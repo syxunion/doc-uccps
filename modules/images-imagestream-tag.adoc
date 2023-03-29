@@ -1,0 +1,7 @@
+// Module included in the following assemblies:
+//  * openshift_images/images-understand.aodc
+
+[id="images-imagestream-tag_{context}"]
+= 镜像流标签
+
+镜像流标签是指向镜像流中镜像的命名指针。镜像流标签与容器镜像标签类似。

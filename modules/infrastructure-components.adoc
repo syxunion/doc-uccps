@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating-infrastructure-machinesets.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+// * nodes-nodes-creating-infrastructure-nodes.adoc
+
+[id="infrastructure-components_{context}"]
+= 统信容器云管理平台 基础架构组件
+
+以下基础架构工作负载不会导致 统信容器云管理平台 worker 订阅：
+
+* 在主控机上运行的 Kubernetes 和 统信容器云管理平台 control plane 服务
+* 默认路由器
+* 集成的容器镜像 registry
+* 基于 HAProxy 的 Ingress Controller
+* 集群指标集合或监控服务，包括监控用户定义的项目的组件
+* 集群聚合日志
+* 服务代理
+* Uniontech Quay
+* {rh-storage-first}
+* UnionTech Uccps Data Foundation
+* UnionTech Advanced Cluster Manager
+* UnionTech Advanced Cluster Security for Kubernetes
+* UnionTech Uccps GitOps
+* UnionTech Uccps Pipelines
+
+// Updated the list to match the list under "Red Hat OpenShift control plane and infrastructure nodes" in https://www.redhat.com/en/resources/openshift-subscription-sizing-guide
+
+运行任何其他容器、Pod 或组件的所有节点都需要是您的订阅可涵盖的 worker 节点。

@@ -1,0 +1,552 @@
+// Module included in the following assemblies:
+//
+// * disaster_recovery/scenario-2-restoring-cluster-state.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+
+:_content-type: PROCEDURE
+[id="dr-scenario-2-restoring-cluster-state_{context}"]
+= 恢复到一个以前的集群状态
+
+您可以使用保存的 etcd 备份来恢复以前的集群状态，或恢复丢失了大多数控制平面主机的集群。
+
+[重要]
+====
+恢复集群时，必须使用同一 z-stream 发行版本中获取的 etcd 备份。例如，统信容器云管理平台1.1.1 集群必须使用从 1.1.1 开始的 etcd 备份。
+====
+
+.先决条件
+
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+* 用作恢复主机的健康控制平面主机。
+* SSH 对控制平面主机的访问。
+* 包含从同一备份中获取的 etcd 快照和静态 pod 资源的备份目录。该目录中的文件名必须采用以下格式: `snapshot_<datetimestamp>.db` 和 `static_kuberesources_<datetimestamp>.tar.gz`。
+
+[重要]
+====
+对于非恢复控制平面节点，不需要建立 SSH 连接或停止静态 pod。您可以逐个删除并重新创建其他非恢复控制平面机器。
+====
+
+.流程
+
+. 选择一个要用作恢复主机的控制平面主机。这是您要在其中运行恢复操作的主机。
+
+. 建立到每个控制平面节点（包括恢复主机）的 SSH 连接。
++
+恢复过程启动后，Kubernetes API 服务器将无法访问，因此您无法访问控制平面节点。因此，建议在一个单独的终端中建立到每个控制平面主机的 SSH 连接。
++
+[重要]
+====
+如果没有完成这个步骤，将无法访问控制平面主机来完成恢复过程，您将无法从这个状态恢复集群。
+====
+
+. 将 etcd 备份目录复制复制到恢复控制平面主机上。
++
+此流程假设您将 backup 目录（其中包含 etcd 快照和静态 pod 资源）复制到恢复控制平面主机的 /home/uswift/ 目录中。
+
+. 在任何其他控制平面节点上停止静态 pod。
++
+[注意]
+====
+不需要手动停止恢复主机上的 pod。恢复脚本将停止恢复主机上的 pod。
+====
+
+.. 访问不是恢复主机的控制平面主机。
+
+.. 将现有 etcd pod 文件从 Kubelet 清单目录中移出：
++
+[source,terminal]
+----
+$ sudo mv /etc/kubernetes/manifests/etcd-pod.yaml /tmp
+----
+
+.. 验证 etcd pod 是否已停止。
++
+[source,terminal]
+----
+$ sudo crictl ps | grep etcd | grep -v operator
+----
++
+命令输出应该为空。如果它不是空的，请等待几分钟后再重新检查。
+
+.. 将现有 Kubernetes API 服务器 pod 文件移出 kubelet 清单目录中：
++
+[source,terminal]
+----
+$ sudo mv /etc/kubernetes/manifests/kube-apiserver-pod.yaml /tmp
+----
+
+.. 验证 Kubernetes API 服务器 pod 是否已停止。
++
+[source,terminal]
+----
+$ sudo crictl ps | grep kube-apiserver | grep -v operator
+----
++
+命令输出应该为空。如果它不是空的，请等待几分钟后再重新检查。
+
+.. 将 etcd 数据目录移到不同的位置：
++
+[source,terminal]
+----
+$ sudo mv /var/lib/etcd/ /tmp
+----
+
+.. 在其他不是恢复主机的控制平面主机上重复此步骤。
+
+. 访问恢复控制平面主机。
+
+
+. 如果启用了集群范围的代理，请确定已导出了 `NO_PROXY`、`HTTP_PROXY`和 `HTTPS_PROXY` 环境变量。
++
+[提示]
+====
+您可以通过查看 `oc get proxy cluster -o yaml` 的输出来检查代理是否已启用。如果 `httpProxy`、`httpsProxy` 和 `noProxy` 字段设置了值，则会启用代理。
+====
+
+. 在恢复控制平面主机上运行恢复脚本，提供到 etcd 备份目录的路径：
++
+[source,terminal]
+----
+$ sudo -E /usr/local/bin/cluster-restore.sh /home/core/backup
+----
++
+.脚本输出示例
+[source,terminal]
+----
+...stopping kube-scheduler-pod.yaml
+...stopping kube-controller-manager-pod.yaml
+...stopping etcd-pod.yaml
+...stopping kube-apiserver-pod.yaml
+Waiting for container etcd to stop
+.complete
+Waiting for container etcdctl to stop
+.............................complete
+Waiting for container etcd-metrics to stop
+complete
+Waiting for container kube-controller-manager to stop
+complete
+Waiting for container kube-apiserver to stop
+..........................................................................................complete
+Waiting for container kube-scheduler to stop
+complete
+Moving etcd data-dir /var/lib/etcd/member to /var/lib/etcd-backup
+starting restore-etcd static pod
+starting kube-apiserver-pod.yaml
+static-pod-resources/kube-apiserver-pod-7/kube-apiserver-pod.yaml
+starting kube-controller-manager-pod.yaml
+static-pod-resources/kube-controller-manager-pod-7/kube-controller-manager-pod.yaml
+starting kube-scheduler-pod.yaml
+static-pod-resources/kube-scheduler-pod-8/kube-scheduler-pod.yaml
+----
++
+. 在所有控制平面主机上重启 kubelet 服务。
+
+.. 在恢复主机中运行以下命令：
++
+[source,terminal]
+----
+[uswift@ip-10-0-143-125 ~]$ sudo systemctl restart kubelet.service
+----
+
+.. 在所有其他控制平面主机上重复此步骤。
+
+. 批准待处理的 CSR：
+
+.. 获取当前 CSR 列表。
++
+[source,terminal]
+----
+$ oc get csr
+----
++
+.输出示例
+----
+NAME        AGE    SIGNERNAME                                    REQUESTOR                                                                   CONDITION
+csr-2s94x   8m3s   kubernetes.io/kubelet-serving                 system:node:<node_name>                                                     Pending <1>
+csr-4bd6t   8m3s   kubernetes.io/kubelet-serving                 system:node:<node_name>                                                     Pending <1>
+csr-4hl85   13m    kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending <2>
+csr-zhhhp   3m8s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending <2>
+...
+----
++
+.. 查看一个 CSR 的详细信息以验证其是否有效：
++
+[source,terminal]
+----
+$ oc describe csr <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+.. 批准每个有效的 `node-bootstrapper` CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----
+
+.. 对于用户置备的安装，请批准每个有效的 kubelet 服务 CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----
+
+
+. 确认单个成员控制平面已被成功启动。
+
+.. 从恢复主机上，验证 etcd 容器是否正在运行。
++
+[source,terminal]
+----
+$ sudo crictl ps | grep etcd | grep -v operator
+----
++
+.输出示例
+[source,terminal]
+----
+3ad41b7908e32       36f86e2eeaaffe662df0d21041eb22b8198e0e58abeeae8c743c3e6e977e8009                                                         About a minute ago   Running             etcd                                          0                   7c05f8af362f0
+----
+
+.. 从恢复主机上，验证 etcd pod 是否正在运行。
++
+[source,terminal]
+----
+$ oc get pods -n openshift-etcd | grep -v etcd-quorum-guard | grep etcd
+----
++
+[注意]
+====
+如果您试图在运行这个命令前运行 `oc login` 并接收以下错误，请等待一些时间以便身份验证控制器启动并再次尝试。
+
+[source,terminal]
+----
+Unable to connect to the server: EOF
+----
+====
++
+.输出示例
+[source,terminal]
+----
+NAME                                             READY   STATUS      RESTARTS   AGE
+etcd-ip-10-0-143-125.ec2.internal                1/1     Running     1          2m47s
+----
++
+如果状态是 `Pending`，或者输出中列出了多个正在运行的 etcd pod，请等待几分钟，然后再次检查。
+
+.. 对不是恢复主机的每个已丢失的控制平面主机重复此步骤。
++
+逐个删除并重新创建其他非恢复控制平面机器。重新创建此机器后，会强制一个新修订版本并自动扩展 etcd。
+
+如果您正在运行安装程序置备的基础架构，或者您使用 Machine API 创建机器，请按照以下步骤执行。否则，您必须使用最初创建 master 节点时使用的相同方法创建新的 master。
+
+.. 为丢失的控制平面主机之一获取机器。
++
+在一个终端中使用 cluster-admin 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc get machines -n openshift-machine-api -o wide
+----
++
+输出示例：
++
+[source,terminal]
+----
+NAME                                        PHASE     TYPE        REGION      ZONE         AGE     NODE                           PROVIDERID                              STATE
+clustername-8qw5l-master-0                  Running   m4.xlarge   us-east-1   us-east-1a   3h37m   ip-10-0-131-183.ec2.internal   aws:///us-east-1a/i-0ec2782f8287dfb7e   stopped <1>
+clustername-8qw5l-master-1                  Running   m4.xlarge   us-east-1   us-east-1b   3h37m   ip-10-0-143-125.ec2.internal   aws:///us-east-1b/i-096c349b700a19631   running
+clustername-8qw5l-master-2                  Running   m4.xlarge   us-east-1   us-east-1c   3h37m   ip-10-0-154-194.ec2.internal    aws:///us-east-1c/i-02626f1dba9ed5bba  running
+clustername-8qw5l-worker-us-east-1a-wbtgd   Running   m4.large    us-east-1   us-east-1a   3h28m   ip-10-0-129-226.ec2.internal   aws:///us-east-1a/i-010ef6279b4662ced   running
+clustername-8qw5l-worker-us-east-1b-lrdxb   Running   m4.large    us-east-1   us-east-1b   3h28m   ip-10-0-144-248.ec2.internal   aws:///us-east-1b/i-0cb45ac45a166173b   running
+clustername-8qw5l-worker-us-east-1c-pkg26   Running   m4.large    us-east-1   us-east-1c   3h28m   ip-10-0-170-181.ec2.internal   aws:///us-east-1c/i-06861c00007751b0a   running
+----
+<1> 这是用于丢失的控制平面主机 `ip-10-0-131-183.ec2.internal` 的控制平面机器。
+
+.. 将机器配置保存到文件系统中的一个文件中：
++
+[source,terminal]
+----
+$ oc get machine clustername-8qw5l-master-0 \ <1>
+    -n openshift-machine-api \
+    -o yaml \
+    > new-master-machine.yaml
+----
+
+.. 编辑上一步中创建的 `new-master-machine.yaml` 文件，以分配新名称并删除不必要的字段。
+
+... 删除整个 `status` 部分：
++
+[source,terminal]
+----
+status:
+  addresses:
+  - address: 10.0.131.183
+    type: InternalIP
+  - address: ip-10-0-131-183.ec2.internal
+    type: InternalDNS
+  - address: ip-10-0-131-183.ec2.internal
+    type: Hostname
+  lastUpdated: "2020-04-20T17:44:29Z"
+  nodeRef:
+    kind: Node
+    name: ip-10-0-131-183.ec2.internal
+    uid: acca4411-af0d-4387-b73e-52b2484295ad
+  phase: Running
+  providerStatus:
+    apiVersion: awsproviderconfig.openshift.io/v1beta1
+    conditions:
+    - lastProbeTime: "2020-04-20T16:53:50Z"
+      lastTransitionTime: "2020-04-20T16:53:50Z"
+      message: machine successfully created
+      reason: MachineCreationSucceeded
+      status: "True"
+      type: MachineCreation
+    instanceId: i-0fdb85790d76d0c3f
+    instanceState: stopped
+    kind: AWSMachineProviderStatus
+----
+
+... 将 `metadata.name` 字段更改为新名称。
++
+建议您保留与旧机器相同的基础名称，并将结束号码改为下一个可用数字。在本例中，`clustername-8qw5l-master-0` 被改为 `clustername-8qw5l-master-3` ：
++
+[source,terminal]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: Machine
+metadata:
+  ...
+  name: clustername-8qw5l-master-3
+  ...
+----
+
+... 更新 `metadata.selfLink` 字段，使用上一步中的新机器名称：
++
+[source,terminal]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: Machine
+metadata:
+  ...
+  selfLink: /apis/machine.openshift.io/v1beta1/namespaces/openshift-machine-api/machines/clustername-8qw5l-master-3
+  ...
+----
+
+... 删除 `spec.providerID` 字段：
++
+[source,terminal]
+----
+providerID: aws:///us-east-1a/i-0fdb85790d76d0c3f
+----
+
+... 删除 `metadata.annotations` 和 `metadata.generation` 字段：
++
+[source,terminal]
+----
+annotations:
+  machine.openshift.io/instance-state: running
+...
+generation: 2
+----
+
+... 删除 `metadata.resourceVersion` 和 `metadata.uid` 字段：
++
+[source,terminal]
+----
+resourceVersion: "13291"
+uid: a282eb70-40a2-4e89-8009-d05dd420d31a
+----
+
+.. 删除丢失的控制平面主机的机器：
++
+.. 验证机器是否已删除：
++
+[source,terminal]
+----
+$ oc get machines -n openshift-machine-api -o wide
+----
++
+输出示例：
++
+[source,terminal]
+----
+NAME                                        PHASE     TYPE        REGION      ZONE         AGE     NODE                           PROVIDERID                              STATE
+clustername-8qw5l-master-1                  Running   m4.xlarge   us-east-1   us-east-1b   3h37m   ip-10-0-143-125.ec2.internal   aws:///us-east-1b/i-096c349b700a19631   running
+clustername-8qw5l-master-2                  Running   m4.xlarge   us-east-1   us-east-1c   3h37m   ip-10-0-154-194.ec2.internal   aws:///us-east-1c/i-02626f1dba9ed5bba  running
+clustername-8qw5l-worker-us-east-1a-wbtgd   Running   m4.large    us-east-1   us-east-1a   3h28m   ip-10-0-129-226.ec2.internal   aws:///us-east-1a/i-010ef6279b4662ced   running
+clustername-8qw5l-worker-us-east-1b-lrdxb   Running   m4.large    us-east-1   us-east-1b   3h28m   ip-10-0-144-248.ec2.internal   aws:///us-east-1b/i-0cb45ac45a166173b   running
+clustername-8qw5l-worker-us-east-1c-pkg26   Running   m4.large    us-east-1   us-east-1c   3h28m   ip-10-0-170-181.ec2.internal   aws:///us-east-1c/i-06861c00007751b0a   running
+----
+
+.. 使用 `new-master-machine.yaml`` 文件创建新机器：
++
+[source,terminal]
+----
+$ oc apply -f new-master-machine.yaml
+----
+
+.. 验证新机器是否已创建：
++
+[source,terminal]
+----
+$ oc get machines -n openshift-machine-api -o wide
+----
++
+输出示例：
++
+[source,terminal]
+----
+NAME                                        PHASE          TYPE        REGION      ZONE         AGE     NODE                           PROVIDERID                              STATE
+clustername-8qw5l-master-1                  Running        m4.xlarge   us-east-1   us-east-1b   3h37m   ip-10-0-143-125.ec2.internal   aws:///us-east-1b/i-096c349b700a19631   running
+clustername-8qw5l-master-2                  Running        m4.xlarge   us-east-1   us-east-1c   3h37m   ip-10-0-154-194.ec2.internal    aws:///us-east-1c/i-02626f1dba9ed5bba  running
+clustername-8qw5l-master-3                  Provisioning   m4.xlarge   us-east-1   us-east-1a   85s     ip-10-0-173-171.ec2.internal    aws:///us-east-1a/i-015b0888fe17bc2c8  running <1>
+clustername-8qw5l-worker-us-east-1a-wbtgd   Running        m4.large    us-east-1   us-east-1a   3h28m   ip-10-0-129-226.ec2.internal   aws:///us-east-1a/i-010ef6279b4662ced   running
+clustername-8qw5l-worker-us-east-1b-lrdxb   Running        m4.large    us-east-1   us-east-1b   3h28m   ip-10-0-144-248.ec2.internal   aws:///us-east-1b/i-0cb45ac45a166173b   running
+clustername-8qw5l-worker-us-east-1c-pkg26   Running        m4.large    us-east-1   us-east-1c   3h28m   ip-10-0-170-181.ec2.internal   aws:///us-east-1c/i-06861c00007751b0a   running
+----
+<1> 新机器 `clustername-8qw5l-master-3` 会被创建，并在阶段从 `Provisioning` 变为 `Running` 后就绪。
++
+创建新机器可能需要几分钟时间。当机器或节点返回一个健康状态时，etcd cluster Operator 将自动同步。
+
+.. 对不是恢复主机的每个已丢失的控制平面主机重复此步骤。
+
+. 在一个单独的终端窗口中，使用以下命令以具有 `cluster-admin` 角色的用户身份登录到集群：
++
+[source,terminal]
+----
+$ oc login -u <cluster_admin> <1>
+----
+<1> 对于 `<cluster_admin>`，使用 `cluster-admin` 角色指定一个用户名。
+
+. 强制 etcd 重新部署。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc patch etcd cluster -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge <1>
+----
+<1> `forceRedeploymentReason` 值必须是唯一的，这就是为什么附加时间戳的原因。
++
+当 etcd cluster Operator 执行重新部署时，现有节点开始使用与初始 bootstrap 扩展类似的新 pod。
+
+. 验证所有节点是否已更新至最新的修订版本。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc get etcd -o=jsonpath='{range .items[0].status.conditions[?(@.type=="NodeInstallerProgressing")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+查看 etcd 的 `NodeInstallerProgressing` 状态条件，以验证所有节点是否处于最新的修订。在更新成功后，输出会显示 `AllNodesAtLatestRevision`：
++
+[source,terminal]
+----
+AllNodesAtLatestRevision
+3 nodes are at revision 7 <1>
+----
+<1> 在本例中，最新的修订版本号是 `7`.
++
+如果输出包含多个修订号，如 `2` 个节点为修订版本 6；1 个节点为修订版本 `7`，这意味着更新仍在进行中。等待几分钟后重试。
+
+. 在重新部署 etcd 后，为控制平面强制进行新的 rollout。由于 kubelet 使用内部负载平衡器连接到 API 服务器，因此 Kubernetes API 将在其他节点上重新安装自己。
++
+在一个终端中使用 cluster-admin 用户连接到集群，运行以下命令。
+
+.. 为 Kubernetes API 服务器强制进行新的推出部署：
++
+[source,terminal]
+----
+$ oc patch kubeapiserver cluster -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+----
++
+验证所有节点是否已更新至最新的修订版本。
++
+[source,terminal]
+----
+$ oc get kubeapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="NodeInstallerProgressing")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+查看 `NodeInstallerProgressing` 状态条件，以验证所有节点是否处于最新版本。在更新成功后，输出会显示 `AllNodesAtLatestRevision`：
++
+[source,terminal]
+----
+AllNodesAtLatestRevision
+3 nodes are at revision 7 <1>
+----
+<1> 在本例中，最新的修订版本号是 `7`.
++
+如果输出包含多个修订号，如 `2 个节点为修订版本 6；1 个节点为修订版本 7`，这意味着更新仍在进行中。等待几分钟后重试。
+
+.. 为 Kubernetes 控制器管理器强制进行新的推出部署：
++
+[source,terminal]
+----
+$ oc patch kubecontrollermanager cluster -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+----
++
+验证所有节点是否已更新至最新的修订版本。
++
+[source,terminal]
+----
+$ oc get kubecontrollermanager -o=jsonpath='{range .items[0].status.conditions[?(@.type=="NodeInstallerProgressing")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+查看 `NodeInstallerProgressing` 状态条件，以验证所有节点是否处于最新版本。在更新成功后，输出会显示 `AllNodesAtLatestRevision`：
++
+[source,terminal]
+----
+AllNodesAtLatestRevision
+3 nodes are at revision 7 <1>
+----
+<1> 在本例中，最新的修订版本号是 `7`.
++
+如果输出包含多个修订号，如 `2 个节点为修订版本 6；1 个节点为修订版本 7`，这意味着更新仍在进行中。等待几分钟后重试。
+
+.. 为 Kubernetes 调度程序强制进行新的推出部署：
++
+[source,terminal]
+----
+$ oc patch kubescheduler cluster -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+----
++
+验证所有节点是否已更新至最新的修订版本。
++
+[source,terminal]
+----
+$ oc get kubescheduler -o=jsonpath='{range .items[0].status.conditions[?(@.type=="NodeInstallerProgressing")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+查看 `NodeInstallerProgressing` 状态条件，以验证所有节点是否处于最新版本。在更新成功后，输出会显示 `AllNodesAtLatestRevision`：
++
+[source,terminal]
+----
+AllNodesAtLatestRevision
+3 nodes are at revision 7 <1>
+----
+<1> 在本例中，最新的修订版本号是 `7`。
++
+如果输出包含多个修订号，如 `2 个节点为修订版本 6；1 个节点为修订版本 7`，这意味着更新仍在进行中。等待几分钟后重试。
+
+. 验证所有控制平面主机是否已启动并加入集群。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc get pods -n openshift-etcd | grep -v etcd-quorum-guard | grep etcd
+----
++
+.输出示例
+[source,terminal]
+----
+etcd-ip-10-0-143-125.ec2.internal                2/2     Running     0          9h
+etcd-ip-10-0-154-194.ec2.internal                2/2     Running     0          9h
+etcd-ip-10-0-173-171.ec2.internal                2/2     Running     0          9h
+----
+
+为确保所有工作负载在恢复过程后返回到正常操作，请重启存储 Kubernetes API 信息的每个 pod。这包括统信容器云管理平台组件，如路由器、Operator 和第三方组件。
+
+请注意，在完成这个过程后，可能需要几分钟才能恢复所有服务。例如，在重启 OAuth 服务器 pod 前，使用 `oc login` 进行身份验证可能无法立即正常工作。

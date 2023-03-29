@@ -1,0 +1,108 @@
+// Module included in the following assemblies:
+//
+// * security/tls-profiles.adoc
+
+:_content-type: PROCEDURE
+[id="tls-profiles-ingress-configuring_{context}"]
+= 为 Ingress Controller 配置 TLS 安全配置集
+
+要为 Ingress Controller 配置 TLS 安全配置集，请编辑 IngressController 自定义资源（CR）来指定预定义或自定义 TLS 安全配置集。如果没有配置 TLS 安全配置集，则默认值基于为 API 服务器设置的 TLS 安全配置集。
+
+.配置 Old TLS 安全配置集的 IngressController CR 示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+ ...
+spec:
+  tlsSecurityProfile:
+    old: {}
+    type: Old
+ ...
+----
+
+TLS 安全配置集定义 Ingress Controller 的 TLS 连接的最低 TLS 版本和 TLS 密码。
+
+您可以在 Status.Tls Profile 和 `Spec.Tls Security Profile` 下看到 `IngressController` 自定义资源（CR）中配置的 TLS 安全配置集的密码和最小 TLS 版本。对于 Custom TLS 安全配置集，这两个参数下列出了特定的密码和最低 TLS 版本。
+
+[注意]
+====
+HAProxy Ingress Controller 镜像支持 TLS `1.3` 和 `Modern` 配置集。
+
+Ingress Operator 还会将 Old 或 Custom 配置集的 TLS `1.0` 转换为 `1.1`。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 编辑 `openshift-ingress-operator` 项目中的 `IngressController CR`，以配置 TLS 安全配置集：
++
+[source,terminal]
+----
+$ oc edit IngressController default -n openshift-ingress-operator
+----
+
+. 添加 `spec.tlsSecurityProfile` 字段：
++
+.Custom 配置集的 `IngressController CR` 示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+ ...
+spec:
+  tlsSecurityProfile:
+    type: Custom <1>
+    custom: <2>
+      ciphers: <3>
+      - ECDHE-ECDSA-CHACHA20-POLY1305
+      - ECDHE-RSA-CHACHA20-POLY1305
+      - ECDHE-RSA-AES128-GCM-SHA256
+      - ECDHE-ECDSA-AES128-GCM-SHA256
+      minTLSVersion: VersionTLS11
+ ...
+----
+<1> 指定 TLS 安全配置集类型（`Old`、`Intermediate` 或 `Custom`）。默认值为 Intermediate。
+<2> 为所选类型指定适当的字段：
+* `old: {}`
+* `intermediate: {}`
+* `custom:`
+<3> 对于 `custom` 类型，请指定 TLS 密码列表和最低接受的 TLS 版本。
+
+. 保存文件以使改变生效。
+
+.验证
+
+* 验证 `IngressController` CR 中是否设置了配置集：
++
+[source,terminal]
+----
+$ oc describe IngressController default -n openshift-ingress-operator
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         default
+Namespace:    openshift-ingress-operator
+Labels:       <none>
+Annotations:  <none>
+API Version:  operator.openshift.io/v1
+Kind:         IngressController
+ ...
+Spec:
+ ...
+  Tls Security Profile:
+    Custom:
+      Ciphers:
+        ECDHE-ECDSA-CHACHA20-POLY1305
+        ECDHE-RSA-CHACHA20-POLY1305
+        ECDHE-RSA-AES128-GCM-SHA256
+        ECDHE-ECDSA-AES128-GCM-SHA256
+      Min TLS Version:  VersionTLS11
+    Type:               Custom
+ ...
+----

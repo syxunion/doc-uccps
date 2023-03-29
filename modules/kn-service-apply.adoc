@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: REFERENCE
+[id="kn-service-apply_{context}"]
+= 应用服务声明
+
+您可以使用 `kn service apply` 命令声明性配置 Knative 服务。如果服务不存在，则使用已更改的选项更新现有服务。
+
+`kn service apply` 命令对 shell 脚本或持续集成管道特别有用，因为用户通常希望在单个命令中完全指定服务的状态来声明目标状态。
+
+使用 `kn service apply` 时，必须为 Knative 服务提供完整的配置。这与 `kn service update` 命令不同，它只在命令中指定您要更新的选项。
+
+
+.示例命令
+
+* 创建服务：
++
+[source,terminal]
+----
+$ kn service apply <service_name> --image <image>
+----
+
+* 将环境变量添加到服务：
++
+[source,terminal]
+----
+$ kn service apply <service_name> --image <image> --env <key>=<value>
+----
+
+* 从 JSON 或 YAML 文件中读取服务声明：
++
+[source,terminal]
+----
+$ kn service apply <service_name> -f <filename>
+----

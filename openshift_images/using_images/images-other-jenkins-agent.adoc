@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+[id="images-other-jenkins-agent"]
+= Jenkins 代理
+include::_attributes/common-attributes.adoc[]
+:context: images-other-jenkins-agent
+
+toc::[]
+
+统信容器云管理平台 提供 Base、Maven 和 Node.js 镜像，以用作 Jenkins 代理。
+
+Jenkins 代理的 Base 镜像执行以下操作：
+
+* 拉取(pull)所需工具、无头 Java、Jenkins JNLP 客户端以及有用的工具，包括 `git`、`tar`、`zip` 和 `nss` 等。
+* 建立 JNLP 代理作为入口点。
+* 包括 `oc` 客户端工具，用于从 Jenkins 任务调用命令行操作。
+* 为 UnionTech Enterprise Linux(RHEL)和 `localdev` 镜像提供 Dockerfile。
+
+Maven v3.5、Node.js v10 和 Node.js v12 镜像扩展 Base 镜像。它们为通用基础镜像(UBI)提供 Dockerfile，您可以在构建新代理镜像时引用。另请注意 contrib 和 contrib/bin 子目录，它可让您为镜像插入配置文件和可执行脚本。
+
+[重要]
+====
+使用适合您的 统信容器云管理平台 发行版本的代理镜像版本。嵌入了与 统信容器云管理平台 版本不兼容的 `oc` 客户端版本可能会导致意外行为。
+====
+
+统信容器云管理平台 Jenkins 镜像还定义了以下示例 pod 模板，来演示如何将这些代理镜像与 Jenkins Kubernetes 插件一起使用：
+
+- `maven` Pod 模板，它使用一个使用了 统信容器云管理平台 Maven Jenkins 代理镜像的单个容器。
+- `nodejs` pod 模板，它使用单一容器，该容器使用 统信容器云管理平台 Node.js Jenkins 代理镜像。
+- `java-builder` pod 模板，它采用两个容器。其中一个是 jnlp 容器，它使用 统信容器云管理平台 Base agent 镜像并处理 `JNLP` 合同来启动和停止 Jenkins 代理。其二是 `java` 容器，它使用 java 统信容器云管理平台 Sample ImageStream，其包含各种 `Java` 二进制文件，包括 `Maven` 二进制文件 mvn，用于构建代码。
+- `nodejs-builder` Pod 模板，它采用两个容器。其中一个是 `jnlp` 容器，它使用 统信容器云管理平台 Base agent 镜像并处理 `JNLP` 合同来启动和停止 Jenkins 代理。第二个是 nodejs 容器，它使用 nodejs 统信容器云管理平台 Sample ImageStream，其中包含各种 `Node.js` 二进制文件，包括 `npm` 二进制文件用于构建代码。
+
+include::modules/images-other-jenkins-agent-images.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-agent-env-var.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-agent-memory.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-agent-gradle.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-agent-pod-retention.adoc[leveloffset=+1]

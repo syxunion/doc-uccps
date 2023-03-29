@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="understanding-odo"]
+= 了解 odo
+include::_attributes/common-attributes.adoc[]
+:context: understanding-odo
+
+toc::[]
+
+ CLI(odo)是在 统信容器云管理平台 和 Kubernetes 上创建应用程序的工具。使用 odo，您可以在 Kubernetes 集群中开发、测试、调试和部署基于微服务的应用，而无需深入了解平台。
+
+odo 遵循 创建和推送 工作流。作为用户，当您创建时，信息（或清单）存储在配置文件中。推送 时，会在 Kubernetes 集群中创建对应的资源。所有这些配置都存储在 Kubernetes API 中，以实现无缝访问和功能。
+
+odo 使用 service 和 link 命令将组件和服务链接在一起。odo 通过使用集群中的 Kubernetes Operator 创建和部署服务来实现这个目标。可使用 Operator Hub 上可用的任何 Operator 创建服务。在链接服务后，odo 会将服务配置注入组件。然后，应用程序就可以使用此配置与 Operator 支持的服务通信。
+
+include::modules/odo-key-features.adoc[leveloffset=+1]
+include::modules/odo-core-concepts.adoc[leveloffset=+1]
+include::modules/odo-listing-components.adoc[leveloffset=+1]
+include::modules/odo-telemetry.adoc[leveloffset=+1]

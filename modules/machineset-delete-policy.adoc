@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * machine_management/manually-scaling-machineset.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+[id="machineset-delete-policy_{context}"]
+= 机器集删除策略
+
+`Random`、`Newest` 和 `Oldest` 是三个支持的删除选项。默认值为 `Random`，表示在扩展机器时随机选择并删除机器。通过修改特定机器集，可以根据用例设置删除策略：
+
+[source,yaml]
+----
+spec:
+  deletePolicy: <delete_policy>
+  replicas: <desired_replica_count>
+----
+
+无论删除策略是什么，都可通过在相关机器上添加 `machine.openshift.io/cluster-api-delete-machine` 注解来指定机器删除的优先级。
+
+[重要]
+====
+默认情况下，统信容器云管理平台 路由器 Pod 部署在 worker 上。由于路由器需要访问某些集群资源（包括 Web 控制台），除非先重新放置了路由器 Pod，否则请不要将 worker 机器集扩展为 0。
+====
+
+[注意]
+====
+当用户需要特定的服务必须运行在特定节点，在 worker 机器集进行缩减时需要忽略这些服务时，可以使用自定义机器集。这可防止服务被中断。
+====

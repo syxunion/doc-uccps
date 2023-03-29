@@ -1,0 +1,44 @@
+// Module is included in the following assemblies:
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+//
+
+:_content-type: PROCEDURE
+[id="ossm-auto-route-create-subdomains_{context}"]
+= Creating subdomain routes
+
+以下示例在 Bookinfo 示例应用程序中创建了一个网关，它会创建子域路由。
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gateway1
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - www.bookinfo.com
+    - bookinfo.example.com
+----
+
+`Gateway` 资源创建以下 Uccps 路由：您可以使用以下命令来检查是否创建了路由。在本例中， `istio-system`  是 Service Mesh control plane 项目的名称。
+[source,terminal]
+----
+$ oc -n istio-system get routes
+----
+
+.预期输出
+[source,terminal]
+----
+NAME           HOST/PORT             PATH  SERVICES               PORT  TERMINATION   WILDCARD
+gateway1-lvlfn bookinfo.example.com        istio-ingressgateway   <all>               None
+gateway1-scqhv www.bookinfo.com            istio-ingressgateway   <all>               None
+----
+
+如果删除了网关，统信容器云管理平台服务网格 会删除路由。但是，您手动创建的路由不会被 统信容器云管理平台服务网格 修改。

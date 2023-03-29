@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-rebooting"]
+= 了解节点重新引导
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-rebooting
+
+toc::[]
+
+
+
+若要在重新引导节点时不造成平台上应用程序中断运行，务必要先撤离（evacuate）相关的 pod。对于由路由层提供高可用性的 pod，不需要执行其他操作。对于需要存储的其他 pod（通常是数据库），务必要确保它们能够在一个 pod 临时下线时仍然保持运作。尽管为有状态 pod 实现可持续运行的方法会视不同应用程序而异，但在所有情形中，都要将调度程序配置为使用节点反关联性，从而确保 pod 在可用节点之间合理分布。
+
+另一个挑战是如何处理运行关键基础架构的节点，比如路由器或 registry。相同的节点撤离过程同样适用于这类节点，但必须要了解某些边缘情况。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-rebooting-infrastructure.adoc[leveloffset=+1]
+
+.其他信息
+
+* 如需有关 pod 反关联性的更多信息，请参阅 xref:../../nodes/scheduling/nodes-scheduler-pod-affinity.adoc#nodes-scheduler-pod-affinity[使用关联性和反关联性规则相对于其他 pod 放置 pod]。
+
+include::modules/nodes-nodes-rebooting-affinity.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-rebooting-router.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-rebooting-gracefully.adoc[leveloffset=+1]
+

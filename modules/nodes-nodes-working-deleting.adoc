@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-working.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-working-deleting_{context}"]
+= 从集群中删除节点
+
+当您使用 CLI 删除节点时，节点对象会从 Kubernetes 中删除，但该节点上存在的 pod 不会被删除。任何未由复制控制器支持的裸机 pod 都无法从 统信容器云管理平台 访问。由复制控制器支持的 Pod 会重新调度到其他可用的节点。您必须删除本地清单 pod。
+
+.流程
+
+要从 统信容器云管理平台 集群中删除节点，请编辑适当的 `MachineSet` 对象：
+
+[注意]
+====
+如果您在裸机上运行集群，则无法通过编辑 `MachineSet` 对象来删除节点。机器集仅在集群与云供应商集成时才可用。相反，您必须在手动删除前取消调度并排空节点。
+====
+
+. 查看集群中的机器集：
++
+[source,terminal]
+----
+$ oc get machinesets -n openshift-machine-api
+----
++
+机器集以 <clusterid>-worker-<aws-region-az> 的形式列出。
+
+. 扩展机器集：
++
+[source,terminal]
+----
+$ oc scale --replicas=2 machineset <machineset> -n openshift-machine-api
+----
++
+或者：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来扩展机器集：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  replicas: 2
+----
+====
+

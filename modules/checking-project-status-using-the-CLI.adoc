@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="checking-project-status-using-the-CLI_{context}"]
+= 使用 CLI 检查项目状态
+
+.流程
+
+. 运行:
++
+[source,terminal]
+----
+$ oc status
+----
++
+此命令提供当前项目的高级概述，以及它的组件和关系。

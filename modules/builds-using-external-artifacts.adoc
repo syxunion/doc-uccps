@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+//* builds/creating-build-inputs.adoc
+
+[id="builds-using-external-artifacts_{context}"]
+= 外部工件 (artifact)
+
+建议不要将二进制文件存储在源存储库中。因此，您必须定义一个构建，在构建过程中拉取其他文件，如 Java .jar 依赖项。具体方法取决于使用的构建策略。
+
+对于 Source 构建策略，必须在 `assemble` 脚本中放入适当的 shell 命令：
+
+.`.s2i/bin/assemble` 文件
+[source,terminal]
+----
+#!/bin/sh
+APP_VERSION=1.0
+wget http://repository.example.com/app/app-$APP_VERSION.jar -O app.jar
+----
+
+.`.s2i/bin/run` 文件
+[source,terminal]
+----
+#!/bin/sh
+exec java -jar app.jar
+----
+
+对于 Docker 构建策略，您必须修改 Dockerfile 并通过 RUN 指令 调用 shell 命令：
+
+.Dockerfile 摘录
+[source,terminal]
+----
+FROM jboss/base-jdk:8
+
+ENV APP_VERSION 1.0
+RUN wget http://repository.example.com/app/app-$APP_VERSION.jar -O app.jar
+
+EXPOSE 8080
+CMD [ "java", "-jar", "app.jar" ]
+----
+
+在实践中，您可能希望将环境变量用于文件位置，以便要下载的具体文件能够使用 BuildConfig 中定义的环境变量来自定义，而不必更新 Dockerfile 或 assemble 脚本。
+
+您可以选择不同方法来定义环境变量：
+
+* 使用 `.s2i/environment` 文件（仅适用于 Source 构建策略）
+* 在 `BuildConfig` 中设置
+* 使用 `oc start-build --env` 明确提供（仅适用于手动触发的构建）
+
+//[role="_additional-resources"]
+//.Additional resources
+//* For more information on how to control which *_assemble_* and *_run_* script is
+//used by a Source build, see Overriding builder image scripts.

@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-identity-provider.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+[id="identity-provider-parameters_{context}"]
+= 身份提供程序参数
+
+以下是所有身份提供程序通用的参数：
+
+[cols="2a,8a",options="header"]
+|===
+|参数     | 描述
+|`name`      | 此提供程序名称作为前缀放在提供程序用户名前，以此组成身份名称。
+
+|`mappingMethod`  | 定义在用户登录时如何将新身份映射到用户。输入以下值之一：
+
+claim:: 默认值。使用身份的首选用户名置备用户。如果具有该用户名的用户已映射到另一身份，则失败。
+lookup:: 查找现有的身份、用户身份映射和用户，但不自动置备用户或身份。这允许集群管理员手动或使用外部流程设置身份和用户。使用此方法需要手动置备用户。
+generate:: 使用身份的首选用户名置备用户。如果拥有首选用户名的用户已映射到现有的身份，则生成一个唯一用户名。例如：myuser2。此方法不应与需要在统信容器云管理平台用户名和身份提供程序用户名（如 LDAP 组同步）之间完全匹配的外部流程一同使用。
+add:: 使用身份的首选用户名置备用户。如果已存在具有该用户名的用户，此身份将映射到现有用户，添加到该用户的现有身份映射中。如果配置了多个身份提供程序并且它们标识同一组用户并映射到相同的用户名，则需要进行此操作。
+|===
+
+[注意]
+在添加或更改身份提供程序时，您可以通过把 `mappingMethod` 参数设置为 `add`，将新提供程序中的身份映射到现有的用户。

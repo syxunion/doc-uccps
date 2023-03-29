@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-pod-topology-spread-constraints
+
+:_content-type: CONCEPT
+[id="nodes-scheduler-pod-topology-spread-constraints-about_{context}"]
+= 关于 pod 拓扑分布限制
+
+通过使用 pod  _拓扑分布约束_，您可以对故障域中的 pod 分布提供精细的控制，以帮助实现高可用性和更有效的资源使用。
+
+统信容器云管理平台 管理员可以标记节点以提供拓扑信息，如区域、区、节点或其他用户定义域。在节点上设置了这些标签后，用户才能定义 pod 拓扑分布约束，以控制 pod 在这些拓扑域中的放置。
+
+您可以指定哪些 pod 要分组在一起，它们分散到哪些拓扑域以及可以接受的基点。只有同一命名空间中的 pod 在因为约束而分散时才会被匹配和分组。
+
+// TODO Mention about relationship to affinity/anti-affinity?

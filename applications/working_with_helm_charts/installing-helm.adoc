@@ -1,0 +1,54 @@
+:_content-type: ASSEMBLY
+[id="installing-helm"]
+= 安装 Helm
+include::_attributes/common-attributes.adoc[]
+:context: installing-helm
+
+toc::[]
+
+	下面的部分论述了如何使用 CLI 安装 Helm。
+
+.先决条件
+* 已安装了 Go 版本 1.13 或更高版本。
+
+== 对于 Linux
+
+. 支持的Linux 架构：
+
+* Linux (x86_64, amd64， Loong64)
++
+下载 Helm 二进制文件并将其添加到您的路径中，在 统信容器云管理平台 web 控制台中，点右上角的 ? 图标并选 命令行工具，根据不同架构点击不同的Download Helm for Linux链接下载。
+
+. 解压tar包：
++
+[source,terminal]
+----
+# tar xf helm.tar
+----
+
+. 将文件移动至目录：
++
+[source,terminal]
+----
+# mv helm /usr/local/bin/helm
+----
+
+. 使二进制文件可执行：
++
+[source,terminal]
+----
+# chmod +x /usr/local/bin/helm
+----
+
+. 检查已安装的版本：
++
+[source,terminal]
+----
+$ helm version
+----
++
+.输出示例
+[source,terminal]
+----
+version.BuildInfo{Version:"v1.2.0+1.uelc20", GitCommit:"8f33223fe17957f11ba7a88b016bc860f034c4e6", GitTreeState:"clean", GoVersion:"go1.18-beta1"}
+----

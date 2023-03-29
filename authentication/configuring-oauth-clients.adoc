@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="configuring-oauth-clients"]
+= 配置 OAuth 客户端
+include::_attributes/common-attributes.adoc[]
+:context: configuring-oauth-clients
+
+toc::[]
+
+在统信容器云管理平台中默认创建多个 OAuth 客户端。您还可以注册和配置其他 OAuth 客户端。
+
+// Default OAuth clients
+include::modules/oauth-default-clients.adoc[leveloffset=+1]
+
+// Register an additional OAuth client
+include::modules/oauth-register-additional-client.adoc[leveloffset=+1]
+
+// Configuring token inactivity timeout for OAuth clients
+include::modules/oauth-configuring-token-inactivity-timeout-clients.adoc[leveloffset=+1]

@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-eventing"]
+= 使用 Knative Eventing 的功能
+include::_attributes/common-attributes.adoc[]
+:context: serverless-functions-eventing
+
+toc::[]
+
+功能作为 Knative 服务部署到 {product-title} 集群中。您可以将函数连接到 Knative Eventing 组件，以便它们可以接收传入的事件。
+
+include::modules/serverless-connect-func-source-odc.adoc[leveloffset=+1]

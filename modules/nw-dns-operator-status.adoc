@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * dns/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-operator-status_{context}"]
+= DNS Operator 状态
+
+您可以使用 `oc describe`` 命令来检查状态并查看 DNS Operator 的详情。
+
+.流程
+
+查看 DNS Operator 的状态：
+[source,terminal]
+----
+$ oc describe clusteroperators/dns
+----

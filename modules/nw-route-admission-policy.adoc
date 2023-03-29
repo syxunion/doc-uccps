@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+// * networking/routes/route-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-route-admission-policy_{context}"]
+= 配置路由准入策略
+
+管理员和应用程序开发人员可在多个命名空间中运行具有相同域名的应用程序。这是针对多个团队开发的、在同一个主机名上公开的微服务的机构。
+
+[警告]
+====
+只有在命名空间间有信任的集群才会启用跨命名空间之间的声明，否则恶意用户可能会接管主机名。因此，默认的准入策略不允许在命名空间间声明主机名。
+====
+
+.先决条件
+
+* 必须具有集群管理员权限。
+
+.流程
+
+* 使用以下命令编辑 `ingresscontroller` 资源变量的 `.spec. routeAdmission` 字段：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontroller/default --patch '{"spec":{"routeAdmission":{"namespaceOwnership":"InterNamespaceAllowed"}}}' --type=merge
+----
++
+.Ingress 控制器配置参数
+[source,yaml]
+----
+spec:
+  routeAdmission:
+    namespaceOwnership: InterNamespaceAllowed
+...
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来配置路由准入策略：
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  routeAdmission:
+    namespaceOwnership: InterNamespaceAllowed
+----
+====

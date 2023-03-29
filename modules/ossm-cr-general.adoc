@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-reference-smcp.adoc
+
+:_content-type: REFERENCE
+[id="ossm-cr-general_{context}"]
+= 常规参数
+
+下面是一个示例，它演示了 `ServiceMeshControlPlane` 对象的 `spec.general` 数，以及可用参数和值的信息。
+
+.常规参数示例
+[source,yaml]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  general:
+    logging:
+      componentLevels: {}
+          # misc: error
+      logAsJSON: false
+    validationMessages: true
+----
+
+
+.Istio 常规参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+
+|logging:
+|使用 为 Service Mesh control plane 组件配置日志记录。.
+|
+|N/A
+
+|logging:
+ componentLevels:
+|用于指定组件日志级别。
+|可能的值有： `trace`, `debug`, `info`, `warning`, `error`, `fatal`, `panic`.
+|N/A
+
+|logging:
+ logLevels:
+|可能的值有： `trace`, `debug`, `info`, `warning`, `error`, `fatal`, `panic`.
+|
+|N/A
+
+|logging:
+ logAsJSON:
+|用于启用或禁用 JSON 日志。
+|`true`/`false`
+|N/A
+
+|validationMessages:
+|用于在 istio.io 资源的状态字段中启用或禁用验证信息。这对于检测资源中的配置错误非常有用。
+|`true`/`false`
+|N/A
+|===

@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-docker-environment-variables_{context}"]
+= 使用 Docker 环境变量
+
+要将环境变量提供给 docker 构建过程和生成的镜像使用，您可以在构建配置的 dockerStrategy 定义中添加环境变量。
+
+这里定义的环境变量作为单个 ENV Dockerfile 指令直接插入到 FROM 指令后，以便稍后可在 Dockerfile 内引用该变量。
+
+.流程
+
+变量在构建期间定义并保留在输出镜像中，因此它们也会出现在运行该镜像的任何容器中。
+
+例如，定义要在构建和运行时使用的自定义 HTTP 代理：
+
+[source,yaml]
+----
+dockerStrategy:
+...
+  env:
+    - name: "HTTP_PROXY"
+      value: "http://myproxy.net:5187/"
+----
+
+您还可以使用 `oc set env` 命令管理构建配置中定义的环境变量。

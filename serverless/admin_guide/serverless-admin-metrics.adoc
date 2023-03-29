@@ -1,0 +1,45 @@
+:_content-type: ASSEMBLY
+[id="serverless-admin-metrics"]
+= Serverless 管理员指标
+include::_attributes/common-attributes.adoc[]
+:context: serverless-admin-metrics
+
+toc::[]
+
+指标 (metrics) 可以让集群管理员监控 Uccps Serverless 集群组件和工作负载的执行情况。
+
+您可以通过在 {ServerlessProductName} 控制台 *管理员* 视角中导航到 *Dashboards* 来查看 Uccps Serverless 的不同指标。
+
+[id="prerequisites_serverless-admin-metrics"]
+==  先决条件
+
+* 如需有关为集群启用指标的信息，请参阅统信容器云管理平台文档中有关管理指标的内容。
+
+* 您可以访问具有集群管理员权限的统信容器云管理平台帐户。
+
+* 在 统信容器云管理平台 控制台中，您可以访问 *管理员* 视角。
+
+// Common metrics
+include::modules/serverless-controller-metrics.adoc[leveloffset=+1]
+include::modules/serverless-webhook-metrics.adoc[leveloffset=+1]
+
+[id="serverless-admin-metrics-eventing"]
+== Knative Eventing 指标
+
+集群管理员可查看 Knative Eventing 组件的以下指标。
+
+通过聚合 HTTP 代码的指标，事件可以分为两类：成功事件 (2xx) 和失败的事件 (5xx)
+
+include::modules/serverless-broker-ingress-metrics.adoc[leveloffset=+2]
+include::modules/serverless-broker-filter-metrics.adoc[leveloffset=+2]
+include::modules/serverless-inmemory-dispatch-metrics.adoc[leveloffset=+2]
+include::modules/serverless-event-source-metrics.adoc[leveloffset=+2]
+
+[id="serverless-admin-metrics-serving"]
+== Knative Serving 指标
+
+集群管理员可查看 Knative Serving 组件的以下指标。
+
+include::modules/serverless-activator-metrics.adoc[leveloffset=+2]
+include::modules/serverless-autoscaler-metrics.adoc[leveloffset=+2]
+include::modules/serverless-go-metrics.adoc[leveloffset=+2]

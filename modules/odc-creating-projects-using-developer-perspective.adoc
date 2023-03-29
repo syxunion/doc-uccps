@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="odc-creating-projects-using-developer-perspective_{context}"]
+= 在 Web 控制台中使用开发者视角创建项目
+
+	您可以使用 *统信容器云管理平台 Web* 控制台中的 开发者 视角在集群中创建项目。
+
+
+.先决条件
+
+* 在 统信容器云管理平台 中，确保您有适当的角色和权限来创建项目、应用程序和其他工作负载。
+
+.流程
+您可以使用 *开发者* 视角创建项目，如下所示：
+
+. 点 *项目* 下拉菜单来查看所有可用的项目。选择 *创建项目*。
++
+.*点击 创建项目*
+image::odc_create_project.png[]
+
+. 在 *创建项目* 对话框的 *名称* 项中输入一个唯一的名称，如 `myproject`。
+. 可选：为项目添加 *显示名称* 和 *描述* 详情。
+. 点击 *创建*。
+. 使用左侧导航面板导航到 *项目* 视图，在仪表板中查看您的项目。
+. 可选：
++
+* 在屏幕顶部的 *项目* 下拉菜单中选择 所有项目 列出集群中的 *所有项目*。
+* 使用 *详情* 选项卡查看项目详情。
+* 如果您有足够的项目权限，可以使用 *项目* 选项卡为项目提供或撤销 _管理员_、_编辑_ 和 _浏览_ 权限。

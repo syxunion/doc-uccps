@@ -1,0 +1,12 @@
+:_content-type: ASSEMBLY
+[id="nodes-secondary-scheduler-about"]
+= 二级调度程序概述
+include::_attributes/common-attributes.adoc[]
+:context: nodes-secondary-scheduler-about
+
+toc::[]
+
+您可以安装 Secondary Scheduler Operator 来运行自定义二级调度程序，以及调度 pod 的默认调度程序。
+
+// About the {secondary-scheduler-operator}
+include::modules/nodes-secondary-scheduler-about.adoc[leveloffset=+1]

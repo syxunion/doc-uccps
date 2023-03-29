@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-setting-thread-count_{context}"]
+= 设置 Ingress Controller 线程数
+集群管理员可设置线程数，以增加集群可以处理的入站的连接量。您可以修补现有的 Ingress Controller 来增加线程量。
+
+.先决条件
+* 以下假设您已创建了 Ingress Controller。
+
+.流程
+* 更新 Ingress Controller 以增加线程数量：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontroller/default --type=merge -p '{"spec":{"tuningOptions": {"threadCount": 8}}}'
+----
++
+[注意]
+====
+如果您的节点有能力运行大量资源，您可以使用与预期节点容量匹配的标签配置 `spec.nodePlacement.nodeSelector`，并将 `spec.tuningOptions.threadCount` 配置为一个适当的高值。
+====

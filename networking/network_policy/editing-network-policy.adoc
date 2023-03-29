@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="editing-network-policy"]
+= 编辑网络策略
+include::_attributes/common-attributes.adoc[]
+:context: editing-network-policy
+
+toc::[]
+
+作为具有 admin 角色的用户，您可以编辑命名空间的现有网络策略。
+
+include::modules/nw-networkpolicy-edit.adoc[leveloffset=+1]
+
+include::modules/nw-networkpolicy-object.adoc[leveloffset=+1]

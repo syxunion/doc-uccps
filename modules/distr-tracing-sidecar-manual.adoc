@@ -1,0 +1,58 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-sidecar-manual_{context}"]
+= 手动注入 sidecar
+
+
+统信容器云管理平台分布式追踪 Operator 只能将 Jaeger Agent sidecar 注入部署工作负载。对于 `Deployments` 以外的控制器类型，如 `StatefulSets` 和 `DaemonSets`，您可以在规格中手动定义 Jaeger 代理 sidecar。
+
+以下片段显示了您可以在 Jaeger 代理 sidecar 的 containers 部分中包含的手动定义：
+
+.`StatefulSet` 的 sidecar 定义示例
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: example-statefulset
+  namespace: example-ns
+  labels:
+    app: example-app
+spec:
+
+    spec:
+      containers:
+        - name: example-app
+          image: acme/myapp:myversion
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+        - name: jaeger-agent
+          image: registry.redhat.io/distributed-tracing/jaeger-agent-rhel7:<version>
+           # The agent version must match the Operator version
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5775
+              name: zk-compact-trft
+              protocol: UDP
+            - containerPort: 5778
+              name: config-rest
+              protocol: TCP
+            - containerPort: 6831
+              name: jg-compact-trft
+              protocol: UDP
+            - containerPort: 6832
+              name: jg-binary-trft
+              protocol: UDP
+            - containerPort: 14271
+              name: admin-http
+              protocol: TCP
+          args:
+            - --reporter.grpc.host-port=dns:///jaeger-collector-headless.example-ns:14250
+            - --reporter.type=grpc
+----
+
+然后，代理可以在 localhost 上的默认位置访问。

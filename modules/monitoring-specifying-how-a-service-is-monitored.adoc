@@ -1,0 +1,78 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+
+:_content-type: PROCEDURE
+[id="specifying-how-a-service-is-monitored_{context}"]
+= 指定如何监控服务
+
+[role="_abstract"]
+要使用服务公开的指标，需要将 统信容器云管理平台 监控配置为从 `/metrics` 端点中提取指标。您可以使用一个 `ServiceMonitor` 自定义资源定义（CRD）应该如何监控服务，或使用一个 `PodMonitor` CRD 指定应该如何监控 pod。前者需要 `Service`  对象，而后者则不需要，允许 Prometheus 直接从 Pod 公开的指标端点中提取指标。
+
+此流程演示了如何为用户定义的项目中的服务创建 `ServiceMonitor` 资源。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色或 `monitoring-edit` 角色的用户访问集群。
+* 您已为用户定义的项目启用了监控。
+* 在本例中，您已在 `ns1` 项目中部署了 `prometheus-example-app` 示例服务。
++
+[注意]
+====
+`prometheus-example-app` 示例服务不支持 TLS 身份验证。
+====
+
+.流程
+
+. 为 `ServiceMonitor` 资源配置创建一个 YAML 文件。在本例中，该文件名为 `example-app-service-monitor.yaml`.
+
+. 添加以下 `ServiceMonitor` 资源配置详情：
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: prometheus-example-monitor
+  name: prometheus-example-monitor
+  namespace: ns1
+spec:
+  endpoints:
+  - interval: 30s
+    port: web
+    scheme: http
+  selector:
+    matchLabels:
+      app: prometheus-example-app
+----
++
+这会定义一个 `ServiceMonitor` 资源，用于提取由 `prometheus-example-app` 示例服务公开的指标，其中包含 `version` 指标。
++ 
+[注意]
+====
+用户定义的命名空间中的 `ServiceMonitor` 资源只能发现同一命名空间中的服务。也就是说， `ServiceMonitor` 资源的 `namespaceSelector` 字段总是被忽略。
+====
+
+. 将配置应用到集群：
++
+[source,terminal]
+----
+$ oc apply -f example-app-service-monitor.yaml
+----
++
+部署  `ServiceMonitor` 资源需要一些时间。
+
+. 您可以检查 `ServiceMonitor` 资源是否正在运行：
++
+[source,terminal]
+----
+$ oc -n ns1 get servicemonitor
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                         AGE
+prometheus-example-monitor   81m
+----

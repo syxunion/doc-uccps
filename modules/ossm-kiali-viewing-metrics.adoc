@@ -1,0 +1,43 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-viewing-metrics_{context}"]
+= Viewing metrics in the Kiali console
+
+您可以在 Kiali 控制台中查看应用程序、工作负载和服务的入站和出站指标。详情页面包括以下标签页：
+
+* 入站应用程序指标
+* 出站应用指标
+* 入站工作负载指标
+* 出站工作负载指标
+* 入站服务指标
+
+这些标签页显示预定义的指标仪表板，它们根据相关应用程序、工作负载或服务级别进行定制。应用程序和工作负载详情视图显示请求和响应指标，如卷、持续时间、大小或 TCP 流量。服务详情视图仅显示入站流量的请求和响应指标。
+
+Kiali 允许您选择图表的尺寸来自定义 chart。Kiali 还可以显示源或目标代理指标报告的指标。另外，Kiali 可以覆盖指标上的 trace。
+
+.先决条件
+
+* 安装和配置 Service Mesh。
+* 已安装并配置了 Kiali。
+* Kiali 控制台的地址。
+* （可选）安装和配置了分布式追踪。
+
+.流程
+
+. 启动 Kiali 控制台。
+
+. 单击 *Log In With Uccps*.
++
+Kiali Overview 页面会显示添加到具有权限的网格中的命名空间。
++
+. 单击 *Applications*, *Workloads*, 或者 *Services*。
+
+. 在 *Applications*, *Workloads*, 或者 *Services* 页面上，从 *Namespace* 菜单中选择项目。
+
+. 如有必要，使用过滤器来查找您要查看其日志的应用程序、工作负载或服务。单击 *Name*。
+
+. 在 *Application Detail*, *Workload Details*, 或 *Service Details* 页面中，单击 *Inbound Metrics* 或 *Outbound Metrics* 选项卡来查看指标。

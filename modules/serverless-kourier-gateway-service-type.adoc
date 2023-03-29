@@ -1,0 +1,34 @@
+// Module included in the following assemblies
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: REFERENCE
+[id="serverless-kourier-gateway-service-type_{context}"]
+= 设置 Kourier 网关服务类型
+// should probably be a procedure but this is out of scope for the abstracts PR
+
+Kourier 网关默认作为 `ClusterIP` 服务类型公开。此服务类型由 `KnativeServing` 自定义资源 (CR) 中的 `service-type` ingress spec 决定。
+
+.默认规格
+[source,yaml]
+----
+...
+spec:
+  ingress:
+    kourier:
+      service-type: ClusterIP
+...
+----
+
+您可以通过修改 `service-type` spec 来覆盖默认服务类型来使用负载均衡器服务类型：
+
+.LoadBalancer 覆盖规格
+[source,yaml]
+----
+...
+spec:
+  ingress:
+    kourier:
+      service-type: LoadBalancer
+...
+----

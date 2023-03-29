@@ -1,0 +1,243 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+
+:_content-type: PROCEDURE
+[id="identity-provider-configuring-apache-request-header_{context}"]
+= 使用请求标头配置 Apache 身份验证
+
+这个示例使用 `mod_auth_gssapi` 模块使用请求标头身份提供程序配置 Apache 验证代理。
+
+.先决条件
+
+* 通过 Optional channel 获得 `mod_auth_gssapi` 模块。您必须在本地机器中安装以下软件包：
++
+** `httpd`
+** `mod_ssl`
+** `mod_session`
+** `apr-util-openssl`
+** `mod_auth_gssapi`
+
+* 生成用于验证提交可信标头的请求的 CA。定义包含 CA 的统信容器云管理平台ConfigMap 对象。这可以通过运行以下命令完成：
++
+[source,terminal]
+----
+$ oc create configmap ca-config-map --from-file=ca.crt=/path/to/ca -n openshift-config <1>
+----
+<1> 证书颁发机构必须存储在 `ConfigMap` 的 `ca.crt` 键中。
++
+[提示]
+====
+您还可以应用以下 YAML 来创建配置映射：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ca-config-map
+  namespace: openshift-config
+data:
+  ca.crt: |
+    <CA_certificate_PEM>
+----
+====
+
+* 您还可以应用以下 YAML 来创建配置映射：
+
+* 您还可以应用以下 YAML 来创建配置映射：
+
+.流程
+
+您还可以应用以下 YAML 来创建配置映射：
+
+. 为 Apache 配置创建证书。您通过 `SSLProxyMachineCertificateFile` 参数值指定的证书是服务器验证代理时使用的代理客户端的证书。它必须使用 TLS Web 客户端身份验证作为扩展密钥类型。
+
+. 创建 Apache 配置文件。使用以下模板来提供所需设置和值：
++
+[重要]
+====
+仔细检查模板的内容，并根据您的环境自定义其相应的内容。
+====
++
+----
+LoadModule request_module modules/mod_request.so
+LoadModule auth_gssapi_module modules/mod_auth_gssapi.so
+# Some Apache configurations might require these modules.
+# LoadModule auth_form_module modules/mod_auth_form.so
+# LoadModule session_module modules/mod_session.so
+
+# Nothing needs to be served over HTTP.  This virtual host simply redirects to
+# HTTPS.
+<VirtualHost *:80>
+  DocumentRoot /var/www/html
+  RewriteEngine              On
+  RewriteRule     ^(.*)$     https://%{HTTP_HOST}$1 [R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+  # This needs to match the certificates you generated.  See the CN and X509v3
+  # Subject Alternative Name in the output of:
+  # openssl x509 -text -in /etc/pki/tls/certs/localhost.crt
+  ServerName www.example.com
+
+  DocumentRoot /var/www/html
+  SSLEngine on
+  SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+  SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+  SSLCACertificateFile /etc/pki/CA/certs/ca.crt
+
+  SSLProxyEngine on
+  SSLProxyCACertificateFile /etc/pki/CA/certs/ca.crt
+  # It is critical to enforce client certificates. Otherwise, requests can
+  # spoof the X-Remote-User header by accessing the /oauth/authorize endpoint
+  # directly.
+  SSLProxyMachineCertificateFile /etc/pki/tls/certs/authproxy.pem
+
+  # To use the challenging-proxy, an X-Csrf-Token must be present.
+  RewriteCond %{REQUEST_URI} ^/challenging-proxy
+  RewriteCond %{HTTP:X-Csrf-Token} ^$ [NC]
+  RewriteRule ^.* - [F,L]
+
+  <Location /challenging-proxy/oauth/authorize>
+      # Insert your backend server name/ip here.
+      ProxyPass https://<namespace_route>/oauth/authorize
+      AuthName "SSO Login"
+      # For Kerberos
+      AuthType GSSAPI
+      Require valid-user
+      RequestHeader set X-Remote-User %{REMOTE_USER}s
+
+      GssapiCredStore keytab:/etc/httpd/protected/auth-proxy.keytab
+      # Enable the following if you want to allow users to fallback
+      # to password based authentication when they do not have a client
+      # configured to perform kerberos authentication.
+      GssapiBasicAuth On
+
+      # For ldap:
+      # AuthBasicProvider ldap
+      # AuthLDAPURL "ldap://ldap.example.com:389/ou=People,dc=my-domain,dc=com?uid?sub?(objectClass=*)"
+    </Location>
+
+    <Location /login-proxy/oauth/authorize>
+    # Insert your backend server name/ip here.
+    ProxyPass https://<namespace_route>/oauth/authorize
+
+      AuthName "SSO Login"
+      AuthType GSSAPI
+      Require valid-user
+      RequestHeader set X-Remote-User %{REMOTE_USER}s env=REMOTE_USER
+
+      GssapiCredStore keytab:/etc/httpd/protected/auth-proxy.keytab
+      # Enable the following if you want to allow users to fallback
+      # to password based authentication when they do not have a client
+      # configured to perform kerberos authentication.
+      GssapiBasicAuth On
+
+      ErrorDocument 401 /login.html
+    </Location>
+
+</VirtualHost>
+
+RequestHeader unset X-Remote-User
+----
++
+[注意]
+====
+`https://<namespace_route>` 地址是到 OAuth 服务器的路由，可通过运行 `oc get route -n openshift-authentication` 获取。
+====
+
+. 更新自定义资源 (CR) 中的 `identityProviders`` 小节：
++
+[source,yaml]
+----
+identityProviders:
+  - name: requestheaderidp
+    type: RequestHeader
+    requestHeader:
+      challengeURL: "https://<namespace_route>/challenging-proxy/oauth/authorize?${query}"
+      loginURL: "https://<namespace_route>/login-proxy/oauth/authorize?${query}"
+      ca:
+        name: ca-config-map
+        clientCommonNames:
+        - my-auth-proxy
+        headers:
+        - X-Remote-User
+----
+
+. 验证配置：
+
+.. 通过提供正确的客户端证书和标头，确认您可以通过请求令牌来绕过代理：
++
+[source,terminal]
+----
+# curl -L -k -H "X-Remote-User: joe" \
+   --cert /etc/pki/tls/certs/authproxy.pem \
+   https://<namespace_route>/oauth/token/request
+----
+
+.. 通过在没有证书的情况下请求令牌，确认没有提供客户端证书的请求会失败：
++
+[source,terminal]
+----
+# curl -L -k -H "X-Remote-User: joe" \
+   https://<namespace_route>/oauth/token/request
+----
+
+.. 确认 `challengeURL` 重定向已启用：
++
+[source,terminal]
+----
+# curl -k -v -H 'X-Csrf-Token: 1' \
+   https://<namespace_route>/oauth/authorize?client_id=openshift-challenging-client&response_type=token
+----
++
+复制 `challengeURL` 重定向，以用于下一步骤。
+
+.. 运行这个命令会显示一个带有 `WWW-Authenticate` 基本质询，协商质询或两个质询都有的 `401` 响应：
++
+[source,terminal]
+----
+# curl -k -v -H 'X-Csrf-Token: 1' \
+   <challengeURL_redirect + query>
+----
+
+.. 测试在使用 Kerberos ticket 和不使用 Kerberos ticket 的情况下登录到 Uccp CLI（oc）：
+... 如果您使用 `kinit` 生成了 Kerberos ticket，请将其销毁：
++
+[source,terminal]
+----
+# kdestroy -c cache_name <1>
+----
++
+<1> 请确定提供 Kerberos 缓存的名称。
+... 使用您的 Kerberos 凭证登录到 oc：
++
+[source,terminal]
+----
+# oc login -u <username>
+----
++
+在提示符后输入您的 Kerberos 密码。
+... 在提示符后输入您的 Kerberos 密码。
++
+[source,terminal]
+----
+# oc logout
+----
+... 使用您的 Kerberos 凭证获得一个 ticket：
++
+[source,terminal]
+----
+# kinit
+----
++
+在提示符后输入您的 Kerberos 用户名和密码。
+... 确认您可以登录到 oc：
++
+[source,terminal]
+----
+# oc login
+----
++
+如果配置正确，您会在不需要单独输入凭证的情况下成功登录。

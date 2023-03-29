@@ -1,0 +1,34 @@
+:_content-type: ASSEMBLY
+[id="serverless-kafka-admin"]
+=  配置 Knative Kafka
+include::_attributes/common-attributes.adoc[]
+:context: serverless-kafka-admin
+
+toc::[]
+
+Knative Kafka 提供集成选项，供您在 {ServerlessProductName} 中使用支持的 Apache Kafka 消息流平台。Kafka 为事件源、频道、代理和事件 sink 功能提供选项。
+
+除了作为 Uccps Serverless 核心安装一部分的 Knative Eventing 组件外，集群管理员还可安装 `KnativeKafka` 自定义资源 (CR) 。
+
+
+`KnativeKafka` CR 为用户提供其他选项，例如：
+
+* Kafka 源
+* Kafka 频道
+* Kafka 代理
+* Kafka 接收器
+
+include::modules/serverless-install-kafka-odc.adoc[leveloffset=+1]
+
+[id="serverless-kafka-admin-security"]
+== Knative Kafka 的安全配置
+
+Kafka 集群通常使用 TLS 或 SASL 身份验证方法进行保护。
+
+[NOTE]
+====
+统信建议您同时启用 SASL 和 TLS。
+====
+
+// kafka broker general configmap
+include::modules/serverless-kafka-broker-configmap.adoc[leveloffset=+1]

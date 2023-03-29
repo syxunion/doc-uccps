@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="configuring-ingress-cluster-traffic-service-external-ip"]
+= 为服务外部 IP 配置 ingress 集群流量
+include::_attributes/common-attributes.adoc[]
+:context: configuring-ingress-cluster-traffic-service-external-ip
+
+toc::[]
+
+您可以将外部 IP 地址附加到服务，使其可用于集群外的流量。这通常只适用于在裸机硬件上安装的集群。必须正确配置外部网络基础架构，将流量路由到该服务。
+
+[id="configuring-ingress-cluster-traffic-service-external-ip-prerequisites"]
+== 先决条件
+
+* 您的集群被配置为启用了 ExternalIP。如需更多信息，请参阅为服务配置 ExternalIPs。
+
+include::modules/nw-service-externalip-create.adoc[leveloffset=+1]

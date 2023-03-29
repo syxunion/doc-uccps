@@ -1,0 +1,158 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="monitoring-configuring-external-alertmanagers_{context}"]
+= 配置外部 alertmanager 实例
+
+统信容器云管理平台 监控堆栈包含一个本地 Alertmanager 实例，用于从 Prometheus 路由警报。您可以通过在 `openshift-monitoring` 项目或`user-workload-monitoring-config` 项目中配置 cluster-monitoring-config 配置映射来添加外部 Alertmanager 实例。
+
+如果您为多个集群添加相同的外部 Alertmanager 配置，并且为每个集群禁用本地实例，则可以使用单个外部 Alertmanager 实例管理多个集群的警报路由。
+
+.先决条件
+
+* 已安装 Uccps CLI (`oc`).
+* *如果要在 `openshift-monitoring` 项目中配置 统信容器云管理平台 核心监控组件*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建了 `cluster-monitoring-config` 配置映射。
+* *如果您要配置用于监控用户定义的项目的组件*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring`　项目中具有  `user-workload-monitoring-config-edit`　角色的用户访问集群。
+** 您已创建了　`user-workload-monitoring-config` 配置映射。
+
+.流程
+
+. 编辑 `ConfigMap` 对象。
+** *配置额外的 Alertmanager 以路由来自 统信容器云管理平台 核心项目的警报*：
+.. 编辑 `openshift-monitoring` 项目中的　`cluster-monitoring-config` 配置映射：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 在 `data/config.yaml/prometheusK8s`　下添加一个 `additionalAlertmanagerConfigs:` 小节：
+
+.. 在本节中添加其他 Alertmanager 的配置详情：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      additionalAlertmanagerConfigs:
+      - <alertmanager_specification>
+----
++
+对于 `<alertmanager_specification>`，请替换额外的　Alertmanager 实例的身份验证和其他配置详情。目前支持的身份验证方法有　bearer 令牌  (`bearerToken`) 和客户端 TLS (`tlsConfig`)。以下示例配置映射使用 bearer 令牌和客户端 TLS 身份验证配置额外的 Alertmanager：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      additionalAlertmanagerConfigs:
+      - scheme: https
+        pathPrefix: /
+        timeout: "30s"
+        apiVersion: v1
+        bearerToken:
+          name: alertmanager-bearer-token
+          key: token
+        tlsConfig:
+          key: 
+            name: alertmanager-tls
+            key: tls.key
+          cert: 
+            name: alertmanager-tls
+            key: tls.crt
+          ca: 
+            name: alertmanager-tls
+            key: tls.ca
+        staticConfigs:
+        - external-alertmanager1-remote.com
+        - external-alertmanager1-remote2.com
+----
+
+** *配置额外的 Alertmanager 实例以路由来自用户定义的项目的警报*:
+
+.. 编辑 `openshift-user-workload-monitoring`　项目中的 `user-workload-monitoring-config` 配置映射：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 在 `data/config.yaml/`　下添加一个　`<component>/additionalAlertmanagerConfigs:` 部分。
+
+.. 在本节中添加其他 Alertmanager 的配置详情：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    <component>:
+      additionalAlertmanagerConfigs:
+      - <alertmanager_specification>
+----
++
+对于 `<component>`，替换两个支持的外部 Alertmanager 组件之一： `prometheus` 或 `thanosRuler`。
++
+对于 `<alertmanager_specification>`，请替换额外的 Alertmanager 实例的身份验证和其他配置详情。目前支持的身份验证方法有 bearer 令牌  (`bearerToken`) 和客户端 TLS (`tlsConfig`)。以下示例配置映射使用带有 bearer 令牌和客户端 TLS 身份验证的 Thanos Ruler 配置额外的 Alertmanager：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+   thanosRuler:
+     additionalAlertmanagerConfigs:
+    - scheme: https
+      pathPrefix: /
+      timeout: "30s"
+      apiVersion: v1
+      bearerToken:
+        name: alertmanager-bearer-token
+        key: token
+      tlsConfig:
+        key: 
+          name: alertmanager-tls
+          key: tls.key
+        cert: 
+          name: alertmanager-tls
+          key: tls.crt
+        ca: 
+          name: alertmanager-tls
+          key: tls.ca
+      staticConfigs:
+      - external-alertmanager1-remote.com
+      - external-alertmanager1-remote2.com
+----
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到  `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
+
+. 保存文件以将更改应用到 `ConfigMap` 对象。这样就会自动应用新组件放置配置。
+
+

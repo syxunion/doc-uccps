@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="configuring-alert-notifications"]
+= 配置警报通知
+include::_attributes/common-attributes.adoc[]
+:context: configuring-alert-notifications
+
+toc::[]
+
+在 统信容器云管理平台 中，当警报规则中定义的条件满足时会触发警报。警报提供一条通知，表示集群中存在一组情况。默认情况下，触发的警报可在 统信容器云管理平台 Web 控制台中的 Alerting UI 中查看。安装后，您可以配置 统信容器云管理平台，将警报通知发送到外部系统。
+
+include::modules/monitoring-sending-notifications-to-external-systems.adoc[leveloffset=+1]
+include::modules/monitoring-configuring-alert-receivers.adoc[leveloffset=+2]
+
+[id="configuring-alert-notifications-additional-resources"]
+[role="_additional-resources"]
+== 其他资源
+
+* xref:../monitoring/monitoring-overview.adoc#monitoring-overview[监控概述]
+* xref:../monitoring/managing-alerts.adoc#managing-alerts[管理警报]

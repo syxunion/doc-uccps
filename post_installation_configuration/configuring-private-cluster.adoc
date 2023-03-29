@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="configuring-private-cluster"]
+= 配置私有集群
+include::_attributes/common-attributes.adoc[]
+:context: configuring-private-cluster
+
+toc::[]
+
+安装 统信容器云管理平台 版本 4.10 集群后，您可以将其某些核心组件设置为私有。
+
+include::modules/private-clusters-about.adoc[leveloffset=+1]
+
+include::modules/private-clusters-setting-dns-private.adoc[leveloffset=+1]
+
+include::modules/private-clusters-setting-ingress-private.adoc[leveloffset=+1]

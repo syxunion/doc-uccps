@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-descheduler-configuring-interval_{context}"]
+= 配置 descheduler 间隔
+
+您可以配置 descheduler 运行之间的时间长度。默认为 3600 秒（一小时）。
+
+.先决条件
+
+* 集群管理员特权
+
+.流程
+
+. 编辑 `KubeDescheduler` 对象:
++
+[source,terminal]
+----
+$ oc edit kubedeschedulers.operator.openshift.io cluster -n openshift-kube-descheduler-operator
+----
+
+. 将  `deschedulingIntervalSeconds` 字段更新为所需的值：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: KubeDescheduler
+metadata:
+  name: cluster
+  namespace: openshift-kube-descheduler-operator
+spec:
+  deschedulingIntervalSeconds: 3600 <1>
+...
+----
+<1> 设置 descheduler 运行间隔的秒数。如果设为 0，则 descheduler 会运行一次并退出。
+
+. 保存文件以使改变生效。

@@ -1,0 +1,22 @@
+:_content-type: PROCEDURE
+[id="filtering-helm-charts-by-certification-level_{context}"]
+= 根据它们的认证级别过滤 Helm Chart
+
+您可以在 *开发者目录* 中根据它们的认证级别过滤 Helm chart。
+
+.流程
+
+. 在 *开发者* 视角中，进入 *+添加* 视图并选择一个项目。
+
+. 在 *开发者目录* 标题中，选择 Helm Chart 选项来查看 *开发者目录* 中的所有 *Helm chart*。
+
+. 使用 *Helm chart* 列表左侧的过滤器过滤所需的 chart：
+* 使用 *Chart Repositories* 过滤器过滤chart。
+* 使用 *Source* 过滤器过滤来自 *合作伙伴*、 *社区* 或 *统信 的 chart*。认证的 chart 由(image:odc_verified_icon.png[title="Certified icon"]) 图标表示。
+
+[注意]
+====
+如果只有一个供应商类型，则 *Source* 过滤器不可见。
+====
+
+现在，您可以选择所需的 chart 并安装它。

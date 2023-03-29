@@ -1,0 +1,30 @@
+////
+This module included in the following assemblies:
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-validating-sidecar_{context}"]
+= Validating encryption with Kiali
+
+Kiali 控制台提供了多种方式来验证应用程序、服务和工作负载是否启用了 mTLS 加密。
+
+.Masthead 图标网格范围 mTLS
+image::ossm-kiali-masthead-mtls-enabled.png[mTLS enabled]
+
+在 masthead 右侧，Kiali 显示一个锁定图标，当网格为整个服务网格启用了 mTLS 时。这意味着网格中的所有通信都使用 mTLS。
+
+.Masthead 图标网格范围 mTLS 部分启用
+image::ossm-kiali-masthead-mtls-partial.png[mTLS partially enabled]
+
+当网格以 PERMISSIVE 模式或者网格范围 mTLS 配置出现错误时，Kiali 会显示 hollow 锁定图标。
+
+.安全徽标
+image::ossm-kiali-graph-badge-security.png[Security badge]
+
+*Graph* 页面有选项，可以在图形边缘上显示 *Security*  badge 来指示启用 mTLS。要在图形上启用安全徽标，请从 *Display* 菜单的  *Show Badges*, 下选择 *Security* 复选框。当边缘显示锁定图标时，它表示至少有一个启用了 mTLS 的请求。如果同时存在 mTLS 和非mTLS 请求，则 side-panel 会显示使用 mTLS 的请求百分比。
+
+*Applications Detail Overview* 页会在图形边缘上显示一个 *Security* 图标，其中至少有一个启用了 mTLS 的请求。
+
+*Workloads Detail Overview* 页会在图形边缘上显示一个 *Security* 图标，其中至少有一个启用了 mTLS 的请求。
+
+*Services Detail Overview* 页会在图形边缘上显示一个 *Security* 图标，其中至少有一个启用了 mTLS 的请求。另外请注意，Kiali 在 *Network* 部分显示为 mTLS 配置的端口旁的锁定图标。

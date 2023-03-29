@@ -1,0 +1,12 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-on-cluster-builds"]
+= On-cluster 功能构建和部署
+:context: serverless-functions-on-cluster-builds
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+您可以直接在集群中构建功能，而不是在本地构建功能。在本地开发机器上使用此工作流时，您只需要使用功能源代码。例如，当您无法在集群功能构建工具（如 docker 或 podman）安装时，这非常有用。
+
+include::modules/serverless-functions-creating-on-cluster-builds.adoc[leveloffset=+1]
+include::modules/serverless-functions-specifying-function-revision.adoc[leveloffset=+1]

@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/index.adoc
+
+:_content-type: CONCEPT
+[id="nodes-secondary-scheduler-about_{context}"]
+= 关于 Secondary Scheduler Operator
+
+UnionTech Uccps 的 Secondary Scheduler Operator 提供了在 统信容器云管理平台 中部署自定义二级调度程序的方法。辅助调度程序与默认调度程序一起运行以调度 pod。Pod 配置可以指定要使用的调度程序。
+
+自定义调度程序必须具有 /bin/kube-scheduler 二进制文件，并基于 Kubernetes 调度框架。
+
+[重要]
+====
+您可以使用 Secondary Scheduler Operator 在 统信容器云管理平台 中部署自定义二级调度程序，但统信不直接支持自定义次要调度程序的功能。
+====
+
+Secondary Scheduler Operator 创建二级调度程序所需的默认角色和绑定。您可以通过为辅助调度程序配置 KubeSchedulerConfiguration 资源来指定要启用或禁用的调度插件。

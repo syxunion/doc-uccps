@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+:context: nodes-cluster-limit-ranges
+[id="nodes-cluster-limit-ranges"]
+= 使用限制范围限制资源消耗
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+默认情况下，容器在 统信容器云管理平台 集群上使用无限的计算资源运行。通过限制范围，您可以限制项目中特定对象的资源消耗：
+
+* pod 和容器：您可以为 pod 及其容器设置 CPU 和内存的最小和最大要求。
+* 镜像流：您可以设置 ImageStream 对象中的镜像和标签数量的限制。
+* 镜像：您可以限制可推送到内部 registry 的镜像大小。
+* 持久性卷声明(PVC):您可以限制请求的 PVC 的大小。
+
+如果 pod 未满足限制范围强制的限制，则无法在命名空间中创建 pod。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-cluster-limit-ranges-about.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-limit-ranges-limits.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-limit-ranges-creating.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-limit-ranges-viewing.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-limit-ranges-deleting.adoc[leveloffset=+1]

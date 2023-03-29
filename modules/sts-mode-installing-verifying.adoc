@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-gcp-workload-identity.adoc
+
+ifeval::["{context}" == "cco-mode-sts"]
+:aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:google-cloud-platform:
+endif::[]
+
+[id="sts-mode-installing-verifying_{context}"]
+= 验证安装
+
+. 连接到统信容器云管理平台集群。
+
+. 验证集群没有 `root` 凭证：
++
+输出应类似于：
++
+[source,terminal]
+----
+Error from server (NotFound): secrets "aws-creds" not found
+----
+
+. 验证组件是否假定 secret 清单中指定的 IAM 角色，而不是使用由 CCO 创建的凭证：
++
+.带有 `Image Registry Operator` 的命令示例
+[source,terminal]
+----
+$ oc get secrets -n openshift-image-registry installer-cloud-credentials -o json | jq -r .data.credentials | base64 --decode
+----
++
+输出应显示组件使用的角色和 Web 身份令牌，如下所示：
++
+.带有 `Image Registry Operator` 的输出示例
+[source,terminal]
+----
+[default]
+role_arn = arn:aws:iam::123456789:role/openshift-image-registry-installer-cloud-credentials
+web_identity_token_file = /var/run/secrets/openshift/serviceaccount/token
+----
+
+ifeval::["{context}" == "cco-mode-sts"]
+:!aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:!google-cloud-platform:
+endif::[]

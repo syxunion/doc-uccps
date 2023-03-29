@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="configuring-request-header-identity-provider"]
+= 配置请求标头身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-request-header-identity-provider
+
+toc::[]
+
+配置 `request-header` 身份提供程序，标识请求标头值中的用户，例如 `X-Remote-User`。它通常与设定请求标头值的身份验证代理一起使用。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-about-request-header.adoc[leveloffset=+1]
+
+include::modules/identity-provider-config-map.adoc[leveloffset=+1]
+
+include::modules/identity-provider-request-header-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]
+
+[id="example-apache-auth-config-using-request-header"]
+== 使用请求标头进行 Apache 验证的配置示例
+
+本例使用请求标头身份提供程序为统信容器云管理平台配置 Apache 验证代理服务器。
+
+[discrete]
+include::modules/identity-provider-apache-custom-proxy-configuration.adoc[leveloffset=+2]
+
+[discrete]
+include::modules/identity-provider-configuring-apache-request-header.adoc[leveloffset=+2]

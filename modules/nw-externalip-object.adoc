@@ -1,0 +1,85 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-externalip.adoc
+
+[id="nw-externalip-object_{context}"]
+= ExternalIP 地址块配置
+
+ExternalIP 地址块的配置由名为 `cluster` 的网络自定义资源（CR）定义。Network CR 是 `config.openshift.io` API 组的一部分。
+
+[重要]
+====
+在集群安装过程中，Cluster Version Operator（CVO）会自动创建一个名为 cluster 的网络 CR。不支持创建此类型的任何其他 CR 对象。
+====
+
+以下 YAML 描述了 ExternalIP 配置：
+
+.network.config.openshift.io CR 名为 `cluster`
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  externalIP:
+    autoAssignCIDRs: [] <1>
+    policy: <2>
+      ...
+----
+<1> 定义 CIDR 格式的 IP 地址块，可用于自动将外部 IP 地址分配给服务。只允许一个 IP 地址范围。
+
+<2> 定义手动为服务分配 IP 地址的限制。如果没有定义限制，则不允许在 Service 对象中指定 `spec.externalIP` 字段。默认情况下，不会定义任何限制。
+
+以下 YAML 描述了 `policy` 小节的字段：
+
+.network.config.openshift.io policy 小节
+[source,yaml]
+----
+policy:
+  allowedCIDRs: [] <1>
+  rejectedCIDRs: [] <2>
+----
+<1> CIDR 格式允许的 IP 地址范围列表。
+<2> CIDR 格式拒绝的 IP 地址范围列表。
+
+[discrete]
+== 外部 IP 配置示例
+
+以下示例中显示了外部 IP 地址池的一些可能配置：
+
+- 以下 YAML 描述了启用自动分配外部 IP 地址的配置：
++
+.带有 `spec.externalIP.autoAssignCIDRs` 的配置示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  ...
+  externalIP:
+    autoAssignCIDRs:
+    - 192.168.132.254/29
+----
+
+- 以下 YAML 为允许的和被拒绝的 CIDR 范围配置策略规则：
++
+.带有 `spec.externalIP.policy` 的示例配置
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  ...
+  externalIP:
+    policy:
+      allowedCIDRs:
+      - 192.168.132.0/29
+      - 192.168.132.8/29
+      rejectedCIDRs:
+      - 192.168.132.7/32
+----

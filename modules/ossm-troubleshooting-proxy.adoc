@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-troubleshooting-proxy_{context}"]
+= Envoy 代理故障排除
+
+Envoy 代理会截获服务网格中所有服务的入站和出站流量。Envoy 还会收集并报告服务网格上的遥测。Envoy 会在同一个 pod 中被部署为相关服务的 sidecar。
+
+== 启用 Envoy 访问日志
+
+Envoy 访问日志可用于诊断流量故障和流，并帮助端到端流量流分析。
+
+要为所有 istio-proxy 容器启用访问日志，请编辑 `ServiceMeshControlPlane` (SMCP)  (SMCP) 对象为日志输出添加文件名。
+
+.流程
+
+. 以具有 cluster-admin 角色的用户身份登录 统信容器云管理平台 CLI。输入以下命令。然后在提示时输入您的用户名和密码。
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:6443
+----
++
+. 切换到安装 Service Mesh control plane 的项目，如  `istio-system`.
++
+[source,terminal]
+----
+$ oc project istio-system
+----
++
+. 编辑 `ServiceMeshControlPlane` 文件。
++
+[source,terminal]
+----
+$ oc edit smcp <smcp_name>
+----
++
+. 如以下示例所示，使用 `name` 指定代理日志的文件名。如果没有为 `name`, 指定值，则不会写入日志条目。
++
+[source,yaml]
+----
+spec:
+  proxy:
+    accessLogging:
+      file:
+        name: /dev/stdout     #file name
+----

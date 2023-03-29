@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-egress-router-configmap.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-egress-router-configmap_{context}"]
+= 使用配置映射配置出口路由器目的地映射
+
+对于大量或经常更换的目标映射集合，您可以使用配置映射来外部维护列表。这种方法的优点是可将编辑配置映射的权限委派给没有 `cluster-admin` 特权的用户。因为出口路由器 pod 需要特权容器，没有 `cluster-admin` 特权的用户无法直接编辑 pod 定义。
+
+[注意]
+====
+配置映射更改时，出口路由器 pod 不会自动更新。您必须重启出口路由器 pod 来获得更新。
+====
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建包含出口路由器 pod 映射数据的文件，如下例所示：
++
+----
+# Egress routes for Project "Test", version 3
+
+80   tcp 203.0.113.25
+
+8080 tcp 203.0.113.26 80
+8443 tcp 203.0.113.26 443
+
+# Fallback
+203.0.113.27
+----
++
+您可以在这个文件中放入空白行和评论。
+
+. 从文件创建 `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc delete configmap egress-routes --ignore-not-found
+----
++
+[source,terminal]
+----
+$ oc create configmap egress-routes \
+  --from-file=destination=my-egress-destination.txt
+----
++
+在以前的版本中，`egress-routes` 值是要创建的 ConfigMap 对象的名称，`my-egress-destination.txt` 是数据从中读取的文件的名称。
++
+[提示]
+====
+您还可以应用以下 YAML 来创建配置映射：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: egress-routes
+data:
+  destination: |
+    # Egress routes for Project "Test", version 3
+
+    80   tcp 203.0.113.25
+
+    8080 tcp 203.0.113.26 80
+    8443 tcp 203.0.113.26 443
+
+    # Fallback
+    203.0.113.27
+----
+====
+
+. 创建出口路由器 pod 定义，并为环境片段中的 `EGRESS_DESTINATION` 字段指定 `configMapKeyRef` 小节：
++
+[source,yaml]
+----
+...
+env:
+- name: EGRESS_DESTINATION
+  valueFrom:
+    configMapKeyRef:
+      name: egress-routes
+      key: destination
+...
+----

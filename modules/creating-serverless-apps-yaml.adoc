@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-applications.adoc
+
+:_content-type: PROCEDURE
+[id="creating-serverless-apps-yaml_{context}"]
+= 使用 YAML 创建无服务器应用程序
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述应用程序，并以可重复的方式描述应用程序。要使用 YAML 创建无服务器应用程序，您必须创建一个 YAML 文件来定义 Knative `Service` 对象，然后使用 `oc apply` 来应用它。
+
+创建服务并部署应用程序后，Knative 会为应用程序的这个版本创建一个不可变的修订版本。Knative 还将执行网络操作，为您的应用程序创建路由、入口、服务和负载平衡器，并根据流量自动扩展或缩减 pod。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建包含以下示例代码的 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-delivery
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+          env:
+            - name: RESPONSE
+              value: "Hello Serverless!"
+----
+. 导航到包含 YAML 文件的目录，并通过应用 YAML 文件来部署应用程序：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

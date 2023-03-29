@@ -1,0 +1,106 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-routing-ingress_{context}"]
+= Managing ingress traffic
+
+在 统信容器云管理平台 中，Ingress Gateway 允许监控、安全性和路由规则等功能应用到进入集群的流量。使用 Service Mesh 网关在服务网格外公开服务。
+
+[id="ossm-routing-determine-ingress_{context}"]
+== Determining the ingress IP and ports
+
+入口配置根据您的环境是否支持外部负载均衡器而有所不同。在集群的入口 IP 和端口中设置一个外部负载均衡器。要确定是否为外部负载均衡器配置了集群的 IP 和端口，请运行以下命令。在本例中， `istio-system` 是 Service Mesh control plane 项目的名称。
+
+[source,terminal]
+----
+$ oc get svc istio-ingressgateway -n istio-system
+----
+
+该命令会返回命名空间中每个项目的  `NAME`, `TYPE`, `CLUSTER-IP`, `EXTERNAL-IP`, `PORT(S)`, 和`AGE` 。
+
+如果设置了 `EXTERNAL-IP`  值，您的环境会有一个外部负载均衡器，供您用于入口网关。
+
+如果 `EXTERNAL-IP` 值是 `<none>`，或 `<pending>`，则您的环境不会为入口网关提供外部负载均衡器。您可以使用服务的节点端口访问网关。
+
+////
+TO DO - remove XREF in this module.
+Determine the ingress according to your environment. For an environment with load balancer support, xref:../../service_mesh/v2x/ossm-traffic-manage.adoc#ossm-routing-config-ig-lb_routing-traffic[Determining ingress ports with a load balancer]. For an environment without load balancer support, xref:../../service_mesh/v2x/ossm-traffic-manage.adoc#ossm-routing-config-ig-no-lb_routing-traffic[Determining ingress ports without a load balancer]. After you have determined the ingress ports, see xref:../../service_mesh/v2x/ossm-traffic-manage.adoc#ossm-routing-gateways_routing-traffic[Configuring ingress using a gateway] to complete your configuration.
+////
+
+[id="ossm-routing-config-ig-lb_{context}"]
+=== Determining ingress ports with a load balancer
+
+如果您的环境有外部负载均衡器，请按照以下步骤操作。
+
+.Procedure
+
+. 运行以下命令来设置入口 IP 和端口。此命令在终端中设置变量。
++
+[source,terminal]
+----
+$ export INGRESS_HOST=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+----
+
+. 运行以下命令来设置入口端口。
++
+[source,terminal]
+----
+$ export INGRESS_PORT=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+----
+
+. 运行以下命令来设置安全入口端口。
++
+[source,terminal]
+----
+$ export SECURE_INGRESS_PORT=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].port}')
+----
+
+. 运行以下命令来设置 TCP 入口端口。
++
+[source,terminal]
+----
+$ export TCP_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="tcp")].port}')
+----
+
+[NOTE]
+====
+在某些情况下，负载均衡器可能会使用主机名而不是 IP 地址公开。在这种情况下，入口网关的 EXTERNAL-IP 值不是一个 IP 地址。相反，这是一个主机名，上一命令无法设置 INGRESS_HOST 环境变量。
+
+在这种情况下，使用以下命令更正 INGRESS_HOST 值：
+====
+
+[source,terminal]
+----
+$ export INGRESS_HOST=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+----
+
+[id="ossm-routing-config-ig-no-lb_{context}"]
+=== Determining ingress ports without a load balancer
+
+如果您的环境没有外部负载均衡器，请确定入口端口并改用节点端口。
+
+.流程
+
+. 设置入口端口。
++
+[source,terminal]
+----
+$ export INGRESS_PORT=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
+----
+
+. 运行以下命令来设置安全入口端口。
++
+[source,terminal]
+----
+$ export SECURE_INGRESS_PORT=$(oc -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
+----
+
+. 运行以下命令来设置 TCP 入口端口。
++
+[source,terminal]
+----
+$ export TCP_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="tcp")].nodePort}')
+----

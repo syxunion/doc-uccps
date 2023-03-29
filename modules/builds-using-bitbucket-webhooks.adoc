@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-using-bitbucket-webhooks_{context}"]
+= 使用 Bitbucket Webhook
+
+当存储库更新时，Bitbucket Webhook 处理 Bitbucket 发出的调用。与前面的触发器类似，您必须指定一个 secret。以下示例是 `BuildConfig` 中的触发器定义 YAML：
+
+[source,yaml]
+----
+type: "Bitbucket"
+bitbucket:
+  secretReference:
+    name: "mysecret"
+----
+
+`oc describe` 命令将有效负载 URL 返回为 Bitbucket Webhook URL，其结构如下：
+
+.输出示例
+[source,terminal]
+----
+https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/bitbucket
+----
+
+.流程
+
+. 配置 Bitbucket Webhook：
+
+.. 描述 `BuildConfig` 以获取 Webhook URL：
++
+[source,terminal]
+----
+$ oc describe bc <name>
+----
+
+.. 复制 Webhook URL，将 `<secret>` 替换为您的 secret 值。
+
+.. 按照 Bitbucket 设置说明，将 Webhook URL 粘贴到 Bitbucket 存储库设置中。
+
+. 提供含有有效 JSON 内容的文件后，如 `payload.json`，您可以使用 `curl` 手动触发 Webhook：
++
+[source,terminal]
+----
+$ curl -H "X-Event-Key: repo:push" -H "Content-Type: application/json" -k -X POST --data-binary @payload.json https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/bitbucket
+----
++
+只有在 API 服务器没有适当签名的证书时，才需要 `-k` 参数。

@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="understanding-networking"]
+= 了解网络
+include::_attributes/common-attributes.adoc[]
+:context: understanding-networking
+
+toc::[]
+集群管理员有几个选项用于公开集群内的应用程序到外部流量并确保网络连接：
+
+* 服务类型，如节点端口或负载均衡器
+
+* API 资源，如 `Ingress` 和 `Route`
+
+默认情况下，Kubernetes 为 pod 内运行的应用分配内部 IP 地址。Pod 及其容器可以网络，但集群外的客户端无法访问网络。这样可保证 pod 中所有容器的行为如同它们在同一主机上一样。当您将应用公开给外部流量时，为每个容器集指定自己的 IP 地址意味着 pod 在端口分配、网络、命名、服务发现、负载平衡、应用配置和迁移方面可被视为物理主机或虚拟机。
+
+[注意]
+====
+一些云平台提供侦听 `169.254.169.254` IP 地址的元数据 API，它是 IPv4 `169.254.0.0/16` CIDR 块中的 连接内部 IP 地址。
+
+此 CIDR 块无法从 pod 网络访问。需要访问这些 IP 地址的 Pod 必须通过将 pod spec 中的 `spec.hostnetwork` 字段设置为 true 来获得主机网络访问。
+
+如果允许 pod 主机网络访问，则将授予 pod 对底层网络基础架构的访问权限。
+====
+
+include::modules/nw-ne-openshift-dns.adoc[leveloffset=+1]
+include::modules/nw-ne-openshift-ingress.adoc[leveloffset=+1]
+include::modules/nw-ne-comparing-ingress-route.adoc[leveloffset=+2]

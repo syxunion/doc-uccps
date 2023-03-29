@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-cluster-admin-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-trigger-admin-web-console_{context}"]
+=  使用 管理员 视角创建触发器
+
+include::snippets/serverless-brokers-intro.adoc[]
+
+.先决条件
+
+* The {ServerlessOperatorName} and Knative Eventing are installed on your {product-title} cluster.
+
+* You have logged in to the web console and are in the *Administrator* perspective.
+
+* 您已登录到 Web 控制台，且处于 *管理员* 视角。
+
+* 具有集群管理员 {product-title} 的权限。
+
+* 您已创建了 Knative 代理。
+
+* 您已创建了 Knative 服务以用作订阅者。
+
+.流程
+
+. 在 {product-title}  Web 控制台的  *管理员* 视角中，导航到 *Serverless* -> *Eventing*.
+. 在 *Broker* 选项卡中，为您要在其中添加触发器的代理选择 Options 菜单 {kebab}
+. 点列表中的 *添加触发器*。
+. 在 *添加触发器* 对话框中，为触发器选择 *订阅者*。订阅者是可以从代理接收事件的 Knative 服务。
+. 点 *添加*。

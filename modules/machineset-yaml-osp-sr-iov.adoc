@@ -1,0 +1,109 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating_machinesets/creating-machineset-osp.adoc
+
+[id="machineset-yaml-osp-sr-iov_{context}"]
+=  在 RHOSP 上使用 SR-IOV 的机器设置自定义资源的 YAML 示例
+
+如果您为单根 I/O 虚拟化（SR-IOV）配置了集群，您可以创建使用该技术的机器集。
+
+此 YAML 示例定义了一个使用 SR-IOV 网络的机器集。它创建的节点标记为 `node-role.openshift.io/<node_role>: ""`
+
+在本例中，`infrastructure_id` 是基础架构 ID 标签，该标签基于您在置备集群时设定的集群 ID，而 `node_role` 则是要添加的节点标签。
+
+示例假定两个名为"radio"和"uplink"的 SR-IOV 网络。网络在 `spec.template.spec.providerSpec.value.ports` 列表中的端口定义中使用。
+
+[注意]
+====
+本例中仅描述特定于 SR-IOV 部署的参数。要查看更常规的示例，请参阅 "Sample YAML for a machine set custom resource on RHOSP"。
+====
+
+.使用 SR-IOV 网络的机器集示例
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  labels:
+    machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+    machine.openshift.io/cluster-api-machine-role: <node_role>
+    machine.openshift.io/cluster-api-machine-type: <node_role>
+  name: <infrastructure_id>-<node_role>
+  namespace: openshift-machine-api
+spec:
+  replicas: <number_of_replicas>
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+      machine.openshift.io/cluster-api-machineset: <infrastructure_id>-<node_role>
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+        machine.openshift.io/cluster-api-machine-role: <node_role>
+        machine.openshift.io/cluster-api-machine-type: <node_role>
+        machine.openshift.io/cluster-api-machineset: <infrastructure_id>-<node_role>
+    spec:
+      metadata:
+      providerSpec:
+        value:
+          apiVersion: openstackproviderconfig.openshift.io/v1alpha1
+          cloudName: openstack
+          cloudsSecret:
+            name: openstack-cloud-credentials
+            namespace: openshift-machine-api
+          flavor: <nova_flavor>
+          image: <glance_image_name_or_location>
+          serverGroupID: <optional_UUID_of_server_group>
+          kind: OpenstackProviderSpec
+          networks:
+            - subnets:
+              - UUID: <machines_subnet_UUID>
+          ports:
+            - networkID: <radio_network_UUID> <1>
+              nameSuffix: radio
+              fixedIPs:
+                - subnetID: <radio_subnet_UUID> <2>
+              tags:
+                - sriov
+                - radio
+              vnicType: direct <3>
+              portSecurity: false <4>
+            - networkID: <uplink_network_UUID> <1>
+              nameSuffix: uplink
+              fixedIPs:
+                - subnetID: <uplink_subnet_UUID> <2>
+              tags:
+                - sriov
+                - uplink
+              vnicType: direct <3>
+              portSecurity: false <4>
+          primarySubnet: <machines_subnet_UUID>
+          securityGroups:
+          - filter: {}
+            name: <infrastructure_id>-<node_role>
+          serverMetadata:
+            Name: <infrastructure_id>-<node_role>
+            openshiftClusterID: <infrastructure_id>
+          tags:
+          - openshiftClusterID=<infrastructure_id>
+          trunk: true
+          userDataSecret:
+            name: <node_role>-user-data
+          availabilityZone: <optional_openstack_availability_zone>
+          configDrive: true <5>
+----
+<1> 输入每个端口的子网 UUID。
+<2> 对于每个端口，vnicType 参数的值必须为 `direct`。
+<3> 每个端口的 `portSecurity` 参数的值必须是 `false`。
+<4> 禁用端口安全性时，您无法为端口设置安全组和允许的地址对。在实例上设置安全组会将组应用到连接的所有端口。
+<5> `configDrive` 参数的值必须是 `true`。
+
+[注意]
+====
+对于由网络和子网列表中的条目创建的端口，启用中继（Trunking）。从这些列表中创建的端口名称遵循 `<machine_name>-<nameSuffix>` 模式。端口定义中需要 `nameSuffix` 字段。
+
+您可以为每个端口	启用中继。
+
+另外，您还可以在端口中添加标签作为其标签（tags）列表的一部分。
+====

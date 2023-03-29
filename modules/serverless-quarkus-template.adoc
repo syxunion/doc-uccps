@@ -1,0 +1,63 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: REFERENCE
+[id="serverless-quarkus-template_{context}"]
+= Quarkus 功能模板结构
+
+使用 Knative  (`kn`) CLI 创建 Quarkus 功能时，项目目录类似于典型的 Maven 项目。另外，项目还包含用于配置功能的 `func.yaml` file 文件。
+
+`http` 和 `event` 触发器功能具有相同的模板结构：
+
+.模块结构
+[source,terminal]
+----
+.
+├── func.yaml <1>
+├── mvnw
+├── mvnw.cmd
+├── pom.xml <2>
+├── README.md
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── functions
+    │   │       ├── Function.java <3>
+    │   │       ├── Input.java
+    │   │       └── Output.java
+    │   └── resources
+    │       └── application.properties
+    └── test
+        └── java
+            └── functions <4>
+                ├── FunctionTest.java
+                └── NativeFunctionIT.java
+----
+<1> 用于确定镜像名称和 registry。
+<2> 项目对象模型（POM）文件包含项目配置，如依赖项的相关信息。您可以通过修改此文件来添加额外的依赖项。
++
+.其他依赖项示例
+[source,xml]
+----
+...
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.8.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+...
+----
++
+依赖项在第一次编译时下载
+<3> 功能项目必须包含标有 `@Funq`  的 Java 方法。您可以将此方法放置在 `Function.java` 类中。
+<4> 包含可用于在本地测试功能的简单测试案例。

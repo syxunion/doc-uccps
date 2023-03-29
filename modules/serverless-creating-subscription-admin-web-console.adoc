@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-cluster-admin-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-subscription-admin-web-console_{context}"]
+= 使用 管理员 视角创建订阅
+
+创建频道和事件 sink（也称为 订阅者 ）后，您可以创建一个订阅来启用事件交付。订阅是通过配置 `Subscription` 对象创建的，它指定了要向其发送事件的频道和订阅者。您还可以指定一些特定于订阅者的选项，比如如何处理失败。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+
+* 您已登录到 Web 控制台，且处于 *管理员* 视角。
+
+* 具有集群管理员 {product-title} 的权限。
+
+* 您已创建了 Knative 频道。
+
+* 您已创建了 Knative 服务以用作订阅者。
+
+.流程
+
+. 在 {product-title}  Web 控制台的  *管理员* 视角中，导航到 *Serverless* -> *Eventing*.
+. 在 *频道* 选项卡中，选择您要在其中添加订阅的频道的 Options 菜单  {kebab}
+. 点击列表中的 *添加订阅*。
+. 在 *添加订阅* 对话框中，为订阅选择 *订阅者*。订阅者是可以从频道接收事件的 Knative 服务。
+. 点 Add。

@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * builds/build-strategies.adoc
+
+[id="builds-strategy-custom-build_{context}"]
+= Custom 构建
+
+采用自定义构建策略时，开发人员可以定义负责整个构建过程的特定构建器镜像。通过利用自己的构建器镜像，可以自定义构建流程。
+
+自定义构建器镜像是嵌入了构建过程逻辑的普通容器镜像，例如用于构建 RPM 或基本镜像的逻辑。
+
+自定义构建以级别很高的特权运行，默认情况下不可供用户使用。只有可赋予集群管理权限的用户才应被授予运行自定义构建的权限。

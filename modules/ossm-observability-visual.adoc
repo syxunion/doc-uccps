@@ -1,0 +1,67 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v1x/ossm-observability.adoc
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-observability-visual_{context}"]
+= Viewing service mesh data in the Kiali console
+
+Kiali Graph 为您的网格流量提供了强大的视觉化功能。拓扑将实时请求流量与您的 Istio 配置信息相结合，可让您快速发现服务网格的行为。多种图形类型允许您将流量视觉化为高级别服务拓扑、低级工作负载拓扑或应用程序级别拓扑。
+
+可以选择的几个图：
+
+* *App 图* 显示所有标记相同应用程序的总工作负载。
+
+* *Service 图* 显示网格中各个服务的节点，但所有应用程序和工作负载都不包括在这个图中。它提供了一个高级别的视图，并聚合了定义的服务的所有流量。
+
+* *Versioned App 图* 显示每个应用版本的节点。应用程序的所有版本都分组在一起。
+
+* *Workload 图* 显示服务网格中每个工作负载的节点。此图不要求您使用应用程序和版本标签。如果您的应用程序没有使用 version 标签，请使用此图。
+
+图形节点使用各种信息进行解码，指向虚拟服务和服务条目等各种路由路由选项，以及故障注入和断路器等特殊配置。它可以识别 mTLS 问题、延迟问题、错误流量等。Graph 高度可配置，可以显示流量动画，并具有强大的 Find 和 Hide 功能。
+
+单击 *Legend*  按钮，以查看图中显示的有关图形、颜色、箭头和徽标的信息。
+
+要查看指标的概述信息，请在图形中选择任意节点或边缘以便在概述详情面板中显示其指标详情。
+
+[id="ossm-observability-topology_{context}"]
+== Changing graph layouts in Kiali
+
+Kiali 图形的布局可能会根据您的应用程序架构和要显示的数据的不同而有所不同。例如，图形节点的数量及其交互可以决定 Kiali 图形的呈现方式。因为无法创建出适合每种情况的单一布局，Kiali 提供了几种不同布局的选择。
+
+.先决条件
+
+*  如果您没有安装自己的应用程序，请安装 Bookinfo 示例应用程序。然后，通过多次输入以下命令为 Bookinfo 应用程序生成流量。
++
+[source,terminal]
+----
+$ curl "http://$GATEWAY_URL/productpage"
+----
++
+此命令模拟访问应用的 `productpage` 微服务的用户。
+
+.流程
+
+. 启动 Kiali 控制台。
+
+. 单击 *Log In With Uccps*.
+
+. 在 Kiali 控制台中，点 *Graph* 查看命名空间图。
+
+. 在 *Namespace* 菜单中选择应用程序命名空间，例如  `bookinfo`。
+
+. 要选择不同的图形布局，请执行以下任一操作：
+
+* 从图顶部的菜单中选择不同的图形数据分组。
+
+** 应用程序图
+** 服务图
+** 版本化应用图（默认）
+** 工作负载图
+
+* 从图形底部的图标中选择不同的图形布局。
+** 布局默认 dagre
+** 布局 1 cose-bilkent
+** 布局 2 cola

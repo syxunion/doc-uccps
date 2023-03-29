@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * ingress/getting-traffic-cluster.adoc
+
+[id="nw-using-load-balancer-getting-traffic_{context}"]
+= 使用负载均衡器使流量进入集群
+
+如果不需要具体的外部 IP 地址，您可以配置负载均衡器服务，以便从外部访问 统信容器云管理平台 集群。
+
+负载均衡器服务分配唯一 IP。负载均衡器有单一边缘路由器 IP，它可以是虚拟 IP (VIP)，但仍然是一台用于初始负载均衡的计算机。
+
+[注意]
+====
+如果配置了池，则会在基础架构一级进行，而不是由集群管理员完成。
+====

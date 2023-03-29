@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="granting-user-permissions-using-the-web-console_{context}"]
+= 使用 Web 控制台授予用户权限
+
+您可以使用 统信容器云管理平台 Web 控制台授予用户权限来监控其自己的项目。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 要将角色分配到的用户帐户已存在。
+
+.流程
+
+. 在 统信容器云管理平台 Web 控制台内的 *管理员* 视角中，导航到 *User Management* -> *Role Bindings* -> *Create Binding*.
+
+. 在  *Binding Type* 部分中，选择 "Namespace Role Binding" 类型。
+
+. 在 *Name* 字段中输入角色绑定的名称。
+
+. 在 *Namespace* 字段中，选择要授予访问权限的用户定义的项目。
++
+[重要]
+====
+监控角色将绑定到您在 *Namespace* 字段中应用的项目。您使用此流程向用户授予的权限将只应用于所选项目。
+====
+
+. 在 *Role Name*  列表中选择 `monitoring-rules-view`, `monitoring-rules-edit`, 或 `monitoring-edit` 。
+
+. 在 *Subject* 部分，选择 *User*.
+
+. 在 *Subject Name* 字段中，输入用户名称。
+
+. 选择 *Create* 以应用角色绑定。

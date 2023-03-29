@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="configuring-a-custom-pki"]
+= 配置自定义 PKI
+include::_attributes/common-attributes.adoc[]
+:context: configuring-a-custom-pki
+
+toc::[]
+
+有些平台组件，如 Web 控制台，使用 Routes 进行通信，且必须信任其他组件的证书与其交互。如果您使用的是自定义公钥基础架构 (PKI) ，您必须将其配置为在集群中识别其私有签名的 CA 证书。
+
+您可以使用 Proxy API 添加集群范围的可信 CA 证书。您必须在安装过程中或运行时执行此操作。
+
+* 在 安装过程 中，配置集群范围的代理。您需要在 install-config.yaml 文件中的 additionalTrustBundle 设置中定义私有签名的 CA 证书。
++
+安装程序生成名为 `user-ca-bundle` 的 ConfigMap，其中包含您定义的附加 CA 证书。然后，Cluster Network Operator 会创建 `trusted-ca-bundle ConfigMap`，将这些内容与 Red Hat Enterprise Linux CoreOS (USwift) 信任捆绑包合并，Proxy 对象的 `trustedCA` 字段中也会引用此 ConfigMap。
+
+* 在运行时，，修改默认 Proxy 对象使其包含您私有签名的 CA 证书 （集群代理启用工作流程的一部分）。这涉及创建包含集群应信任的私有签名 CA 证书的 ConfigMap，然后使用 `trustedCA` 引用私有签名证书的 ConfigMap 修改代理服务器资源。
+
+[注意]
+====
+安装程序配置的 `additionalTrustBundle` 字段和 proxy 资源的 `trustedCA` 字段被用来管理集群范围信任捆绑包; 在安装时会使用 `additionalTrustBundle` ，并在运行时使用代理的`trustedCA`。
+
+`trustedCA` 字段是对包含集群组件使用的自定义证书和密钥对的 `ConfigMap` 的引用。
+====
+
+include::modules/installation-configure-proxy.adoc[leveloffset=+1]
+
+include::modules/nw-proxy-configure-object.adoc[leveloffset=+1]
+
+include::modules/certificate-injection-using-operators.adoc[leveloffset=+1]

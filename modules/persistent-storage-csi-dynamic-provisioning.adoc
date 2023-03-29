@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi.adoc
+
+:_content-type: PROCEDURE
+[id="csi-dynamic-provisioning_{context}"]
+= 动态置备
+
+动态置备持久性存储取决于 CSI 驱动程序和底层存储后端的功能。CSI 驱动的供应商应该提供了在统信容器云管理平台中创建存储类及进行配置的参数文档。
+
+创建的存储类可以被配置为启用动态置备。
+
+.流程
+
+* 创建一个默认存储类，以保证所有不需要特殊存储类的 PVC 由安装的 CSI 驱动程序来置备。
++
+[source,shell]
+----
+# oc create -f - << EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: <storage-class> <1>
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: <provisioner-name> <2>
+parameters:
+EOF
+----
+<1> 要创建的存储类的名称。
+<2> 已安装的 CSI 驱动程序名称

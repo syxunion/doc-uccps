@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="preparing-ossm-installation"]
+= Preparing to install Service Mesh
+include::_attributes/common-attributes.adoc[]
+:context: preparing-ossm-installation
+
+toc::[]
+
+Before you can install {SMProductName}, you must subscribe to {product-title} and install {product-title} in a supported configuration.
+
+== Prerequisites
+
+
+* 安装与 {product-title} 版本匹配的 {product-title} 命令行工具（ oc 客户端工具），并将其添加到执行路径中。
+
+
+include::modules/ossm-supported-configurations.adoc[leveloffset=+1]

@@ -1,0 +1,106 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+[id="quotas-resources-managed_{context}"]
+= 配额管理的资源
+
+下方描述了可通过配额管理的一系列计算资源和对象类型。
+
+[注意]
+====
+如果 `status.phase in (Failed, Succeeded)` 为 `true`，则 Pod 处于终端状态。
+====
+
+.配额管理的计算资源
+[cols="3a,8a",options="header"]
+|===
+
+|资源名称 |描述
+
+|`cpu`
+|非终端状态的所有 `Pod` 的 `CPU` 请求总和不能超过这个值。`CPU` 和 `requests.cpu` 的值相同，并可互换使用。
+
+|`memory`
+|非终端状态的所有 `Pod` 的 内存请求总和不能超过这个值。`memory` 和 `requests.memory` 的值相同，并可互换使用。
+
+|`ephemeral-storage`
+|非终端状态的所有本地临时存储请求总和不能超过这个值。`ephemeral-storage` 和 `requests.ephemeral-storage` 的值相同，并可互换使用。
+
+|`requests.cpu`
+|非终端状态的所有 `Pod` 的 `CPU` 请求总和不能超过这个值。`CPU` 和 `requests.cpu` 的值相同，并可互换使用。
+
+|`requests.memory`
+|非终端状态的所有 `Pod` 的 内存请求总和不能超过这个值。`memory` 和 `requests.memory` 的值相同，并可互换使用。
+
+|`requests.ephemeral-storage`
+|非终端状态的所有临时存储请求总和不能超过这个值。`ephemeral-storage` 和 `requests.ephemeral-storage` 的值相同，并可互换使用。
+
+|`limits.cpu`
+|非终端状态的所有 `Pod` 的 `CPU` 限值总和不能超过这个值。
+
+|`limits.memory`
+|非终端状态的所有 `Pod` 的内存限值总和不能超过这个值。
+
+|`limits.ephemeral-storage`
+|非终端状态的所有 `Pod` 的临时存储限值总和不能超过这个值。
+
+|===
+
+.配额管理的存储资源
+[cols="3a,8a",options="header"]
+|===
+
+|资源名称 |描述
+
+|`requests.storage`
+|处于任何状态的所有持久性卷声明的存储请求总和不能超过这个值。
+
+|`persistentvolumeclaims`
+|项目中可以存在的持久性卷声明的总数。
+
+|`<storage-class-name>.storageclass.storage.k8s.io/requests.storage`
+|在处于任何状态且具有匹配存储类的所有持久性卷声明中，存储请求总和不能超过这个值。
+
+|`<storage-class-name>.storageclass.storage.k8s.io/persistentvolumeclaims`
+|项目中可以存在的具有匹配存储类的持久性卷声明的总数。
+
+|===
+
+[id="quotas-object-counts-managed_{context}"]
+.配额管理的对象计数
+[cols="3a,8a",options="header"]
+|===
+
+|资源名称 |描述
+
+|`pods`
+|项目中可以存在的处于非终端状态的 `Pod` 总数。
+
+|`replicationcontrollers`
+|项目中可以存在的 `ReplicationController` 的总数。
+
+|`resourcequotas`
+|项目中可以存在的资源配额总数。
+
+|`services`
+|项目中可以存在的服务总数。
+
+|`services.loadbalancers`
+|项目中可以存在的 `LoadBalancer` 类型的服务总数。
+
+|`services.nodeports`
+|项目中可以存在的 `NodePort` 类型的服务总数。
+
+|`secrets`
+|项目中可以存在的 secret 的总数。
+
+|`configmaps`
+|项目中可以存在的 `ConfigMap` 对象的总数。
+
+|`persistentvolumeclaims`
+|项目中可以存在的持久性卷声明的总数。
+
+|`openshift.io/imagestreams`
+|项目中可以存在的镜像流的总数。
+|===

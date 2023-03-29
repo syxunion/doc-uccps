@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+:_content-type: PROCEDURE
+[id="ossm-routing-bookinfo-test_{context}"]
+= Testing the new route configuration
+
+通过刷新 Bookinfo 应用程序的 `/productpage` 来测试新的配置
+
+.流程
+
+. 设置 `GATEWAY_URL` 参数的值。您可以在以后使用这个变量查找 Bookinfo 产品页面的 URL。在本例中，istio-system 是 control plane 项目的名称。
++
+[source,terminal]
+----
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+----
+
+. 运行以下命令，以检索产品页面的 URL:
++
+[source,terminal]
+----
+echo "http://$GATEWAY_URL/productpage"
+----
+
+. 在浏览器中打开 Bookinfo 网站。
+
+页面的评论部分显示没有分级星，无论您刷新多少次。这是因为您已将 Service Mesh 配置为将 reviews 服务的所有流量路由到版本 `reviews:v1` ，此版本的服务无法访问星表分级服务。
+
+您的服务网格现在将流量路由到服务的一个版本。

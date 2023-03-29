@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/ossm-deploy-mod-v2x.adoc
+
+:_content-type: CONCEPT
+[id="ossm-deploy-single-tenant_{context}"]
+= Single tenancy deployment model
+
+在 Istio 中，租户是为一组部署的工作负载共享共同访问权限和特权的用户组。您可以使用租户在不同的团队之间提供一定程度的隔离。您可以使用 istio.io 或服务资源的 `NetworkPolicies`, `AuthorizationPolicies`, 和 `exportTo` 注解来隔离对不同租户的访问。
+
+从 {SMProductName} 版本 1.0 开始，单租户、集群范围的 {SMProductShortName} control plane 配置已弃用。{SMProductName} 默认为多租户模型。

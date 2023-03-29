@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="quick-starts-accessing-and-executing-code-snippets_{context}"]
+= 代码片段 markdown 参考
+
+当 web 控制台的快速入门中包括了一个 CLI 代码片段时，您可以它。要使用这个功能，您必须首先安装 Web Terminal Operator。如果您没有安装 Web Terminal Operator，则 web 终端中执行的 web 终端和代码片段操作将不存在。另外，无论您是否安装了 Web Terminal Operator，您都可以将代码片段复制到剪贴板中。
+
+[id="quick-starts-syntax-for-inline-code-snippets_{context}"]
+== 内联代码片段的语法
+
+----
+`code block`{{copy}}
+`code block`{{execute}}
+----
+
+[注意]
+====
+如果使用 execute 语法，无论您是否安装了 Web Terminal Operator，都会出现 *Copy to clipboard* 操作。
+====
+
+[id="quick-starts-syntax-for-multi-line-code-snippets_{context}"]
+== 多行代码片段的语法
+
+----
+```
+multi line code block
+```{{copy}}
+
+```
+multi line code block
+```{{execute}}
+----

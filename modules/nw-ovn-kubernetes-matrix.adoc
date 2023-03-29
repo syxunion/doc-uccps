@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ovn-kubernetes.adoc
+
+:_content-type: REFERENCE
+[id="nw-ovn-kubernetes-matrix_{context}"]
+= 支持的默认 CNI 网络供应商功能列表
+
+统信容器云管理平台 为默认的 Container Network Interface (CNI) 网络供应商提供两个支持的选择：OpenShift SDN 和 OVN-Kubernetes。下表总结了这两个网络供应商当前支持的功能：
+
+.默认 CNI 网络供应商功能比较
+[cols="50%,25%,25%",options="header"]
+|
+|功能|OpenShift SDN|OVN-Kubernetes
+
+|出口 IP|支持|支持
+
+|出口防火墙 ^[1]^|支持|支持
+
+|出口路由器|支持 ^[2]^|支持
+
+|IPsec 加密|不支持|支持
+
+|IPv6|不支持 ^[3]^|支持
+
+|Kubernetes 网络策略|部分支持|支持 ^[4]^
+
+|Kubernetes 网络策略日志|不支持|支持
+
+|硬件卸载|不支持|支持
+
+|多播|支持|支持
+
+[.small]
+--
+1. 在 OpenShift SDN 中，出口防火墙也称为出口网络策略。这和网络策略出口不同。
+
+2. OVN-Kubernetes 的出口路由器仅支持重定向模式。
+
+3. IPv6 只在裸机集群中被支持。
+
+4. OpenShift SDN 的网络策略不支持出口规则和一些 `ipBlock` 规则。
+--

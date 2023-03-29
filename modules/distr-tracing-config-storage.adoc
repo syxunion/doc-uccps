@@ -1,0 +1,716 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-storage_{context}"]
+= 分布式追踪存储配置选项
+
+您可以在 `spec.storage` 下为 Collector、Ingester 和 Query 服务配置存储。可以根据性能和恢复能力的需要提供每个组件的多个实例。
+
+.{JaegerName} Operator 用来定义分布式追踪存储的一般存储参数
+
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|spec:
+  storage:
+    type:
+|要在部署中使用的存储类型。
+|`memory` 或 `elasticsearch`内存存储仅适用于开发、测试、演示和验证概念环境，因在关闭 pod 时，数据不会保留。对于生产环境，分布式追踪平台支持 Elasticsearch 进行持久性存储。
+|`memory`
+
+|storage:
+  secretname:
+|secret 名称，例如 `tracing-secret`.
+|
+|N/A
+
+|storage:
+  options: {}
+|定义存储的配置选项。
+|
+|
+|===
+
+.Elasticsearch 索引清理参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|storage:
+  esIndexCleaner:
+    enabled:
+|当使用 Elasticsearch 存储时，默认会创建一个任务来清理索引中的旧 trace。这个参数用于启用或禁用索引清理任务。
+|`true`/ `false`
+|`true`
+
+|storage:
+  esIndexCleaner:
+    numberOfDays:
+|删除索引前等待的天数。
+|整数值
+|`7`
+
+|storage:
+  esIndexCleaner:
+    schedule:
+|为 Elasticsearch 索引的清理频率定义调度。
+|Cron 表达式
+|"55 23 * * *"
+|===
+
+[id="distributed-tracing-config-auto-provisioning-es_{context}"]
+== 自动置备 Elasticsearch 实例
+
+部署 Jaeger 自定义资源时， {JaegerName} Operator 会使用 Uccps Elasticsearch Operator 根据自定义资源文件的`storage` 部分中提供的配置创建 Elasticsearch 集群。如果设置了以下配置，统信容器云管理平台分布式追踪扩展组件 将置备 Elasticsearch：  
+
+* `spec.storage:type` 设置为 `elasticsearch`
+* `spec.storage.elasticsearch.doNotProvision` 设置为 `false`
+* `spec.storage.options.es.server-urls` ，因此没有连接到 Red Hat Elasticsearch Operator 未置备的 Elasticsearch 实例。
+
+在置备 Elasticsearch 时， {JaegerName} Operator 会将 Elasticsearch 自定义资源名称设置为 Jaeger 自定义资源的 `spec.storage.elasticsearch.name` 的 `name` 。如果没有为 `spec.storage.elasticsearch.name`, 指定一个值，Operator 会使用 `elasticsearch`.
+
+.限制
+
+* 每个命名空间只能有一个具有自助置备 Elasticsearch 实例的分布式追踪平台。Elasticsearch 集群旨在专用于单个分布式追踪平台实例。
+* 每个命名空间只能有一个 Elasticsearch。
+
+[NOTE]
+====
+如果您已经安装了 Elasticsearch 作为 Uccps Logging, 的一部分， {JaegerName} Operator 可使用已安装的 Uccps Elasticsearch Operator 来置备存储。
+====
+
+以下配置参数用于一个 _自置备的_ Elasticsearch 实例，这是由 {JaegerName} Operator 使用 Uccps Elasticsearch Operator 创建的实例。在配置文件中，您可以在 `spec:storage:elasticsearch` 下为自助置备 Elasticsearch 指定配置选项。
+
+.Elasticsearch 资源配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|elasticsearch:
+  properties:
+    doNotProvision:
+|用于指定 {JaegerName} Operator 是否应该置备 Elasticsearch 实例。
+|`true`/`false`
+|`true`
+
+|elasticsearch:
+  properties:
+    name:
+|Elasticsearch 实例的名称。 {JaegerName} Operator  使用此参数中指定的 Elasticsearch 实例连接到 Elasticsearch。
+|字符串
+|`elasticsearch`
+
+|elasticsearch:
+  nodeCount:
+|Elasticsearch 节点数量。对于高可用性，需要至少 3 个节点。不要只使用 2 个节点，因为可能会出现“脑裂”问题。
+|整数值。例如，概念验证 = 1，最小部署 = 3
+|3
+
+|elasticsearch:
+  resources:
+    requests:
+      cpu:
+|根据您的环境配置，请求的 CPU 数量。
+|以内核数或 millicores 指定，例如 200m, 0.5, 1。例如，概念证明 = 500m，最小部署 =1
+|1
+
+|elasticsearch:
+  resources:
+    requests:
+      memory:
+|根据您的环境配置，可用于请求的内存。
+|以字节为单位指定，例如 200Ki, 50Mi, 5Gi。例如，概念证明 = 1Gi，最小部署 = 16Gi*
+|16Gi
+
+|elasticsearch:
+  resources:
+    limits:
+      cpu:
+|根据您的环境配置，CPU 数量的限值。
+|以内核数或 millicores 指定，例如 200m, 0.5, 1。例如，概念证明 = 500m，最小部署 =1
+|
+
+|elasticsearch:
+  resources:
+    limits:
+      memory:
+|根据您的环境配置，可用的内存限值。
+|以字节为单位指定，例如 200Ki, 50Mi, 5Gi。例如，概念证明 = 1Gi，最小部署 = 16Gi*
+|
+
+|elasticsearch:
+  redundancyPolicy:
+|数据复制策略定义如何在集群中的数据节点之间复制 Elasticsearch 分片：如果没有指定， {JaegerName} Operator 会自动根据节点数量决定最合适的复制。
+|`ZeroRedundancy`（无副本分片）、 `SingleRedundancy`（一个副本分片）、 `MultipleRedundancy`（每个索引分散于一半的 Data 节点）、 `FullRedundancy` （每个索引在集群中的每个 Data 节点上完全复制）。
+|
+
+|elasticsearch:
+  useCertManagement:
+|用于指定分布式追踪平台是否应使用  {JaegerShortName} 的证书管理功能。此功能被添加到 统信容器云管理平台 中的 统信容器与管理平台 的日志记录子系统中，是新 Jaeger 部署的首选设置。
+|`true`/`false`
+|`true`
+
+|
+3+|*通过这个设置可以使每个 Elasticsearch 节点使用较低内存进行操作，但对于生产环境部署，不建议这样做。对于生产环境，您应该默认为每个 pod 分配不少于 16Gi 内存，但最好为每个 pod 最多分配 64Gi 内存。
+|===
+
+.生产环境存储示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple-prod
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      nodeCount: 3
+      resources:
+        requests:
+          cpu: 1
+          memory: 16Gi
+        limits:
+          memory: 16Gi
+----
+
+.具有持久性存储的存储示例：
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple-prod
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      nodeCount: 1
+      storage: # <1>
+        storageClassName: gp2
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 200m
+          memory: 4Gi
+        limits:
+          memory: 4Gi
+      redundancyPolicy: ZeroRedundancy
+----
+
+<1> 持久性存储配置。在本例中，AWS gp2 的大小为 5Gi。如果没有指定值，则分布式追踪平台将使用 emptyDir。Uccps Elasticsearch Operator 置备 PersistentVolumeClaim 和 PersistentVolume，它们不会在分布式追踪平台实例中删除。如果您创建具有相同名称和命名空间的分布式追踪平台实例，则可以挂载同一卷。
+
+
+[id="distributed-tracing-config-external-es_{context}"]
+== 连接到现有 Elasticsearch 实例
+
+您可以使用现有 Elasticsearch 集群进行分布式追踪存储。现有的 Elasticsearch 集群（也称为 外部 Elasticsearch 实例）是由 {JaegerName} Operator 或 Uccps Elasticsearch Operator 安装的实例。
+
+部署 Jaeger 自定义资源时，如果设置了以下配置，{JaegerName} Operator 不会置备 Elasticsearch：
+
+* `spec.storage.elasticsearch.doNotProvision` 设置为 `true`
+* `spec.storage.options.es.server-urls` 有一个值
+* `spec.storage.elasticsearch.name` 具有一个值，或者 Elasticsearch 实例名称是 `elasticsearch`.
+
+{JaegerName} Operator 使用 `spec.storage.elasticsearch.name` 中指定的 Elasticsearch 实例连接到 Elasticsearch。
+
+.限制
+
+* 您无法将 {product-title} 日志记录 Elasticsearch 实例与分布式追踪平台共享或重复使用。Elasticsearch 集群旨在专用于单个分布式追踪平台实例。
+
+
+以下配置参数适用于已经存在的 Elasticsearch 实例，也称为外部 Elasticsearch 实例。在本例中，您可以在自定义资源文件中的 `spec:storage:options:es` 下为 Elasticsearch 指定配置选项。
+
+.常规 ES 配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es:
+  server-urls:
+|Elasticsearch 实例的 URL。
+|Elasticsearch 服务器的完全限定域名。
+|`http://elasticsearch.<namespace>.svc:9200`
+
+|es:
+  max-doc-count:
+|T从 Elasticsearch 查询返回的最大文档数量。这也适用于聚合。如果同时设置了 `es.max-doc-count` 和 `es.max-num-spans`，Elasticsearch 将使用两者中的较小的值。
+|
+|10000
+
+|es:
+  max-num-spans:
+|[*Deprecated* - 已弃用 - 将在以后的版本中删除，使用 es.max-doc-count 代替。] 在 Elasticsearch 中每个查询每次抓取的最大 span 数量。如果同时设置了 es.max-num-spans 和 es.max-doc-count，Elasticsearch 将使用两者中的较小的值。
+|
+|10000
+
+|es:
+  max-span-age:
+|Elasticsearch 中 span 的最大查询。
+|
+|72h0m0s
+
+|es:
+  sniffer:
+|Elasticsearch 的侦察器配置。客户端使用侦察过程自动查找所有节点。默认禁用此选项。
+|`true`/ `false`
+|`false`
+
+|es:
+  sniffer-tls-enabled:
+|在监控 Elasticsearch 集群时启用 TLS 的选项。客户端使用侦察过程自动查找所有节点。默认禁用
+|`true`/ `false`
+|`false`
+
+|es:
+  timeout:
+|用于查询的超时。当设为零时，则没有超时。
+|
+|0s
+
+|es:
+  username:
+|Elasticsearch 所需的用户名。如果指定，基本身份验证也会加载 CA。另请参阅 `es.password`.
+|
+|
+
+|es:
+  password:
+|Elasticsearch 所需的密码。另请参阅 `es.username`.
+|
+|
+
+|es:
+  version:
+|主要的 Elasticsearch 版本。如果没有指定，则该值将从 Elasticsearch 中自动探测到。
+|
+|0
+|===
+
+.ES 数据复制参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es:
+  num-replicas:
+|Elasticsearch 中每个索引的副本数。
+|
+|1
+
+|es:
+  num-shards:
+|Elasticsearch 中每个索引的分片数量。
+|
+|5
+|===
+
+.ES 索引配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es:
+  create-index-templates:
+|设置为 true 时，应用程序启动时自动创建索引模板。手动安装模板时，设置为 false。
+|`true`/ `false`
+|`true`
+
+|es:
+  index-prefix:
+|分布式追踪平台索引的可选前缀。例如，将其设置为 "production" 会创建名为 "production-tracing-*" 的索引。
+|
+|
+|===
+
+.ES 批量处理器配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es:
+  bulk:
+    actions:
+|在批量处理器决定向磁盘提交更新前可添加到队列的请求数。
+|
+|1000
+
+//What is the default here? The original text said "Set to zero to disable. By default, this is disabled."
+|es:
+  bulk:
+    flush-interval:
+|提交批量请求的时间.要禁用批量处理器清除间隔，请将其设置为零。
+|
+|200ms
+
+|es:
+  bulk:
+    size:
+|在批量处理器决定提交更新之前，批量请求可以处理的字节数。
+|
+|5000000
+
+|es:
+  bulk:
+    workers:
+|可以接收并将批量请求提交 Elasticsearch 的 worker 数量。
+|
+|1
+|===
+
+.ES TLS 配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es:
+  tls:
+    ca:
+|用于验证远程服务器的 TLS 证书颁发机构(CA)文件的路径。
+|
+|默认将使用系统信任存储。
+
+|es:
+  tls:
+    cert:
+|TLS 证书文件的路径，用来识别此进程到远程服务器。
+|
+|
+
+|es:
+  tls:
+    enabled:
+|与远程服务器对话时启用传输层安全(TLS)。默认禁用此选项。
+|`true`/ `false`
+|`false`
+
+|es:
+  tls:
+    key:
+|TLS 私钥文件的路径，用来识别此进程到远程服务器。
+|
+|
+
+|es:
+  tls:
+    server-name:
+|覆盖远程服务器证书中预期的 TLS 服务器名称。
+|
+|
+//Clarification of "if specified" for `token-file` and `username`, does that mean if this is set? Or that it only loads the CA if one is specified (that is, if es.tls.ca has a value?)
+|es:
+  token-file:
+|包含 bearer 令牌的文件的路径。如果指定该标志，该标志也会载入认证机构（CA）文件。
+|
+|
+|===
+
+.ES 归档配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|es-archive:
+  bulk:
+    actions:
+|在批量处理器决定向磁盘提交更新前可添加到队列的请求数。
+|
+|0
+
+//What is the default here? The original text said "Set to zero to disable. By default, this is disabled."
+|es-archive:
+  bulk:
+    flush-interval:
+|提交批量请求的时间.要禁用批量处理器清除间隔，请将其设置为零。
+|
+|0s
+
+|es-archive:
+  bulk:
+    size:
+|在批量处理器决定提交更新之前，批量请求可以处理的字节数。
+|
+|0
+
+|es-archive:
+  bulk:
+    workers:
+|可以接收并将批量请求提交 Elasticsearch 的 worker 数量。
+|
+|0
+
+|es-archive:
+  create-index-templates:
+|设置为 true 时，应用程序启动时自动创建索引模板。手动安装模板时，设置为 false。
+|`true`/ `false`
+|`false`
+
+|es-archive:
+  enabled:
+|启用额外的存储。
+|`true`/ `false`
+|`false`
+
+|es-archive:
+  index-prefix:
+|分布式追踪平台索引的可选前缀。例如，将其设置为 "production" 会创建名为 "production-tracing-*" 的索引。
+|
+|
+
+|es-archive:
+  max-doc-count:
+|从 Elasticsearch 查询返回的最大文档数量。这也适用于聚合。
+|
+|0
+
+|es-archive:
+  max-num-spans:
+|[*Deprecated* [已弃用 - 将在以后的版本中删除，使用 es-archive.max-doc-count 替代。] Elasticsearch 中的每个查询一次获取的最大 span 数量。
+|
+|0
+
+|es-archive:
+  max-span-age:
+|Elasticsearch 中 span 的最大查询。
+|
+|0s
+
+|es-archive:
+  num-replicas:
+|Elasticsearch 中每个索引的副本数。
+|
+|0
+
+|es-archive:
+  num-shards:
+|Elasticsearch 中每个索引的分片数量。
+|
+|0
+
+|es-archive:
+  password:
+|Elasticsearch 所需的密码。另请参阅 es.username。
+|
+|
+
+|es-archive:
+  server-urls:
+|以逗号分隔的 Elasticsearch 服务器列表。必须指定为完全限定的 URL，例如 `\http://localhost:9200`.
+|
+|
+
+|es-archive:
+  sniffer:
+|Elasticsearch 的侦察器配置。客户端使用侦察过程自动查找所有节点。默认禁用此选项。
+|`true`/ `false`
+|`false`
+
+|es-archive:
+  sniffer-tls-enabled:
+|在监控 Elasticsearch 集群时启用 TLS 的选项。客户端使用侦察过程自动查找所有节点。默认禁用此选项。
+|`true`/ `false`
+|`false`
+
+|es-archive:
+  timeout:
+|用于查询的超时。当设为零时，则没有超时。
+|
+|0s
+
+|es-archive:
+  tls:
+    ca:
+|用于验证远程服务器的 TLS 证书颁发机构(CA)文件的路径。
+|
+|默认将使用系统信任存储。
+
+|es-archive:
+  tls:
+    cert:
+|TLS 证书文件的路径，用来识别此进程到远程服务器。
+|
+|
+
+|es-archive:
+  tls:
+    enabled:
+|与远程服务器对话时启用传输层安全(TLS)。默认禁用此选项。
+|`true`/ `false`
+|`false`
+
+|es-archive:
+  tls:
+    key:
+|TLS 私钥文件的路径，用来识别此进程到远程服务器。
+|
+|
+
+|es-archive:
+  tls:
+    server-name:
+|覆盖远程服务器证书中预期的 TLS 服务器名称。
+|
+|
+
+//Clarification of "if specified" for next two rows, does that mean if this is set? Or that it only loads the CA if one is specified (that is, if es-archive.tls.ca has a value?)
+|es-archive:
+  token-file:
+|包含 bearer 令牌的文件的路径。如果指定该标志，该标志也会载入认证机构（CA）文件。
+|
+|
+
+|es-archive:
+  username:
+|Elasticsearch 所需的用户名。如果指定，基本身份验证也会加载 CA。请参阅 es-archive.password。
+|
+|
+
+|es-archive:
+  version:
+|主要的 Elasticsearch 版本。如果没有指定，则该值将从 Elasticsearch 中自动探测到。
+|
+|0
+|===
+
+
+.使用卷挂载的存储示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple-prod
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: https://quickstart-es-http.default.svc:9200
+        index-prefix: my-prefix
+        tls:
+          ca: /es/certificates/ca.crt
+    secretName: tracing-secret
+  volumeMounts:
+    - name: certificates
+      mountPath: /es/certificates/
+      readOnly: true
+  volumes:
+    - name: certificates
+      secret:
+        secretName: quickstart-es-http-certs-public
+----
+
+以下示例显示了使用从存储在 secret 中的卷和用户/密码挂载了 TLS CA 证书的外部 Elasticsearch 集群的 Jaeger CR。
+
+.外部 Elasticsearch 示例：
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple-prod
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: https://quickstart-es-http.default.svc:9200 # <1>
+        index-prefix: my-prefix
+        tls: # <2>
+          ca: /es/certificates/ca.crt
+    secretName: tracing-secret # <3>
+  volumeMounts: # <4>
+    - name: certificates
+      mountPath: /es/certificates/
+      readOnly: true
+  volumes:
+    - name: certificates
+      secret:
+        secretName: quickstart-es-http-certs-public
+----
+<1> 在默认命名空间中运行的 Elasticsearch 服务 URL。
+<2> TLS 配置。在这种情况下，只有 CA 证书，但在使用 mutual TLS 时，它也可以包含 es.tls.key 和 es.tls.cert。
+<3> 定义环境变量 ES_PASSWORD 和 ES_USERNAME 的 Secret。由 kubectl create secret generic tracing-secret --from-literal=ES_PASSWORD=changeme --from-literal=ES_USERNAME=elastic 创建
+<4> 被挂载到所有存储组件的卷挂载和卷。
+
+[id="distr-tracing-manage-es-certificates_{context}"]
+== 使用 Elasticsearch 管理证书
+
+您可以使用 Red Hat Elasticsearch Operator 创建和管理证书。使用 Red Hat Elasticsearch Operator 管理证书还可让您使用带有多个 Jaeger Collector 的单个 Elasticsearch 集群。
+
+
+从版本 2.4 开始， {JaegerName} Operator 平台 Operator 使用 Elasticsearch 自定义资源中的以下注解将证书创建委派给 Uccps Elasticsearch Operator：
+
+* `logging.openshift.io/elasticsearch-cert-management: "true"`
+* `logging.openshift.io/elasticsearch-cert.jaeger-<shared-es-node-name>: "user.jaeger"`
+* `logging.openshift.io/elasticsearch-cert.curator-<shared-es-node-name>: "system.logging.curator"`
+
+其中  `<shared-es-node-name>` 是 Elasticsearch 节点的名称。例如，如果您创建一个名为 `custom-es` 的 Elasticsearch 节点，您的自定义资源可能类似以下示例。
+
+.显示注解的 Elasticsearch CR 示例
+[source,yaml]
+----
+apiVersion: logging.openshift.io/v1
+kind: Elasticsearch
+metadata:
+  annotations:
+    logging.openshift.io/elasticsearch-cert-management: "true"
+    logging.openshift.io/elasticsearch-cert.jaeger-custom-es: "user.jaeger"
+    logging.openshift.io/elasticsearch-cert.curator-custom-es: "system.logging.curator"
+  name: custom-es
+spec:
+  managementState: Managed
+  nodeSpec:
+    resources:
+      limits:
+        memory: 16Gi
+      requests:
+        cpu: 1
+        memory: 16Gi
+  nodes:
+    - nodeCount: 3
+      proxyResources: {}
+      resources: {}
+      roles:
+        - master
+        - client
+        - data
+      storage: {}
+  redundancyPolicy: ZeroRedundancy
+----
+
+.先决条件
+
+* {product-title}
+* {logging-title}
+* Elasticsearch 节点和 Jaeger 实例必须部署到同一命名空间中。例如 `tracing-system`.
+
+您可以通过在 Jaeger 自定义资源中将 `spec.storage.elasticsearch.useCertManagement` 设置为 true 来启用证书管理。
+
+.示例显示 useCertManagement
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-prod
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      name: custom-es
+      doNotProvision: true
+      useCertManagement: true
+----
+
+{JaegerName} Operator 会将 Elasticsearch 自定义资源名称设置为 Jaeger 自定义资源的 `spec.storage.elasticsearch.name` 的 `name` 值。
+
+证书由 Uccps Elasticsearch Operator 和 {JaegerName} Operator 平台 Operator 注入证书。

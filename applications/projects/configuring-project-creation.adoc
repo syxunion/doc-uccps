@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="configuring-project-creation"]
+= 配置项目创建
+include::_attributes/common-attributes.adoc[]
+:context: configuring-project-creation
+
+toc::[]
+
+在 统信容器云管理平台 中，项目用于对相关对象进行分组和隔离。使用 Web 控制台或 `oc new-project` 命令请求创建新项目时，系统会根据可自定义的模板来配置项目的创建。
+
+作为集群管理员，您可以允许开发人员和服务帐户创建或配置其自己的项目，并且配置具体的方式。
+
+include::modules/about-project-creation.adoc[leveloffset=+1]
+include::modules/modifying-template-for-new-projects.adoc[leveloffset=+1]
+include::modules/disabling-project-self-provisioning.adoc[leveloffset=+1]
+include::modules/customizing-project-request-message.adoc[leveloffset=+1]

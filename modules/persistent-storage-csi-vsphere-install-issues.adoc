@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// persistent-storage-csi-vsphere.adoc
+//
+
+[id="persistent-storage-csi-vsphere-install-issues_{context}"]
+= 删除第三方 vSphere CSI Operator 驱动程序
+
+统信容器云管理平台1.2 包括 vSphere CSI Operator 驱动程序的内置版本。如果您已经安装了由社区或其他厂商提供的 vSphere Container Storage Interface(CSI)驱动程序，则可能会对集群禁用对下一个主版本的 统信容器云管理平台的更新。
+
+[注意]
+====
+这些说明可能不完整，因此请参阅厂商或社区供应商卸载指南，以确保删除驱动程序和组件。
+====
+
+卸载第三方 vSphere CSI 驱动程序：
+
+. 删除第三方 vSphere CSI 驱动程序（VMware vSphere Container Storage 插件）部署和 Daemonset 对象。
+. 删除之前使用第三方 vSphere CSI 驱动程序安装的 configmap 和 secret 对象。
+. 删除第三方 vSphere CSI 驱动程序 `CSIDriver` 对象：
++
+[output, terminal]
+----
+~ $ oc delete CSIDriver csi.vsphere.vmware.com
+----
++
+[output, terminal]
+----
+csidriver.storage.k8s.io "csi.vsphere.vmware.com" deleted
+----
+
+从统信容器云管理平台集群中删除第三方 vSphere CSI Driver 后， vSphere CSI Operator Driver 会自动恢复，以及阻止统信容器云管理平台升级所有条件。如果您已有 vSphere CSI PV 对象，它们的生命周期现在由 vSphere CSI Operator Driver 管理。

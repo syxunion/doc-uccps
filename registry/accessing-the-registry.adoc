@@ -1,0 +1,44 @@
+:_content-type: ASSEMBLY
+:context: accessing-the-registry
+[id="accessing-the-registry"]
+= 访问registry
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+使用以下部分介绍的内容来访问registry，包括查看日志和指标，以及保护和公开registry。
+
+您可以使用 `podman` 命令直接访问registry。您可以使用 `podman push` 或 `podman pull` 等操作直接从集成的registry中进行镜像的 pull 和 push 操作。您需要首先使用 `podman login` 命令登录到registry。您可以执行的操作取决于您的用户权限，如以下各节所述。
+
+
+== 先决条件 
+
+* 您必须已经配置了一个身份供应商（IDP）。
+* 为了抓取镜像，例如使用 `podman pull` 命令，用户必须具有registry-viewer角色。要添加此角色，请运行以下命令：
++
+[source,terminal]
+----
+$ oc policy add-role-to-user registry-viewer <user_name>
+----
+
+* 在编写或推送镜像时，例如使用 `podman push` 命令时：
+** 用户必须具有 `registry-editor` 角色。要添加此角色，请运行以下命令：
++
+[source,terminal]
+----
+$ oc policy add-role-to-user registry-editor <user_name>
+----
++
+** 集群必须有一个可以推送镜像的现有项目。
+
+include::modules/registry-accessing-directly.adoc[leveloffset=+1]
+
+include::modules/registry-checking-the-status-of-registry-pods.adoc[leveloffset=+1]
+
+include::modules/registry-viewing-logs.adoc[leveloffset=+1]
+
+include::modules/registry-accessing-metrics.adoc[leveloffset=+1]
+
+[id="accessing-the-registry-additional-resources"]
+[role="_additional-resources"]
+== Additional resources

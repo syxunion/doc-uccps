@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-internal-oauth.adoc
+
+[id="oauth-troubleshooting-api-events_{context}"]
+= OAuth API 事件故障排除
+
+在有些情况下，API 服务器会返回一个 `unexpected condition` 错误消息；若不直接访问 API 主日志，很难对此消息进行调试。该错误的基本原因被有意遮挡，以避免向未经身份验证的用户提供有关服务器状态的信息。
+
+这些错误的子集与服务帐户 OAuth 配置问题有关。这些问题在非管理员用户可查看的事件中捕获。OAuth 期间遇到 `unexpected condition` 服务器错误时，可运行 `oc get events` 在 `ServiceAccount` 下查看这些事件。
+
+以下示例警告缺少正确 OAuth 重定向 URI 的服务帐户：
+
+[source,terminal]
+----
+$ oc get events | grep ServiceAccount
+----
+
+.输出示例
+[source,terminal]
+----
+1m         1m          1         proxy                    ServiceAccount                                  Warning   NoSAOAuthRedirectURIs   service-account-oauth-client-getter   system:serviceaccount:myproject:proxy has no redirectURIs; set serviceaccounts.openshift.io/oauth-redirecturi.<some-value>=<redirect> or create a dynamic URI using serviceaccounts.openshift.io/oauth-redirectreference.<some-value>=<reference>
+----
+
+运行 `oc describe sa/<service_account_name>` 可以报告与给定服务帐户名称关联的任何 OAuth 事件。
+
+[source,terminal]
+----
+$ oc describe sa/proxy | grep -A5 Events
+----
+
+.输出示例
+[source,terminal]
+----
+Events:
+  FirstSeen     LastSeen        Count   From                                    SubObjectPath   Type            Reason                  Message
+  ---------     --------        -----   ----                                    -------------   --------        ------                  -------
+  3m            3m              1       service-account-oauth-client-getter                     Warning         NoSAOAuthRedirectURIs   system:serviceaccount:myproject:proxy has no redirectURIs; set serviceaccounts.openshift.io/oauth-redirecturi.<some-value>=<redirect> or create a dynamic URI using serviceaccounts.openshift.io/oauth-redirectreference.<some-value>=<reference>
+----
+
+下方列出可能的事件错误：
+
+**无重定向 URI 注解或指定了无效的 URI**
+
+[source,terminal]
+----
+Reason                  Message
+NoSAOAuthRedirectURIs   system:serviceaccount:myproject:proxy has no redirectURIs; set serviceaccounts.openshift.io/oauth-redirecturi.<some-value>=<redirect> or create a dynamic URI using serviceaccounts.openshift.io/oauth-redirectreference.<some-value>=<reference>
+----
+
+**指定了无效的路由**
+
+[source,terminal]
+----
+Reason                  Message
+NoSAOAuthRedirectURIs   [routes.route.openshift.io "<name>" not found, system:serviceaccount:myproject:proxy has no redirectURIs; set serviceaccounts.openshift.io/oauth-redirecturi.<some-value>=<redirect> or create a dynamic URI using serviceaccounts.openshift.io/oauth-redirectreference.<some-value>=<reference>]
+----
+
+**指定了无效的引用类型**
+
+[source,terminal]
+----
+Reason                  Message
+NoSAOAuthRedirectURIs   [no kind "<name>" is registered for version "v1", system:serviceaccount:myproject:proxy has no redirectURIs; set serviceaccounts.openshift.io/oauth-redirecturi.<some-value>=<redirect> or create a dynamic URI using serviceaccounts.openshift.io/oauth-redirectreference.<some-value>=<reference>]
+----
+
+**缺少 SA 令牌**
+
+[source,terminal]
+----
+Reason                  Message
+NoSAOAuthTokens         system:serviceaccount:myproject:proxy has no tokens
+----

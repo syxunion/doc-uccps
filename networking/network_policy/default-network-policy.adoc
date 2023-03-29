@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="default-network-policy"]
+= 为项目定义默认网络策略
+include::_attributes/common-attributes.adoc[]
+:context: default-network-policy
+
+toc::[]
+
+作为集群管理员，您可以在创建新项目时修改新项目模板，使其自动包含网络策略。如果您还没有新项目的自定义模板，则需要首先创建一个。
+
+include::modules/modifying-template-for-new-projects.adoc[leveloffset=+1]
+
+include::modules/nw-networkpolicy-project-defaults.adoc[leveloffset=+1]

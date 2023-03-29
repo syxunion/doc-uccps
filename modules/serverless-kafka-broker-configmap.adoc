@@ -1,0 +1,97 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-kafka-admin.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kafka-broker-configmap_{context}"]
+= 配置 Kafka 代理设置
+
+您可以通过创建配置映射并在 Kafka `Broker` 对象中引用此配置映射，配置复制因素、bootstrap 服务器和 Kafka 代理的主题分区数量。
+
+.先决条件
+
+* 在 {product-title}  上具有集群或专用管理员权限。
+* {ServerlessOperatorName}、Knative Eventing 和 KnativeKafka 自定义资源(CR)已安装在  {product-title} 集群中。
+* 您已创建了一个项目，或具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 修改 `kafka-broker-config` 配置映射，或创建自己的配置映射来包含以下配置：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <config_map_name> <1>
+  namespace: <namespace> <2>
+data:
+  default.topic.partitions: <integer> <3>
+  default.topic.replication.factor: <integer> <4>
+  bootstrap.servers: <list_of_servers> <5>
+----
+<1> 配置映射名称。
+<2> 配置映射所在的命名空间。
+<3> Kafka 代理的主题分区数量。这控制如何将事件发送到代理的速度。更多分区需要更多计算资源。
+<4> 主题消息的复制因素。这可防止数据丢失。更高的复制因素需要更大的计算资源和更多存储。
+<5> 以逗号分隔的 bootstrap 服务器列表。这可以位于 {product-title} 集群内部或外部，是代理从发送事件发送到的 Kafka 集群列表。
++
+[重要]
+====
+`default.topic.replication.factor` 值必须小于或等于集群中的 Kafka 代理实例数量。例如，如果您只有一个 Kafka 代理，则 `default.topic.replication.factor` 值应该不超过
+====
++
+.Kafka 代理配置映射示例
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-broker-config
+  namespace: knative-eventing
+data:
+  default.topic.partitions: "10"
+  default.topic.replication.factor: "3"
+  bootstrap.servers: "my-cluster-kafka-bootstrap.kafka:9092"
+----
+
+. 应用配置映射：
++
+[source,yaml]
+----
+$ oc apply -f <config_map_filename>
+----
+
+. 指定 Kafka Broker 对象的配置映射：
++
+.Broker 对象示例
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: <broker_name> <1>
+  namespace: <namespace> <2>
+  annotations:
+    eventing.knative.dev/broker.class: Kafka <3>
+spec:
+  config:
+    apiVersion: v1
+    kind: ConfigMap
+    name: <config_map_name> <4>
+    namespace: <namespace> <5>
+...
+----
+<1> 代理名称。
+<2> 代理存在的命名空间。
+<3> 代理类注解。在本例中，代理是使用类值 Kafka 的 `Kafka` 代理。
+<4> 配置映射名称。
+<5> 配置映射所在的命名空间。
+
+. 应用代理：
++
+[source,yaml]
+----
+$ oc apply -f <broker_filename>
+----

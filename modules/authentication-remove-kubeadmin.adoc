@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+// * authentication/understanding-identity-provider.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="removing-kubeadmin_{context}"]
+= 移除 kubeadmin 用户
+
+在定义了身份提供程序并创建新的 `cluster-admin` 用户后，您可以移除 kubeadmin 来提高集群安全性。
+
+[警告]
+====
+如果在另一用户成为 `cluster-admin` 前按照这个步骤操作，则必须重新安装 统信容器云管理平台。此命令无法撤销。
+====
+
+.先决条件
+
+* 必须至少配置了一个身份提供程序。
+* 必须向用户添加了 `cluster-admin` 角色。
+* 必须已经以管理员身份登录。
+
+.流程
+
+* 移除 `kubeadmin` Secret：
++
+[source,terminal]
+----
+$ oc delete secrets kubeadmin -n kube-system
+----

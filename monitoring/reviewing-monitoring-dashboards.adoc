@@ -1,0 +1,43 @@
+:_content-type: ASSEMBLY
+[id="reviewing-monitoring-dashboards"]
+= 10 查看监控仪表板
+include::_attributes/common-attributes.adoc[]
+:context: reviewing-monitoring-dashboards
+
+toc::[]
+
+统信容器云管理平台 1.2 提供了一组全面的监控仪表板，可帮助您了解集群组件和用户定义的工作负载的状态。
+
+在 *管理员* 视角中，您可以访问 统信容器云管理平台 核心组件的仪表板，包括：
+
+* API 性能
+* etcd
+* Kubernetes 计算资源
+* Kubernetes 网络资源
+* Prometheus
+* 与集群和节点性能相关的 USE 方法仪表板
+
+在 *开发者* 视角中，您可以访问为所选项目提供以下统计的仪表板：
+
+* CPU 用量
+* 内存用量
+* 带宽信息
+* 数据包速率信息
+
+
+[注意]
+====
+在 *开发者* 视角中，您一次只能查看一个项目的仪表板。
+====
+
+// Reviewing monitoring dashboards as a cluster administrator
+include::modules/monitoring-reviewing-monitoring-dashboards-admin.adoc[leveloffset=+1]
+
+// Reviewing monitoring dashboards as a developer
+include::modules/monitoring-reviewing-monitoring-dashboards-developer.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+[id="additional-resources-reviewing-monitoring-dashboards"]
+.其他资源
+
+* xref:../applications/odc-monitoring-project-and-application-metrics-using-developer-perspective.adoc#monitoring-project-and-application-metrics-using-developer-perspective[使用 Developer 视角监控项目和应用程序的指标]

@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-images_{context}"]
+= 自动修剪镜像
+
+系统因为年龄、状态或超过限制而不再需要的镜像会自动修剪。集群管理员可以配置 Pruning 自定义资源，或挂起它。
+
+.先决条件
+
+* 具有 Cluster Administrator 权限
+* 安装 oc CLI。
+
+.流程
+
+* 验证名为 `imagepruners.imageregistry.operator.openshift.io/cluster` 的项包括以下 `spec` 和 `status` 字段：
+
+[source,yaml]
+----
+spec:
+  schedule: 0 0 * * * <1>
+  suspend: false <2>
+  keepTagRevisions: 3 <3>
+  keepYoungerThanDuration: 60m <4>
+  keepYoungerThan: 3600000000000 <5>
+  resources: {} <6>
+  affinity: {} <7>
+  nodeSelector: {} <8>
+  tolerations: [] <9>
+  successfulJobsHistoryLimit: 3 <10>
+  failedJobsHistoryLimit: 3 <11>
+status:
+  observedGeneration: 2 <12>
+  conditions: <13>
+  - type: Available
+    status: "True"
+    lastTransitionTime: 2019-10-09T03:13:45
+    reason: Ready
+    message: "Periodic image pruner has been created."
+  - type: Scheduled
+    status: "True"
+    lastTransitionTime: 2019-10-09T03:13:45
+    reason: Scheduled
+    message: "Image pruner job has been scheduled."
+  - type: Failed
+    staus: "False"
+    lastTransitionTime: 2019-10-09T03:13:45
+    reason: Succeeded
+    message: "Most recent image pruning job succeeded."
+----
+<1> `schedule`: `CronJob` 格式的调度。这是可选字段，默认为每日的午夜。
+<2> `suspend`: 如果设为 `true` 运行修剪的 `CronJob` 将暂停。这是可选字段，默认为 `false`。新集群上的初始值为 `false`。
+<3> `keepTagRevisions`: 要保留的每个标签的修订版本数量。这是可选字段，默认为 `3`。初始值为 `3`。
+<4> `keepYoungerThanDuration`: 保留比此时间段更早的镜像。这是可选字段。如果没有指定值，则使用 `keepYoungerThan`，或默认值 `60m` （60分钟）。
+<5> `keepYoungerThan`: 已弃用。与 `keepYoungerThanDuration` 相同，但持续时间被指定为纳秒的整数。这是可选字段。当设置 `keepYoungerThanDuration` 时，会忽略此字段。
+<6> `resources`: 标准 `Pod` 资源请求和限值。这是可选字段。
+<7> `affinity`: 标准 `Pod` 关联性。这是可选字段。
+<8> `nodeSelector`: 标准 Pod 节点选择器。这是可选字段。
+<9> `tolerations`: 标准 Pod 容限。这是可选字段。
+<10> `successfulJobsHistoryLimit`: 要保留的作业的 `最大值`。必须是 `>= 1` 才能确保报告指标。这是可选字段，默认为 `3`。初始值为`3`。
+<11> `failedJobsHistoryLimit`: 要保留的最大失败作业数。必须是 `>= 1` 才能确保报告指标。这是可选字段，默认为 `3`。初始值为 `3`。
+<12> `observedGeneration`: Operator 观察到的生成。
+<13> `conditions`: 带有以下类型的标准条件对象：
+* `Available`: 指示修剪任务是否已创建。原因可以是 `Ready` 或 `Error`。
+* `Scheduled`: 指示是否调度了下一个修剪任务。原因可调度、挂起或出错。
+* `Failed`: 指示最新修剪任务是否失败。
+
+
+[重要]
+====
+Image Registry Operator 管理修剪器的行为与在 Image Registry Operator 的 `ClusterOperato`r 对象上指定的 `managementState` 关联 。如果 Image Registry Operator 没有处于 Managed 状态，则镜像修剪器仍然可以被 Pruning Custom Resource 配置和管理。
+
+但是，Image Registry Operator 的 `managementState` 会更改部署的镜像修剪器任务的行为：
+
+* `Managed`: 镜像修剪器的 `--prune-registry` 标志被设置为 `true`.
+* `Removed`: 镜像修剪器的 `--prune-registry` 标志被设置为 `false`，这意味着它只在 `etcd` 中修剪镜像元数据。
+* `Unmanaged`: 镜像修剪器的 `--prune-registry` --prune-registry 标志设置为 `false`。
+====

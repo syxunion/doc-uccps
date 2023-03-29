@@ -1,0 +1,83 @@
+// Module included in the following assemblies:
+//
+// * builds/advanced-build-operations.adoc
+
+[id="builds-chaining-builds_{context}"]
+= 串联构建
+
+对于编译语言（例如 Go、C、C ++ 和 Java），在应用程序镜像中包含编译所需的依赖项可能会增加镜像的大小，或者引入可被利用的漏洞。
+
+为避免这些问题，可以将两个构建串联在一起。一个生成编译工件的构建，另一个构建将工件放置在运行工件的独立镜像中。
+
+在以下示例中，Source-to-Image（S2I）构建与 Docker 构建相结合，以编译工件并将其置于单独的运行时镜像中。
+
+[注意]
+====
+虽然本例串联了 Source-to-Image（S2I） 构建和 Docker 构建，但第一个构建可以使用任何策略来生成包含所需工件的镜像，第二个构建则可以使用任何策略来消耗镜像中的输入内容。
+====
+
+//image::chained-build.png[Chained Build] *Needs update*
+
+第一个构建获取应用程序源，并生成含有 `WAR` 文件的镜像。镜像推送到 `artifact-image` 镜像流。输出工件的路径取决于使用的 S2I 构建器的 `assemble` 脚本。在这种情况下，它会输出到 `/wildfly/standalone/deployments/ROOT.war`。
+
+[source,yaml]
+----
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: artifact-build
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: artifact-image:latest
+  source:
+    git:
+      uri: https://github.com/openshift/openshift-jee-sample.git
+      ref: "master"
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: wildfly:10.1
+        namespace: openshift
+----
+
+第二个构建使用路径指向第一个构建中输出镜像内的 WAR 文件的镜像源。内联 `dockerfile` 将该 `WAR` 文件复制到运行时镜像中。
+
+[source,yaml]
+----
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: image-build
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: image-build:latest
+  source:
+    dockerfile: |-
+      FROM jee-runtime:latest
+      COPY ROOT.war /deployments/ROOT.war
+    images:
+    - from: <1>
+        kind: ImageStreamTag
+        name: artifact-image:latest
+      paths: <2>
+      - sourcePath: /wildfly/standalone/deployments/ROOT.war
+        destinationDir: "."
+  strategy:
+    dockerStrategy:
+      from: <3>
+        kind: ImageStreamTag
+        name: jee-runtime:latest
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+----
+<1> `from` 指定 docker 构建应包含来自 `artifact-image` 镜像流的镜像输出，而这是上一个构建的目标。
+<2> `paths` 指定要在当前 docker 构建中包含目标镜像的哪些路径。
+<3> 运行时镜像用作 docker 构建的源镜像。
+
+此设置的结果是，第二个构建的输出镜像不需要包含创建 `WAR` 文件所需的任何构建工具。此外，由于第二个构建包含镜像更改触发器，因此每当运行第一个构建并生成含有二进制工件的新镜像时，将自动触发第二个构建，以生成包含该工件的运行时镜像。所以，两个构建表现为一个具有两个阶段的构建。

@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+[id="serverless-applications"]
+= 无服务器应用程序
+include::_attributes/common-attributes.adoc[]
+:context: serverless-applications
+
+toc::[]
+
+include::snippets/serverless-apps.adoc[]
+
+使用以下任一方法创建一个无服务器应用程序：
+
+* 从 {product-title} 控制台创建 Knative 服务。
+* 使用 Knative (`kn`) CLI 创建 Knative 服务。
+* 使用 `oc` CLI 创建并应用 Knative  `Service` 对象作为 YAML 文件。
+
+// create service using CLI
+include::modules/creating-serverless-apps-kn.adoc[leveloffset=+1]
+
+// offline mode
+include::modules/kn-service-offline-create.adoc[leveloffset=+1]
+
+// create service using YAML
+include::modules/creating-serverless-apps-yaml.adoc[leveloffset=+1]
+
+include::modules/verifying-serverless-app-deployment.adoc[leveloffset=+1]
+
+// OCP only
+ifdef::openshift-enterprise[]
+// Using Knative services w/ restrictive NetworkPolicies
+include::modules/serverless-services-network-policies.adoc[leveloffset=+1]
+endif::[]
+// move to admin guide, outside scope of this PR
+
+// config init containers
+include::modules/serverless-init-containers-apps.adoc[leveloffset=+1]
+// HTTPS redirection
+include::modules/serverless-https-redirect-service.adoc[leveloffset=+1]

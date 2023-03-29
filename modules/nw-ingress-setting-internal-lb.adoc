@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-setting-internal-lb_{context}"]
+= 配置 Ingress Controller 以使用内部负载均衡器
+
+当在云平台上创建 Ingress Controller 时，Ingress Controller 默认由一个公共云负载均衡器发布。作为管理员，您可以创建一个使用内部云负载均衡器的 Ingress Controller。
+
+[警告]
+====
+如果云供应商是 Microsoft Azure，则必须至少有一个指向节点的公共负载均衡器。如果不这样做，所有节点都将丢失到互联网的出站连接。
+====
+
+[重要]
+====
+如果要更改 `IngressController` 的 scope，您可以在创建自定义资源(CR)后更改 `.spec.endpointPublishingStrategy.loadBalancer.scope` 参数。
+====
+
+.LoadBalancer 图表
+image::202_OpenShift_Ingress_0222_load_balancer.png[]
+
+上图显示了与 统信容器云管理平台 Ingress LoadBalancerService 端点发布策略相关的以下概念：
+
+* 您可以使用 Uccp Ingress Controller Load Balancer 在外部使用云供应商负载均衡器或内部加载负载。
+* 您可以使用负载均衡器的单个 IP 地址以及更熟悉的端口，如 8080 和 4200，如图形中所述的集群所示。
+* 来自外部负载均衡器的流量定向到 pod，并由负载均衡器管理，如下节点的实例中所述。有关实现详情请查看 Kubernetes 服务文档 。
+
+.先决条件
+
+* 安装 Uccp CLI（oc）。
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 在名为 `<name>-ingress-controller.yaml` 的文件中创建 `IngressController` 自定义资源 (CR) ，如下例所示：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  namespace: openshift-ingress-operator
+  name: <name> <1>
+spec:
+  domain: <domain> <2>
+  endpointPublishingStrategy:
+    type: LoadBalancerService
+    loadBalancer:
+      scope: Internal <3>
+----
+<1> 将 `<name>` 替换为 `IngressController` 对象的名称。
+<2> 指定控制器发布的应用程序的 `domain`。
+<3> 指定一个 `Internal` 值以使用内部负载均衡器。
+
+. 运行以下命令，创建上一步中定义的 Ingress Controller：
++
+[source,terminal]
+----
+$ oc create -f <name>-ingress-controller.yaml <1>
+----
+<1> 将 `<name>` 替换为 `IngressController` 对象的名称。
+
+. 可选：通过运行以下命令确认创建了 Ingress Controller：
++
+[source,terminal]
+----
+$ oc --all-namespaces=true get ingresscontrollers
+----

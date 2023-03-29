@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/creating-network-policy.adoc
+// * networking/network_policy/viewing-network-policy.adoc
+// * networking/network_policy/editing-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+[id="nw-networkpolicy-object_{context}"]
+
+= 示例 NetworkPolicy 对象
+
+下文解释了示例 NetworkPolicy 对象：
+
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-27107 <1>
+spec:
+  podSelector: <2>
+    matchLabels:
+      app: mongodb
+  ingress:
+  - from:
+    - podSelector: <3>
+        matchLabels:
+          app: app
+    ports: <4>
+    - protocol: TCP
+      port: 27017
+----
+<1> NetworkPolicy 对象的名称。
+<2> 一个选择器（selector）用于描述策略应用到的 pod。策略对象只能选择定义了 NetworkPolicy 对象的项目中的 pod。
+<3> 与策略对象允许从中入口流量的 pod 匹配的选择器。选择器将匹配任何项目中的 pod。
+<4> 接受流量的一个或多个目标端口的列表。

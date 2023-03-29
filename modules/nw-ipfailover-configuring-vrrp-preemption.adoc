@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ipfailover-configuring-vrrp-preemption_{context}"]
+= 配置 VRRP 抢占
+
+当一个节点上的虚拟 IP（VIP）因为通过了检查脚本的检查而脱离 `fault` 状态时，如果其优先级低于当前处于 `master` 状态的节点上的 VIP，则节点上的 VIP 将进入 `backup` 状态。但是，如果脱离 `fault` 状态的节点上的 VIP 具有更高的优先级，则抢占策略会决定其在集群中的角色。
+
+当一个节点上的虚拟 IP（VIP）因为通过了检查脚本的检查而脱离 `fault` 状态时，如果其优先级低于当前处于 `master` 状态的节点上的 VIP，则节点上的 VIP 将进入 `backup` 状态。但是，如果脱离 `fault` 状态的节点上的 VIP 具有更高的优先级，则抢占策略会决定其在集群中的角色。
+
+.先决条件
+
+* 已安装 Uccp CLI CLI (`oc`).
+
+.流程
+
+* 要指定抢占，输入 `oc edit deploy ipfailover-keepalived `以编辑路由器部署配置：
++
+[source,terminal]
+----
+$ oc edit deploy ipfailover-keepalived
+----
++
+[source,yaml]
+----
+...
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_HA_PREEMPTION  <1>
+          value: preempt_delay 300
+...
+----
+<1>设置 OPENSHIFT_HA_PREEMPTION 值：
+- `preempt_delay 300`: Keepalived 会等待指定的 300 秒，并将 `master` 移到主机上的优先级更高的 VIP。这是默认值。
+- `nopreempt`: 不会将 `master` 从主机上的较低优先级 VIP 移到主机上的优先级更高的 VIP。

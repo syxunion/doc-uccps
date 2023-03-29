@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ipfailover-configuring-more-than-254_{context}"]
+= 为超过 254 地址配置 IP 故障转移
+
+IP 故障转移管理有 254 个组虚拟 IP（VIP）地址的限制。默认情况下，统信容器云管理平台 会为每个组分配一个 IP 地址。您可以使用 `OPENSHIFT_HA_VIP_GROUPS` 变量进行更改，使得每个组中有多个 IP 地址，并在配置 IP 故障转移时定义每个虚拟路由器冗余协议（VRRP）实例可用的 VIP 组数量。
+
+在 VRRP 故障转移事件中，对 VIP 进行分组会为每个 VRRP 创建更广泛的 VIP 分配范围，并在集群中的所有主机都能够从本地访问服务时很有用。例如，当服务通过 `ExternalIP` 公开时。
+
+[注意]
+====
+使用故障转移的一个规则是，请勿将路由等服务限制到一个特定的主机。相反，服务应复制到每一主机上，以便在 IP 故障转移时，不必在新主机上重新创建服务。
+====
+
+[注意]
+====
+如果使用 统信容器云管理平台 健康检查，IP 故障转移和组的性质意味着不会检查组中的所有实例。因此，必须使用 Kubernetes 健康检查来确保服务处于活动状态。
+====
+
+.先决条件
+
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+* 要更改分配给每个组的 IP 地址数量，请更改 `OPENSHIFT_HA_VIP_GROUPS` 变量的值，例如：
++
+.IP 故障转换配置的 `Deployment` YAML 示例
+[source,yaml]
+----
+...
+    spec:
+        env:
+        - name: OPENSHIFT_HA_VIP_GROUPS <1>
+          value: "3"
+...
+----
+<1> 如果将具有 7 个 VIP 的环境中的 `OPENSHIFT_HA_VIP_GROUPS` 设置为 3 时，它会创建三个组，将三个 VIP 分配到第一个组，为剩余的两个组各分配两个 VIP。
+
+[注意]
+====
+如果 `OPENSHIFT_HA_VIP_GROUPS` 设置的组数量少于设置为故障的 IP 地址数量，则组包含多个 IP 地址，且所有地址都作为一个单元移动。
+====

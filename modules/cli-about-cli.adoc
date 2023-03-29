@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/getting-started.adoc
+
+:_content-type: CONCEPT
+[id="cli-about-cli_{context}"]
+= 关于 Uccps CLI
+
+使用 Uccps 命令行界面（CLI），`oc` 命令，您可以通过终端创建应用程序并管理 统信容器云管理平台 项目。Uccps CLI 在以下情况下是理想的选择：
+
+* 直接使用项目源代码
+* 编写 统信容器云管理平台 操作脚本
+* 在管理项目时，受带宽资源的限制，Web 控制台无法使用

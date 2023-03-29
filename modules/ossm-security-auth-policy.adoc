@@ -1,0 +1,182 @@
+////
+Module included in the following assemblies:
+-service_mesh/v2x/ossm-security.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-vs-istio_{context}"]
+= Configuring Role Based Access Control (RBAC)
+
+基于角色的访问控制 (RBAC) 对象决定是否允许用户或服务在项目内执行给定的操作。您可以为网格中的工作负载定义 mesh-、namespace- 和工作负载范围访问控制。
+
+要配置 RBAC，在您要配置访问权限的命名空间中创建一个  `AuthorizationPolicy` 资源。如果要配置网格范围访问，请使用安装 Service Mesh control plane 的项目，如`istio-system`。
+
+例如，对于 RBAC，您可以创建以下策略：
+
+* 配置项目内部通信。
+* 允许或拒绝对默认命名空间中所有工作负载的完全访问。
+* 允许或拒绝入口网关访问。
+* 需要令牌才能访问。
+
+授权策略包括选择器、操作和规则列表：
+
+* `selector` 字段指定策略的目标。
+* `action` 字段指定是否允许或拒绝请求。
+* `rules` 字段指定何时触发操作。
+** `from` 字段指定请求来源的限制。
+** `to` 字段指定请求目标和参数的限制。
+** `when` 字段指定应用该规则的其他条件。
+
+.流程
+
+. 创建 `AuthorizationPolicy` 资源。以下示例显示了一个更新 ingress-policy `AuthorizationPolicy` 的资源，以拒绝 IP 地址访问入口网关。
++
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: ingress-policy
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+      ipBlocks: ["1.2.3.4"]
+----
++
+. 在编写资源以便在命名空间中创建资源后运行以下命令。命名空间必须与 `AuthorizationPolicy` 资源中的 `metadata.namespace` 字段匹配。
++
+[source,terminal]
+----
+$ oc create -n istio-system -f <filename>
+----
+
+.后续步骤
+
+考虑以下示例用于其他通用配置。
+
+== Configure intra-project communication
+
+您可以使用 `AuthorizationPolicy` 配置 Service Mesh control plane，以允许或拒绝与网格中的网格或服务通信的流量。
+
+=== Restrict access to services outside a namespace
+
+您可以使用以下 `AuthorizationPolicy` 资源示例拒绝来自 `bookinfo` 命名空间中没有的源的请求。
+
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin-deny
+ namespace: bookinfo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: DENY
+ rules:
+ - from:
+   - source:
+       notNamespaces: ["bookinfo"]
+----
+
+=== Creating allow-all and default deny-all authorization policies
+
+以下示例显示了一个 allow-all 授权策略，允许对 bookinfo 命名空间中的所有工作负载进行完全访问。
+
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all
+  namespace: bookinfo
+spec:
+  action: ALLOW
+  rules:
+  - {}
+----
+
+以下示例显示了拒绝对 bookinfo 命名空间中的所有工作负载的访问的策略。
+
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: bookinfo
+spec:
+  {}
+----
+
+== Allow or deny access to the ingress gateway
+
+您可以设置一个授权策略来根据 IP 地址添加 allow 或 deny 列表。
+
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: ingress-policy
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+       ipBlocks: ["1.2.3.4", "5.6.7.0/24"]
+----
+
+== Restrict access with JSON Web Token
+
+您可以使用 JSON Web Token（JWT）限制可以访问您的网格的内容。验证后，用户或服务可以访问路由，与该令牌关联的服务。
+
+创建 `RequestAuthentication` 资源，用于定义工作负载支持的身份验证方法。下面的例子接受由 `http://localhost:8080/auth/realms/master` 发布的 JWT。
+
+[source,yaml]
+----
+apiVersion: "security.istio.io/v1beta1"
+kind: "RequestAuthentication"
+metadata:
+  name: "jwt-example"
+  namespace: bookinfo
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  jwtRules:
+  - issuer: "http://localhost:8080/auth/realms/master"
+    jwksUri: "http://keycloak.default.svc:8080/auth/realms/master/protocol/openid-connect/certs"
+----
+
+然后，在同一命名空间中创建一个 `AuthorizationPolicy` 资源，以用于您创建的 `RequestAuthentication` 资源。以下示例在向 `httpbin` 工作负载发送请求时，需要在 `Authorization` 标头中有一个 JWT。
+
+[source,yaml]
+----
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "frontend-ingress"
+  namespace: bookinfo
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+----

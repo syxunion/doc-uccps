@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-iscsi"]
+= 使用 iSCSI 的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-iscsi
+
+toc::[]
+
+您可以使用 iSCSI为统信容器云管理平台集群提供持久性存储。我们假设您对 Kubernetes 和 iSCSI 有一定的了解。
+
+Kubernetes 持久性卷框架允许管理员提供带有持久性存储的集群，并使用户可以在不了解底层存储架构的情况下请求这些资源。
+
+[重要]
+====
+存储的高可用性功能由底层存储供应商实现。
+====
+
+[重要]
+====
+Uccp 假设集群中的所有节点都已配置了 iSCSI initator，即安装了 `iscsi-initiator-utils` 软件包，并在 `/etc/iscsi/initiatorname.iscsi` 中配置了它们的 initiator 的名称。
+====
+
+include::modules/storage-persistent-storage-iscsi-provisioning.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-iscsi-enforcing-disk-quota.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-iscsi-volume-security.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-iscsi-multipath.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-iscsi-custom-initiator.adoc[leveloffset=+1]

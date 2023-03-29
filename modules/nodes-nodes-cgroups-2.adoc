@@ -1,0 +1,145 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-working.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-cgroups-2_{context}"]
+= 启用 Linux 控制组版本 2(cgroups v2)
+
+您可以使用机器配置在集群中的特定节点上启用 Linux 控制组群版本 2 (cgroups v2)。用于启用 cgroups v2 的 统信容器云管理平台 进程会禁用所有 cgroup 版本 1 控制器和层次结构。
+
+[重要]
+====
+统信容器云管理平台 cgroup 版本 2 功能是一个开发者预览（Developer Preview）功能，目前还不被统信支持。
+====
+
+.先决条件
+* 您有一个正在运行的 统信容器云管理平台 集群，它使用版本 4.10 或更高版本。
+* 以具有管理特权的用户身份登录集群。
+* 您有要配置的节点的 `node-role.kubernetes.io` 值。
++
+[source,terminal]
+----
+$ oc describe node <node-name>
+----
++
+.输出示例
+[source,terminal]
+----
+Name:               ci-ln-v05w5m2-72292-5s9ht-worker-a-r6fpg
+Roles:              worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/instance-type=n1-standard-4
+                    beta.kubernetes.io/os=linux
+                    failure-domain.beta.kubernetes.io/region=us-central1
+                    failure-domain.beta.kubernetes.io/zone=us-central1-a
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=ci-ln-v05w5m2-72292-5s9ht-worker-a-r6fpg
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/worker= <1>
+#...
+----
+<1> 这个值是您需要的节点角色。
+
+.流程
+
+. 在节点上启用 cgroup v2：
+
+* 创建机器配置文件 YAML，如 `worker-cgroups-v2.yaml` ：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: "worker" <1>
+  name: worker-enable-cgroups-v2
+spec:
+  kernelArguments:
+    - systemd.unified_cgroup_hierarchy=1 <2>
+    - cgroup_no_v1="all" <3>
+----
+<1> 为您要配置的节点指定 `node-role.kubernetes.io` 值，如 `master`、`worker` 或 `infra`。
+<2> 在 systemd 中启用 cgroup v2。
+<3> 禁用 cgroup v1。
+
+* 创建新机器配置：
++
+[source,terminal]
+----
+$ oc create -f worker-enable-cgroups-v2.yaml
+----
+
+. 检查机器配置以查看是否添加了新配置：
++
+[source,terminal]
+----
+$ oc get MachineConfig
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                               GENERATEDBYCONTROLLER                      IGNITIONVERSION   AGE
+00-master                                          52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+00-worker                                          52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+01-master-container-runtime                        52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+01-master-kubelet                                  52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+01-worker-container-runtime                        52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+01-worker-kubelet                                  52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+99-master-generated-registries                     52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+99-master-ssh                                                                                 3.2.0             40m
+99-worker-generated-registries                     52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+99-worker-ssh                                                                                 3.2.0             40m
+rendered-master-23e785de7587df95a4b517e0647e5ab7   52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+rendered-worker-5d596d9293ca3ea80c896a1191735bb1   52dd3ba6a9a527fc3ab42afac8d12b693534c8c9   3.2.0             33m
+worker-enable-cgroups-v2                                                                      3.2.0             10s
+----
+
+. 检查节点，以查看每个受影响节点上的调度是否已禁用。这表示要应用更改：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                       STATUS                     ROLES    AGE   VERSION
+ci-ln-fm1qnwt-72292-99kt6-master-0         Ready                      master   58m   v1.23.0
+ci-ln-fm1qnwt-72292-99kt6-master-1         Ready                      master   58m   v1.23.0
+ci-ln-fm1qnwt-72292-99kt6-master-2         Ready                      master   58m   v1.23.0
+ci-ln-fm1qnwt-72292-99kt6-worker-a-h5gt4   Ready,SchedulingDisabled   worker   48m   v1.23.0
+ci-ln-fm1qnwt-72292-99kt6-worker-b-7vtmd   Ready                      worker   48m   v1.23.0
+ci-ln-fm1qnwt-72292-99kt6-worker-c-rhzkv   Ready                      worker   48m   v1.23.0
+----
+
+. 节点返回 `Ready` 状态后，您可以通过检查节点上是否存在 `sys/fs/cgroup.controllers` 文件来验证 `cgroup v2` 是否已启用。此文件由 `cgroup v2` 创建。
++
+* 为该节点启动一个 debug 会话：
++
+[source,terminal]
+----
+$ oc debug node/<node_name>
+----
++
+* 找到 `sys/fs/cgroup/cgroup.controllers` 文件。如果存在这个文件，则在该节点上启用了 `cgroup v2`。
++
+.输出示例
+[source,terminal]
+----
+cgroup.controllers	cgroup.stat		cpuset.cpus.effective  io.stat		pids
+cgroup.max.depth	cgroup.subtree_control	cpuset.mems.effective  kubepods.slice	system.slice
+cgroup.max.descendants	cgroup.threads		init.scope	       memory.pressure	user.slice
+cgroup.procs		cpu.pressure		io.pressure	       memory.stat
+----
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关在安装过程中启用 cgroups v2 的详情，请参考安装过程的 安装配置参数部分中的可选参数表。
+
+//this should be an xref someday

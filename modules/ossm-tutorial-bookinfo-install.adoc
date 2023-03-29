@@ -1,0 +1,140 @@
+////
+This PROCEDURE module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-tutorial-bookinfo-install_{context}"]
+= Installing the Bookinfo application
+
+本教程介绍了如何创建项目、将 Bookinfo 应用程序部署到该项目并在 Service Mesh 中查看正在运行的应用程序来创建示例应用程序。
+
+.先决条件:
+
+* 安装了 统信容器云管理平台 。
+* 安装了 统信容器云管理平台服务网格扩展组件 2.1。
+* 访问 Uccps CLI (`oc`).
+* 具有 `cluster-admin` 角色的帐户。
+
+
+[NOTE]
+====
+本节中的命令假设 Service Mesh control plane 项目为 istio-system。如果在另一个命名空间中安装了 control plane，在运行前编辑每个命令.
+====
+
+.流程
+
+. 以具有 `cluster-admin` 权限的用户身份登录到 统信容器云管理平台控制台。
+
+. 点 *主页* -> *项目*。
+
+. 点 *创建项目*。
+
+. 在  *Project Name* 中输入 `bookinfo` ，输入  *显示名称* 及 *描述*，然后点 *创建*。
++
+** 或者，也可以通过 CLI 运行这个命令来创建 `bookinfo` 项目。
++
+[source,terminal]
+----
+$ oc new-project bookinfo
+----
++
+. 点 *Operators* -> *安装的 Operators*。
+
+. 点  *项目* 菜单，使用  {SMProductShortName} 命名空间。在这个示例中，使用 `istio-system`。
+
+. 点  *{SMProductName}* Operator。
+
+. 点  *Istio Service Mesh Member Roll* 选项卡。
+
+.. 如果您已经创建了 Istio Service Mesh Member Roll, 请点击名称，然后点击 YAML 标签来打开 YAML 编辑器。
+
+.. 如果您还没有创建 `ServiceMeshMemberRoll`，点 *Create ServiceMeshMemberRoll*.
++
+. 点 *Members*, t，然后在 *值* 字段中输入项目名称。
++
+. 点 *创建* 保存更新的  Service Mesh Member Roll。
++
+.. 或者，将以下示例保存到 YAML 文件中。
++
+.Bookinfo ServiceMeshMemberRoll 示例 servicemeshmemberroll-default.yaml
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+spec:
+  members:
+  - bookinfo
+----
++
+.. 运行以下命令上传该文件，并在 `istio-system` 命名空间中创建 `ServiceMeshMemberRoll` 资源。在本例中， `istio-system` 是 {SMProductShortName} control plane 项目的名称。
+[source,terminal]
+----
+$ oc create -n istio-system -f servicemeshmemberroll-default.yaml
+----
++
+. 运行以下命令，以验证 `ServiceMeshMemberRoll` 是否已成功创建。
++
+[source,terminal]
+----
+$ oc get smmr -n istio-system -o wide
+----
++
+当 `STATUS` 列为 `Configured` 时，安装成功完成。
++
+[source,terminal]
+----
+NAME      READY   STATUS       AGE   MEMBERS
+default   1/1     Configured   70s   ["bookinfo"]
+----
+. 在 CLI 中，通过应用 _`bookinfo`_ project 文件在 `bookinfo` 项目中部署 Bookinfo： 
++
+[source,bash,subs="attributes"]
+----
+$ oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/platform/kube/bookinfo.yaml
+----
++
+您应该看到类似如下的输出：
++
+[source,terminal]
+----
+service/details created
+serviceaccount/bookinfo-details created
+deployment.apps/details-v1 created
+service/ratings created
+serviceaccount/bookinfo-ratings created
+deployment.apps/ratings-v1 created
+service/reviews created
+serviceaccount/bookinfo-reviews created
+deployment.apps/reviews-v1 created
+deployment.apps/reviews-v2 created
+deployment.apps/reviews-v3 created
+service/productpage created
+serviceaccount/bookinfo-productpage created
+deployment.apps/productpage-v1 created
+----
++
+. 通过应用 `bookinfo-gateway.yaml` 文件创建入站网关 ：
++
+[source,bash,subs="attributes"]
+----
+$ oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/networking/bookinfo-gateway.yaml
+----
++
+您应该看到类似如下的输出：
++
+[source,terminal]
+----
+gateway.networking.istio.io/bookinfo-gateway created
+virtualservice.networking.istio.io/bookinfo created
+----
++
+. 设置 `GATEWAY_URL` 参数的值：
++
+[source,terminal]
+----
+$ export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+----

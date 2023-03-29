@@ -1,0 +1,10 @@
+:_content-type: ASSEMBLY
+[id="using-an-egress-router"]
+= 使用出口路由器 pod 的注意事项
+include::_attributes/common-attributes.adoc[]
+:context: using-an-egress-router
+
+toc::[]
+
+include::modules/nw-egress-router-about.adoc[leveloffset=+1]
+

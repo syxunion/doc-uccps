@@ -1,0 +1,7 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+[id="builds-strategy-s2i-environment-variables_{context}"]
+= Source-to-image 环境变量
+
+可以通过两种方式将环境变量提供给源构建过程和生成的镜像：环境文件和 BuildConfig 环境值。提供的变量将存在于构建过程和输出镜像中。

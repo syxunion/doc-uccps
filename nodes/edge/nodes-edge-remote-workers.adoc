@@ -1,0 +1,57 @@
+:_content-type: ASSEMBLY
+:context: nodes-edge-remote-workers
+[id="nodes-edge-remote-workers"]
+= 在网络边缘使用远程 worker 节点
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+您可以使用位于网络边缘的节点来配置 统信容器云管理平台 集群。在本主题中，它们称为远程 worker 节点。带有远程 worker 节点的典型集群合并了内部 master 和 worker 节点，其他位置的 worker 节点会连接到集群。本主题旨在提供使用远程 worker 节点的最佳实践指导，且不包含特定配置详情。
+
+在使用具有远程 worker 节点的部署模式时，不同行业有不同的用例，如电信、零售、制造企业和政府。例如，您可以通过将远程 worker 节点合并到 Kubernetes 区域来隔离项目和工作负载。
+
+但是，具有远程 worker 节点可能会带来更高的延迟，以及网络连接间丢失的问题。使用带有远程 worker 节点的集群会有一些挑战，包括：
+
+* *网络隔离*: 统信容器云管理平台 control plane 和远程 worker 节点必须可以相互通信。由于 control plane 和远程 worker 节点之间很远，网络问题可能会阻止这种通信。如需有关 统信容器云管理平台 如何响应网络分离以及减少对集群的影响的信息，请参阅使用远程 worker 节点进行网络隔离。
+
+* *电源终端*: 因为 control plane 和远程 worker 节点位于不同的位置，因此在远程位置或在两个位置之间的任意点出现停机会给集群造成负面影响。如需了解 统信容器云管理平台 如何响应节点丢失以及减少对集群的影响的信息，请参阅远程 worker 节点的电源丢失。
+
+* *延迟或临时减少吞吐量*: 与任何网络一样，集群和远程 worker 节点之间的网络状况改变都会对集群有负面影响。这类问题超出了本文档的范围。
+
+在规划使用远程 worker 节点的集群时，请注意以下限制：
+
+* 统信容器云管理平台 不支持使用与内部集群所使用的不同云供应商的远程 worker 节点。
+
+* 因为系统和环境中的问题（如特定类型的内存不在另一区中可用），将工作负载从一个 Kubernetes 区域移动到不同的 Kubernetes 区可能会有问题。
+
+* 使用代理和防火墙可能会遇到本文档所涉及到的范围以外的限制。有关如何解决这些限制，如配置防火墙，请参阅相关的 统信容器云管理平台 文档。
+
+* 您需要配置和维护 control plane 和网络边缘节点之间的 L2/L3 级别网络连接。
+
+include::modules/nodes-edge-remote-workers-network.adoc[leveloffset=+1]
+
+有关在带有远程 worker 节点的集群中使用这些对象的更多信息，请参阅 xref:../../nodes/edge/nodes-edge-remote-workers.html#nodes-edge-remote-workers-strategies_nodes-edge-remote-workers[关于远程 worker 节点策略]。
+
+include::modules/nodes-edge-remote-workers-power.adoc[leveloffset=+1]
+
+有关在带有远程 worker 节点的集群中使用这些对象的更多信息，请参阅 xref:../../nodes/edge/nodes-edge-remote-workers.html#nodes-edge-remote-workers-strategies_nodes-edge-remote-workers[关于远程 worker 节点策略]。
+
+include::modules/nodes-edge-remote-workers-strategies.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.Additional resources
+
+* For more information on Daemonesets, see xref:../../nodes/jobs/nodes-pods-daemonsets.adoc#nodes-pods-daemonsets[DaemonSets].
+
+* For more information on  taints and tolerations, see xref:../../nodes/scheduling/nodes-scheduler-taints-tolerations.adoc#nodes-scheduler-taints-tolerations-about_nodes-scheduler-taints-tolerations[Controlling pod placement using node taints].
+
+* For more information on configuring `KubeletConfig` objects, see xref:../../post_installation_configuration/node-tasks.adoc#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-node-tasks[Creating a KubeletConfig CRD].
+
+* For more information on replica sets, see xref:../../applications/deployments/what-deployments-are.html#deployments-repliasets_what-deployments-are[ReplicaSets].
+
+* For more information on deployments, see xref:../../applications/deployments/what-deployments-are.html#deployments-kube-deployments_what-deployments-are[Deployments].
+
+* For more information on replication controllers, see xref:../../applications/deployments/what-deployments-are.html#deployments-replicationcontrollers_what-deployments-are[Replication controllers].
+
+* For more information on the controller manager, see xref:../../operators/operator-reference.adoc#kube-controller-manager-operator_cluster-operators-ref[Kubernetes Controller Manager Operator].

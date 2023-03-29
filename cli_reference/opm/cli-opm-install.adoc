@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="cli-opm-install"]
+= 安装 opm CLI
+include::_attributes/common-attributes.adoc[]
+:context: cli-opm-install
+
+toc::[]
+
+include::modules/olm-about-opm.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+如需有关捆绑格式的更多信息，请参阅 Operator Framework 打包格式。
+要使用 Operator SDK 创建捆绑包镜像，请参阅使用 捆绑包镜像。
+
+include::modules/olm-installing-opm.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+[id="opm-addtl-resources"]
+== 其他资源
+
+* 请参阅为 opm 操作管理自定义目录，包括创建、更新和修剪目录。

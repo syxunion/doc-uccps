@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * builds/troubleshooting-builds.adoc
+
+[id="builds-troubleshooting-access-resources_{context}"]
+= 解决资源访问遭到拒绝的问题
+
+如果您的资源访问请求遭到拒绝：
+
+问题::
+构建失败并显示以下信息：
+
+[source,terminal]
+----
+requested access to the resource is denied
+----
+
+解决方案::
+您已超过项目中设置的某一镜像配额。检查当前的配额，并验证应用的限值和正在使用的存储：
+
+[source,terminal]
+----
+$ oc describe quota
+----

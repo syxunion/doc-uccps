@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/recommended-host-practices.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="recommended-node-host-practices_{context}"]
+= 推荐的节点主机实践
+
+统信容器云管理平台 节点配置文件包含重要的选项。例如，控制可以为节点调度的最大 pod 数量的两个参数: `podsPerCore` 和 `maxPods`。
+
+当两个参数都被设置时，其中较小的值限制了节点上的 pod 数量。超过这些值可导致：
+
+* CPU 使用率增加。
+* 减慢 pod 调度的速度。
+* 根据节点中的内存数量，可能出现内存耗尽的问题。
+* 耗尽 IP 地址池。
+* 资源过量使用，导致用户应用程序性能变差。
+
+[重要]
+====
+在 Kubernetes 中，包含单个容器的 pod 实际使用两个容器。第二个容器用来在实际容器启动前设置联网。因此，运行 10 个 pod 的系统实际上会运行 20 个容器。
+====
+
+[注意]
+====
+云供应商的磁盘 IOPS 节流可能会对 CRI-O 和 kubelet 产生影响。当节点上运行大量 I/O 高负载的 pod 时，可能会出现超载的问题。建议您监控节点上的磁盘 I/O，并使用有足够吞吐量的卷。
+====
+
+`podsPerCore` 根据节点中的处理器内核数来设置节点可运行的 pod 数量。例如：在一个有 4 个处理器内核的节点上将 podsPerCore 设为 `10` ，则该节点上允许的最大 pod 数量为 `40`。  
+
+[source,yaml]
+----
+kubeletConfig:
+  podsPerCore: 10
+----
+
+将 `podsPerCore` 设置为 `0` 可禁用这个限制。默认为 `0`。`podsPerCore` 不能超过 `maxPods`。`maxPods` 把节点可以运行的 `pod` 数量设置为一个固定值，而不需要考虑节点的属性。
+
+[source,yaml]
+----
+ kubeletConfig:
+    maxPods: 250
+----

@@ -1,0 +1,16 @@
+////
+This CONCEPT module included in the following assemblies:
+-service_mesh/v1x/ossm-vs-community.adoc
+-service_mesh/v2x/ossm-vs-community.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-kiali-service-mesh_{context}"]
+= Kiali and service mesh
+
+通过 {product-title} 上的 Service Mesh 安装 Kiali 与社区 Kiali 安装不同。为了解决问题、提供额外功能或处理不同之处，这些不同有时是必须的。
+
+* Kiali 已被默认启用。
+* 默认启用 Ingress 。
+* 对 Kiali ConfigMap 进行了更新。
+* 对 Kiali 的 ClusterRole 设置进行了更新。
+* 不要编辑 ConfigMap，因为您的更改可能会被 {SMProductShortName} 或 Kiali Operator 覆盖。Kiali Operator 管理的文件有 `kiali.io/` 标签或注解。更新 Operator 文件应仅限于具有 `cluster-admin` 权限的用户。如果使用 {product-dedicated}，则更新 Operator 文件应该仅限于具有 `dedicated-admin` 权限的用户。

@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+[id="usage-oc-kubectl"]
+= oc 和 kubectl 命令的使用方法
+include::_attributes/common-attributes.adoc[]
+:context: usage-oc-kubectl
+
+Kubernetes 命令行界面（CLI）`kubectl` 可以用来对 Kubernetes 集群运行命令。由于 统信容器云管理平台 是经过认证的 Kubernetes 发行版本，因此您可以使用 统信容器云管理平台 附带的受支持的 kubectl 二进制文件，或者使用 `oc` 二进制文件来获得扩展的功能。
+
+== oc 二进制文件
+
+`oc` 二进制文件提供与 kubectl 二进制文件相同的功能，但它经过扩展，可原生支持额外的 统信容器云管理平台 功能，包括：
+
+* **对 统信容器云管理平台 资源的完整支持**
++
+`DeploymentConfig`、`BuildConfig`、`Route`、`ImageStream` 和 `ImageStreamTag` 对象等资源特定于 统信容器云管理平台 发行版本，并基于标准 Kubernetes 原语构建。
++
+* **身份验证**
++
+`oc` 二进制文件提供了一个内置 `login` 命令，此命令可进行身份验证，并让您处理 统信容器云管理平台 项目，这会将 Kubernetes 命名空间映射到经过身份验证的用户。如需更多信息，请参阅 xref:../../authentication/understanding-authentication.adoc#understanding-authentication[了解身份验证]。
++
+* **附加命令**
++
+例如，借助附加命令 `oc new-app` 可以更轻松地使用现有源代码或预构建镜像来启动新的应用程序。同样，附加命令 `oc new-project` 让您可以更轻松地启动一个项目并切换到该项目作为您的默认项目。
+
+[重要]
+====
+如果安装了旧版本的 `oc` 二进制文件，则无法使用 统信容器云管理平台 1.2 中的所有命令。如果要使用最新的功能，您必须下载并安装与 统信容器云管理平台 服务器版本对应的 `oc` 二进制文件的最新版本。
+====
+
+非安全 API 更改至少涉及两个次发行版本（例如，4.1 到 4.2 到 4.3）来更新旧的 oc 二进制文件。使用新功能可能需要较新的 oc 二进制文件。一个 4.3 服务器可能会带有版本 4.2 oc 二进制文件无法使用的功能，而一个 4.3 oc 二进制文件可能会带有 4.2 服务器不支持的功能。
+
+
+
+== kubectl 二进制文件
+
+提供 `kubectl` 二进制文件的目的是为来自标准 Kubernetes 环境的新 统信容器云管理平台 用户或者希望使用 `kubectl` CLI 的用户支持现有工作流和脚本。`kubectl` 的现有用户可以继续使用二进制文件与 Kubernetes 原语交互，而不需要对 统信容器云管理平台 集群进行任何更改。
+
+您可以按照安装 Uccps CLI 的步骤安装受支持的 kubectl 二进制文件。如果您下载二进制文件，或者在使用 RPM 安装 CLI 时安装，则 kubectl 二进制文件会包括在存档中。
+
+如需更多信息，请参阅 link:https://kubernetes.io/docs/reference/kubectl/overview/[ kubectl 文档]。

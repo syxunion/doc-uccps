@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-reference-guide"]
+= 功能开发参考指南
+include::_attributes/common-attributes.adoc[]
+:context: serverless-functions-reference-guide
+
+toc::[]
+
+Uccps Serverless 功能提供模板，可用于创建基本功能。模板启动功能项目 boilerplate，并准备好将其用于 `kn func` 工具。每个功能模板是为特定的运行时量身定制的，并遵循其约定。使用模板，您可以自动启动功能项目。
+
+可用的运行时模板如下：
+
+Node.js
+Quarkus
+TypeScript
+//* SpringBoot - TBC
+
+include::modules/serverless-nodejs-context-object-reference.adoc[leveloffset=+1]
+include::modules/serverless-typescript-context-object-reference.adoc[leveloffset=+1]

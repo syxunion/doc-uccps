@@ -1,0 +1,149 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-kubernetes-plugin_{context}"]
+= 使用 Jenkins Kubernetes 插件
+
+在以下示例中，`Uccps-jee-sample` `BuildConfig` 对象会导致 Jenkins Maven 代理 pod 动态置备。pod 会克隆一些 Java 源代码，构建一个 WAR 文件，并导致第二个 `BuildConfig` `Uccps-jee-sample-docker` 运行。第二个 `BuildConfig` 会将新的 WAR 文件分层到一个容器镜像中。
+
+.使用 Jenkins Kubernetes 插件的 `BuildConfig` 示例
+[source,yaml]
+----
+kind: List
+apiVersion: v1
+items:
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: openshift-jee-sample
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    name: openshift-jee-sample-docker
+  spec:
+    strategy:
+      type: Docker
+    source:
+      type: Docker
+      dockerfile: |-
+        FROM openshift/wildfly-101-centos7:latest
+        COPY ROOT.war /wildfly/standalone/deployments/ROOT.war
+        CMD $STI_SCRIPTS_PATH/run
+      binary:
+        asFile: ROOT.war
+    output:
+      to:
+        kind: ImageStreamTag
+        name: openshift-jee-sample:latest
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    name: openshift-jee-sample
+  spec:
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          node("maven") {
+            sh "git clone https://github.com/openshift/openshift-jee-sample.git ."
+            sh "mvn -B -Popenshift package"
+            sh "oc start-build -F openshift-jee-sample-docker --from-file=target/ROOT.war"
+          }
+    triggers:
+    - type: ConfigChange
+----
+
+它还可覆盖动态创建的 Jenkins 代理 pod 的规范。下面是对前一示例的修改，可覆盖容器内存并指定环境变量：
+
+.使用 Jenkins Kubernetes 插件的 `BuildConfig` 示例，指定内存限制和环境变量
+[source,yaml]
+----
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: openshift-jee-sample
+spec:
+  strategy:
+    type: JenkinsPipeline
+    jenkinsPipelineStrategy:
+      jenkinsfile: |-
+        podTemplate(label: "mypod", <1>
+                    cloud: "openshift", <2>
+                    inheritFrom: "maven", <3>
+                    containers: [
+            containerTemplate(name: "jnlp", <4>
+                              image: "openshift/jenkins-agent-maven-35-centos7:v3.10", <5>
+                              resourceRequestMemory: "512Mi", <6>
+                              resourceLimitMemory: "512Mi", <7>
+                              envVars: [
+              envVar(key: "CONTAINER_HEAP_PERCENT", value: "0.25") <8>
+            ])
+          ]) {
+          node("mypod") { <9>
+            sh "git clone https://github.com/openshift/openshift-jee-sample.git ."
+            sh "mvn -B -Popenshift package"
+            sh "oc start-build -F openshift-jee-sample-docker --from-file=target/ROOT.war"
+          }
+        }
+  triggers:
+  - type: ConfigChange
+----
+<1> 动态定义的名为 `mypod` 的新 Pod 模板。新 pod 模板名称在节点片段中引用。
+<2> `cloud` 值必须设置为 `Uccps`。
+<3> 新 pod 模板可以从现有 pod 模板继承其配置。在本例中，继承自 统信容器云管理平台 预定义的 Maven Pod 模板。
+<4> 本例覆盖了预先存在容器中的值，且必须按名称指定。统信容器云管理平台 附带的所有 Jenkins 代理镜像均使用容器名称 `jnlp`。
+<5> 再次指定容器镜像名称。这是个已知问题。
+<6> 指定了 `512 Mi` 的内存请求。
+<7> 指定了 `512 Mi` 的内存限值。
+<8> `CONTAINER_HEAP_PERCENT` 环境变量，其值指定为 0.25。
+<9> 节点片段引用定义的 pod 模板的名称。
+
+构建完成后会默认删除 pod。该行为可通过插件或在 Jenkinsfile 管道中修改。
+
+上游 Jenkins 最近引入了一个 YAML 声明格式，用于定义带有您的管道的 `podTemplate` 管道 DSL。一个这种格式的示例，它使用 统信容器云管理平台 Jenkins 镜像中定义的 `java-builder` pod 模板示例：
+
+[source,yaml]
+----
+def nodeLabel = 'java-buidler'
+
+pipeline {
+  agent {
+    kubernetes {
+      cloud 'openshift'
+      label nodeLabel
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    worker: ${nodeLabel}
+spec:
+  containers:
+  - name: jnlp
+    image: image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+  - name: java
+    image: image-registry.openshift-image-registry.svc:5000/openshift/java:latest
+    command:
+    - cat
+    tty: true
+"""
+    }
+  }
+
+  options {
+    timeout(time: 20, unit: 'MINUTES')
+  }
+
+  stages {
+    stage('Build App') {
+      steps {
+        container("java") {
+          sh "mvn --version"
+        }
+     }
+    }
+  }
+}
+----

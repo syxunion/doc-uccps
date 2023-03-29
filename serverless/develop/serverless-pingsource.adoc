@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="serverless-pingsource"]
+= 创建 ping 源
+:context: serverless-pingsource
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+ping 源是一个事件源，可用于定期向事件消费者发送带有恒定有效负载的 ping 事件。ping 源可以用来调度发送事件，类似于计时器。
+
+// dev console
+include::modules/serverless-pingsource-odc.adoc[leveloffset=+1]
+// kn commands
+include::modules/serverless-pingsource-kn.adoc[leveloffset=+1]
+include::modules/specifying-sink-flag-kn.adoc[leveloffset=+2]
+// YAML
+include::modules/serverless-pingsource-yaml.adoc[leveloffset=+1]

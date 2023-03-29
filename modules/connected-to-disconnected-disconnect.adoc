@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+[id="connected-to-disconnected-disconnect_{context}"]
+= 断开集群与网络的连接
+
+镜像所有所需的软件仓库并配置集群以作为断开连接的集群后，您可以断开集群与网络的连接。
+
+
+

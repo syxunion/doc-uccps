@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+// * networking/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-loglevel_{context}"]
+= 设置 CoreDNS 日志级别
+
+您可以配置 CoreDNS 日志级别来确定日志记录错误信息中的详情量。CoreDNS 日志级别的有效值为 `Normal`、`Debug` 和 `Trace`。默认 `logLevel` 为 `Normal`。
+
+[注意]
+====
+您可以配置 CoreDNS 日志级别来确定日志记录错误信息中的详情量。CoreDNS 日志级别的有效值为 `Normal`、`Debug` 和 `Trace`。默认 `logLevel` 为 `Normal`。
+
+* `logLevel`: `Normal` 启用 "errors" 类: `log` . { class error }.
+
+* `logLevel`: `Debug` 启用 "denial" 类: `log` . { class denial error }。
+
+* `logLevel`: `Trace` 启用 "all" 类: `log` . { class all }.
+====
+
+.流程
+
+* 要将 `logLevel` 设置为 `Debug`，输入以下命令：
++
+[source,terminal]
+----
+$ oc patch dnses.operator.openshift.io/default -p '{"spec":{"logLevel":"Debug"}}' --type=merge
+----
+
+* 要将 `logLevel` 设置为 `Debug`，输入以下命令：
++
+[source,terminal]
+----
+$ oc patch dnses.operator.openshift.io/default -p '{"spec":{"logLevel":"Trace"}}' --type=merge
+----
+
+.验证
+
+* 要将 `logLevel` 设置为 `Debug`，输入以下命令：
++
+[source,terminal]
+----
+$ oc get configmap/dns-default -n openshift-dns -o yaml
+----

@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing-groups.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-running-subset_{context}"]
+= 将 LDAP 服务器上的子组与统信容器云管理平台同步
+
+您可以使用白名单文件和/或黑名单文件，将 LDAP 组的子集与统信容器云管理平台同步。
+
+[注意]
+====
+您可以使用黑名单文件、白名单文件或白名单字面量的任意组合。白名单和黑名单文件必须每行包含一个唯一组标识符，您可以在该命令本身中直接包含白名单字面量。这些准则适用于在 LDAP 服务器上找到的组，以及统信容器云管理平台中已存在的组。
+====
+
+.先决条件
+
+* 创建同步配置文件。
+
+.流程
+
+* 要将 LDAP 组的子集与统信容器云管理平台同步，请使用以下任一命令：
++
+[source,terminal]
+----
+$ oc adm groups sync --whitelist=<whitelist_file> \
+                   --sync-config=config.yaml      \
+                   --confirm
+----
++
+[source,terminal]
+----
+$ oc adm groups sync --blacklist=<blacklist_file> \
+                   --sync-config=config.yaml      \
+                   --confirm
+----
++
+[source,terminal]
+----
+$ oc adm groups sync <group_unique_identifier>    \
+                   --sync-config=config.yaml      \
+                   --confirm
+----
++
+[source,terminal]
+----
+$ oc adm groups sync <group_unique_identifier>  \
+                   --whitelist=<whitelist_file> \
+                   --blacklist=<blacklist_file> \
+                   --sync-config=config.yaml    \
+                   --confirm
+----
++
+[source,terminal]
+----
+$ oc adm groups sync --type=openshift           \
+                   --whitelist=<whitelist_file> \
+                   --sync-config=config.yaml    \
+                   --confirm
+----
++
+[注意]
+====
+默认情况下，所有组同步操作都是空运行（dry-run），因此您必须在 `oc adm groups sync` 命令上设置 `--confirm` 标志，才能更改统信容器云管理平台组记录。
+====

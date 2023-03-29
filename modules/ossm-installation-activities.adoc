@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/preparing-ossm-installation.adoc
+// * service_mesh/v2x/preparing-ossm-installation.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: CONCEPT
+[id="ossm-installation-activities_{context}"]
+= Operator 概述
+
+{SMProductName} 需要以下四个 Operator：
+
+* *OpenShift Elasticsearch* - (可选) 为使用 {JaegerShortName} 进行追踪和日志记录提供数据库存储。它基于开源 link:https://www.elastic.co/[Elasticsearch] 项目。
+* *{JaegerName}* - 提供分布式追踪以监控复杂分布式系统中的事务并进行故障排除。它基于开源  link:https://www.jaegertracing.io/[Jaeger] 项目。
+* *Kiali* - 为您的服务网格提供可观察性。允许您在单个控制台中查看配置、监控流量和分析追踪。它基于开源 link:https://www.kiali.io/[Kiali] 项目。
+* *{SMProductName}* - 允许您连接、保护、控制和观察组成应用程序的微服务。 {SMProductShortName} 定义并监控管理 `ServiceMeshControlPlane` 资源，这个资源用来管理 {SMProductShortName} 组件的部署、更新和删除操作。它基于开源 link:https://istio.io/[Istio] 项目。

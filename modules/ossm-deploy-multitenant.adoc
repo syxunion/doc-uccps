@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/ossm-deploy-mod-v2x.adoc
+
+:_content-type: CONCEPT
+[id="ossm-deploy-multitenant_{context}"]
+= Multitenant deployment model
+
+{SMProductName} 安装了一个 `ServiceMeshControlPlane` 它默认配置为多租户。{SMProductName} 使用多租户 Operator 来管理 {SMProductShortName} 生命周期。在网格内，命名空间用于租期。
+
+{SMProductName} 使用 `ServiceMeshControlPlane` 资源来管理网格安装，该安装范围默认限制为包含资源的命名空间。您可以使用 `ServiceMeshMemberRoll` 和 `ServiceMeshMember` 资源在网格中包含额外的命名空间。命名空间只能包含在单个网格中，多个网格也可以安装到单个 OpenShift 集群中。
+
+典型的服务网格部署使用单一 {SMProductShortName} control plane 来配置网格中服务间的通信。{SMProductName} 支持 “软多租户”, 其中每个租户有一个 control plane 和一个网格，并且集群中可以有多个独立的 control plane。多租户部署指定可以访问 {SMProductShortName} 的项目， 并将 {SMProductShortName} 与其他 control plane 实例隔离。
+
+集群管理员在所有 Istio control plane 间获得控制和可见性，而租户管理员只能控制其特定的 Service Mesh、Kiali 和 Jaeger 实例。
+
+您可以授予团队权限，以便仅将工作负载部署到给定的命名空间或一组命名空间。 如果服务网格管理员授予 `mesh-user` 角色，用户可以创建一个 `ServiceMeshMember` 资源来将命名空间添加到 `ServiceMeshMemberRoll`.

@@ -1,0 +1,149 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-writing-description_{context}"]
+= 编写模板描述
+
+模板描述向用户介绍模板的作用，有助于用户在 web 控制台中搜索查找模板。除模板名称以外的其他元数据均为可选，但若有则会非常有用。除常规描述性信息外，元数据还应包含一组标签。实用标签包括与模板相关的语言名称，如 Java、PHP、Ruby 等。
+
+以下是模板描述性元数据的示例：
+
+[source,yaml]
+----
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: cakephp-mysql-example <1>
+  annotations:
+    openshift.io/display-name: "CakePHP MySQL Example (Ephemeral)" <2>
+    description: >-
+      An example CakePHP application with a MySQL database. For more information
+      about using this template, including OpenShift considerations, see
+      https://github.com/sclorg/cakephp-ex/blob/master/README.md.
+
+
+      WARNING: Any data stored will be lost upon pod destruction. Only use this
+      template for testing." <3>
+    openshift.io/long-description: >-
+      This template defines resources needed to develop a CakePHP application,
+      including a build configuration, application DeploymentConfig, and
+      database DeploymentConfig.  The database is stored in
+      non-persistent storage, so this configuration should be used for
+      experimental purposes only. <4>
+    tags: "quickstart,php,cakephp" <5>
+    iconClass: icon-php <6>
+    openshift.io/provider-display-name: "Red Hat, Inc." <7>
+    openshift.io/documentation-url: "https://github.com/sclorg/cakephp-ex" <8>
+    openshift.io/support-url: "https://access.redhat.com" <9>
+message: "Your admin credentials are ${ADMIN_USERNAME}:${ADMIN_PASSWORD}" <10>
+----
+<1> 模板的唯一名称。
+<2> 可由用户界面使用的简单、用户友好型名称。
+<3> 模板的描述。包含充足的详细信息，方便用户了解所部署的内容以及部署前须知的注意事项。还应提供其他信息链接，如 README 文件。可包括换行符来创建段落。
+<4> 其他模板描述。例如，这可按照服务目录显示。
+<5> 要与模板关联的标签，用于搜索和分组。添加将包含在其中一个提供的目录类别中的标签。请参见控制台常量文件中 `CATALOG_CATEGORIES` 中的 `id` 和 `categoryAliases`。此外，还可为整个集群自定义类别。
+<6> 在 web 控制台中与模板一同显示的图标。
++
+.可用图标
+[%collapsible]
+====
+* `icon-3scale`
+* `icon-aerogear`
+* `icon-amq`
+* `icon-angularjs`
+* `icon-ansible`
+* `icon-apache`
+* `icon-beaker`
+* `icon-camel`
+* `icon-capedwarf`
+* `icon-cassandra`
+* `icon-catalog-icon`
+* `icon-clojure`
+* `icon-codeigniter`
+* `icon-cordova`
+* `icon-datagrid`
+* `icon-datavirt`
+* `icon-debian`
+* `icon-decisionserver`
+* `icon-django`
+* `icon-dotnet`
+* `icon-drupal`
+* `icon-eap`
+* `icon-elastic`
+* `icon-erlang`
+* `icon-fedora`
+* `icon-freebsd`
+* `icon-git`
+* `icon-github`
+* `icon-gitlab`
+* `icon-glassfish`
+* `icon-go-gopher`
+* `icon-golang`
+* `icon-grails`
+* `icon-hadoop`
+* `icon-haproxy`
+* `icon-helm`
+* `icon-infinispan`
+* `icon-jboss`
+* `icon-jenkins`
+* `icon-jetty`
+* `icon-joomla`
+* `icon-jruby`
+* `icon-js`
+* `icon-knative`
+* `icon-kubevirt`
+* `icon-laravel`
+* `icon-load-balancer`
+* `icon-mariadb`
+* `icon-mediawiki`
+* `icon-memcached`
+* `icon-mongodb`
+* `icon-mssql`
+* `icon-mysql-database`
+* `icon-nginx`
+* `icon-nodejs`
+* `icon-openjdk`
+* `icon-openliberty`
+* `icon-openshift`
+* `icon-openstack`
+* `icon-other-linux`
+* `icon-other-unknown`
+* `icon-perl`
+* `icon-phalcon`
+* `icon-php`
+* `icon-play`
+* `iconpostgresql`
+* `icon-processserver`
+* `icon-python`
+* `icon-quarkus`
+* `icon-rabbitmq`
+* `icon-rails`
+* `icon-redhat`
+* `icon-redis`
+* `icon-rh-integration`
+* `icon-rh-spring-boot`
+* `icon-rh-tomcat`
+* `icon-ruby`
+* `icon-scala`
+* `icon-serverlessfx`
+* `icon-shadowman`
+* `icon-spring-boot`
+* `icon-spring`
+* `icon-sso`
+* `icon-stackoverflow`
+* `icon-suse`
+* `icon-symfony`
+* `icon-tomcat`
+* `icon-ubuntu`
+* `icon-vertx`
+* `icon-wildfly`
+* `icon-windows`
+* `icon-wordpress`
+* `icon-xamarin`
+* `icon-zend`
+====
+<7> 提供模板的个人或组织的名称。
+<8> 用于参考更多模板文档的 URL。
+<9> 用于获取模板支持的 URL。
+<10> 模板实例化时显示的说明消息。该字段应向用户介绍如何使用新建资源。显示消息前，对消息进行参数替换，以便输出中包含所生成的凭据和其他参数。其中包括用户应遵守的所有后续步骤文档链接。

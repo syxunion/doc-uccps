@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * web_console/dynamic-plug-ins.adoc
+
+:_content-type: PROCEDURE
+[id="running-your-dynamic-plugin_{context}"]
+= 运行您的动态插件
+
+您可以使用本地开发环境运行插件。Uccps 控制台在连接到您登录的集群的容器中运行。
+
+.先决条件
+* 已安装 Uccps CLI (`oc`)。
+* 您必须有一个 Uccps 集群正在运行。
+* 必须至少安装了 Podman 的 Docker 或 v3.2.0。
+
+.流程
+
+* 在克隆存储库的本地目录中打开两个终端窗口。
++
+
+a. 在第一个终端中运行以下命令：
++
+[source,terminal]
+----
+$ yarn install
+----
++
+[source,terminal]
+----
+$ yarn run start
+----
+
+b. 在第二个终端窗口中运行以下命令：
++
+[source,terminal]
+----
+$ oc login
+----
++
+[source,terminal]
+----
+$ yarn run start-console
+----
+
+.验证
+* 访问 link:http://localhost:9000/example[local host] 以查看正在运行的插件。

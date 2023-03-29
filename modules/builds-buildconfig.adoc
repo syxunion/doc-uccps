@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+// * builds/understanding-builds.adoc
+
+:_content-type: REFERENCE
+[id="builds-buildconfig_{context}"]
+= BuildConfigs
+
+构建配置描述单个构建定义，以及一组规定何时创建新构建的触发器（trigger）。构建配置通过 `BuildConfig` 定义，它是一种 REST 对象，可在对 API 服务器的 POST 中使用以创建新实例。
+
+构建配置或 `BuildConfig` 的特征就是构建策略和一个或多个源。策略决定流程，而源则提供输入。
+
+根据您选择使用 统信容器云管理平台 创建应用程序的方式，如果使用 Web 控制台或 CLI，通常会自动生成 `BuildConfig`，并且可以随时对其进行编辑。如果选择稍后手动更改配置，则了解 `BuildConfig` 的组成部分及可用选项可能会有所帮助。
+
+以下示例 `BuildConfig` 在每次容器镜像标签或源代码改变时产生新的构建：
+
+.`BuildConfig` 对象定义
+[source,yaml]
+----
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: "ruby-sample-build" <1>
+spec:
+  runPolicy: "Serial" <2>
+  triggers: <3>
+    -
+      type: "GitHub"
+      github:
+        secret: "secret101"
+    - type: "Generic"
+      generic:
+        secret: "secret101"
+    -
+      type: "ImageChange"
+  source: <4>
+    git:
+      uri: "https://github.com/openshift/ruby-hello-world"
+  strategy: <5>
+    sourceStrategy:
+      from:
+        kind: "ImageStreamTag"
+        name: "ruby-20-centos7:latest"
+  output: <6>
+    to:
+      kind: "ImageStreamTag"
+      name: "origin-ruby-sample:latest"
+  postCommit: <7>
+      script: "bundle exec rake test"
+----
+<1> 此规格会创建一个名为 `ruby-sample-build` 的新 `BuildConfig`。
+<2> `runPolicy` 字段控制从此构建配置创建的构建能否同时运行。默认值为 `Serial`，即新构建将按顺序运行，而不是同时运行。
+<3> 您可以指定导致创建新构建的触发器的列表。
+<4> `source` 部分定义构建的来源。源类型决定主要的输入源，可以是 `Git`（指向代码库存储位置）、Dockerfile（从内联 Dockerfile 构建）或 Binary（接受二进制有效负载）。可以同时拥有多个源。有关每种源类型的更多信息，请参阅"创建构建输入"。
+<5> strategy 部分描述用于执行构建的构建策略。您可以在此处指定 Source、Docker 或 Custom 策略。本例使用 `ruby-20-centos7` 容器镜像， `Source-to-image（S2I` 用于应用程序构建。
+<6> 成功构建容器镜像后，它将被推送到 `output` 部分中描述的存储库。
+<7> `postCommit` 部分定义一个可选构建 hook。

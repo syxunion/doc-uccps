@@ -1,0 +1,215 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+:_content-type: REFERENCE
+[id="nw-ingress-controller-configuration-parameters_{context}"]
+= Ingress Controller 配置参数
+
+`ingresscontrollers.operator.openshift.io` 资源提供了以下配置参数。
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`domain`
+|`domain` 是 Ingress Controller 服务的一个 DNS 名称，用于配置多个功能：
+
+* 对于 `LoadBalancerService` 端点发布策略，`domain` 被用来配置 DNS 记录。请参阅 `endpointPublishingStrategy`。
+
+* 当使用生成的默认证书时，该证书对域及其子域有效。请参阅 defaultCertificate。
+
+* 该值会发布到独立的 Route 状态，以便用户了解目标外部 DNS 记录的位置。
+
+`domain` 值在所有 Ingress 控制器中需要是唯一的，且不能更新。
+
+如果为空，默认值为 `ingress.config.openshift.io/cluster .spec.domain`。
+
+|`appsDomain`
+|当在创建一个 Route 时没有明确指定主机，appsDomain 是 AWS 基础架构使用的可选域，而不是在 domain 字段中指定的域。如果为 appsDomain 输入一个值，则使用这个值为 Route 生成默认主机值。与 domain 不同，appsDomain 可以在安装后进行修改。只有在设置了使用通配符（wildcard）证书的新 Ingress Controller 时，才能使用此参数。
+
+|`replicas`
+|replicas 是 Ingress 控制器副本数量。如果没有设置，则默认值为 2。
+
+|`endpointPublishingStrategy`
+|`endpointPublishingStrategy` 用于向其他网络发布 Ingress Controller 端点，以启用负载均衡器集成，并提供对其他系统的访问。
+
+如果没有设置，则默认值基于 `infrastructure.config.openshift.io/cluster .status.platform`：
+
+* AWS: `LoadBalancerService` (具有外部范围)
+* Azure: `LoadBalancerService` (具有外部范围)
+* GCP: `LoadBalancerService` (具有外部范围)
+* 裸机: `NodePortService`
+* 其他: `HostNetwork`
++
+对于大多数平台，可以更新 `endpointPublishingStrategy` 值。在 GCP 上，您可以配置以下 `endpointPublishingStrategy` 字段：
+
+* `loadBalancer.scope`
+* `loadbalancer.providerParameters.gcp.clientAccess`
+* `hostNetwork.protocol`
+* `nodePort.protocol`
+
+|`defaultCertificate`
+|`defaultCertificate` 的值是一个到包括由 Ingress controller 提供的默认证书的 secret 的指代。当 Routes 没有指定其自身证书时，使用 `defaultCertificate`。
+
+secret 必须包含以下密钥和数据： 
+* `tls.crt`：证书文件内容
+* `tls.key`：密钥文件内容
+
+如果没有设置，则自动生成和使用通配符证书。该证书对 Ingress Controller 的域 和子域有效，所生成的证书的 CA 会自动与集群的信任存储集成。
+
+内部证书（无论是生成的证书还是用户指定的证书）自动与 统信容器云管理平台 内置的 OAuth 服务器集成。
+
+|`namespaceSelector`
+|`namespaceSelector` 用来过滤由 Ingress 控制器提供服务的一组命名空间。这对实现分片（shard）非常有用。
+
+|`routeSelector`
+|`routeSelector` 用于由 Ingress Controller 提供服务的一组 Routes。这对实现分片（shard）非常有用。
+
+|`nodePlacement`
+|`NodePlacement` 启用对 Ingress Controller 调度的显式控制。
+
+如果没有设置，则使用默认值。
+
+[注意]
+====
+`nodePlacement` 参数包括两个部分: `nodeSelector` 和 `tolerations`。例如：
+
+[source,yaml]
+----
+nodePlacement:
+ nodeSelector:
+   matchLabels:
+     kubernetes.io/os: linux
+ tolerations:
+ - effect: NoSchedule
+   operator: Exists
+----
+====
+
+|`tlsSecurityProfile`
+|`tlsSecurityProfile` 指定 Ingress Controller 的 TLS 连接的设置。
+
+如果没有设置，则默认值基于 `apiservers.config.openshift.io/cluster` 资源。
+
+当使用 `Old`、`Intermediate` 和 `Modern`配置集类型时，有效的配置集可能会在不同发行版本间有所改变。例如：使用在版本 `X.Y.Z` 中部署的 Intermediate 配置集，升级到版本 `X.Y.Z+1` 可能会导致新的配置集配置应用到 Ingress Controller，从而导致一个 rollout 操作。
+
+Ingress Controller 的最低 TLS 版本是 `1.1`，最高 TLS 版本为 `1.3`。
+
+[注意]
+====
+加密器和配置的安全配置集的最小 TLS 版本反映在 TLSProfile 状态中。
+====
+
+[重要]
+====
+Ingress Operator 将 `Old` 或 `Custom` 配置集的 TLS `1.0` 转换为 `1.1`。
+====
+
+|`clientTLS`
+|`clientTLS` 验证客户端对集群和服务的访问；因此，启用了 mutual TLS 身份验证。如果没有设置，则不启用客户端 TLS。
+
+`clientTLS` 具有所需的子字段 `spec.clientTLS.clientCertificatePolicy` 和 `spec.clientTLS.ClientCA`。
+
+`ClientCertificatePolicy` 子字段接受以下两个值之一：`Required` 或 `Optional`。`ClientCA` 子字段指定 ``openshift-config 命名空间中的配置映射。配置映射应包含 CA 证书捆绑包。`AllowedSubjectPatterns` 是一个可选值，用于指定正则表达式列表，该列表与有效客户端证书上的可分辨名称匹配以过滤请求。正则表达式必须使用 PCRE 语法。至少一种模式必须与客户端证书的可分辨名称匹配；否则，入口控制器拒绝证书，并拒绝连接。如果没有指定，ingress 控制器不会根据可分辨的名称拒绝证书。
+
+|`routeAdmission`
+|`routeAdmission` 定义了处理新路由声明的策略，如允许或拒绝命名空间间的声明。
+
+`namespaceOwnership` 描述了如何处理跨命名空间的主机名声明。默认为 `Strict`。
+
+* `Strict`: 不允许路由在命名空间间声明相同的主机名。
+* `InterNamespaceAllowed`: 允许路由在命名空间间声明相同主机名的不同路径。
+
+`wildcardPolicy` 描述了 Ingress Controller 如何处理采用通配符策略的路由。
+
+* `WildcardsAllowed`: 表示 Ingress Controller 允许采用任何通配符策略的路由。
+
+* `WildcardsDisallowed`: 表示 Ingress Controller 只接受采用 None 通配符策略的路由。将 `wildcardPolicy` 从 `WildcardsAllowed` 更新为 `WildcardsDisallowed`，会导致采用 Subdomain 通配符策略的已接受路由停止工作。这些路由必须重新创建为采用 None 通配符策略，让 `Ingress Controller` 重新接受。`WildcardsDisallowed` 是默认设置。
+
+|`IngressControllerLogging`
+|`logging` 定义了有关在哪里记录什么内容的参数。如果此字段为空，则会启用运行日志，但禁用访问日志。
+
+* `access` 描述了客户端请求的日志记录方式。如果此字段为空，则禁用访问日志。
+** `destination` 描述日志消息的目的地。
+*** `type` 是日志的目的地类型：
+**** `Container` 指定日志应该进入 sidecar 容器。`Ingress Operator` 在 `Ingress Controller` pod 上配置名为 *logs* 的容器，并配置 `Ingress Controller` 以将日志写入容器。管理员应该配置一个自定义日志记录解决方案，从该容器读取日志。使用容器日志意味着，如果日志速率超过容器运行时或自定义日志解决方案的容量，则可能会出现日志丢失的问题。
+**** `Syslog` 指定日志发送到 Syslog 端点。管理员必须指定可以接收 Syslog 消息的端点。管理员应该已经配置了一个自定义 Syslog 实例。
+*** `container` 描述了 Container 日志记录目的地类型的参数。目前没有容器日志记录参数，因此此字段必须为空。
+*** `syslog` 描述了 Syslog 日志记录目的地类型的参数：
+**** `address` 是接收日志消息的 syslog 端点的 IP 地址。
+**** `port` 是接收日志消息的 syslog 端点的 UDP 端口号。
+**** `maxLength` 是 syslog 消息的最大长度。它必须介于 480 到 4096 字节之间。如果此字段为空，则最大长度设置为默认值 1024 字节。
+**** `facility` 指定日志消息的 `syslog` 工具。如果该字段为空，则工具为 local1。否则,它必须指定一个有效的 syslog 工具： `kern`、`user`、`mail`、`daemon`、`auth`、 `syslog`, `lpr`, `news`, `uucp`, `cron`, `auth2`, `ftp`, `ntp`, `audit`, `alert`, `cron2`, `local0`, `local1`、`local2`、`local3`。 `local4`、`local5`、`local6`或 `local7`。
+** `httpLogFormat` 指定 HTTP 请求的日志消息格式。如果此字段为空，日志消息将使用实现中的默认 HTTP 日志格式。有关 HAProxy 的默认 HTTP 日志格式，请参阅 HAProxy 文档。
+
+|`httpHeaders`
+|`httpHeaders` 为 HTTP 标头定义策略。
+
+通过为 `IngressControllerHTTPHeaders` 设置 `forwardHeaderPolicy`，您可以指定 Ingress 控制器何时和如何设置 `Forwarded`、`X-Forwarded-For`、`X-Forwarded-Host`、`X-Forwarded-Port`、`X-Forwarded-Proto` 和 `X-Forwarded-Proto-Version` HTTP 标头。
+
+默认情况下，策略设置为 `Append`
+
+* `Append` 指定 Ingress Controller 会附加标头，并保留任何现有的标头。
+* `Replace` 指定 Ingress Controller 设置标头，删除任何现有的标头。
+* `IfNone` 指定 Ingress Controller 在尚未设置标头时设置它们。
+* `Never` 指定 Ingress Controller 不会设置标头，并保留任何现有的标头。
+
+通过设置 `headerNameCaseAdjustments`，您可以指定 HTTP 标头名对大小写的调整。每个调整都指定一个 HTTP 标头名称需要进行相关的大小写调整。例如，指定 `X-Forwarded-For` 表示 `x-forwarded-for` HTTP 标头应调整相应的大写。
+
+这些调整仅应用于明文、边缘终止和重新加密路由，且仅在使用 HTTP/1 时有效。
+
+对于请求标头，这些调整仅适用于具有 `haproxy.router.openshift.io/h1-adjust-case=true` 注解的路由。对于响应标头，这些调整适用于所有 HTTP 响应。如果此字段为空，则不会调整任何请求标头。
+
+|`httpCompression`
+|`httpCompression` 定义 HTTP 流量压缩的策略。
+
+* `mimeTypes` 定义应该将压缩应用到的 MIME 类型列表。例如，`text/css`; `charset=utf-8`, `text/html, text/*`, `image/svg+xml`, `application/octet-stream`, `X-custom/customsub`，格式为 `type/subtype; [;attribute=value]`。types 是：application, image, message, multipart, text, video, 或一个自定义类型（前面带有一个 X-；如需更详细的 MIME 类型和子类型的信息，请参阅 RFC1341
+
+|`httpErrorCodePages`
+|`httpErrorCodePages` 指定自定义 `HTTP` 错误代码响应页面。默认情况下，`IngressController` 使用 `IngressController` 镜像内构建的错误页面。
+
+|`tuningOptions`
+|`tuningOptions` tuningOptions 指定用于调整 Ingress Controller pod 性能的选项。
+
+* `headerBufferBytes` 为 Ingress Controller 连接会话指定保留多少内存（以字节为单位）。如果为 Ingress Controller 启用了 HTTP/2，则必须至少为 16384。如果没有设置，则默认值为 32768 字节。不建议设置此字段，因为 headerBufferBytes 值太小可能会破坏 Ingress Controller，而 headerBufferBytes 值过大可能会导致 Ingress Controller 使用比必要多的内存。
+
+* `headerBufferMaxRewriteBytes` 指定从 headerBufferBytes 为 Ingress Controller 连接会话保留多少内存（以字节为单位），用于 HTTP 标头重写和附加。headerBufferMaxRewriteBytes 的最小值是 4096。headerBufferBytes 必须大于 headerBufferMaxRewriteBytes，用于传入的 HTTP 请求。如果没有设置，则默认值为 `8192` 字节。不建议设置此字段，因为 `headerBufferMaxRewriteBytes` 值可能会破坏 Ingress Controller，headerBufferMaxRewriteBytes 值太大可能会导致 Ingress Controller 使用比必要大得多的内存。
+
+* `threadCount` 指定每个 HAProxy 进程创建的线程数量。创建更多线程可让每个 Ingress Controller pod 处理更多连接，而代价会增加所使用的系统资源。`HAProxy` 支持多达 `64` 个线程。如果此字段为空，Ingress Controller 将使用默认值 4 个线程。默认值可能会在以后的版本中改变。不建议设置此字段，因为增加 HAProxy 线程数量可让 Ingress Controller pod 在负载下使用更多 CPU 时间，并阻止其他 pod 收到需要执行的 CPU 资源。减少线程数量可能会导致 `Ingress Controller` 执行不佳。
+
+* `clientTimeout` 指定连接在等待客户端响应时保持打开的时长。如果未设置，则默认超时为 `30s`。
+
+* `serverFinTimeout` 指定连接在等待服务器响应关闭连接时保持打开的时长。如果未设置，则默认超时为 `1s`。
+
+* `serverTimeout` 指定连接在等待服务器响应时保持打开的时长。如果未设置，则默认超时为 `30s`。
+
+* `clientFinTimeout` 指定连接在等待客户端响应关闭连接时保持打开的时长。如果未设置，则默认超时为 `1s`。
+
+* `tlsInspectDelay` 指定路由器可以保存数据以查找匹配的路由的时长。如果把这个值设置得太短，对于 `edge-terminated` 或 `reencrypted` 的路由，则可能会导致路由器回退到使用默认证书，即使正在使用一个更加匹配的证书时也是如此。如果未设置，则默认检查延迟为 `5s`。
+
+* `tunnelTimeout` 指定隧道连接在隧道闲置期间保持打开的时长，包括 `websockets`。如果未设置，则默认超时为 `1h`。
+
+|`logEmptyRequests`
+|`logEmptyRequests` 指定没有接收和记录请求的连接。这些空请求来自负载均衡器健康探测或 Web 浏览器规范连接(preconnect)，并记录这些请求。但是，这些请求可能是由网络错误导致的，在这种情况下，记录空请求可用于诊断错误。这些请求可能是由端口扫描导致的，记录空请求有助于检测入侵尝试。此字段允许的值有 `Log` 和 `Ignore`。默认值为 `Log`。
+
+`LoggingPolicy` 类型接受以下两个值之一：
+
+* `Log`: 将此值设置为 `Log`` 表示应记录某一事件。
+* `Ignore`: 将此值设置为 `Log`` 表示应记录某一事件。
+
+|`HTTPEmptyRequestsPolicy`
+|`HTTPEmptyRequestsPolicy` 描述了在收到请求前发生超时时，如何处理 `HTTP` 连接。此字段允许的值是 `Respond` 和 `Ignore`。默认值为 `Respond`。
+
+`HTTPEmptyRequestsPolicy` 类型接受以下两个值之一：
+
+* `Respond`: 如果字段设置为 `Respond`，`Ingress` `Controller` 会发送 HTTP `400` 或 `408` 响应，在启用了访问日志时记录连接，并在适当的指标中计数连接。
+* `Ignore`: 将这个选项设置为 `Ignore` 会在 `HAproxy`` 配置中添加 `http-ignore-probes` 参数。如果字段设置为 `Ignore`，Ingnore 会在不发送响应的情况下关闭连接，然后记录连接或递增指标。
+
+这些连接来自负载均衡器健康探测或 Web 浏览器规范连接（预连接），可以安全地忽略。但是，这些请求可能是由网络错误造成的，因此将此字段设置为 Ignore 可能会妨碍对问题的检测和诊断。这些请求可能是由端口扫描导致的，在这种情况下，记录空请求有助于检测入侵尝试。
+|===
+
+
+[注意]
+====
+所有参数都是可选的。
+====

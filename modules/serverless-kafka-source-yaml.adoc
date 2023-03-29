@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-kafka-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kafka-source-yaml_{context}"]
+= 使用 YAML 创建 Kafka 事件源
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述应用程序，并以可重复的方式描述应用程序。要使用 YAML 创建 Kafka 源，您必须创建一个 YAML 文件来定义 `KafkaSource` 对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* {ServerlessOperatorName}、Knative Eventing 和 KnativeKafka 自定义资源已安装在集群中。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建 `KafkaSource` 对象作为 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: <source_name>
+spec:
+  consumerGroup: <group_name> <1>
+  bootstrapServers:
+  - <list_of_bootstrap_servers>
+  topics:
+  - <list_of_topics> <2>
+  sink:
+  - <list_of_sinks> <3>
+----
+<1> 用户组是一组使用相同组群 ID 的用户，并消耗一个标题中的数据。
+<2> 主题提供数据存储的目的地。每个主题都被分成一个或多个分区。
+<3> sink 指定事件从源发送到的位置。
++
+[重要]
+====
+仅支持 OpenShift Serverless 上的 KafkaSource 对象的 v1beta1 API 版本。不要使用这个 API 的 v1alpha1 版本，因为这个版本现已弃用。
+====
++
+.`KafkaSource`  对象示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+spec:
+  consumerGroup: knative-group
+  bootstrapServers:
+  - my-cluster-kafka-bootstrap.kafka:9092
+  topics:
+  - knative-demo-topic
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+----
+
+. 应用 `KafkaSource`  YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+.验证
+
+*输入以下命令验证 Kafka 事件源是否已创建：
++
+[source, terminal]
+----
+$ oc get pods
+----
++
+.输出示例
+[source, terminal]
+----
+NAME                                    READY     STATUS    RESTARTS   AGE
+kafkasource-kafka-source-5ca0248f-...   1/1       Running   0          13m
+----

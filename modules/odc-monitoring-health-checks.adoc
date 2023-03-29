@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// applications/application-health
+
+:_content-type: PROCEDURE
+[id="odc-monitoring-health-checks"]
+= 使用开发者视角监控健康检查失败
+
+如果应用程序健康检查失败，您可以使用 *拓扑* 视图来监控这些运行状况检查。
+
+.先决条件：
+* 在 web 控制台中切换到 *开发者* 视角。
+* 已使用 *开发者* 视角在 统信容器云管理平台 上创建并部署了应用程序。
+* 您已将健康检查添加到应用程序中。
+
+.流程
+. 在 *拓扑* 视图中，点应用程序节点来查看侧面板。
+. 点击 *观察* 选项卡，在 *所有事件* 部分查看健康检查失败。
+. 点 *所有事件* 旁的下箭头来查看与健康检查失败相关的信息。

@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+[id="builds-strategy-s2i-ignore-source-files_{context}"]
+= 忽略 source-to-image 源文件
+
+Source-to-Image（S2I） 支持 `.s2iignore` 文件，该文件包含了需要被忽略的文件列表。构建工作目录中的文件（由各种输入源提供）若与 `.s2iignore` 文件中指定的文件匹配，将不会提供给 `assemble` 脚本使用。
+
+//For more details on the format of the `.s2iignore` file, see the S2I documentation.

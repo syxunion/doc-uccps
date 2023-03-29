@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * ingress/routes.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-creating-a-passthrough-route_{context}"]
+= 创建 passthrough 路由
+
+您可以使用 `oc create route` 命令使用 passthrough 终止配置安全路由。如果 passthrough 终止，加密的流量会直接发送到目的地，而路由器不会提供 TLS 终止。因此，路由不需要密钥或证书。
+
+.先决条件
+
+* 您必须具有要公开的服务。
+
+.流程
+
+* 创建 `Route` 资源：
++
+[source,terminal]
+----
+$ oc create route passthrough route-passthrough-secured --service=frontend --port=8080
+----
++
+如果您检查生成的 `Route` 资源，它应该类似于如下：
++
+.使用 Passthrough 终止的安全路由
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: route-passthrough-secured <1>
+spec:
+  host: www.example.com
+  port:
+    targetPort: 8080
+  tls:
+    termination: passthrough <2>
+    insecureEdgeTerminationPolicy: None <3>
+  to:
+    kind: Service
+    name: frontend
+----
+<1> 对象的名称，长度限于 63 个字符。
+<2> termination 字段设置为 `passthrough`。这是唯一需要 `tls` 的字段。
+<3> 可选的 `insecureEdgeTerminationPolicy`。禁用后唯一有效的值是 `None`、`Redirect` 或为空。
++
+目标 pod 负责为端点上的流量提供证书。目前，这是唯一支持需要客户端证书的方法，也称双向验证。

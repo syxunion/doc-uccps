@@ -1,0 +1,254 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/recommended-host-practices.adoc
+// * post_installation_configuration/node-tasks.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="create-a-kubeletconfig-crd-to-edit-kubelet-parameters_{context}"]
+= 创建 KubeletConfig CRD 来编辑 kubelet 参数
+
+kubelet 配置目前被序列化为 Ignition 配置，因此可以直接编辑。但是，在 Machine Config Controller (MCC) 中同时添加了新的 `kubelet-config-controller` 。这可让您使用 `KubeletConfig` 自定义资源 (CR) 来编辑 kubelet 参数。
+
+[注意]
+====
+因为 `kubeletConfig` 对象中的字段直接从上游 Kubernetes 传递给 kubelet，kubelet 会直接验证这些值。`kubeletConfig` 对象中的无效值可能会导致集群节点不可用。有关有效值，请参阅 Kubernetes 文档。
+====
+
+请考虑以下指导：
+
+* 为每个机器配置池创建一个 `KubeletConfig` CR，带有该池需要更改的所有配置。如果要将相同的内容应用到所有池，则所有池仅需要一个 `KubeletConfig` CR。
+
+* 编辑现有的 `KubeletConfig` CR 以修改现有设置或添加新设置，而不是为每个更改创建一个 CR。建议您仅创建一个 CR 来修改不同的机器配置池，或用于临时更改，以便您可以恢复更改。
+
+* 根据需要，创建多个 `KubeletConfig` CR，每个集群限制为 10。对于第一个 `KubeletConfig` CR，Machine Config Operator (MCO) 会创建一个机器配置，并附带 `kubelet`。对于每个后续 CR，控制器会创建另一个带有数字后缀的 `kubelet` 机器配置。例如，如果您有一个带有 `-2` 后缀的 `kubelet` 机器配置，则下一个 `kubelet` 机器配置会附加 `-3`。
+
+如果要删除机器配置，以相反的顺序删除它们，以避免超过限制。例如，在删除 `kubelet-2` 机器配置前删除 `kubelet-3` 机器配置。
+
+[注意]
+====
+如果您有一个带有 `kubelet-9` 后缀的机器配置，并且创建了另一个 `KubeletConfig` CR，则不会创建新的机器配置，即使少于 10 个 `kubelet` 机器配置。
+====
+
+.`KubeletConfig` CR 示例
+[source,terminal]
+----
+$ oc get kubeletconfig
+----
+
+[source, terminal]
+----
+NAME                AGE
+set-max-pods        15m
+----
+
+.显示 `KubeletConfig` 机器配置示例
+[source,terminal]
+----
+$ oc get mc | grep kubelet
+----
+
+[source, terminal]
+----
+...
+99-worker-generated-kubelet-1                  b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             26m
+...
+----
+
+以下流程演示了如何配置 worker 节点上的每个节点的最大 pod 数量。
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` CR 关联的标签。执行以下步骤之一：
+
+.. 查看机器配置池：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: 2019-02-08T14:52:39Z
+  generation: 1
+  labels:
+    custom-kubelet: set-max-pods <1>
+----
+<1> 如果添加了标签，它会出现在 `labels` 下。
+
+.. 如果标签不存在，则添加一个键/值对：
++
+[source,terminal]
+----
+$ oc label machineconfigpool worker custom-kubelet=set-max-pods
+----
+
+.流程
+
+. 查看您可以选择的可用机器配置对象：
++
+[source,terminal]
+----
+$ oc get machineconfig
+----
++
+默认情况下，与 kubelet 相关的配置为 `01-master-kubelet` 和 `01-worker-kubelet`。
+
+. 检查每个节点的最大 pod 的当前值：
++
+[source,terminal]
+----
+$ oc describe node <node_name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe node ci-ln-5grqprb-f76d1-ncnqq-worker-a-mdv94
+----
++
+在 `Allocatable` 小节中找到 `value: pods: <value>`：
++
+.输出示例
+[source,terminal]
+----
+Allocatable:
+ attachable-volumes-aws-ebs:  25
+ cpu:                         3500m
+ hugepages-1Gi:               0
+ hugepages-2Mi:               0
+ memory:                      15341844Ki
+ pods:                        250
+----
+
+. 通过创建一个包含 kubelet 配置的自定义资源文件，设置 worker 节点上的每个节点的最大 pod：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: set-max-pods
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: set-max-pods <1>
+  kubeletConfig:
+    maxPods: 500 <2>
+----
+<1> 输入机器配置池中的标签。
+<2> 添加 kubelet 配置。在本例中，使用 `maxPods` 设置每个节点的最大 pod。
++
+[注意]
+====
+kubelet 与 API 服务器进行交互的频率取决于每秒的查询数量 (QPS) 和 burst 值。如果每个节点上运行的 pod 数量有限，使用默认值（`kubeAPIQPS` 为 `50`，`kubeAPIBurst` 为 `100`）就可以。如果节点上有足够 CPU 和内存资源，则建议更新 kubelet QPS 和 burst 速率。
+
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: set-max-pods
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: set-max-pods
+  kubeletConfig:
+    maxPods: <pod_count>
+    kubeAPIBurst: <burst_rate>
+    kubeAPIQPS: <QPS>
+----
+====
+.. 为带有标签的 worker 更新机器配置池：
++
+[source,terminal]
+----
+$ oc label machineconfigpool worker custom-kubelet=large-pods
+----
+
+.. 创建 `KubeletConfig` 对象：
++
+[source,terminal]
+----
+$ oc create -f change-maxPods-cr.yaml
+----
+
+.. 验证 `KubeletConfig` 对象是否已创建：
++
+[source,terminal]
+----
+$ oc get kubeletconfig
+----
++
+.输出示例
+[source, terminal]
+----
+NAME                AGE
+set-max-pods        15m
+----
++
+根据集群中的 worker 节点数量，等待每个 worker 节点被逐个重启。对于有 3 个 worker 节点的集群，这个过程可能需要大约 10 到 15 分钟。
+
+. 验证更改是否已应用到节点：
+
+.. 在 worker 节点上检查 `maxPods` 值已更改：
++
+[source,terminal]
+----
+$ oc describe node <node_name>
+----
+
+.. 找到 `Allocatable` 小节：
++
+[source,terminal]
+----
+ ...
+Allocatable:
+  attachable-volumes-gce-pd:  127
+  cpu:                        3500m
+  ephemeral-storage:          123201474766
+  hugepages-1Gi:              0
+  hugepages-2Mi:              0
+  memory:                     14225400Ki
+  pods:                       500 <1>
+ ...
+----
+<1> 在本例中，`pods` 参数应报告您在 `KubeletConfig` 对象中设置的值。
+
+. 验证 `KubeletConfig` 对象中的更改：
++
+[source,terminal]
+----
+$ oc get kubeletconfigs set-max-pods -o yaml
+----
++
+这应该显示 `True` 状态和 `type:Success`，如下例所示：
++
+[source,yaml]
+----
+spec:
+  kubeletConfig:
+    maxPods: 500
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: set-max-pods
+status:
+  conditions:
+  - lastTransitionTime: "2021-06-30T17:04:07Z"
+    message: Success
+    status: "True"
+    type: Success
+----

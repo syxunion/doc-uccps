@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * nodes/clusters/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="nodes-cluster-resource-override_{context}"]
+= 使用 Cluster Resource Override Operator 的集群级别的过量使用
+
+Cluster Resource Override Operator 是一个准入 Webhook，可让您控制过量使用的程度，并在集群中的所有节点上管理容器密度。Operator 控制特定项目中节点可以如何超过定义的内存和 CPU 限值。
+
+您必须使用 统信容器云管理平台 控制台或 CLI 安装 Cluster Resource override Operator，如下所示。在安装过程中，您会创建一个 ClusterResourceOverride 自定义资源 (CR)，其中设置过量使用级别，如下例所示：
+
+[source,yaml]
+----
+apiVersion: operator.autoscaling.openshift.io/v1
+kind: ClusterResourceOverride
+metadata:
+    name: cluster <1>
+spec:
+  podResourceOverride:
+    spec:
+      memoryRequestToLimitPercent: 50 <2>
+      cpuRequestToLimitPercent: 25 <3>
+      limitCPUToMemoryPercent: 200 <4>
+----
+<1> 名称必须是 cluster。
+<2> 可选。如果指定或默认指定了容器内存限值，则该内存请求会覆盖到限值的这个百分比，从 1 到 100 之间。默认值为 50.
+<3> 可选。如果指定或默认指定了容器 CPU 限值，则将 CPU 请求覆盖到限值的这个百分比，从 1 到 100 之间。默认值为 25。
+<4> 可选。如果指定或默认指定了容器内存限值，则 CPU 限值将覆盖的内存限值的百分比（如果指定）。以 100% 扩展 1Gi RAM， 等于 1 个 CPU 内核。这会在覆盖 CPU 请求前进行（如果配置了）。默认值为 200。
+
+[注意]
+====
+如果容器上没有设置限值，则 Cluster Resourceoverride Operator 覆盖无效。创建一个针对单独项目的带有默认限制的 `LimitRange` 对象，或在 `Pod` specs 中配置要应用的覆盖的限制。
+====
+
+配置后，可通过将以下标签应用到每个项目的命名空间对象来启用每个项目的覆盖：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+
+....
+
+  labels:
+    clusterresourceoverrides.admission.autoscaling.openshift.io/enabled: "true"
+
+....
+----
+
+Operator 监视 `ClusterResourceOverride` CR 并确保 `ClusterResourceOverride` 准入 Webhook 被安装到与 Operator 相同的命名空间。

@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+ifeval::["{context}" == "nodes-descheduler"]
+:nodes:
+endif::[]
+
+ifeval::["{context}" == "virt-enabling-descheduler-evictions"]
+:virt:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nodes-descheduler-installing_{context}"]
+= 安装 descheduler
+
+在默认情况下，不提供 descheduler。要启用 descheduler，您必须从 OperatorHub 安装 Kube Descheduler Operator，并启用一个或多个 descheduler 配置集。
+
+.先决条件
+
+* 必须具有集群管理员权限。
+* 访问 统信容器云管理平台 Web 控制台。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+. 为 Kube Descheduler Operator 创建所需的命名空间。
+.. 导航到 *Administration* -> *Namespaces* 点 *Create Namespace*.
+.. 在 *Name* 字段中输入 `openshift-kube-descheduler-operator`，在 Labels 字段中输入 `openshift.io/cluster-monitoring=true` 来启用 *descheduler* 指标，然后点击 *Create*。
+. 安装 Kube Descheduler Operator。
+.. 导航到 *Operators* -> *OperatorHub*.
+.. 在过滤框中输入 *Kube Descheduler Operator* 。
+.. 选择 *Kube Descheduler Operator* 点 *Install*.
+.. 在 *Install Operator* 页面中，选择 *A specific namespace on the cluster*. 。从下拉菜单中选择 *openshift-kube-descheduler-operator*。
+.. 将 *Update Channel* 和 *Approval Strategy* 的值调整为所需的值。
+.. 点 *Install*.
+. 创建 descheduler 实例。
+.. 在 *Operators* -> *Installed Operators* 页面中, 点击 *Kube Descheduler Operator*.
+.. 选择 *Kube Descheduler* 标签页并点击 *Create KubeDescheduler*.
+.. 根据需要编辑设置。
+
+... 展开 *Profiles* 部分，以选择要启用的一个或多个配置集。 `AffinityAndTaints` 配置集默认为启用。点 *Add Profile* 选择附加配置集。
++
+[注意]
+====
+不要同时启用 `TopologyAndDuplicates` 和 `SoftTopologyAndDuplicates` 。启用两者会导致冲突。
+====
+... 可选：扩展 *Profile Customizations* 部分，以便为 `LifecycleAndUtilization` 配置集设置自定义 pod 生命周期值。有效单位是 `s`, `m`, 或 `h`. 默认 pod 生命周期为 24 小时。
+... 可选： 使用 *Descheduling Interval Seconds* 字段更改 descheduler 运行间隔的秒数。默认值为 `3600` 秒。
+.. 点 *Create*.
+
+您还可以稍后使用 Uccps CLI(oc)为 descheduler 配置配置集和设置。如果您在从 web 控制台创建 descheduler 实例时没有调整配置集，则默认启用 AffinityAndTaints 配置集。
+
+ifeval::["{context}" == "nodes-descheduler"]
+:!nodes:
+endif::[]
+

@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-descheduler-uninstalling_{context}"]
+= 卸载 descheduler
+
+您可以通过删除 descheduler 实例并卸载 Kube Descheduler Operator 从集群中移除 descheduler。此流程还会清理 `KubeDescheduler` CRD 和 `openshift-kube-descheduler-operator` 命名空间。
+
+.先决条件
+
+* 必须具有集群管理员权限。
+* 访问 统信容器云管理平台 Web 控制台。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+. 删除 descheduler 实例。
+.. F在 *Operators* -> *Installed Operators* 页面中点 *Kube Descheduler Operator*。
+.. 选择 *Kube Descheduler* 选项卡。
+.. 点 *集群* 条目旁的 Options 菜单 {kebab} 并选择 *Delete KubeDescheduler*。
+.. 在确认对话框中，点 *Delete*。
+. 卸载 Kube Descheduler Operator。
+.. 导航到 *Operators* -> *Installed Operators*。
+.. 点 *Kube Descheduler Operator* 条目 kebab 旁边的 Options 菜单 {kebab} ，然后选择 *Uninstall Operator*。
+.. 在确认对话框中，点 *Uninstall*。
+. 删除 `openshift-kube-descheduler-operator` 命名空间。
+.. 导航到 *Administration* -> *Namespaces*。
+.. 在过滤器框中输入 `openshift-kube-descheduler-operator` 。
+.. 点 *openshift-kube-descheduler-operator* 条目旁的 Options 菜单  {kebab} ，然后选择  *Delete Namespace*。
+.. 在确认对话框中，输入 `openshift-kube-descheduler-operator` 并点 *Delete*。
+. 删除 `KubeDescheduler` CRD。
+.. 导航到 *Administration* -> *Custom Resource Definitions*.
+.. 在过滤框中输入 `KubeDescheduler` 。
+.. 点 *KubeDescheduler* 条目旁的 Options 菜单 {kebab} ，然后选择 *Delete CustomResourceDefinition*.
+.. 在确认对话框中，点 *Delete*。

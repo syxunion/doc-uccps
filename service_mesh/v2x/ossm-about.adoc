@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="ossm-about"]
+= About OpenShift Service Mesh
+include::_attributes/common-attributes.adoc[]
+:context: ossm-about
+
+toc::[]
+
+[NOTE]
+====
+因为 {SMProductName} 的发行节奏与 {product-title} 且 {SMProductName} 支持部署多个版本的 `ServiceMeshControlPlane`, 所以 {SMProductShortName} 没有为产品的次版本维护单独的文档。除非在一个特定主题或特定功能中明确指定了特定的版本，当前的文档集适用于所有当前支持的{SMProductShortName} 版本。
+
+如需有关 {SMProductName} 生命周期和支持的平台的更多信息，请参阅link:https://access.redhat.com/support/policy/updates/openshift#ossm[平台生命周期政策].
+====
+
+include::modules/ossm-servicemesh-overview.adoc[leveloffset=+1]
+
+include::modules/ossm-core-features.adoc[leveloffset=+1]

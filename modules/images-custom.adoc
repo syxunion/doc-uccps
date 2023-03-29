@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * builds/build-strategies.adoc
+
+[id="images-custom_{context}"]
+= 使用自定义构建器镜像
+
+统信容器云管理平台 的自定义构建策略允许您定义负责整个构建过程的特定构建器镜像。当您需要构建来生成单独的工件，如软件包、JAR、WAR、可安装的 ZIP 或基础镜像时，请使用自定义构建器镜像。
+
+自定义构建器镜像是嵌入构建过程逻辑的普通容器镜像，用于构建工件，如 RPM 或基础容器镜像。
+
+另外，自定义构建器允许实施任何扩展构建过程，如运行单元或集成测试的 CI/CD 流。
+
+[id="images-custom-builder-image-ref_{context}"]
+== 自定义构建器镜像
+
+在调用时，自定义构建器镜像将接收以下环境变量以及继续进行构建所需要的信息：
+
+.自定义构建器环境变量
+[cols="1,3",options="header"]
+|===
+
+|变量名称 |描述
+
+|`BUILD`
+|Build 对象定义的完整序列化 JSON。如果必须使用特定的 API 版本进行序列化，您可以在构建配置的自定义策略规格中设置 `buildAPIVersion` 参数。
+
+|`SOURCE_REPOSITORY`
+|包含要构建的源代码的 Git 存储库的 URL。
+
+|`SOURCE_URI`
+|使用与 `SOURCE_REPOSITORY` 相同的值。可以使用其中任一个。
+
+|`SOURCE_CONTEXT_DIR`
+|指定要在构建时使用的 Git 存储库的子目录。只有定义后才出现。
+
+|`SOURCE_REF`
+|要构建的 Git 引用。
+
+|`ORIGIN_VERSION`
+|创建此构建对象的 统信容器云管理平台 master 的版本。
+
+|`OUTPUT_REGISTRY`
+|镜像要推送到的容器镜像 registry。
+
+|`OUTPUT_IMAGE`
+|所构建镜像的容器镜像标签名称。
+
+|`PUSH_DOCKERCFG_PATH`
+|用于运行 `podman push` 操作的容器 registry 凭证的路径。
+
+|===
+
+[id="images-custom-builder-flow_{context}"]
+== 自定义构建器工作流
+
+虽然自定义构建器镜像作者在定义构建过程时具有很大的灵活性，但构建器镜像仍必须遵循如下必要的步骤，才能在 统信容器云管理平台 内无缝运行构建：
+
+. Build 对象定义包含有关构建的输入参数的所有必要信息。
+. 运行构建过程。
+. 如果构建生成了镜像，则将其推送到构建的输出位置（若已定义）。可通过环境变量传递其他输出位置。

@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-security.adoc
+
+[id="ossm-security-cipher_{context}"]
+= Configuring cipher suites and ECDH curves
+
+密码套件和 Elliptic-curve Diffie-Hellman（ECDH 策展）可以帮助您保护服务网格的安全。您可以使用 `spec.security.controlplane.tls.cipherSuites` 和 ECDH 策展在 `ServiceMeshControlPlane` 资源中使用 `spec.security.controlplane.tls.ecdhCurves` 定义以逗号隔开的密码套件列表。如果其中任何一个属性为空，则使用默认值。
+
+如果您的服务网格使用 TLS 1.2 或更早版本， `cipherSuites` 设置就会有效。它在使用 TLS 1.3 时无效。
+在以逗号分开的列表中设置密码组合，以优先级顺序进行排列。例如， `ecdhCurves: CurveP256, CurveP384`  把 `CurveP256` 设置为比 `CurveP384` 有更高的优先级。 
+
+[NOTE]
+====
+在配置加密套件时，需要包括 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 或 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256。HTTP/2 的支持至少需要其中一个加密套件.
+====
+
+支持的加密套件是：
+
+* TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+* TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+* TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+* TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+* TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+* TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+* TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+* TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+* TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+* TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+* TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+* TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+* TLS_RSA_WITH_AES_128_GCM_SHA256
+* TLS_RSA_WITH_AES_256_GCM_SHA384
+* TLS_RSA_WITH_AES_128_CBC_SHA256
+* TLS_RSA_WITH_AES_128_CBC_SHA
+* TLS_RSA_WITH_AES_256_CBC_SHA
+* TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
+* TLS_RSA_WITH_3DES_EDE_CBC_SHA
+
+支持的 ECDH Curves 是：
+
+* CurveP256
+* CurveP384
+* CurveP521
+* X25519

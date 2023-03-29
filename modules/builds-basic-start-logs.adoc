@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-start-logs_{context}"]
+= 流传输构建日志
+
+您可以指定 `--follow` 标志，在 `stdout` 中输出构建日志。
+
+.流程
+
+* 要在 `stdout` 中手动输出构建日志，请输入以下命令：
++
+[source,terminal]
+----
+$ oc start-build <buildconfig_name> --follow
+----

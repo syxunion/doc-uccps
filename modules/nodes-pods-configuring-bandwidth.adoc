@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-configuring.adoc
+// * nodes/nodes-cluster-pods-configuring
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configuring-bandwidth_{context}"]
+= 限制可供 pod 使用的带宽
+
+您可以对 pod 应用服务质量流量控制，有效限制其可用带宽。出口流量（从 pod 传出）按照策略来处理，仅在超出配置的速率时丢弃数据包。入口流量（传入 pod 中）通过控制已排队数据包进行处理，以便有效地处理数据。您对 pod 应用的限制不会影响其他 pod 的带宽。
+
+.流程
+
+限制 pod 的带宽：
+
+. 编写对象定义 JSON 文件，并使用 `kubernetes.io/ingress-bandwidth` 和 `kubernetes.io/egress-bandwidth` 注解指定数据流量速度。例如，将 pod 出口和入口带宽限制为 10M/s：
++
+.受限 `Pod` 对象定义
+[source,json]
+----
+{
+    "kind": "Pod",
+    "spec": {
+        "containers": [
+            {
+                "image": "openshift/hello-openshift",
+                "name": "hello-openshift"
+            }
+        ]
+    },
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "iperf-slow",
+        "annotations": {
+            "kubernetes.io/ingress-bandwidth": "10M",
+            "kubernetes.io/egress-bandwidth": "10M"
+        }
+    }
+}
+----
+
+. 使用对象定义创建 pod：
++
+[source,terminal]
+----
+$ oc create -f <file_or_dir_path>
+----

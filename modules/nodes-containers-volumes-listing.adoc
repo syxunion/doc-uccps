@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-volumes-listing_{context}"]
+= 列出 pod 中的卷和卷挂载
+
+您可以列出 pod 或 pod 模板中的卷和卷挂载：
+
+.流程
+
+列出卷：
+
+[source,terminal]
+----
+$ oc set volume <object_type>/<name> [options]
+----
+
+列出卷支持的选项：
+[cols="3a*",options="header"]
+|===
+
+|选项 |描述 |默认
+
+|`--name`
+|卷的名称
+|
+
+|`-c, --containers`
+|按名称选择容器。它还可以使用通配符 '*’ 来匹配任意字符。
+character.
+|`'*'`
+|===
+
+例如：
+
+* 列出 pod *p1* 的所有卷：
++
+[source,terminal]
+----
+$ oc set volume pod/p1
+----
+
+* 列出在所有部署配置中定义的卷 *v1*：
++
+[source,terminal]
+----
+$ oc set volume dc --all --name=v1
+----

@@ -1,0 +1,204 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-mint.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-passthrough.adoc
+
+ifeval::["{context}" == "post-install-cluster-tasks"]
+:post-install:
+endif::[]
+ifeval::["{context}" == "cco-mode-mint"]
+:mint:
+endif::[]
+ifeval::["{context}" == "cco-mode-passthrough"]
+:passthrough:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="manually-rotating-cloud-creds_{context}"]
+= 手动轮转云供应商凭证
+
+如果因为某种原因更改了云供应商凭证，您必须手动更新 Cloud Credential Operator（CCO）用来管理云供应商凭证的 secret。
+
+轮转云凭证的过程取决于 CCO 配置使用的模式。在为使用 mint 模式的集群轮转凭证后，您必须手动删除由删除凭证创建的组件凭证。
+
+////
+[NOTE]
+====
+You can also use the command line interface to complete all parts of this procedure.
+====
+////
+
+.先决条件
+
+* 您的集群会在支持使用您要使用的 CCO 模式手动轮转云凭证的平台上安装：
+
+
+** 对于 Mint 模式，支持 AWS 和 GCP。
+** 对于 passthrough 模式，支持 AWS、Azure、GCP、Uniontech UStack Platform和 VMware vSphere。
+
+* 您已更改了用于与云供应商接口的凭证。
+
+* 新凭证有足够的权限来在集群中使用 CCO 模式。
+
+.流程
+
+. 在 web 控制台的 *管理员* 视角中，导航到 *工作负载* -> *Secrets*。
+
+. 在 `Secrets` 页面的表中，找到您的云供应商的 root secret。
++
+[cols=2,options=header]
+|===
+|平台
+|Secret 名称
+
+|AWS
+|`aws-creds`
+
+ifndef::mint[]
+|Azure
+|`azure-credentials`
+endif::mint[]
+
+|GCP
+|`gcp-credentials`
+
+ifndef::mint[]
+|{rh-openstack}
+|`openstack-credentials`
+
+|{rh-virtualization}
+|`ovirt-credentials`
+
+|VMware vSphere
+|`vsphere-creds`
+endif::mint[]
+
+|===
+
+. 点击与 secret 相同的行 {kebab} 中的 *选项* 菜单，然后选择 *编辑 Secret*。
+
+. 记录 *Value* 字段的内容。您可以使用这些信息验证在更新凭证后该值是否不同。
+
+. 使用云供应商的新身份验证信息更新 *Value* 字段的文本，然后点 *保存*。
+
+. 如果集群的 CCO 配置为使用 mint 模式，请删除各个 CredentialsRequest 对象引用的每个组件 secret。
++
+以具有 `cluster-admin` 角色的用户身份登录统信容器云管理平台CLI。
++
+获取所有引用的组件 secret 的名称和命名空间：
+[source,terminal]
+----
+$ oc -n openshift-cloud-credential-operator get CredentialsRequest \
+  -o json | jq -r '.items[] | select (.spec.providerSpec.kind=="<provider_spec>") | .spec.secretRef'
+----
++
+其中，`<provider_spec>` 是您的云供应商所对应的值：
++
+--
+* AWS: `AWSProviderSpec`
+* GCP: `GCPProviderSpec`
+--
++
+.AWS 输出的部分示例
++
+[source,json]
+----
+{
+  "name": "ebs-cloud-credentials",
+  "namespace": "openshift-cluster-csi-drivers"
+}
+{
+  "name": "cloud-credential-operator-iam-ro-creds",
+  "namespace": "openshift-cloud-credential-operator"
+}
+----
+
+.. 删除每个引用的组件 secret：
++
+[source,terminal]
+----
+$ oc delete secret <secret_name> \//<1>
+  -n <secret_namespace> <2>
+----
++
+其中，<secret_name> 是 secret 的名称
+<secret_namespace> 是包括 secret 的命名空间。
++
+.删除 AWS secret 示例
++
+[source,terminal]
+----
+$ oc delete secret ebs-cloud-credentials -n openshift-cluster-csi-drivers
+----
++
+您不需要从供应商控制台手动删除凭证。删除引用的组件 secret 将导致 CCO 从平台中删除现有凭证并创建新凭证。
+
+
+.验证
+
+验证凭证是否已更改：
+
+. 在 web 控制台的 *Administrator* 视角中，导航到 *Workloads* -> *Secrets*.
+
+. 验证 *Value* 字段的内容已改变。
+
+////
+// Provider-side verification also possible, though cluster-side is cleaner process.
+. To verify that the credentials have changed from the console of your cloud provider:
+
+.. Get the `CredentialsRequest` CR names for your platform:
++
+[source,terminal]
+----
+$ oc -n openshift-cloud-credential-operator get CredentialsRequest -o json | jq -r '.items[] | select (.spec[].kind=="<provider_spec>") | .metadata.name'
+----
++
+Where `<provider_spec>` is the corresponding value for your cloud provider: `AWSProviderSpec` for AWS, `AzureProviderSpec` for Azure, or `GCPProviderSpec` for GCP.
++
+.Example output for AWS
++
+[source,terminal]
+----
+aws-ebs-csi-driver-operator
+cloud-credential-operator-iam-ro
+openshift-image-registry
+openshift-ingress
+openshift-machine-api-aws
+----
+
+.. Get the IAM username that corresponds to each `CredentialsRequest` CR name:
++
+[source,terminal]
+----
+$ oc get credentialsrequest <cr_name> -n openshift-cloud-credential-operator -o json | jq -r ".status.providerStatus"
+----
++
+Where `<cr_name>` is the name of a `CredentialsRequest` CR.
++
+.Example output for AWS
++
+[source,json]
+----
+{
+  "apiVersion": "cloudcredential.openshift.io/v1",
+  "kind": "AWSProviderStatus",
+  "policy": "<example-iam-username-policy>",
+  "user": "<example-iam-username>"
+}
+----
++
+Where `<example-iam-username>` is the name of an IAM user on the cloud provider.
+
+.. For each IAM username, view the details for the user on the cloud provider. The credentials should show that they were created after being rotated on the cluster.
+////
+
+ifeval::["{context}" == "post-install-cluster-tasks"]
+:!post-install:
+endif::[]
+ifeval::["{context}" == "cco-mode-mint"]
+:!mint:
+endif::[]
+ifeval::["{context}" == "cco-mode-passthrough"]
+:!passthrough:
+endif::[]

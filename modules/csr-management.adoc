@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// installing/installing_aws/installing-aws-user-infra.adoc
+// installing/installing_aws/installing-restricted-networks-aws.adoc
+// installing/installing_azure_stack_hub/installing-azure-stack-hub-user-infra.adoc
+// installing/installing_azure/installing-azure-user-infra.adoc
+// installing/installing_bare_metal/installing-bare-metal-network-customizations.adoc
+// installing/installing_bare_metal/installing-bare-metal.adoc
+// installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// installing/installing_gcp/installing-gcp-user-infra-vpc.adoc
+// installing/installing_gcp/installing-gcp-user-infra.adoc
+// installing/installing_gcp/installing-restricted-networks-gcp.adoc
+// installing/installing_ibm_power/installing-ibm-power.adoc
+// installing/installing_ibm_power/installing-restricted-networks-ibm-power.adoc
+// installing/installing_ibm_z/installing-ibm-z-kvm.adoc
+// installing/installing_ibm_z/installing-ibm-z.adoc
+// installing/installing_ibm_z/installing-restricted-networks-ibm-z-kvm.adoc
+// installing/installing_ibm_z/installing-restricted-networks-ibm-z.adoc
+// installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// installing/installing_vmc/installing-vmc-user-infra.adoc
+// installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// installing/installing_vsphere/installing-vsphere.adoc
+// machine_management/adding-rhel-compute.adoc
+// machine_management/more-rhel-compute.adoc
+// post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="csr-management_{context}"]
+= 证书签名请求管理
+
+在使用您置备的基础架构时，集群只能有限地访问自动机器管理，因此您必须提供一种在安装后批准集群证书签名请求 (CSR) 的机制。`kube-controller-manager` 只能批准 kubelet 客户端 CSR。`machine-approver` 无法保证使用 kubelet 凭证请求的提供证书的有效性，因为它不能确认是正确的机器发出了该请求。您必须决定并实施一种方法，以验证 kubelet 提供证书请求的有效性并进行批准。

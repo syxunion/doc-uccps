@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+//nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: PROCEDURE
+[id="eco-checking_status_of_node_maintenance_cr_tasks_{context}"]
+= 检查当前 NodeMaintenance CR 任务的状态
+
+您可以检查当前 `NodeMaintenance` CR 任务的状态。
+
+.先决条件
+
+* 安装 统信容器云管理平台 CLI `oc`.
+* 以具有 `cluster-admin` 权限的用户身份登录。
+
+.流程
+
+* 运行以下命令，检查当前节点维护任务的状态，如 NodeMaintenance CR 或 nm 对象：
++
+[source,terminal]
+----
+$ oc get nm -o yaml
+----
++
+.输出示例
++
+[source,yaml]
+----
+apiVersion: v1
+items:
+- apiVersion: nodemaintenance.medik8s.io/v1beta1
+  kind: NodeMaintenance
+  metadata:
+...
+  spec:
+    nodeName: node-1.example.com
+    reason: Node maintenance
+  status:
+    evictionPods: 3   <1>
+    lastError: "Last failure message" <2>
+    phase: Succeeded
+    totalpods: 5 <3>
+...
+----
+<1> 调度用于驱除的 pod 数量。
+<2> 最新的驱除错误（若有）。
+<3> 节点进入维护模式前的 pod 总数。

@@ -1,0 +1,7 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.aodc
+
+[id="images-imagestream-trigger_{context}"]
+= 镜像流触发器
+
+镜像流触发器（imagestream trigger）会在镜像流标签更改时引发特定操作。例如，导入可导致标签值变化。当有部署、构建或其他资源监听这些信息时，就会启动触发器。

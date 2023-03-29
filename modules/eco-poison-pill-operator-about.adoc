@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/eco-poison-pill-operator.adoc
+
+:_content-type: CONCEPT
+[id="about-poison-pill-operator_{context}"]
+= 关于 Poison Pill Operator
+
+Poison Pill Operator 在集群节点中运行，并重启被识别为不健康的节点。Operator 使用 MachineHealthCheck 控制器来检测集群中节点的健康状况。当节点被识别为不健康时，MachineHealthCheck 资源会创建 PoisonPillRemediation 自定义资源 (CR)，这会触发 Poison Pill Operator。
+
+Poison Pill Operator 会最大程度减少有状态应用程序的停机时间，并在发生临时故障时恢复计算容量。无论 IPMI 或 API 等管理界面如何置备节点，都可使用此 Operator 来置备节点，无论集群安装类型是什么，如安装程序置备的基础架构或用户置备的基础架构。
+
+[id="understanding-poison-pill-operator-config_{context}"]
+== 了解 Poison Pill Operator 配置
+
+Poison Pill Operator 在 Poison Pill Operator 命名空间中创建  `PoisonPillConfig` CR ，名称为 `poison-pill-config` 。您可以编辑这个 CR。但是，您无法为 Poison Pill Operator 创建新 CR。
+
+`PoisonPillConfig` 中的更改会重新创建 Poison Pill 守护进程集。
+
+`PoisonPillConfig` CR 类似以下 YAML 文件：
+
+[source,yaml]
+----
+apiVersion: poison-pill.medik8s.io/v1alpha1
+kind: PoisonPillConfig
+metadata:
+  name: poison-pill-config
+  namespace: openshift-operators
+spec:
+  safeTimeToAssumeNodeRebootedSeconds: 180 <1>
+  watchdogFilePath: /test/watchdog1 <2>
+  isSoftwareRebootEnabled: true <3>
+  apiServerTimeout: 15s <4>
+  apiCheckInterval: 5s <5>
+  maxApiErrorThreshold: 3 <6>
+  peerApiServerTimeout: 5s <7>
+  peerDialTimeout: 5s <8>
+  peerRequestTimeout: 5s <9>
+  peerUpdateInterval: 15m <10>
+----
+
+<1> 指定存活对等点的超时持续时间，然后 Operator 可以假定一个不健康的节点已被重启。Operator 自动计算这个值的下限。但是，如果不同的节点有不同的 watchdog 超时，则必须将此值改为更高的值。
+<2> 指定节点中 watchdog 设备的文件路径。如果您输入了到 watchdog 设备的错误路径，Poison Pill Operator 会自动检测到 softdog 设备路径。
++
+如果 watchdog 设备不可用， `PoisonPillConfig` CR 将使用软件重新引导。
+<3> 指定是否启用不健康节点的软件重启。默认情况下， `isSoftwareRebootEnabled` 的值设置为 true。要禁用软件重启，请将参数设置为 false。
+<4> 指定检查每个 API 服务器的连接的超时持续时间。此超过了此持续时间，Operator 会启动补救。
+<5> 指定检查每个 API 服务器的连接的频率。
+<6> 指定一个阈值。达到这个阈值后，节点开始联系其同级服务器。
+<7> 指定连接 API 服务器的对等的超时持续时间。
+<8> 指定与 peer 建立连接的超时持续时间。
+<9> 指定从 peer 获取响应的超时时间。
+<10> 指定更新对等信息的频率，如 IP 地址。
+
+[id="understanding-poison-pill-remediation-template-config_{context}"]
+== 了解 Poison Pill Remediation 模板配置
+
+Poison Pill Operator 还会在 Poison Pill Operator 命名空间中创建  `PoisonPillRemediationTemplate` CR ，其名称为 poison-pill-default-template。此 CR 为节点定义补救策略。
+
+默认补救策略是 `NodeDeletion` 它会删除节点对象。在 统信容器云管理平台 1.2 中，Poison Pill Operator 引入了一个新的补救策略，称为 ResourceDeletion。ResourceDeletion 补救策略会删除节点上的 pod 和关联的卷附加，而不是节点对象。此策略有助于更快地恢复工作负载。
+
+`PoisonPillRemediationTemplate` CR 类似于以下 YAML 文件：
+
+[source,yaml]
+----
+apiVersion: poison-pill.medik8s.io/v1alpha1
+kind: PoisonPillRemediationTemplate
+metadata:
+  creationTimestamp: "2022-03-02T08:02:40Z"
+  generation: 1
+  name: poison-pill-default-template
+  namespace: openshift-operators
+  resourceVersion: "596469"
+  uid: 5d29e437-c485-48fa-ba9e-0354649afd31
+spec:
+  template:
+    spec:
+      remediationStrategy: NodeDeletion <1>
+----
+<1> 指定补救策略。默认补救策略是  `NodeDeletion`.

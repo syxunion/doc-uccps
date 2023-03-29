@@ -1,0 +1,88 @@
+// Module included in the following assemblies:
+// * openshift_images/using-image-pull-secrets
+// * openshift_images/managing-image-streams.adoc
+
+:_content-type: PROCEDURE
+[id="images-allow-pods-to-reference-images-from-secure-registries_{context}"]
+= 允许 Pod 引用其他安全 registry 中的镜像
+
+Docker 客户端的 `.dockercfg $HOME/.docker/config.json` 文件是一个 Docker 凭证文件，如果您之前已登录安全或不安全的 registry，则该文件会保存您的身份验证信息。
+
+要拉取（pull）并非来自 统信容器云管理平台 内部 registry 的安全容器镜像，您必须从 Docker 凭证创建一个 pull secret，并将其添加到您的服务帐户。
+
+Docker 凭据文件和相关 pull secret 可以包含对同一 registry 的多个引用，每个 registry 都有自己的一组凭证。
+
+.`config.json` 文件示例
+[source,json]
+----
+{
+   "auths":{
+      "cloud.openshift.com":{
+         "auth":"b3Blb=",
+         "email":"you@example.com"
+      },
+      "quay.io":{
+         "auth":"b3Blb=",
+         "email":"you@example.com"
+      },
+      "quay.io/repository-main":{
+         "auth":"b3Blb=",
+         "email":"you@example.com"
+      }
+   }
+}
+----
+
+.pull secret 示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  .dockerconfigjson: ewogICAiYXV0aHMiOnsKICAgICAgIm0iOnsKICAgICAgIsKICAgICAgICAgImF1dGgiOiJiM0JsYj0iLAogICAgICAgICAiZW1haWwiOiJ5b3VAZXhhbXBsZS5jb20iCiAgICAgIH0KICAgfQp9Cg==
+kind: Secret
+metadata:
+  creationTimestamp: "2021-09-09T19:10:11Z"
+  name: pull-secret
+  namespace: default
+  resourceVersion: "37676"
+  uid: e2851531-01bc-48ba-878c-de96cfe31020
+type: Opaque
+----
+
+.流程
+
+* 如果您已有该安全 registry 的 `.dockercfg` 文件，则可运行以下命令从该文件中创建一个 secret：
++
+[source,terminal]
+----
+$ oc create secret generic <pull_secret_name> \
+    --from-file=.dockercfg=<path/to/.dockercfg> \
+    --type=kubernetes.io/dockercfg
+----
+
+* 或者，如果您已有 `$HOME/.docker/config.json` 文件，则可运行以下命令：
++
+[source,terminal]
+----
+$ oc create secret generic <pull_secret_name> \
+    --from-file=.dockerconfigjson=<path/to/.docker/config.json> \
+    --type=kubernetes.io/dockerconfigjson
+----
+
+* 如果您还没有安全 registry 的 Docker 凭证文件，则可运行以下命令创建一个 secret：
++
+[source,terminal]
+----
+$ oc create secret docker-registry <pull_secret_name> \
+    --docker-server=<registry_server> \
+    --docker-username=<user_name> \
+    --docker-password=<password> \
+    --docker-email=<email>
+----
+
+* 要使用 secret 为 Pod 拉取镜像，您必须将 secret 添加到您的服务帐户中。本例中服务帐户的名称应与 Pod 使用的服务帐户的名称匹配。默认服务帐户是 `default`：
++
+[source,terminal]
+----
+$ oc secrets link default <pull_secret_name> --for=pull
+----

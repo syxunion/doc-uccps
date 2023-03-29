@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-hostpath.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-hostpath-pod_{context}"]
+= 在特权 pod 中挂载 hostPath 共享
+
+创建持久性卷声明后，应用程序就可以使用它。以下示例演示了在 pod 中挂载此共享。
+
+.先决条件
+* 已存在一个映射到底层 hostPath 共享的持久性卷声明。
+
+.流程
+
+* 创建可挂载现有持久性卷声明的特权 pod:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-name <1>
+spec:
+  containers:
+    ...
+    securityContext:
+      privileged: true <2>
+    volumeMounts:
+    - mountPath: /data <3>
+      name: hostpath-privileged
+  ...
+  securityContext: {}
+  volumes:
+    - name: hostpath-privileged
+      persistentVolumeClaim:
+        claimName: task-pvc-volume <4>
+----
+<1> pod 的名称。
+<2> pod 必须以特权运行，才能访问节点的存储。
+<3> 在特权 pod 中挂载主机路径共享的路径。不要挂载到容器 `root`、`/` 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统（如主机的 `/dev/pts` 文件）。使用 `/host` 挂载主机是安全的。
+<4> 之前创建的 `PersistentVolumeClaim` 对象的名称。

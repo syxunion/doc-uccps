@@ -1,0 +1,163 @@
+// Module included in the following assemblies:
+//
+// web_console/odc-about-web-terminal.adoc
+
+:_content-type: PROCEDURE
+[id="odc-uninstalling-web-terminal_{context}"]
+= 卸载 Web 终端
+
+卸载 web 终端需要两步：
+
+. 卸载 Web Terminal Operator 和安装 Operator 时添加的相关自定义资源 (CR)。
+. 卸载 DevWorkspace Operator 及其作为 Web Terminal Operator 依赖项添加的相关自定义资源。
+
+卸载 Web Terminal Operator 不会移除安装 Operator 时创建的任何自定义资源定义（CRD）或受管资源。为了安全起见，必须手动卸载这些组件。删除这些组件还允许您通过确保在卸载 Operator 时不会闲置终端来保存集群资源。
+
+.先决条件
+* 使用具有 `cluster-admin` 权限的账户访问 统信容器云管理平台 集群。
+
+== 删除 Web Terminal Operator 以及支持它的自定义资源
+
+使用控制台和 CLI 删除安装 Web Terminal Operator 期间创建的任何现有 Web 终端和 CR。
+
+[注意]
+====
+在 统信容器云管理平台 4.8 之前，Web Terminal Operator 使用不同的 CRD 提供 Web Terminal 功能。要卸载 Web Terminal Operator 版本 1.2.1 及以下版本，请参阅 统信容器云管理平台 4.7 的文档。
+====
+
+.流程
+. 使用 Web 控制台卸载 Web Terminal Operator：
+.. 在 web 控制台的 *Administrator* 视角中，导航到 *Operators -> Installed Operators*。
+.. 滚动过滤器列表或在 *Filter by name* 框中输入关键字以查找 *Web Terminal* Operator。
+.. 点击 Web Terminal Operator 的 Options 菜单 kebab ，然后选择 *Uninstall Operator*。
+.. 在 *Uninstall Operator* 确认对话框中，点 *Uninstall* 从集群中删除 Operator、Operator 部署和 pod。Operator 会停止运行，并且不再接收更新。
++
+. 删除 Operator 使用的 CRD。
++
+[source,terminal]
+----
+$ oc delete devworkspaces.workspace.devfile.io --all-namespaces \
+    --selector 'console.openshift.io/terminal=true' --wait
+----
++
+[source,terminal]
+----
+$ oc delete devworkspacetemplates.workspace.devfile.io --all-namespaces \
+    --selector 'console.openshift.io/terminal=true' --wait
+----
+
+== 删除 DevWorkspace Operator 依赖项
+
+使用 CLI 删除安装 Web Terminal Operator 时创建的自定义资源定义 (CRD) 和其他资源。
+
+[重要]
+====
+DevWorkspace Operator 作为独立 Operator 的功能，可能作为集群中安装的其他 Operator 的依赖项（例如，CodeReady Workspaces Operator 可能依赖于它）。只有在确保不再需要 DevWorkspace Operator 时，才按照以下步骤操作。
+====
+
+.流程
+. 删除 Operator 使用的 `DevWorkspace` 自定义资源，以及任何相关的 Kubernetes 对象，如部署。
++
+[source,terminal]
+----
+$ oc delete devworkspaces.workspace.devfile.io --all-namespaces --all --wait
+----
++
+[source,terminal]
+----
+$ oc delete devworkspaceroutings.controller.devfile.io --all-namespaces --all --wait
+----
++
+[警告]
+====
+如果此步骤未完成，则终结器很难轻松地完全卸载 Operator。
+====
++
+. 删除 Operator 使用的 CRD：
++
+[警告]
+====
+DevWorkspace Operator 提供了使用转换 Webhook 的自定义资源定义(CRD)。无法删除这些 CRD 可能会导致集群中的问题。
+====
++
+[source,terminal]
+----
+$ oc delete customresourcedefinitions.apiextensions.k8s.io devworkspaceroutings.controller.devfile.io
+----
++
+[source,terminal]
+----
+$ oc delete customresourcedefinitions.apiextensions.k8s.io devworkspaces.workspace.devfile.io
+----
++
+[source,terminal]
+----
+$ oc delete customresourcedefinitions.apiextensions.k8s.io devworkspacetemplates.workspace.devfile.io
+----
++
+[source,terminal]
+----
+$ oc delete customresourcedefinitions.apiextensions.k8s.io devworkspaceoperatorconfigs.controller.devfile.io
+----
++
+. 验证所有涉及的自定义资源定义都已移除。以下命令不应该显示任何结果。
++
+[source,terminal]
+----
+$ oc get customresourcedefinitions.apiextensions.k8s.io | grep "devfile.io"
+----
++
+. 删除 `devworkspace-webhook-server` 部署、变异并验证 Webhook：
++
+[source,terminal]
+----
+$ oc delete deployment/devworkspace-webhook-server -n openshift-operators
+----
++
+[source,terminal]
+----
+$ oc delete mutatingwebhookconfigurations controller.devfile.io
+----
++
+[source,terminal]
+----
+$ oc delete validatingwebhookconfigurations controller.devfile.io
+----
++
+[注意]
+====
+如果您在没有删除变异并验证 Webhook 的情况下删除 `devworkspace-webhook-server` 部署，则无法使用 `oc exec` 命令在集群中的容器中运行命令。删除 Webhook 后，您将可以再次使用 oc exec 命令。
+====
++
+. 删除任何剩余的服务、secret 和配置映射。根据安装，以下命令中包含的一些资源可能不存在。
++
+[source,terminal]
+----
+$ oc delete all --selector app.kubernetes.io/part-of=devworkspace-operator,app.kubernetes.io/name=devworkspace-webhook-server -n openshift-operators
+----
++
+[source,terminal]
+----
+$ oc delete serviceaccounts devworkspace-webhook-server -n openshift-operators
+----
++
+[source,terminal]
+----
+$ oc delete configmap devworkspace-controller -n openshift-operators
+----
++
+[source,terminal]
+----
+$ oc delete clusterrole devworkspace-webhook-server
+----
++
+[source,terminal]
+----
+$ oc delete clusterrolebinding devworkspace-webhook-server
+----
++
+. 使用 Web 控制台卸载 Operator：
+.. 在 web 控制台的 *Administrator* 视角中，导航到 *Operators -> Installed Operators*.
+.. 滚动过滤器列表或在 *Filter by name* 框中输入关键字以查找 *DevWorkspace* Operator。
+.. 点 DevWorkspace Operator 的 Options 菜单 kebab ，然后选择 *Uninstall Operator*。
+.. 在 *Uninstall Operator* 确认对话框中，点 *Uninstall* 从集群中删除 Operator、Operator 部署和 pod。Operator 会停止运行，并且不再接收更新。

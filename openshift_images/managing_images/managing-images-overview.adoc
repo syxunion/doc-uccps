@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="managing-images-overview"]
+= 管理镜像概述
+include::_attributes/common-attributes.adoc[]
+:context: managing-images-overview
+
+toc::[]
+
+您可通过 统信容器云管理平台 与镜像交互并设置镜像流，具体取决于镜像 registry 所处的位置、这些 registry 的任何身份验证要求以及您预期的构建和部署性能。
+
+include::modules/images-managing-overview.adoc[leveloffset=+1]

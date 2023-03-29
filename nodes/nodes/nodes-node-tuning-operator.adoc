@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="nodes-node-tuning-operator"]
+= 使用 Node Tuning Operator
+include::_attributes/common-attributes.adoc[]
+:context: nodes-node-tuning-operator
+
+toc::[]
+
+了解 Node Tuning Operator，以及如何使用它通过编排 tuned 守护进程以管理节点级别的性能优化。
+
+include::modules/node-tuning-operator.adoc[leveloffset=+1]
+
+include::modules/accessing-an-example-cluster-node-tuning-operator-specification.adoc[leveloffset=+1]
+
+include::modules/custom-tuning-specification.adoc[leveloffset=+1]
+
+include::modules/cluster-node-tuning-operator-default-profiles-set.adoc[leveloffset=+1]
+
+include::modules/node-tuning-operator-supported-tuned-daemon-plug-ins.adoc[leveloffset=+1]

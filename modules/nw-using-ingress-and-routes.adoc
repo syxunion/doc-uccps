@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * ingress/configuring-ingress-cluster-traffic-ingress-controller.adoc
+
+[id="nw-using-ingress-and-routes_{context}"]
+= 使用 Ingress Controller 和路由
+
+Ingress Operator 管理 Ingress Controller 和通配符 DNS。
+
+使用 Ingress Controller 是允许从外部访问 统信容器云管理平台 集群的最常用方法。
+
+Ingress Controller 配置为接受外部请求并根据配置的路由进行代理。这仅限于 HTTP、使用 SNI 的 HTTPS 以及使用 SNI 的 TLS，对于通过使用 SNI 的 TLS 工作的 Web 应用程序和服务而言已经足够。
+
+与管理员合作将 Ingress Controller 配置为接受外部请求并根据配置的路由进行代理。
+
+管理员可以创建通配符 DNS 条目，再设置 Ingress Controller。然后，您可以处理边缘 Ingress Controller，无需与管理员联系。
+
+默认情况下，集群中的每个入口控制器可以接受集群中任何项目中创建的任何路由。
+
+Ingress Controller:
+
+* 默认有两个副本；即，它应该在两个 worker 节点上运行。
+* 可以纵向扩张，以在更多节点上具有更多副本。

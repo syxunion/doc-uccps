@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="gce-persistentdisk-storage-class_{context}"]
+= GCE PersistentDisk (gcePD) 对象定义
+
+.gce-pd-storageclass.yaml
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: <storage-class-name> <1>
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard <2>
+  replication-type: none
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+----
+<1> 存储类的名称。持久性卷声明使用此存储类来置备关联的持久性卷。
+<2> 选择 `pd-standard` 或 `pd-ssd`。默认为 `pd-standard`。

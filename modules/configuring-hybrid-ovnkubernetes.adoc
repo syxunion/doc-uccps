@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_aws/installing-aws-network-customizations.adoc
+// * installing/installing_azure/installing-azure-network-customizations.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-network-customizations.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-hybrid-networking.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-hybrid-ovnkubernetes_{context}"]
+= 使用 OVN-Kubernetes 配置混合网络
+
+您可以将集群配置为使用 OVN-Kubernetes 的混合网络。这允许支持不同节点网络配置的混合集群。例如：集群中运行 Linux 和 Windows 节点时需要这样做。
+
+[重要]
+====
+您必须在安装集群过程中使用 OVN-Kubernetes 配置混合网络。您不能在安装过程中切换到混合网络。
+====
+
+.先决条件
+
+* 您在 `install-config.yaml` 文件中为 `networking.networkType` 参数定义了 `OVNKubernetes`。如需更多信息，请参阅有关在所选云供应商上配置 统信容器云管理平台 网络自定义的安装文档。
+
+.流程
+
+. 进入包含安装程序的目录并创建清单：
++
+[source,terminal]
+----
+$ ./openshift-install create manifests --dir <installation_directory>
+----
++
+--
+其中：
+
+`<installation_directory>`:: 指定包含集群的 `install-config.yaml` 文件的目录名称。
+--
+
+. 在 `<installation_directory>/manifests/` 目录中 为高级网络配置创建一个名为 `cluster-network-03-config.yml` 的 stub 清单文件：
++
+[source,terminal]
+----
+$ cat <<EOF > <installation_directory>/manifests/cluster-network-03-config.yml
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+EOF
+----
++
+--
+其中：
+
+`<installation_directory>`:: 指定包含集群的 `manifests/` 目录的目录名称。
+--
+
+. 在编辑器中打开 `cluster-network-03-config.yml` 文件，并使用混合网络配置 OVN-Kubernetes，如下例所示：
++
+--
+.指定混合网络配置
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  defaultNetwork:
+    ovnKubernetesConfig:
+      hybridOverlayConfig:
+        hybridClusterNetwork: <1>
+        - cidr: 10.132.0.0/14
+          hostPrefix: 23
+        hybridOverlayVXLANPort: 9898 <2>
+----
+<1> 指定用于额外覆盖网络上节点的 CIDR 配置。hybridClusterNetwork CIDR 无法与 clusterNetwork CIDR 重叠。
+<2> 为额外覆盖网络指定自定义 VXLAN 端口。这是在 vSphere 上安装的集群中运行 Windows 节点所需要的，且不得为任何其他云供应商配置。自定义端口可以是除默认 `4789` 端口外的任何打开的端口。有关此要求的更多信息，请参阅 Microsoft 文档中的 Pod 到主机间的 pod 连接性。
+--
++
+[注意]
+====
+Windows Server Long-Term Servicing Channel（LTSC）：Windows Server 2019 在带有自定义 `hybridOverlayVXLANPort` 值的集群中不被支持，因为这个 Windows server 版本不支持选择使用自定义的 VXLAN 端口。
+====
+
+. 保存 `cluster-network-03-config.yml` 文件，再退出文本编辑器。
+. 可选：备份 `manifests/cluster-network-03-config.yml` 文件。创建集群时，安装程序会删除 `manifests/` 目录。
+

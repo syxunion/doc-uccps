@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+:context: nodes-containers-using
+[id="nodes-containers-sysctls"]
+= 在容器中使用 sysctl
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+Sysctl 设置可以通过 Kubernetes 来公开，允许用户在运行时为容器内的命名空间修改某些内核参数。只有拥有命名空间的 sysctl 才能独立于 pod 进行设置。如果 sysctl 没有命名空间（称为节点级别），则必须使用其他设置 sysctl 的方法，如 Node Tuning Operator。此外，只有被认为是安全的 sysctl 才会默认列在白名单中；您可以在节点上手动启用其他不安全 sysctl 来供用户使用。
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-containers-sysctls-about.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-sysctls-setting.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-sysctls-unsafe.adoc[leveloffset=+1]

@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * nodes/clusters/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="nodes-cluster-node-overcommit_{context}"]
+= 节点级别的过量使用
+
+您可以使用各种方法来控制特定节点上的过量使用，如服务质量 (QOS) 保障、CPU 限值或保留资源。您还可以为特定节点和特定项目禁用过量使用功能。

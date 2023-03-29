@@ -1,0 +1,17 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="threescale-configuring-the-threescale-webassembly-module_{context}"]
+= 配置 3scale WebAssembly 模块
+
+3scale WebAssembly 模块配置的架构取决于 3scale 帐户和授权服务，以及要处理的服务列表。
+
+.先决条件
+
+在所有情形中，先决条件都是一组最低必填字段：
+
+* 对于 3scale 帐户和授权服务： `backend-listener` URL。
+* 要处理的服务列表：服务 ID 和至少一个凭据查找方法以及查找方法。
+* 您将找到处理 `userkey`, 以及带有 `appkey` 的 `appid` ，以及 OpenID Connect(OIDC)模式的示例。
+* WebAssembly 模块使用您在静态配置中指定的设置。例如，如果您向模块中添加映射规则配置，它将始终适用，即使 3scale 管理门户没有这样的映射规则。 `ServiceMeshExtension` 资源的其余部分围绕 `spec.config` YAML 条目存在。

@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.aodc
+
+[id="nfs-user-id_{context}"]
+= 用户 ID
+
+用户 ID 可以在容器镜像或者 Pod 定义中定义。
+
+[注意]
+====
+通常情况下，最好使用附件组群 ID 而不是用户 ID 来获得对持久性存储的访问。
+====
+
+在上面显示的目标 NFS 目录示例中，容器需要将其 UID 设定为 `65534`，忽略组 ID。因此可以把以下内容添加到 `Pod` 定义中：
+
+[source,yaml]
+----
+spec:
+  containers: <1>
+  - name:
+  ...
+    securityContext:
+      runAsUser: 65534 <2>
+----
+<1>Pods 包括一个特定于每一个容器的 `securityContext` 定义，以及一个适用于 Pod 定义中所有容器的 pod 的 `securityContext`。
+<2> `65534` 是 `nfsnobody` 用户。
+
+假设项目为 `default` 且 SCC 为 `restricted`，则不允许 pod 请求的用户 ID `65534`。因此，pod 会因以下原因失败：
+
+* 它要求 `65534` 作为其用户 ID。
+* Pod 可用的所有 SCC 被检查以决定哪些 SCC 允许 ID 为 `65534` 的用户。虽然检查了 SCC 的所有策略，但这里的焦点是用户 ID。
+* 因为所有可用的 SCC 都使用 `MustRunAsRange` 作为其 `runAsUser` 策略，所以需要进行 UID 范围检查。
+* `65534` 不包含在 SCC 或项目的用户 ID 范围内。
+
+一般情况下，作为一个最佳实践方案，最好不要修改预定义的 SCC。解决这个问题的的首选方法是，创建一个自定义 SCC，在其中定义最小和最大用户 ID。 UID 范围仍然会被强制检查，UID 65534 会被允许。
+
+[注意]
+====
+要使用自定义 SCC，需要首先将其添加到适当的服务帐户（service account）中。例如，在一个特定项目中使用 `default` 服务账户（除非在 `Pod` 规格中指定了另外一个账户）。
+====

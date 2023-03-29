@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-apiserversource.adoc
+
+:_content-type: PROCEDURE
+[id="odc-creating-apiserversource_{context}"]
+= 使用 Web 控制台创建 API 服务器源
+
+在集群中安装 Knative Eventing 后，您可以使用 web 控制台创建 API 服务器源。使用 {product-title} Web 控制台提供了一个简化且直观的用户界面来创建事件源。
+
+.先决条件
+
+* 已登陆到 {product-title} Web 控制台。
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在  {product-title} 中创建应用程序和其他工作负载。
+* 已安装 Uccps CLI (`oc`).
+
+.Procedure
+
+include::snippets/serverless-service-account-apiserversource.adoc[]
+
+. 在 *开发者* 视角中，导航到  *+添加* → *事件源*。此时会显示 *事件源s*  页面。
+. 可选：如果您的事件源有多个供应商，请从 *Providers* 列表中选择所需的供应商，以过滤供应商的可用事件源。
+. 选择 *ApiServerSource* ，然后点 *创建 事件源*。此时会显示  *创建 事件源* 页面。
+. 使用 *Form view* 或 *YAML view* 配置  *ApiServerSource* 设置：
++
+[注意]
+====
+您可以在 *Form view* 和 *YAML view* 间进行切换。在不同视图间切换时数据会被保留。
+====
+.. 输入 `v1` 作为 *APIVERSION* 和 `Event` 作为 *KIND*.
+// .. Select *Resource* as the *Mode*. *Mode* is the mode that the receive adapter controller runs in. `Ref` sends only the reference to the resource. `Resource` sends the full resource.
+// TODO: clarify what this is used for. Out of scope for this PR since not required.
+.. 为您创建的服务帐户选择 *Service Account Name*
+.. 为事件源选择 *Sink* 。 *Sink* 可以是一个 *Resource*，如频道、代理或服务，也可以是一个 URI。
+. 点 *创建*.
+
+.验证
+
+* 创建 API 服务器源后，您会在 *拓扑* 视图中看到它连接到接收器的服务。
++
+image::toplogy-odc-apiserver.png[ApiServerSource Topology view]
+
+[注意]
+====
+如果使用 URI sink，请右键点击  *URI sink* -> *Edit URI* 来修改 URI。
+====
+
+.删除 API 服务器源
+
+. 导航到 *拓扑* 视图。
+. 右键点击 API 服务器源并选择 *删除 ApiServerSource*.
++
+image::delete-apiserversource-odc.png[Delete the ApiServerSource]

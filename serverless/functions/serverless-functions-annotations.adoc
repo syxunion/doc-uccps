@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-attributes"]
+= 在功能中添加注解
+include::_attributes/common-attributes.adoc[]
+:context: serverless-functions-annotations
+
+toc::[]
+
+您可以将 Kubernetes 注解添加到部署的 Serverless 功能中。注解可让您将任意元数据附加到函数，例如，关于功能目的的备注。注解添加到 `func.yaml`  配置文件的 `annotations` 部分。
+
+功能注解功能有两个限制：
+
+* 当功能注解传播到集群中的对应 Knative 服务后，无法通过从  `func.yaml` 文件中删除该服务来将其从服务中删除。您必须通过直接修改服务的 YAML 文件或使用 {product-title} web 控制台从 Knative 服务中删除注解。
+
+* 您无法设置 Knative 设置的注解，例如 `autoscaling` 注解。
+
+include::modules/serverless-functions-adding-annotations.adoc[leveloffset=+1]

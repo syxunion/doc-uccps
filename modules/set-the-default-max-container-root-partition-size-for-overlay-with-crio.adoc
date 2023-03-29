@@ -1,0 +1,123 @@
+// Module included in the following assemblies:
+//
+// post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="set-the-default-max-container-root-partition-size-for-overlay-with-crio_{context}"]
+= 验证 `storage.conf` 文件中的更改：
+
+每个容器的根分区显示底层主机的所有可用磁盘空间。按照以下说明，为所有容器的 root 磁盘设置最大分区大小。
+
+要配置最大 Overlay 大小，以及其他 CRI-O 选项，如日志级别和 PID 限制，您可以创建以下 `ContainerRuntimeConfig` 自定义资源定义（CRD）：
+
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: ContainerRuntimeConfig
+metadata:
+ name: overlay-size
+spec:
+ machineConfigPoolSelector:
+   matchLabels:
+     custom-crio: overlay-size
+ containerRuntimeConfig:
+   pidsLimit: 2048
+   logLevel: debug
+   overlaySize: 8G
+----
+
+.流程
+
+. 创建配置对象：
++
+[source,terminal]
+----
+$ oc apply -f overlaysize.yml
+----
+
+. 要将新的 CRI-O 配置应用到 worker 节点，请编辑 worker 机器配置池：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool worker
+----
+
+. 根据在 ContainerRuntimeConfig CRD 中设置的 `matchLabels` 名称添加 `custom-crio` 标签：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: "2020-07-09T15:46:34Z"
+  generation: 3
+  labels:
+    custom-crio: overlay-size
+    machineconfiguration.openshift.io/mco-built-in: ""
+----
+
+. 保存更改，然后查看机器配置：
++
+[source,terminal]
+----
+$ oc get machineconfigs
+----
++
+新的 `99-worker-generated-containerruntime` 和 `rendered-worker-xyz` 对象被创建：
++
+.输出示例
+[source,terminal]
+----
+99-worker-generated-containerruntime  4173030d89fbf4a7a0976d1665491a4d9a6e54f1   3.2.0             7m42s
+rendered-worker-xyz                   4173030d89fbf4a7a0976d1665491a4d9a6e54f1   3.2.0             7m36s
+----
+
+. 创建这些对象后，监控机器配置池以了解要应用的更改：
++
+[source,terminal]
+----
+$ oc get mcp worker
+----
++
+worker 节点将 `UPDATING` 显示为 `True`，以及机器数量、更新的数字和其他详情：
++
+.输出示例
+[source,terminal]
+----
+NAME   CONFIG              UPDATED   UPDATING   DEGRADED  MACHINECOUNT  READYMACHINECOUNT  UPDATEDMACHINECOUNT   DEGRADEDMACHINECOUNT   AGE
+worker rendered-worker-xyz False True False     3             2                   2                    0                      20h
+----
++
+完成后，worker 节点会从 `UPDATING` 转换回 `False`，`UPDATEDMACHINECOUNT` 数与 `MACHINECOUNT` 数匹配：
++
+.输出示例
+[source,terminal]
+----
+NAME   CONFIG              UPDATED   UPDATING   DEGRADED  MACHINECOUNT  READYMACHINECOUNT  UPDATEDMACHINECOUNT   DEGRADEDMACHINECOUNT   AGE
+worker   rendered-worker-xyz   True      False      False      3         3            3             0           20h
+----
++
+查看 worker 机器，您会看到新的 8 GB 最大大小配置适用于所有 worker：
++
+.输出示例
+[source,terminal]
+----
+head -n 7 /etc/containers/storage.conf
+[storage]
+  driver = "overlay"
+  runroot = "/var/run/containers/storage"
+  graphroot = "/var/lib/containers/storage"
+  [storage.options]
+    additionalimagestores = []
+    size = "8G"
+----
++
+在容器内，您会看到 root 分区现在为 8 GB：
++
+.输出示例
+[source,terminal]
+----
+$ df -h
+Filesystem                Size      Used Available Use% Mounted on
+overlay                   8.0G      8.0K      8.0G   0% /
+----

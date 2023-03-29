@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//* * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-s2i-buildconfig-environment_{context}"]
+= 使用 Source-to-image 构建配置环境
+
+您可以在构建配置的 `sourceStrategy` 定义中添加环境变量。这里定义的环境变量可在 assemble 脚本执行期间看到，也会在输出镜像中定义，使它们能够供 `run` 脚本和应用程序代码使用。
+
+.流程
+
+* 例如，禁用 Rails 应用程序的资产编译：
++
+[source,yaml]
+----
+sourceStrategy:
+...
+  env:
+    - name: "DISABLE_ASSET_COMPILATION"
+      value: "true"
+----
+
+[role="_additional-resources"]
+.其他资源
+
+* “构建环境”部分提供了更多高级指导。
+* 您还可以使用 `oc set env` 命令管理构建配置中定义的环境变量。

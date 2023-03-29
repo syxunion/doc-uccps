@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="installing-knative-eventing"]
+= 安装 Knative Eventing
+include::_attributes/common-attributes.adoc[]
+:context: installing-knative-eventing
+
+toc::[]
+
+要在集群上使用事件驱动的构架，请安装 Knative Eventing。您可以创建 Knative 组件，如事件源、代理和频道，然后使用它们向应用程序或外部系统发送事件。
+
+安装 {ServerlessOperatorName} 后，您可以使用默认设置安装 Knative Eventing，或者在 `KnativeEventing`自定义资源 (CR) 中配置更高级的设置
+
+include::modules/serverless-install-eventing-web-console.adoc[leveloffset=+1]
+include::modules/serverless-install-eventing-yaml.adoc[leveloffset=+1]

@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * builds/custom-builds-buildah.adoc
+
+
+:_content-type: PROCEDURE
+[id="builds-build-custom-builder-image_{context}"]
+= 构建自定义构建器镜像
+
+您可以使用 统信容器云管理平台 构建和推送要在 Custom 策略中使用的自定义构建器镜像。
+
+.先决条件
+
+* 定义要用于创建新的自定义构建器镜像的所有输入。
+
+.流程
+
+. 定义要用于构建自定义构建器镜像的 `BuildConfig` 对象：
++
+[source,terminal]
+----
+$ oc new-build --binary --strategy=docker --name custom-builder-image
+----
+
+. 从您在其中创建自定义构建镜像的目录中，运行构建：
++
+[source,terminal]
+----
+$ oc start-build custom-builder-image --from-dir . -F
+----
++
+构建完成后，新自定义构建器镜像将在名为 `custom-builder-image:latest` 的镜像流标签中的项目内可用。

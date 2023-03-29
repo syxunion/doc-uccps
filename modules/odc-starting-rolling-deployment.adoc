@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="odc-starting-rolling-deployment_{context}"]
+= 使用开发者视角启动滚动部署
+
+.先决条件
+* 确认您使用 web 控制台的 *开发者* 视角。
+* 确保您已使用 *+添加* 视图创建了一个应用程序，并可以在 *拓扑* 视图中查看它。``
+
+.流程
+
+要启动滚动部署来升级应用程序：
+
+. 在 *开发者* 视角的 *拓扑* 视图中，点应用程序节点，查看侧面面板中的 *详情* 选项卡。请注意，*更新策略* 被设置为默认的 `RollingUpdate` 策略 。
+. 在 *操作* 下拉菜单中，选择 *恢复推出部署* 来启动滚动更新。滚动部署将应用程序更新到新版本，然后终止旧版本。

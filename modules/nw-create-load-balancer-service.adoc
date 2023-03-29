@@ -1,0 +1,120 @@
+// Module included in the following assemblies:
+//
+// * ingress/getting-traffic-cluster.adoc
+
+:_content-type: PROCEDURE
+[id="nw-create-load-balancer-service_{context}"]
+= 创建负载均衡器服务
+
+使用以下流程来创建负载均衡器服务。
+
+.先决条件
+
+* 确保您要公开的项目和服务已经存在。
+
+.流程
+
+创建负载均衡器服务：
+
+. 登录 统信容器云管理平台。
+
+. 加载您要公开的服务所在的项目。
++
+[source,terminal]
+----
+$ oc project project1
+----
+
+. 在 control plane 节点上打开文本文件并粘贴以下文本，根据需要编辑该文件：
++
+.负载均衡器配置文件示例
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-2 <1>
+spec:
+  ports:
+  - name: db
+    port: 3306 <2>
+  loadBalancerIP:
+  loadBalancerSourceRanges: <3>
+  - 10.0.0.0/8
+  - 192.168.0.0/16
+  type: LoadBalancer <4>
+  selector:
+    name: mysql <5>
+----
+<1> 为负载均衡器服务输入一个描述性名称。
+<2> 输入您要公开的服务所侦听的同一个端口
+<3> 输入特定 IP 地址列表来限制通过负载均衡器的流量。如果 cloud-provider 不支持这个功能，则此字段将被忽略。
+<4> 输入 Loadbalancer 作为类型。
+<5> 输入服务的名称。
++
+[注意]
+====
+要将通过负载均衡器的流量限制为特定的 IP 地址，建议使用 `service.beta.kubernetes.io/load-balancer-source-ranges` 注解，而不是设置 `loadBalancerSourceRanges` 字段。通过注释，您可以更轻松地迁移到 OpenShift API，后者将在未来的发行版中实施。
+====
+. 保存并退出 文件。
+
+. 运行以下命令来创建服务：
++
+[source,terminal]
+----
+$ oc create -f <file-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f mysql-lb.yaml
+----
+
+. 执行以下命令以查看新服务：
++
+[source,terminal]
+----
+$ oc get svc
+----
++
+.输出示例
+[source,terminal]
+----
+NAME       TYPE           CLUSTER-IP      EXTERNAL-IP                             PORT(S)          AGE
+egress-2   LoadBalancer   172.30.22.226   ad42f5d8b303045-487804948.example.com   3306:30357/TCP   15m
+----
++
+如果启用了云供应商，该服务会自动分配到一个外部 IP 地址。
+
+. 在 master 上，使用 cURL 等工具来确保您可以通过公共 IP 地址访问该服务：
++
+[source,terminal]
+----
+$ curl <public-ip>:<port>
+----
++
+例如：
++
+[source,terminal]
+----
+$ curl 172.29.121.74:3306
+----
++
+此部分中的示例使用 MySQL 服务，这需要客户端应用程序。如果您得到一串字符并看到 `Got packets out of order` 消息，则您已连接到该服务。
++
+如果您有 MySQL 客户端，请使用标准 CLI 命令登录：
++
+[source,terminal]
+----
+$ mysql -h 172.30.131.89 -u admin -p
+----
++
+.输出示例
+[source,terminal]
+----
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+
+MySQL [(none)]>
+----

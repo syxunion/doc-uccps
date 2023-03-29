@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="idling-applications"]
+= 闲置应用程序
+include::_attributes/common-attributes.adoc[]
+:context: idling-applications
+
+toc::[]
+
+集群管理员可以闲置应用程序来减少资源消耗。在成本与资源消耗相关的公共云中部署集群时，这非常有用。
+
+若有任何可扩展的资源不在使用中，统信容器云管理平台 会发现这些资源并通过将其副本数减少到 `0` 来闲置它们。下一次网络流量定向到这些资源时，通过扩大副本数来取消闲置这些资源，并且继续正常运作。
+
+应用程序由服务以及其他可扩展的资源组成，如部署配置。闲置应用程序的操作涉及闲置所有关联的资源。
+
+include::modules/idle-idling-applications.adoc[leveloffset=+1]
+include::modules/idle-unidling-applications.adoc[leveloffset=+1]

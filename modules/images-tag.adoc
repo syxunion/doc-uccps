@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.adoc
+// * openshift_images/tagging-images.adoc
+
+[id="images-tag_{context}"]
+= 镜像标签
+
+镜像标签（tag）是应用于存储库中容器镜像的标签，用于将特定镜像与镜像流中的其他镜像区分开来。标签通常代表某种版本号。例如，这里 `:v3.11.59-2` 是标签：
+
+[source,text]
+----
+registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.11.59-2
+----
+
+您可以向镜像添加其他标签。例如，可为镜像分配 `:v3.11.59-2` 和 `:latest` 标签。
+
+统信容器云管理平台 提供 oc tag 命令，该命令类似于 docker tag 命令，但是在镜像流上运行，而非直接在镜像上运行。

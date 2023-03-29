@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-config.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-security-enabling-strict-mtls_{context}"]
+= Enabling strict mTLS across the service mesh
+
+如果您的工作负载没有与外部服务通信，您可以在网格间快速启用 mTLS，而不中断通信。您可以通过在 `ServiceMeshControlPlane`  资源中将 `spec.security.dataPlane.mtls` 设置为 `true` 来启用它。Operator 会创建所需资源。
+
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+spec:
+  version: v{MaistraVersion}
+  security:
+    dataPlane:
+      mtls: true
+----
+
+您还可以使用 统信容器云管理平台 控制台启用 mTLS。
+
+.Procedure
+
+. 登录到 web 控制台。
+
+. 点  *项目* 菜单，选择安装 Service Mesh control plane 的项目，如 *istio-system*。
+
+. 点 *Operators* -> *安装的 Operators*.
+
+. 点 *Provided APIs* 下的 *Service Mesh Control Plane* 。
+
+. 点 `ServiceMeshControlPlane` 资源的名称，例如 `basic`。
+
+. 在 *Details* 页面中，单击 *Data Plane Security* 的 *Security* 部分中的切换。

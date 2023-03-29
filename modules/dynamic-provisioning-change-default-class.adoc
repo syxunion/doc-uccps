@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+
+[id="change-default-storage-class_{context}"]
+= 更改默认存储类
+
+使用以下流程更改默认存储类。例如，您有两个定义的存储类 gp2 和 standard，您想要将默认存储类从 gp2 改为 standard。
+
+. 列出存储类：
++
+[source,terminal]
+----
+$ oc get storageclass
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                 TYPE
+gp2 (default)        kubernetes.io/aws-ebs <1>
+standard             kubernetes.io/aws-ebs
+----
+<1> `(default)` 表示默认存储类。
+
+. 将默认存储类的 `storageclass.kubernetes.io/is-default-class` 注解的值改为 false ：
++
+[source,terminal]
+----
+$ oc patch storageclass gp2 -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+----
+
+. 通过将 `storageclass.kubernetes.io/is-default-class` 注解设置为 `true` 来使另一个存储类成为默认值：
++
+[source,terminal]
+----
+$ oc patch storageclass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+----
+
+. 确认更改：
++
+[source,terminal]
+----
+$ oc get storageclass
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                 TYPE
+gp2                  kubernetes.io/aws-ebs
+standard (default)   kubernetes.io/aws-ebs
+----

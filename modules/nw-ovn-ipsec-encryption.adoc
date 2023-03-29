@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ipsec-ovn.adoc
+
+[id="nw-ovn-ipsec-encryption_{context}"]
+= IPsec 的加密协议和隧道模式
+
+使用的加密机制是 `AES-GCM-16-256`。完整性检查值（ICV）为 `16` 字节。密钥长度为 `256` 位。
+
+使用的 IPsec 隧道模式是 _Transport 	mode_，它是一个加密端到端通讯的模式。

@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * builds/advanced-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-build-pruning_{context}"]
+= 修剪构建
+
+默认情况下，生命周期已结束的构建将无限期保留。您可以限制要保留的旧构建数量。
+
+.流程
+
+. 通过为 `BuildConfig` 中的 `successfulBuildsHistoryLimit` 或 `failedBuildsHistoryLimit` 提供正整数值，限制要保留的旧构建的数量，如下例中所示：
++
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "BuildConfig"
+metadata:
+  name: "sample-build"
+spec:
+  successfulBuildsHistoryLimit: 2 <1>
+  failedBuildsHistoryLimit: 2 <2>
+----
+<1> `successfulBuildsHistoryLimit` 将保留最多两个状态为 `completed` 的构建。
+<2> `failedBuildsHistoryLimit` 将保留最多两个状态为 `failed`、`cancelled` 或 `error` 的构建。
+
+. 通过以下操作之一来触发构建修剪：
++
+* 更新构建配置。
+* 等待构建结束其生命周期。
+
+构建按其创建时间戳排序，首先修剪最旧的构建。
+
+[注意]
+====
+管理员可以使用 `oc adm` 对象修剪命令来手动修剪构建。
+====

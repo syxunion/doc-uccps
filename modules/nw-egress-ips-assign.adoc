@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/assigning-egress-ips-ovn.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-ips-assign_{context}"]
+= 为一个命名空间分配出口 IP 地址
+
+您可以将一个或多个出口 IP 地址分配给一个命名空间，或分配给命名空间中的特定 pod。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以集群管理员身份登录集群。
+* 至少配置一个节点来托管出口 IP 地址。
+
+.流程
+
+. 流程
+.. 创建一个 `<egressips_name>.yaml` 文件，其中 `<egressips_name>` 是对象的名称。
+.. 创建一个 `<egressips_name>.yaml` 文件，其中 `<egressips_name>` 是对象的名称。
++
+[source,yaml]
+----
+apiVersion: k8s.ovn.org/v1
+kind: EgressIP
+metadata:
+  name: egress-project1
+spec:
+  egressIPs:
+  - 192.168.127.10
+  - 192.168.127.11
+  namespaceSelector:
+    matchLabels:
+      env: qa
+----
+
+. 运行以下命令来创建对象。
++
+[source,terminal]
+----
+$ oc apply -f <egressips_name>.yaml <1>
+----
+<1> 将 `<egressips_name>` 替换为对象的名称。
++
+.输出示例
+[source,terminal]
+----
+egressips.k8s.ovn.org/<egressips_name> created
+----
+
+. 可选：保存 `<egressips_name>.yaml` 文件，以便在以后进行修改。
+. 为需要出口 IP 地址的命名空间添加标签。要在第 1 步中定义的 EgressIP 对象的命名空间中添加标签，请运行以下命令：
++
+[source,terminal]
+----
+$ oc label ns <namespace> env=qa <1>
+----
+<1> 将 `<namespace>` 替换为需要出口 IP 地址的命名空间。

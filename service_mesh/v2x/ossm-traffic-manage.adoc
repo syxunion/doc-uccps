@@ -1,0 +1,61 @@
+:_content-type: ASSEMBLY
+[id="ossm-routing-traffic"]
+= Managing traffic in your service mesh
+include::_attributes/common-attributes.adoc[]
+:context: traffic-management
+
+toc::[]
+
+使用  {SMProductName}, 您可以控制服务间的流量和 API 调用流。服务网格中的一些服务可能需要在网格内进行通信，其他服务则需要隐藏。您可以管理流量来隐藏特定后端服务、公开服务、创建测试或版本部署，或者在一组服务中添加安全层。
+
+include::modules/ossm-gateways.adoc[leveloffset=+1]
+
+include::modules/ossm-automatic-gateway-injection.adoc[leveloffset=+2]
+
+include::modules/ossm-deploying-automatic-gateway-injection.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-ingress.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-gateways.adoc[leveloffset=+2]
+
+[id="ossm-auto-route_{context}"]
+== Understanding automatic routes
+
+在 Service Mesh 中自动管理网关的 统信容器云管理平台 路由。每次在 service mesh 中创建、更新或删除 Istio 网关时，都会自动创建、更新或删除 统信容器云管理平台 路由。
+
+[id="ossm-auto-route-subdomains_{context}"]
+=== Routes with subdomains
+
+统信容器云管理平台服务网格使用子域创建路由，但必须配置 统信容器云管理平台 才能启用它。支持子域，如 `*.domain.com`，但默认情况下不受支持。在配置通配符主机网关前，配置 统信容器云管理平台 通配符策略。
+
+
+include::modules/ossm-auto-route.adoc[leveloffset=+2]
+
+include::modules/ossm-auto-route-annotations.adoc[leveloffset=+2]
+
+
+include::modules/ossm-auto-route-enable.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-service-entries.adoc[leveloffset=+1]
+
+include::modules/ossm-routing-virtual-service.adoc[leveloffset=+1]
+
+include::modules/ossm-routing-destination-rules.adoc[leveloffset=+1]
+
+include::modules/ossm-networkpolicy-overview.adoc[leveloffset=+1]
+
+include::modules/ossm-config-disable-networkpolicy.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-sidecar.adoc[leveloffset=+1]
+
+== Routing Tutorial
+
+本指南使用 Bookinfo 示例应用程序来提供示例应用程序中的路由示例。安装 xref:../../service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc#ossm-tutorial-bookinfo-overview_ossm-create-mesh[Bookinfo 应用程序] 以了解这些路由示例如何工作。
+
+include::modules/ossm-routing-bookinfo-example.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-bookinfo-applying.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-bookinfo-test.adoc[leveloffset=+2]
+
+include::modules/ossm-routing-bookinfo-route.adoc[leveloffset=+2]

@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-custom-event-sources.adoc
+
+:_content-type: CONCEPT
+[id="serverless-sinkbinding-intro_context"]
+= 接收器（sink）绑定
+
+`SinkBinding` 对象支持将事件产品与交付寻址分离。接收器绑定用于将 事件制作者 连接到事件消费者（sink) 。event producer 是一个 Kubernetes 资源，用于嵌入 `PodSpec` 模板并生成事件。sink 是一个可寻址的 Kubernetes 对象，可以接收事件。
+
+`SinkBinding` 对象将环境变量注入到 sink 的  `PodTemplateSpec`  中，这意味着应用程序代码不需要直接与 Kubernetes API 交互来定位事件目的地。这些环境变量如下：
+
+`K_SINK`:: 解析 sink 的 URL。
+`K_CE_OVERRIDES`:: 指定出站事件覆盖的 JSON 对象。
+
+[注意]
+====
+`SinkBinding` 对象目前不支持服务的自定义修订名称。.
+====
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

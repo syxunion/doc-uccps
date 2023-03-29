@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+[id="configuring-multi-network-policy"]
+= 配置多网络策略
+include::_attributes/common-attributes.adoc[]
+:context: configuring-multi-network-policy
+
+toc::[]
+
+作为集群管理员，您可以为额外网络配置网络策略。
+
+[注意]
+====
+您只能为 macvlan 额外网络指定多网络策略。不支持其他类型的额外网络，如 ipvlan。
+====
+
+include::modules/nw-multi-network-policy-differences.adoc[leveloffset=+1]
+include::modules/nw-multi-network-policy-enable.adoc[leveloffset=+1]
+
+[id="{context}_working-with-multi-network-policy"]
+== 使用多网络策略
+
+作为集群管理员，您可以创建、编辑、查看和删除多网络策略。
+
+[id="{context}_prerequisites"]
+=== 先决条件
+
+* 您已为集群启用了多网络策略支持。
+
+include::modules/nw-networkpolicy-create.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-edit.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-view.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-delete.adoc[leveloffset=+2]

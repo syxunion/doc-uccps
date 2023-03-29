@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-viewing-logs_{context}"]
+= 查看部署日志
+
+.流程
+
+. 输出给定 `部署配置` 的最新修订的日志：
++
+[source,terminal]
+----
+$ oc logs -f dc/<name>
+----
++
+如果最新的修订正在运行或已失败，命令会返回负责部署 Pod 的进程的日志。如果成功，它将从应用程序的 pod 返回日志。
+
+. 您还可以查看来自旧的失败部署进程的日志，只要存在这些进程（旧的复制控制器及其部署器 pod）并且没有手动清理或删除：
++
+[source,terminal]
+----
+$ oc logs --version=1 dc/<name>
+----

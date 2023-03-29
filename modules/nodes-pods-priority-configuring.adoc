@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-priority.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-priority-configuring_{context}"]
+= 配置优先级和抢占
+
+您可以通过创建优先级类对象并使用 Pod spec 中的 `priorityClassName` 将 `Pod` 与优先级关联，以应用 pod 优先级与抢占功能。
+
+.优先级类对象示例
+[source,yaml]
+----
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority <1>
+value: 1000000 <2>
+preemptionPolicy: PreemptLowerPriority <3>
+globalDefault: false <4>
+description: "This priority class should be used for XYZ service pods only." <5>
+----
+<1> 优先级类对象的名称。
+<2> T对象的优先级值。
+<3> 指定此优先级类是否被抢占或未抢占的可选字段。抢占策略默认为  `PreemptLowerPriority`，它允许该优先级类中的 pod 抢占较低优先级 pod。如果抢占策略设置为 Never，则该优先级类中的 pod 就不会被抢占。
+<4> 此可选字段指定是否应该将这个优先级类用于 pod，而不指定优先级类名。此字段默认为 false。集群中只能存在一个 globalDefault 设为 true 的优先级类。如果没有 globalDefault:true 的优先级类，则无优先级类名称的 pod 的优先级为零。添加具有 globalDefault:true 的优先级类只会影响在添加优先级类后创建的 pod，不会更改现有 pod 的优先级。
+<5> 此可选任意文本字符串用于描述开发人员应对哪些 pod 使用这个优先级类。
+
+.流程
+
+配置集群以使用优先级与抢占功能：
+
+. 创建一个或多个优先级类：
+
+.. 指定优先级的名称和值。
+
+.. 可选）指定优先级类的 globalDefault 字段和描述。
+
+. 创建 Pod spec 或编辑现有的 pod 以包含优先级类的名称，如下所示：
++
+.带有优先级类名称的 Pod 规格示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  priorityClassName: high-priority <1>
+----
+<1> 指定要用于此 pod 的优先级类。
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+您可以将优先级名称直接添加到 pod 配置或 pod 模板中。

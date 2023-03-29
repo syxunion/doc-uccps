@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * security/encrypting-etcd.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: CONCEPT
+[id="about-etcd_{context}"]
+= 关于 etcd 加密
+
+默认情况下，统信容器云管理平台 不加密 etcd 数据。在集群中启用对 etcd 进行加密的功能可为数据的安全性提供额外的保护层。例如，如果 etcd 备份暴露给不应该获得这个数据的人员，它会帮助保护敏感数据。
+
+启用 etcd 加密时，以下 Uccps API 服务器和 Kubernetes API 服务器资源将被加密：
+
+* Secrets
+* 配置映射
+* Routes
+* OAuth 访问令牌
+* OAuth 授权令牌
+
+当您启用 etcd 加密时，会创建加密密钥。这些密钥会每周进行轮转。您必须具有这些密钥才能从 etcd 备份中恢复。
+
+[注意]
+====
+请记住，etcd 仅对值进行加密，而不对键进行加密。这意味着资源类型、命名空间和对象名称是不加密的。
+====

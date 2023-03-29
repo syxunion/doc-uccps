@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/what-huge-pages-do-and-how-they-are-consumed-by-apps.adoc
+// * virt/virtual_machines/advanced_vm_management/virt-using-huge-pages-with-vms.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+ifeval::["{context}" == "huge-pages"]
+:ocp-hugepages:
+endif::[]
+
+ifeval::["{context}" == "virt-using-huge-pages-with-vms"]
+:virt-hugepages:
+endif::[]
+
+[id="what-huge-pages-do_{context}"]
+= 巨页的作用
+
+内存在块（称为页）中进行管理。在大多数系统中，页的大小为 4Ki。1Mi 内存相当于 256 个页，1Gi 内存相当于 256,000 个页。CPU 有内置的内存管理单元，可在硬件中管理这些页的列表。Translation Lookaside Buffer (TLB) 是虚拟页到物理页映射的小型硬件缓存。如果在硬件指令中包括的虚拟地址可以在 TLB 中找到，则其映射信息可以被快速获得。如果没有包括在 TLN 中，则称为 TLB miss。系统将会使用基于软件的，速度较慢的地址转换机制，从而出现性能降低的问题。因为 TLB 的大小是固定的，因此降低 TLB miss 的唯一方法是增加页的大小。
+
+巨页指一个大于 4Ki 的内存页。在 x86_64 构架中，有两个常见的巨页大小: 2Mi 和 1Gi。在其它构架上的大小会有所不同。要使用巨页，必须写相应的代码以便应用程序了解它们。Transparent Huge Pages（THP）试图在应用程序不需要了解的情况下自动管理巨页，但这个技术有一定的限制。特别是，它的页大小会被限为 2Mi。当有较高的内存使用率时，THP 可能会导致节点性能下降，或出现大量内存碎片（因为 THP 的碎片处理）导致内存页被锁定。因此，有些应用程序可能更适用于（或推荐）使用预先分配的巨页，而不是 THP。
+
+ifdef::ocp-hugepages[]
+In {product-title}, applications in a pod can allocate and consume pre-allocated
+huge pages.
+endif::ocp-hugepages[]
+
+ifdef::virt-hugepages[]
+In {VirtProductName}, virtual machines can be configured to consume pre-allocated
+huge pages.
+endif::virt-hugepages[]
+
+
+ifeval::["{context}" == "huge-pages"]
+:ocp-hugepages!:
+endif::[]
+
+ifeval::["{context}" == "virt-using-huge-pages-with-vms"]
+:virt-hugepages!:
+endif::[]

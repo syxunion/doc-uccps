@@ -1,0 +1,23 @@
+// Module included in the following assemblies
+//
+// * /serverless/about-serverless.adoc
+
+:_content-type: CONCEPT
+[id="about-knative-eventing_{context}"]
+= Knative Eventing
+
+{product-title}上的 Knative Eventing 可让开发人员使用 link:https://www.redhat.com/en/topics/integration/what-is-event-driven-architecture[事件驱动的架构] 和无服务器应用程序。事件驱动的体系结构是基于事件和事件用户间分离关系的概念。
+
+事件生成者创建事件，事件 sink、或消费者接收事件。Knative Eventing 使用标准 HTTP POST 请求来发送和接收事件制作者和 sink 之间的事件。这些事件符合 link:https://cloudevents.io[CloudEvents 规范]，它允许在任何编程语言中创建、解析、发送和接收事件。
+
+Knative Eventing  支持以下用例：
+
+在不创建消费者的情况下发布事件:: 您可以将事件作为 HTTP POST 发送到代理，并使用绑定分离生成事件的应用程序的目标配置。
+
+在不创建发布程序的情况下消费事件:: 您可以使用 Trigger 来根据事件属性消费来自代理的事件。应用程序以 HTTP POST 的形式接收事件。
+
+要启用多种 sink 类型的交付，Knative Eventing 会定义以下通用接口，这些接口可由多个 Kubernetes 资源实现：
+
+可寻址的资源:: 能够接收和确认通过 HTTP 发送的事件到 Event 的 `status.address.url` 字段中定义的地址。Kubernetes `Service` 资源也满足可寻址的接口。
+
+可调用的资源:: 能够通过 HTTP 接收事件并转换它，并在 HTTP 响应有效负载中返回 0 或 1 新事件。这些返回的事件可能会象处理外部事件源中的事件一样进一步处理。

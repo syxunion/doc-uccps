@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-utility-commands_{context}"]
+= 工具命令
+
+== tkn
+`tkn` CLI 的主命令。
+
+.示例： 显示所有选项
+[source,terminal]
+----
+$ tkn
+----
+
+== completion [shell]
+输出 shell 完成代码，必须经过评估方可提供互动完成。支持的 shell 是 `bash` 和 `zsh`。
+
+.示例：bash shell 完成代码
+[source,terminal]
+----
+$ tkn completion bash
+----
+
+== version
+输出 `tkn` CLI 的版本信息。
+
+.示例： 检查 `tkn` 版本
+[source,terminal]
+----
+$ tkn version
+----

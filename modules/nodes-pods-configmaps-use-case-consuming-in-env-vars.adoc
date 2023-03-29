@@ -1,0 +1,94 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmaps-use-case-consuming-in-env-vars_{context}"]
+= 使用配置映射在容器中填充环境变量
+
+配置映射可用于在容器中填充各个环境变量或从构成有效环境变量名称的所有键填充容器中的环境变量。
+
+例如，请考虑以下配置映射：
+
+.有两个环境变量的 `ConfigMap` 
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: special-config <1>
+  namespace: default <2>
+data:
+  special.how: very <3>
+  special.type: charm <3>
+----
+<1> 配置映射的名称。
+<2> 配置映射所在的项目。配置映射只能由同一项目中的 pod 引用。
+<3> 要注入的环境变量。
+
+.带有一个环境变量的 `ConfigMap`
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-config <1>
+  namespace: default
+data:
+  log_level: INFO <2>
+----
+<1> 配置映射的名称。
+<2> 要注入的环境变量。
+
+.流程
+
+* 您可以使用 `configMapKeyRef` 部分在 pod 中使用此 `ConfigMap` 的键。
++
+.配置为注入特定环境变量的 Pod 规格示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env: <1>
+        - name: SPECIAL_LEVEL_KEY <2>
+          valueFrom:
+            configMapKeyRef:
+              name: special-config <3>
+              key: special.how <4>
+        - name: SPECIAL_TYPE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: special-config <3>
+              key: special.type <4>
+              optional: true <5>
+      envFrom: <6>
+        - configMapRef:
+            name: env-config <7>
+  restartPolicy: Never
+----
+<1> 从 ConfigMap 中拉取指定的环境变量的小节。
+<2> 要将键值注入到的 pod 环境变量的名称。
+<3> 要从中拉取特定环境变量的 ConfigMap 名称。
+<4> 要从 ConfigMap 中拉取的环境变量。
+<5> 使环境变量成为可选。作为可选项，即使指定的 ConfigMap 和键不存在，也会启动 pod。
+<6> 从 ConfigMap 中拉取所有环境变量的小节。
+<7> 要从中拉取所有环境变量的 ConfigMap 名称。
++
+当此 pod 运行时，pod 日志包括以下输出：
++
+----
+SPECIAL_LEVEL_KEY=very
+log_level=INFO
+----
+
+[注意]
+====
+示例输出中没有列出 `SPECIAL_TYPE_KEY=charm` ，因为设置了 optional: true。
+====

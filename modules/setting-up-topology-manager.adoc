@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * scaling_and_performance/using-topology-manager.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="seting_up_topology_manager_{context}"]
+= 设置拓扑管理器
+
+要使用拓扑管理器，您必须在 `cpumanager-enabled` 自定义资源（CR）中配置分配策略。如果您设置了 CPU Manager，则该文件可能会存在。如果这个文件不存在，您可以创建该文件。
+
+.先决条件
+
+* 将 CPU Manager 策略配置为 `static`。请参考扩展和性能文档中的使用 CPU Manager 部分 。
+
+.流程
+
+激活 Topolgy Manager：
+
+. 在 `cpumanager-enabled` 自定义资源（CR）中配置拓扑管理器分配策略。
++
+[source,terminal]
+----
+$ oc edit KubeletConfig cpumanager-enabled
+----
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: cpumanager-enabled
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: cpumanager-enabled
+  kubeletConfig:
+     cpuManagerPolicy: static <1>
+     cpuManagerReconcilePeriod: 5s
+     topologyManagerPolicy: single-numa-node <2>
+----
+<1> 此参数必须是 `static`。
+<2> 指定所选拓扑管理器分配策略。在这里，策略是 `single-numa-node`。有效值为：`default`、`best-effort`、`restricted`、`single-numa-node`。

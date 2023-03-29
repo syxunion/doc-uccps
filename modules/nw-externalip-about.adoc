@@ -1,0 +1,167 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-externalip.adoc
+
+:_content-type: CONCEPT
+[id="nw-externalip-about_{context}"]
+= 关于 ExternalIP
+
+对于非云环境，统信容器云管理平台 支持通过 *ExternalIP* 工具将外部 IP 地址分配给 `Service` 对象的 spec.externalIPs[] 字段。通过设置此字段，统信容器云管理平台 为服务分配额外的虚拟 IP 地址。IP 地址可以在为集群定义的服务网络之外。配置了 ExternalIP 功能的服务与具有 `type=NodePort` 的服务类似，允许您将流量定向到本地节点以进行负载均衡。
+
+您必须配置网络基础架构，以确保您定义的外部 IP 地址块路由到集群。
+
+统信容器云管理平台 通过添加以下功能来扩展 Kubernetes 中的 ExternalIP 功能：
+- 通过可配置策略对用户使用外部 IP 地址的限制
+- 根据请求自动将外部 IP 地址分配给服务
+
+[警告]
+====
+默认情况下禁用，使用 ExternalIP 功能可能会造成安全隐患，因为集群内到一个外部 IP 地址的流量会定向到那个服务。这可让集群用户拦截用于外部资源的敏感流量。
+====
+
+[重要]
+====
+这个功能只在非云部署中被支持。对于云部署，使用负载均衡器服务自动部署云负载均衡器，以服务端点为目标。
+====
+
+您可以使用以下方法分配外部 IP 地址：
+
+自动分配一个外部 IP::
+当创建了一个带有 `spec.type=LoadBalancer` 设置的 Service 对象时，统信容器云管理平台 会从`autoAssignCIDRs` CIDR 块中自动为 `spec.externalIPs[]` 分配一个 IP 地址。在本例中，统信容器云管理平台 实现了负载均衡器服务类型的非云版本，并为服务分配 IP 地址。默认情况下，自动分配被禁用，且必须由集群管理员配置，如以下部分所述。
+
+手动分配外部 IP::
+统信容器云管理平台 在创建 Service 对象时使用分配给 `spec.externalIPs[]` 数组的 IP 地址。您不能指定已经被其他服务使用的 IP 地址。
+
+[id="configuration-externalip_{context}"]
+== 配置 ExternalIP
+
+在 统信容器云管理平台 中使用外部 IP 地址取决于名为 cluster 的 `Network.config.openshift.io` CR 中的以下字段：
+
+* `spec.externalIP.autoAssignCIDRs` 定义了一个负载均衡器在为服务选择外部 IP 地址时使用的 IP 地址块。统信容器云管理平台 只支持单个 IP 地址块进行自动分配。当手工为服务分配 ExternalIPs 时，这比管理有限共享 IP 地址的端口空间更简单。如果启用了自动分配，则会为带有 `spec.type=LoadBalancer` 的 Service 对象分配一个外部 IP 地址。
+* 在手动指定 IP 地址时，`spec.externalIP.policy` 定义了允许的 IP 地址块。统信容器云管理平台 不会将策略规则应用到 `spec.externalIP.autoAssignCIDRs` 定义的 IP 地址块。
+
+如果路由正确，来自配置的外部 IP 地址块的外部流量可以通过服务公开的任何 TCP 或 UDP 端口访问服务端点。
+
+[重要]
+====
+您必须确保分配的 IP 地址块在集群中的一个或多个节点上终止。
+====
+
+统信容器云管理平台 支持自动和手动分配 IP 地址，并且保证每个地址都被分配到最多一个服务。这样可保证，无论由其他服务公开的端口是什么，每个服务都可以公开选择的端口。
+
+[注意]
+====
+要使用 统信容器云管理平台 中由 `autoAssignCIDRs` 定义 的 IP 地址块，您必须为主机网络配置必要的 IP 地址分配和路由。
+====
+
+以下 YAML 描述了配置了外部 IP 地址的服务：
+
+.带有 `spec.externalIPs[]` 设置的示例 `Service` 对象
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-service
+spec:
+  clusterIP: 172.30.163.110
+  externalIPs:
+  - 192.168.132.253
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: highport
+    nodePort: 31903
+    port: 30102
+    protocol: TCP
+    targetPort: 30102
+  selector:
+    app: web
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.132.253
+----
+
+[id="restrictions-on-ip-assignment_{context}"]
+== 对外部 IP 地址分配的限制
+
+作为集群管理员，您可以指定允许和拒绝的 IP 地址块。
+
+限制只针对没有 `cluster-admin` 权限的用户。集群管理员始终可以将服务 `spec.externalIPs[]` 字段设置为任何 IP 地址。
+
+您可以使用一个通过指定 `spec.ExternalIP.policy` 字段来定义的一个 `policy` 对象来配置 IP 地址策略。策略对象有以下内容：
+
+[source,json]
+----
+{
+  "policy": {
+    "allowedCIDRs": [],
+    "rejectedCIDRs": []
+  }
+}
+----
+
+在配置策略限制时，会应用以下规则：
+
+- 如果设置了 `policy={}`，那么创建带有 `spec.ExternalIPs[]` 设置的 Service 对象将失败。这是 统信容器云管理平台 的默认设置。这与设置 `policy=null` 的行为相同。
+- 如果设置了`policy`，并且设置了 `policy.allowedCIDRs[]` 或 `policy.rejectedCIDRs[]`，则应用以下规则：
+
+* 如果同时设置了 `allowedCIDRs[]` 和 `rejectedCIDRs[]`，则 `allowedCIDRs[]` 的设置高于 `rejectedCIDRs[]`。
+* 如果设置了 `allowedCIDRs[]`，只有在允许指定的 IP 地址时，创建带有 `spec.ExternalIPs[]` 的 `Service` 对象才能成功。
+* 如果设置了 `rejectedCIDRs[]`，只有在指定的 IP 地址未被拒绝时，创建带有 `spec.ExternalIPs[]` 的 `Service` 对象才能成功。
+
+[id="example-policy-objects_{context}"]
+== 策略对象示例
+
+下面的例子演示了几个不同的策略配置。
+
+- 在以下示例中，策略会防止 统信容器云管理平台 使用指定的外部 IP 地址创建任何服务：
++
+.拒绝为 `Service` 对象 `spec.externalIPs[]` 指定的任何值的策略示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  externalIP:
+    policy: {}
+  ...
+----
+
+- 在以下示例中，设置了 `allowedCIDRs` 和 `rejectedCIDRs` 字段。
++
+.包括允许和拒绝 CIDR 块的策略示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  externalIP:
+    policy:
+      allowedCIDRs:
+      - 172.16.66.10/23
+      rejectedCIDRs:
+      - 172.16.66.10/24
+  ...
+----
+
+- 在以下示例中，`policy` 被设置为 `null`。如果设为 `null`，则通过输入 `oc get network.config.openshift.io -o yaml` 来检查配置对象时，`policy` 项不会出现在输出中。
++
+.允许为 `Service` 对象 `spec.externalIPs[]` 指定的任何值的示例策略
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  externalIP:
+    policy: null
+  ...
+----

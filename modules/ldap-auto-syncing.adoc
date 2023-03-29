@@ -1,0 +1,221 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-auto-syncing_{context}"]
+= 自动同步 LDAP 组
+
+您可以通过配置 cron 作业来定期自动同步 LDAP 组。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已配置了 LDAP 身份提供程序 (IDP)。
++
+此流程假设您创建一个名为 `ldap-secret` 的 LDAP secret 和名为 `ca-config-map` 的配置映射。
+
+.流程
+
+. 创建一个在其中运行 cron 任务的项目：
++
+[source,terminal]
+----
+$ oc new-project ldap-sync <1>
+----
+<1> 此流程使用名为 `ldap-sync` 的项目。
+
+. 找到您在配置 LDAP 身份提供程序时创建的 secret 和配置映射，并将它们复制到此新项目。
++
+secret 和配置映射存在于 `openshift-config` 项目中，必须复制到新的 `ldap-sync` 项目中。
+
+. 定义服务帐户：
++
+.`ldap-sync-service-account.yaml` 示例
+[source,yaml]
+----
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ldap-group-syncer
+  namespace: ldap-sync
+----
+
+. 创建服务帐户：
++
+[source,terminal]
+----
+$ oc create -f ldap-sync-service-account.yaml
+----
+
+. 定义集群角色：
++
+.Example `ldap-sync-cluster-role.yaml`
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ldap-group-syncer
+rules:
+  - apiGroups:
+      - ''
+      - user.openshift.io
+    resources:
+      - groups
+    verbs:
+      - get
+      - list
+      - create
+      - update
+----
+
+. 定义集群角色：
++
+[source,terminal]
+----
+$ oc create -f ldap-sync-cluster-role.yaml
+----
+
+. 定义集群角色绑定将集群角色绑定绑定到服务帐户：
++
+.`ldap-sync-cluster-role-binding.yaml` 示例
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ldap-group-syncer
+subjects:
+  - kind: ServiceAccount
+    name: ldap-group-syncer              
+    namespace: ldap-sync
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ldap-group-syncer                
+----
+
+
+. 创建集群角色绑定：
++
+[source,terminal]
+----
+$ oc create -f ldap-sync-cluster-role-binding.yaml
+----
+
+. 定义指定同步配置文件的配置映射：
++
+.`ldap-sync-config-map.yaml` 示例
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ldap-group-syncer
+  namespace: ldap-sync
+data:
+  sync.yaml: |                                 <1>
+    kind: LDAPSyncConfig
+    apiVersion: v1
+    url: ldaps://10.0.0.0:389                  <2>
+    insecure: false
+    bindDN: cn=admin,dc=example,dc=com         <3>
+    bindPassword:
+      file: "/etc/secrets/bindPassword"
+    ca: /etc/ldap-ca/ca.crt
+    rfc2307:                                   <4>
+      groupsQuery:
+        baseDN: "ou=groups,dc=example,dc=com"  <5>
+        scope: sub
+        filter: "(objectClass=groupOfMembers)"
+        derefAliases: never
+        pageSize: 0
+      groupUIDAttribute: dn
+      groupNameAttributes: [ cn ]
+      groupMembershipAttributes: [ member ]
+      usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"   <6>
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+      userUIDAttribute: dn
+      userNameAttributes: [ uid ]
+      tolerateMemberNotFoundErrors: false
+      tolerateMemberOutOfScopeErrors: false
+----
+<1> 定义同步配置文件。
+<2> 指定 URL。
+<3> 指定 bindDN。
+<4> 本例使用 RFC2307 模式；根据需要调整值。您还可以使用不同的架构。
+<5> 为 `groupsQuery` 和 `usersQuery` 指定 baseDN。
+<6> 为 `groupsQuery` 和 `usersQuery` 指定 baseDN。
+
+. 创建配置映射：
++
+[source,terminal]
+----
+$ oc create -f ldap-sync-config-map.yaml
+----
+
+. 定义 cron 作业：
++
+.`ldap-sync-cron-job.yaml` 示例
+[source,yaml]
+----
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: ldap-group-syncer
+  namespace: ldap-sync
+spec:                                                                                <1>
+  schedule: "*/30 * * * *"                                                           <2>
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 1800                                                 
+      template:
+        spec:
+          containers:
+            - name: ldap-group-sync
+              image: "registry.redhat.io/openshift4/ose-cli:latest"
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "oc adm groups sync --sync-config=/etc/config/sync.yaml --confirm" <3>
+              volumeMounts:
+                - mountPath: "/etc/config"
+                  name: "ldap-sync-volume"
+                - mountPath: "/etc/secrets"
+                  name: "ldap-bind-password"
+                - mountPath: "/etc/ldap-ca"
+                  name: "ldap-ca"
+          volumes:
+            - name: "ldap-sync-volume"
+              configMap:
+                name: "ldap-group-syncer"
+            - name: "ldap-bind-password"
+              secret:
+                secretName: "ldap-secret"                                            <4>
+            - name: "ldap-ca"
+              configMap:
+                name: "ca-config-map"                                                <5>
+          restartPolicy: "Never"
+          terminationGracePeriodSeconds: 30
+          activeDeadlineSeconds: 500
+          dnsPolicy: "ClusterFirst"
+          serviceAccountName: "ldap-group-syncer"
+----
+<1> 配置 cron 作业的设置。
+<2> 以 cron 格式指定的作业计划。这个示例 cron 作业每 30 分钟运行一次。根据需要调整频率，确保考虑到同步运行所需的时间。
+<3> 运行 cron 作业的 LDAP sync 命令。传递配置映射中定义的同步配置文件。
+<4> 此 secret 是在配置 LDAP IDP 时创建的。
+<5> 此配置映射是在配置 LDAP IDP 时创建的。
+
+. 创建 cron job：
++
+[source,terminal]
+----
+$ oc create -f ldap-sync-cron-job.yaml
+----

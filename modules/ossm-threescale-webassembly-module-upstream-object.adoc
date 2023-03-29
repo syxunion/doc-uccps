@@ -1,0 +1,35 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-upstream-object_{context}"]
+= The 3scale WebAssembly module upstream object
+
+`upstream` 对象描述代理可以对其执行调用的外部主机。
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+upstream:
+  name: outbound|443||multitenant.3scale.net
+  url: "https://myaccount-admin.3scale.net/"
+  timeout: 5000
+...
+----
+
+.`upstream` 对象字段
+|===
+|Name |描述 |必填
+
+a|`name`
+a|name 不是自由格式的标识符。它是外部主机的标识符，如代理配置中所定义。对于独立 Envoy 配置，它会映射到一个集群的名称，在其他代理中也称为 上游（upstream）。注： 这个字段的值，因为 Service Mesh 和 3scale Istio 适配器 control plane 根据使用竖线(|)作为多个字段分隔符的格式来配置名称。对于此集成，请始终使用格式：outbound|<port>||<hostname>。
+|是
+
+a|`url`
+|用于访问所描述服务的完整 URL。除非被方案所暗示，否则您必须包含 TCP 端口。
+|是
+
+a|`Timeout`
+|超时时间（毫秒），使得响应时间超过响应时间的连接将被视为错误。默认值为 1000 秒。
+|选填
+|===

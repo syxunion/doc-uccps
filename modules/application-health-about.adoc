@@ -1,0 +1,178 @@
+// Module included in the following assemblies:
+//
+// * applications/application-health.adoc
+
+:_content-type: CONCEPT
+[id="application-health-about_{context}"]
+= 了解健康检查
+
+一个健康检查使用就绪度、存活度和启动健康检查的组合来定期对正在运行的容器执行诊断。
+
+您可以在包含要执行健康检查的容器的 pod 规格中包括一个或多个探测。
+
+[注意]
+====
+如果要在现有 pod 中添加或编辑健康检查，您必须编辑 pod `部署配置`，或者在 web 控制台中使用 *开发者* 视角。您不能使用 CLI 添加或编辑现有 pod 的健康检查。
+====
+
+就绪度探测::
+就绪度探测（readiness probe）决定容器是否准备好接受服务请求。如果容器就绪度探测失败，kubelet 会从可用服务端点列表中移除 pod。
++
+失败后，这个探测将继续检查 pod。如果 pod 可用，kubelet 会将 pod 添加到可用服务端点列表中。
+
+存活度健康检查::
+存活度探测（liveness probe）决定容器是否仍然在运行。如果存活度探测因为死锁等情况而失败，kubelet 会终止容器。pod 会根据其重启策略响应。
++
+例如，在一个 `restartPolicy` 为 `Always` 或 `OnFailure` 的 pod 上的存活度探测会终止并重启容器。
+
+启动探测::
+启动探测（startup probe）指示容器内的应用程序是否启动。其它所有探测在启动成功前被禁用。如果启动探测无法在指定时间内成功，kubelet 会终止容器，容器受 pod `restartPolicy` 影响。
++
+一些应用程序在第一次初始化时可能需要额外时间启动。您可以使用带存活度或就绪度探测的启动探测，延迟这个探测的时长来处理需要长时间启动的系统（使用 `failureThreshold` 和 `periodSeconds` 参数）。
++
+例如，您可以添加一个启动探测，`failureThreshold` 为 30 次失败，`periodSeconds` 为 10 秒，结果为最多 5 分钟（30 * 10 = 300s）。在启动探测第一次成功后，存活度探测会接管。
+
+您可以使用以下测试类型配置存活度、就绪度和启动探测：
+
+* HTTP GET：在使用 HTTP GET 测试时，测试会使用 web hook 确定容器的健康状态。如果 HTTP 响应代码介于 `200` 与 `399` 之间，则测试可以成功。
++
+在初始化完成后，可以使用 HTTP GET 测试应用程序返回的 HTTP 状态码。
+
+* 容器命令：在使用容器命令测试时，探测会在容器内执行命令。如果测试退出的状态为 `0`，代表探测成功。
+
+* TCP 套接字：当使用 TCP 套接字测试时，探测会尝试为容器打开一个套接字连接。只有在探测可以建立连接时，容器才被视为健康。对于在初始化完成前不会开始监听的应用程序，可以使用 TCP 套接字测试。
+
+您可以配置几个字段来控制探测的行为：
+
+* `initialDelaySeconds`: 容器启动后经过这个时间（以秒为单位）后才可以调度探测。默认值为 0。
+* `periodSeconds`: 执行探测间的延迟时间（以秒为单位）。默认值为 `10`。这个值必须大于 `timeoutSeconds`。
+* `timeoutSeconds`: 不活跃状态维持了这个时间（以秒为单位）后，探测超时，容器被认为已失败。默认值为 `1`。这个值必须小于 `periodSeconds`。
+* `successThreshold`: 探测在失败后必须报告成功的次数，才会重置容器状态为成功。对于存活度探测，这个值必须是 `1`。默认值为 `1`。
+* `failureThreshold`: 这个探测允许失败的次数。默认值为 3。在指定的尝试后：
+** 对于存活度探测，容器被重启
+** 对于就绪度探测，pod 标记为 `Unready`
+** 对于启动探测，容器会终止，并取决于 pod 的 `restartPolicy`
+
+[discrete]
+[id="application-health-examples"]
+== 探测示例
+
+以下是在对象规格中显示的不同探测的示例。
+
+.就绪度探测示例，它在 pod 规格中带有一个容器命令就绪度探测
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: health-check
+  name: my-application
+...
+spec:
+  containers:
+  - name: goproxy-app 
+    args:
+    image: k8s.gcr.io/goproxy:0.1 
+    readinessProbe:
+      exec: 
+        command: 
+        - cat
+        - /tmp/healthy
+...
+----
+
+
+.在 pod 规格中进行容器命令测试的容器命令启动探测和存活度探测示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: health-check
+  name: my-application
+...
+spec:
+  containers:
+  - name: goproxy-app 
+    args:
+    image: k8s.gcr.io/goproxy:0.1 
+    livenessProbe: 
+      httpGet: 
+        scheme: HTTPS 
+        path: /healthz
+        port: 8080 
+        httpHeaders:
+        - name: X-Custom-Header
+          value: Awesome
+    startupProbe: 
+      httpGet: 
+        path: /healthz
+        port: 8080 <9>
+      failureThreshold: 30 
+      periodSeconds: 10
+...
+----
+
+
+.带有容器命令测试的在 pod 规格中使用超时的存活度探测示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: health-check
+  name: my-application
+...
+spec:
+  containers:
+  - name: goproxy-app 
+    args:
+    image: k8s.gcr.io/goproxy:0.1 
+    livenessProbe: 
+      exec: 
+        command: 
+        - /bin/bash
+        - '-c'
+        - timeout 60 /opt/eap/bin/livenessProbe.sh
+      periodSeconds: 10 
+      successThreshold: 1 
+      failureThreshold: 3 
+...
+----
+
+
+.在部署中使用 TCP 套接字测试的就绪度探测和存活度探测示例
+[source,yaml]
+----
+kind: Deployment
+apiVersion: apps/v1
+...
+spec:
+...
+  template:
+    spec:
+      containers:
+        - resources: {}
+          readinessProbe: 
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: ruby-ex
+          livenessProbe: 
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+...
+----
+

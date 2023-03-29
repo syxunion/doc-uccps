@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="ossm-deployment-models"]
+= Service mesh deployment models
+include::_attributes/common-attributes.adoc[]
+:context: ossm-deployment-models
+
+toc::[]
+
+{SMProductName} 支持几种不同的部署模型，它们可以以不同的方式组合以满足您的业务需求。
+
+
+include::modules/ossm-deploy-single-mesh.adoc[leveloffset=+1]
+
+include::modules/ossm-deploy-single-tenant.adoc[leveloffset=+1]
+
+include::modules/ossm-deploy-multitenant.adoc[leveloffset=+1]
+
+include::modules/ossm-deploy-multi-mesh.adoc[leveloffset=+1]

@@ -1,0 +1,34 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-node-selectors
+[id="nodes-scheduler-node-selectors"]
+= 使用节点选择器将 pod 放置到特定节点
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+_node selector_ 指定一个键/值对映射，该映射使用 pod 中指定的自定义标签和选择器定义。
+
+要使 pod 有资格在节点上运行，pod 必须具有与节点上标签相同的键值节点选择器。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-scheduler-node-selectors-about.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-selectors-pod.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-selectors-cluster.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-selectors-project.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* xref:../../nodes/scheduling/nodes-scheduler-taints-tolerations.adoc#nodes-scheduler-taints-tolerations-projects_nodes-scheduler-taints-tolerations[使用节点选择器和容限创建项目]
+
+// include::modules/nodes-scheduler-node-selectors-configuring.adoc[leveloffset=+1]

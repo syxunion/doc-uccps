@@ -1,0 +1,135 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="attaching-additional-labels-to-your-time-series-and-alerts_{context}"]
+= 在时间序列和警报中附加额外标签
+
+使用 Prometheus 的外部标签功能，可以将自定义标签附加到离开 Prometheus 的所有时间序列和警报。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。 
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`)。
+
+.流程
+
+. 编辑 `ConfigMap` 对象：
+** *对于监控 统信容器云管理平台 核心项目的 Prometheus 实例，要将自定义标签附加到离开的所有时间序列和警报*:
+.. 编辑  `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` ConfigMap 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 在 `data/config.yaml` 下定义每个指标要添加的标签映射:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      externalLabels:
+        <key>: <value> <1>
+----
++
+<1> 使用键值对替换 `<key>: <value>`，其中  `<key>` 是新标签的唯一名称，`<value>` 是它的值。
++
+[警告]
+====
+不要使用 `prometheus` 或 `prometheus_replica` 作为键的名称，因为它们是保留的并会被覆盖。
+====
++
+例如，要将关于区域和环境的元数据添加到所有时间序列和警报中，请使用：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      externalLabels:
+        region: eu
+        environment: prod
+----
+
+** *对于监控用户定义的项目的 Prometheus 实例，要将自定义标签附加到离开的所有时间序列和警报*：
+.. 在 `openshift-user-workload-monitoring` 项目中编辑 `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 在 `data/config.yaml` 下定义每个指标要添加的标签映射:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      externalLabels:
+        <key>: <value> <1>
+----
++
+<1> 使用键值对替换 `<key>: <value>` ，其中 `<key>` 是新标签的唯一名称， `<value>` 是它的值。
++
+[警告]
+====
+不要使用 `prometheus` 或 `prometheus_replica` 作为键的名称，因为它们是保留的并会被覆盖。
+====
++
+[注意]
+====
+在 `openshift-user-workload-monitoring` 项目中， `prometheus` 负责处理指标，而 Thanos Ruler 负责处理警报和记录规则。在 `user-workload-monitoring-config` `ConfigMap` 中为 `prometheus` 设置 `externalLabels` 只会为指标配置外部标签，而不会为任何规则配置外部标签。
+====
++
+例如，要将关于区域和环境的元数据添加到与用户定义的项目相关所有时间序列和警报中，请使用：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      externalLabels:
+        region: eu
+        environment: prod
+----
+
+. 保存文件以使改变生效。新的配置会被自动应用。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

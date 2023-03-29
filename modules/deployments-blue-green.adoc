@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/route-based-deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-blue-green_{context}"]
+= 蓝绿部署
+
+蓝绿部署涉及同时运行应用程序的两个版本，并将流量从生产版本（蓝色版本）移动到更新版本（绿色版本）。您可以使用滚动策略或切换路由中的服务。
+
+由于许多应用程序依赖于持久性数据，您必须有支持 N-1 兼容性的应用程序；这意味着，通过创建数据层的两个副本在数据库、存储或磁盘间共享数据并实现实时迁移。
+
+以测试新版本时使用的数据为例。如果是生产数据，新版本中的错误可能会破坏生产版本。
+
+[id="deployments-blue-green-setting-up_{context}"]
+== 设置蓝绿部署
+
+蓝绿部署使用两个 `Deployment` 对象。这两者都在运行，生产环境中的 `Deployment` 依赖于路由指定的服务，每个 Deployment 对象公开给不同的服务。
+
+[注意]
+====
+路由适用于 Web（HTTP 和 HTTPS）流量，因此这种技术最适合 Web 应用程序。
+====
+
+您可以创建指向新版本的新路由并进行测试。准备就绪后，将生产路径中的服务更改为指向新服务，使新（绿色）版本上线。
+
+如果需要，可以通过将服务切回到之前的版本以回滚到老版本（蓝色）。
+
+.流程
+
+. 创建两个独立的应用程序组件。
+.. 在 `example-blue` 服务下，创建运行 `v1` 镜像的示例应用程序的副本：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example:v1 --name=example-blue
+----
++
+.. 在 `example-green` 服务下，创建使用 `v2` 镜像的第二个副本：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example:v2 --name=example-green
+----
+
+. 创建指向旧服务的路由：
++
+[source,terminal]
+----
+$ oc expose svc/example-blue --name=bluegreen-example
+----
+
+. 通过 `bluegreen-example-<project>.apps.<cluster_name>.<router_domain>` 访问应用程序，验证您能否看到 `v1` 镜像。
+
+. 编辑路由并将服务名称改为 `example-green`：
++
+[source,terminal]
+----
+$ oc patch route/bluegreen-example -p '{"spec":{"to":{"name":"example-green"}}}'
+----
+
+. 要验证路由是否已改变，请刷新浏览器直到您看到 `v2` 镜像。

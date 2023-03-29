@@ -1,0 +1,38 @@
+[id="applications-create-using-cli-image_{context}"]
+= 从镜像创建应用程序
+
+您可以从现有镜像部署应用程序。镜像可以来自 统信容器云管理平台 服务器中的镜像流、特定 registry 中的镜像或本地 Docker 服务器中的镜像。
+
+`new-app` 命令尝试确定传递给它的参数中指定的镜像类型。但是，您可以使用 `--docker-image` 参数明确告知 new-app 镜像是一个容器镜像，或使用 `-i|--image-stream` 参数明确告知镜像是一个镜像流。
+
+[注意]
+====
+如果指定本地 Docker 存储库中的镜像，必须确保同一镜像可供 统信容器云管理平台 节点使用。
+====
+
+== Docker Hub MySQL 镜像
+
+从 Dockerhub MySQL 镜像创建应用程序，例如：
+
+[source,terminal]
+----
+$ oc new-app mysql
+----
+
+== 私有 REGISTRY 中的镜像
+
+使用私有 registry 中的镜像创建应用程序时，请指定完整容器镜像规格：
+
+[source,terminal]
+----
+$ oc new-app myregistry:5000/example/myimage
+----
+
+== 现有镜像流和可选镜像流标签
+
+从现有镜像流和可选镜像流标签创建应用程序：
+
+[source,terminal]
+----
+$ oc new-app my-stream:v1
+----

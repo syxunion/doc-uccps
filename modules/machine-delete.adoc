@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * machine_management/delete-machine.adoc
+// * windows_containers/removing-windows-nodes.adoc
+
+:_content-type: PROCEDURE
+[id="machine-delete_{context}"]
+= 删除一个特定的机器
+
+您可以删除特定的机器。
+
+[注意]
+====
+您无法删除 control plane 机器。
+====  
+
+.先决条件
+
+* 安装 统信容器云管理平台 集群：
+* 安装 Uccps CLI(`oc`)。
+* 以具有 `cluster-admin` 权限的用户身份登录 `oc`。
+
+.流程
+
+. 查看集群中的机器，找到要删除的机器：
++
+[source,terminal]
+----
+$ oc get machine -n openshift-machine-api
+----
++
+命令输出包含 `<clusterid>-worker-<cloud_region>` 格式的机器列表。
+
+. 删除机器：
++
+[source,terminal]
+----
+$ oc delete machine <machine> -n openshift-machine-api
+----
+
++
+[重要]
+====
+默认情况下，机器控制器会尝试排空在机器上运行的节点，直到成功为止。在某些情况下，如错误配置了 pod 的中断预算，节点排空操作可能无法成功完成，从而导致机器无法被删除。您可以在特定机器上使用 "machine.openshift.io/exclude-node-draining" 注解来跳过排空节点的过程。如果要删除的机器属于机器集，则会立即创建一个新机器来满足指定的副本数要求。
+====

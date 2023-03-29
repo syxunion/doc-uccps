@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring_samples_operator.adoc
+
+
+[id="samples-operator-configuration_{context}"]
+= Cluster Samples Operator 配置参数
+
+示例资源提供以下配置字段：
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`managementState`
+|`Managed`: Cluster Samples Operator 根据配置要求更新示例。
+
+`Unmanaged`: Cluster Samples Operator 忽略对 `Uccps` 命名空间中的配置资源对象和任何镜像流或模板的更新。
+
+`Removed`: Cluster Samples Operator 删除 `Uccps` 命名空间中 `Managed` 镜像流和模板集合。它忽略集群管理员创建的新示例或跳过列表中的任何示例。移除完成后，Cluster Samples Operator 会像处于 `Unmanaged` 状态一样工作，并忽略示例资源、镜像流或模板上的任何监控事件。
+
+|`samplesRegistry`
+|允许您指定镜像流可以访问哪个 `registry` 获取其镜像内容。对于 统信容器云管理平台，samplesRegistry 默认为 `registry.redhat.io`。
+
+[注意]
+====
+在未显式设置 `Samples Registry` （如空字符串）或该 registry 已设置为 `registry.redhat.io`  时，如果没有拉取（pull）访问的 secret，则不会开始创建或更新 RHEL 内容。这两种情况下，镜像导入将从需要凭证的 registry.redhat.io 中进行。
+
+如果 `Samples Registry` 被除空字符串或 `registry.redhat.io` 以外的值覆盖，则创建或更新 RHEL 内容不受存在 pull secret 的限制。
+====
+
+|`architectures`
+|用于选择架构类型的占位符。
+
+|`skippedImagestreams`
+|Cluster Samples Operator 清单中集群管理员希望 Operator 忽略或不予管理的镜像流。您可以在此参数中添加镜像流名称列表。例如: `["httpd","perl"]`.
+
+|`skippedTemplates`
+|Cluster Samples Operator 清单中集群管理员希望 Operator 忽略或不予管理的模板。
+
+|===
+
+secret、镜像流和模板监控事件可在初始创建示例资源对象之前发生，Cluster Samples Operator 会检测到这些事件并对事件队列重新排序。
+
+== 配置限制
+
+当 Cluster Samples Operator 开始支持多个架构时，则在处于 Managed 状态时不允许更改架构列表。
+
+要更改构架值，集群管理员必须：
+
+* 将 `Management State`  标记为 `Removed`，并保存更改。
+* 在随后更改中，编辑构架并将 `Management State`  改回 `Managed`.
+
+Cluster Samples Operator 在 `Removed` 状态下仍然会处理 `secret`。您可在切换到 `Removed` 之前，或在切换到 `Managed` 之前仍处于 Removed 时，或切换到 Managed 状态后创建 secret。如果在切换到 Managed 后创建 secret，创建示例会延迟到处理 secret 事件。如果您选择在切换前删除所有样本，则会有助于更改 registry。不需要在切换前删除所有示例。
+
+== Conditions
+
+示例资源将在所处状态下保持以下条件：
+
+[cols="3a,8a",options="header"]
+|===
+|条件 |描述
+
+|`SamplesExists`
+|代表 Uccps 命名空间中创建了样本。
+
+|`ImageChangesInProgress`
+|如果创建或更新了镜像流，但并非所有标记规范生成与标记状态生成均匹配，此条件则为 `True`。
+
+所有生成均匹配，或者导入过程中发生不可恢复的错误时显示为 `False`，最后看到的错误位于消息字段中，待处理的镜像流列表位于原因字段中。
+
+统信容器云管理平台 中已弃用此条件。
+
+|`ConfigurationValid`
+|如果提交的改变在以前已被认为是不可以被改变的 (restricted)，则为 `True`，否则为 `False`。
+
+|`RemovePending`
+|代表有 `Management State: Removed` 设置待处理，但 Cluster Samples Operator 正在等待删除操作完成。
+
+|`ImportImageErrorsExist`
+|指明哪些镜像流在它们的一个标签的镜像导入阶段出错。
+
+出错时显示为 `True`。出错的镜像流列表位于原因字段中。各个报告错误的详情位于消息字段中。
+
+|`MigrationInProgress`
+|当 Cluster Samples Operator 检测到对应版本与安装当前示例集的 Cluster Samples Operator 版本不同时，显示为 `True`。
+
+统信容器云管理平台 中已弃用此条件。
+
+|===

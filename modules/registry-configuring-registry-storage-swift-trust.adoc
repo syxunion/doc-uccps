@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * registry/installing-openstack- .adoc
+// * registry/configuring-registry-operator.adoc
+// * registry/configuring-registry-storage-openstack-user-infrastructure.adoc
+:_content-type: PROCEDURE
+[id="registry-configuring-registry-storage-swift-trust_{context}"]
+= 配置 Image Registry Operator 以信任 Swift 存储
+
+您必须将 Image Registry Operator 配置为信任 Uniontech UStack Platform(有栈)Swift 存储。
+
+// to allow the client to pull the image layers from the image registry rather than from links directly from Swift.
+
+.流程
+
+* 在命令行中输入以下命令将 `config.imageregistry` 对象中的 `spec.disableRedirect` 字段的值更改为 true ：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"disableRedirect":true}}'
+----

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_baremetal/installing-bare-metal-network-customizations.adoc
+// * installing/installing_baremetal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-baremetal.adoc
+
+:_content-type: PROCEDURE
+[id="installation-registry-storage-block-recreate-rollout-bare-metal_{context}"]
+= 配置块 registry 存储
+
+要允许镜像 registry 在作为集群管理员升级过程中使用块存储类型，您可以使用 `Recreate` rollout 策略。
+
+[重要]
+====
+支持块存储卷，但不建议将其用于生产环境中的镜像 registry。在块存储上配置 registry 的安装不具有高可用性，因为 registry 无法具有多个副本。
+====
+
+.流程
+
+. 要将镜像 registry 存储设置为块存储类型，对 registry 进行补丁，使其使用 `Recreate`  rollout 策略，并只使用一个(1)副本运行：
++
+[source,terminal]
+----
+$ oc patch config.imageregistry.operator.openshift.io/cluster --type=merge -p '{"spec":{"rolloutStrategy":"Recreate","replicas":1}}'
+----
++
+. 为块存储设备置备 PV，并为该卷创建 PVC。请求的块卷使用 ReadWriteOnce(RWO)访问模式。
++
+. 编辑 registry 配置，使其引用正确的 PVC。

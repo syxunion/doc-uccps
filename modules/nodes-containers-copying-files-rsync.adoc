@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-copying-files.adoc
+
+[id="nodes-containers-copying-files-rsync_{context}"]
+= 使用高级 rsync 功能
+
+与标准的 `rsync` 相比，`oc rsync` 命令可用的命令行选项比较少。如果您想要使用某个标准 `rsync` 命令行选项，但 `oc rsync` 中没有这个选项（例如，`--exclude-from=FILE` 选项），您可以使用标准 `rsync` 的 `--rsh (-e)` 选项或 `RSYNC_RSH` 变量来作为权宜之计，如下所示：
+
+[source,terminal]
+----
+$ rsync --rsh='oc rsh' --exclude-from=FILE SRC POD:DEST
+----
+
+或：
+
+导出 `RSYNC_RSH` 变量：
+
+[source,terminal]
+----
+$ export RSYNC_RSH='oc rsh'
+----
+
+然后运行 rsync 命令：
+
+[source,terminal]
+----
+$ rsync --exclude-from=FILE SRC POD:DEST
+----
+
+以上两个示例将标准 `rsync` 配置为使用 `oc rsh` 作为远程 shell 程序，从而连接到远程 pod，它们是运行 oc rsync 的替代方法。

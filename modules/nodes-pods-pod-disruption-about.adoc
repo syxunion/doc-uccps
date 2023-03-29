@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-configuring.adoc
+// * nodes/nodes-cluster-pods-configuring
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-configuring-pod-distruption-about_{context}"]
+= 了解如何使用 pod 中断预算来指定必须在线的 pod 数量
+
+ _pod 中断预算_ 是 *Kubernetes* API 的一部分，可以像其他对象类型一样通过 oc 命令进行管理。它们允许在操作过程中指定 pod 的安全约束，比如为维护而清空节点。
+
+`PodDisruptionBudget` 是一个 API 对象，用于指定在某一时间必须保持在线的副本的最小数量或百分比。在项目中进行这些设置对节点维护（比如缩减集群或升级集群）有益，而且仅在自愿驱除（而非节点失败）时遵从这些设置。
+
+`PodDisruptionBudget` 对象的配置由以下关键部分组成：
+
+* 标签选择器，即一组 pod 的标签查询。
+* 可用性级别，用来指定必须同时可用的最少 pod 的数量：
+** `minAvailable` 是必须始终可用的 pod 的数量，即使在中断期间也是如此。
+** `maxUnavailable` 是中断期间可以无法使用的 pod 的数量。
+
+[注意]
+====
+允许 `maxUnavailable` 为 `0%` 或 `0` ， `minAvailable`  为 100％ 或等于副本数，但这样设置可能会阻止节点排空操作。
+====
+
+您可以使用以下命令来检查所有项目的 pod 中断预算：
+
+[source,terminal]
+----
+$ oc get poddisruptionbudget --all-namespaces
+----
+
+.输出示例
+[source,terminal]
+----
+NAMESPACE         NAME          MIN-AVAILABLE   SELECTOR
+another-project   another-pdb   4               bar=foo
+test-project      my-pdb        2               foo=bar
+----
+
+如果系统中至少有 `minAvailable` 个 pod 正在运行，则 `PodDisruptionBudget` 被视为是健康的。超过这一限制的每个 pod 都可被驱除。
+
+[注意]
+====
+根据您的 pod 优先级与抢占设置，可能会无视 pod 中断预算要求而移除较低优先级 pod。
+====

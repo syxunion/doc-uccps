@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="creating-cluster-admin_{context}"]
+= 创建集群管理员
+
+需要具备 cluster-admin 角色才能在统信容器云管理平台集群上执行管理员级别的任务，例如修改集群资源。
+
+.先决条件
+
+* 您必须已创建了要定义为集群管理员的用户。
+
+.流程
+
+* 将用户定义为集群管理员：
++
+[source,terminal]
+----
+$ oc adm policy add-cluster-role-to-user cluster-admin <user>
+----

@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="enabling-alert-routing-for-user-defined-projects"]
+= 为用户定义的项目启用警报路由
+include::_attributes/common-attributes.adoc[]
+:context: enabling-alert-routing-for-user-defined-projects
+
+toc::[]
+
+:FeatureName: 用户定义的项目的警报路由
+include::snippets/technology-preview.adoc[leveloffset=+1]
+
+[role="_abstract"]
+在 统信容器云管理平台 1.2 中，集群管理员可以为用户定义的项目启用警报路由。
+
+//Overview of alert routing for user-defined projects
+include::modules/monitoring-understanding-alert-routing-for-user-defined-projects.adoc[leveloffset=+1]
+
+// Enabling alert routing for user-defined projects
+include::modules/monitoring-enabling-alert-routing-for-user-defined-projects.adoc[leveloffset=+1]
+
+// Granting users permission to configure alert routing for user-defined projects
+include::modules/monitoring-granting-users-permission-to-configure-alert-routing-for-user-defined-projects.adoc[leveloffset=+1]
+
+// Disabling alert routing for user-defined projects
+include::modules/monitoring-disabling-alert-routing-for-user-defined-projects.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* xref:../monitoring/enabling-monitoring-for-user-defined-projects.adoc#enabling-monitoring-for-user-defined-projects[为用户定义的项目启用监控]
+* xref:../monitoring/managing-alerts.adoc#managing-alerts[管理警报]

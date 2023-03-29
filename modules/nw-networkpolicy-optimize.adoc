@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/about-network-policy.adoc
+
+[id="nw-networkpolicy-optimize_{context}"]
+= 网络策略优化
+
+使用一个网络策略来通过 pod 上的不同标签来在命名空间中将不同 pod 进行隔离。
+
+[注意]
+====
+有效使用网络策略规则的指南只适用于 OpenShift SDN 集群网络供应商。
+====
+
+将 `NetworkPolicy` 对象应用到单一命名空间中的大量 pod 时，效率较低。因为 Pod 标签不存在于 IP 地址一级，因此网络策略会为使用 podSelector 选择的每个 pod 之间生成单独的 Open vSwitch（OVS）流量规则 。
+
+例如，在一个 `NetworkPolicy` 对象中，如果 spec `podSelector` 和 ingress `podSelector` 每个都匹配 200 个 pod，则会产生 40,000 (200*200) OVS 流规则。这可能会减慢节点的速度。
+
+在设计您的网络策略时，请参考以下指南：
+
+* 使用命名空间使其包含需要隔离的 pod 组，可以减少 OVS 流规则数量。
++
+使用 `namespaceSelector` 或空 `podSelector` 选择整个命名空间的`NetworkPolicy` 对象会只生成 一个与命名空间的 VXLAN 虚拟网络 ID（VNID）匹配的 OVS 流量规则。
+
+* 保留不需要在原始命名空间中隔离的 pod，并将需要隔离的 pod 移到一个或多个不同的命名空间中。
+
+* 创建额外的目标跨命名空间网络策略，以允许来自不同隔离的 pod 的特定流量。

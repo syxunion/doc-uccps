@@ -1,0 +1,17 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-configuration_{context}"]
+= The 3scale WebAssembly module configuration
+
+`ServiceMeshExtension` 自定义资源规格提供了 `Proxy-WASM` 模块从中读取的配置。
+
+该 spec 嵌入主机中，并由 `Proxy-WASM` module 模块读取。通常，配置采用要解析的模块的 JSON 文件格式，但 `ServiceMeshExtension` 资源可以将 spec 值解释为 YAML，并将其转换为 JSON 以供模块使用。
+
+如果您在独立模式中使用 `Proxy-WASM` ，则必须使用 JSON 格式编写配置。使用 JSON 格式意味着在 `host` 配置文件中根据需要使用转义和引用，如 Envoy。当您将 WebAssembly 模块与 `ServiceMeshExtension` 资源搭配使用时，配置采用 YAML 格式。在这种情况下，无效的配置会强制模块根据其 JSON 表示将诊断显示到 sidecar 的日志记录流。
+
+[IMPORTANT]
+====
+`EnvoyFilter`  自定义资源不是受支持的 API，虽然可在 3scale Istio 适配器或 Service Mesh 版本中使用。不建议使用 `EnvoyFilter` 自定义资源。使用 `ServiceMeshExtension` API 而不是 `EnvoyFilter`自定义资源。如果需要使用自定义资源，则必须以 JSON 格式指定 spec.
+====

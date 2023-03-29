@@ -1,0 +1,9 @@
+:_content-type: ASSEMBLY
+[id="assigning-a-secondary-network-to-a-vrf"]
+= 为 VRF 分配从属网络
+include::_attributes/common-attributes.adoc[]
+:context: assigning-a-secondary-network-to-a-vrf
+
+toc::[]
+
+include::modules/cnf-assigning-a-secondary-network-to-a-vrf.adoc[leveloffset=+1]

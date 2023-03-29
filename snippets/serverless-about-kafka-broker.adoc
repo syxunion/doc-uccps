@@ -1,0 +1,22 @@
+// Text snippet included in the following modules and assemblies:
+//
+// * /modules/serverless-broker-types.adoc
+// * /serverless/develop/serverless-kafka-developer.adoc
+
+:_content-type: SNIPPET
+
+对于生产环境就绪的 Knative Eventing 部署，红帽建议您使用 Knative Kafka 代理实现。Kafka 代理是 Knative 代理的 Apache Kafka 原生实现，它将 CloudEvents 直接发送到 Kafka 实例。
+
+[重要]
+====
+Kafka 代理禁用联邦信息处理标准(FIPS)模式。
+====
+
+Kafka 代理具有与 Kafka 的原生集成，用于存储和路由事件。这可让您更好地与 Kafka 集成，以便在其他代理类型上更好地与 Kafka 集成，并减少网络跃点。Kafka 代理实现的其他优点包括：
+
+* At-least-once delivery guarantees
+* 根据 CloudEvents 分区扩展排序事件交付
+* Control plane  高可用性
+* 水平扩展数据平面
+
+Knative Kafka 代理使用二进制内容模式将传入的 CloudEvents 存储为 Kafka 记录。这意味着，所有 CloudEvent 属性和扩展都会在 Kafka 记录上映射，而 CloudEvent 的 `data` 规格与 Kafka 记录的值对应。

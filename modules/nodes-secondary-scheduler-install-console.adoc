@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/nodes-secondary-scheduler-configuring.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-secondary-scheduler-install-console_{context}"]
+= 安装二级调度程序 Operator
+
+您可以使用 Web 控制台为 UnionTech Uccps 安装 Secondary Scheduler Operator。
+
+.先决条件
+
+* 您可以使用 `cluster-admin` 权限访问集群。
+* 访问 统信容器云管理平台 web 控制台。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+
+. 为 UnionTech Uccps 的二级调度程序 Operator 创建所需的命名空间。
+.. 导航到 *Administration* -> *Namespaces* 点 *Create Namespace*。
+.. 在 *Name* 字段中输入 `openshift-secondary-scheduler-operator`，再单击 *Create*。
++
+// There are no metrics to collect for the secondary scheduler operator as of now, so no need to add the metrics label
+
+. 为 UnionTech Uccps 安装 Secondary Scheduler Operator。
+.. 导航到 *Operators* -> *OperatorHub*。
+.. 在过滤器框中输入 *{secondary-scheduler-operator-full}* 。
+.. 为 UnionTech Uccps 选择  *{secondary-scheduler-operator-full}* 然后单击 *Install*.
+.. 在 *Install Operator* 页面:
+... *Update 频道* 设置为 *stable*, 它为 UnionTech Uccps 安装 Secondary Scheduler Operator 的最新稳定版本。
+... 选择 *集群上的 A specific namespace* ，再从下拉菜单中选择  *openshift-secondary-scheduler-operator* 。
+... 选择一个 *更新批准* 策略。
++
+* *Automatic* 策略允许 Operator Lifecycle Manager（OLM）在有新版本可用时自动更新 Operator。
+* *Manual* 策略需要拥有适当凭证的用户批准 Operator 更新。
+... 点 *Install*.
+
+.验证
+
+. 导航到 *Operators* -> *Installed Operators*.
+. 验证 UnionTech Uccps 的 *{secondary-scheduler-operator-full}* 是否已列为 *Succeeded*.

@@ -1,0 +1,140 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-osp-enabling-ovs-offload_{context}"]
+= 启用 OVS 硬件卸载
+
+:FeatureName: OVS 硬件卸载
+
+include::snippets/technology-preview.adoc[]
+
+对于在 UnionTech OpenStack Platform(RHOSP)上运行的集群，您可以启用 Open vSwitch(OVS) 硬件卸载。
+
+OVS 是一种多层虚拟交换机，能够启用大规模多服务器网络虚拟化。
+
+.先决条件
+
+* 您在为单根输入/输出虚拟化(SR-IOV)配置的 RHOSP 上安装集群。
+* 在集群中安装了 SR-IOV Network Operator。
+* 您在集群中创建了两个 `hw-offload` 类型虚拟功能(VF)接口。
+
+.流程
+
+. 在命令行中输入以下命令禁用准入 Webhook：
++
+[source,terminal]
+----
+$ oc patch sriovoperatorconfig default --type=merge -n openshift-sriov-network-operator --patch '{ "spec": { "enableOperatorWebhook": false } }'
+----
+
+. 为集群中的两个 `hw-offload` 类型 VF 接口创建一个 `SriovNetworkNodePolicy` 策略：
++
+.第一个虚拟功能接口
+[source,yaml]
+----
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy <1>
+metadata:
+  name: "hwoffload9"
+  namespace: openshift-sriov-network-operator
+spec:
+  deviceType: netdevice
+  isRdma: true
+  nicSelector:
+    pfNames: <2>
+    - ens6
+  nodeSelector:
+    feature.node.kubernetes.io/network-sriov.capable: 'true'
+  numVfs: 1
+  priority: 99
+  resourceName: "hwoffload9"
+----
+<1> 在此处插入 `SriovNetworkNodePolicy` 值。
+<2> 两个接口都必须包含物理功能(PF)名称。
++
+.第二个虚拟功能接口
+[source,yaml]
+----
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy <1>
+metadata:
+  name: "hwoffload10"
+  namespace: openshift-sriov-network-operator
+spec:
+  deviceType: netdevice
+  isRdma: true
+  nicSelector:
+    pfNames: <2>
+    - ens5
+  nodeSelector:
+    feature.node.kubernetes.io/network-sriov.capable: 'true'
+  numVfs: 1
+  priority: 99
+  resourceName: "hwoffload10"
+----
+<1> 在此处插入 `SriovNetworkNodePolicy` 值。
+<2> 两个接口都必须包含物理功能(PF)名称。
+
+. 为两个接口创建 `NetworkAttachmentDefinition` 资源：
++
+.第一接口的 `NetworkAttachmentDefinition` 资源
+[source,yaml]
+----
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: openshift.io/hwoffload9
+  name: hwoffload9
+  namespace: default
+spec:
+    config: '{ "cniVersion":"0.3.1", "name":"hwoffload9","type":"host-device","device":"ens6"
+    }'
+----
++
+.第二个接口的 `NetworkAttachmentDefinition` 资源
+[source,yaml]
+----
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: openshift.io/hwoffload10
+  name: hwoffload10
+  namespace: default
+spec:
+    config: '{ "cniVersion":"0.3.1", "name":"hwoffload10","type":"host-device","device":"ens5"
+    }'
+----
+ 
+. 使用通过 pod 创建的接口。例如：
++
+.使用两个 OVS 卸载接口的 Pod
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dpdk-testpmd
+  namespace: default
+  annotations:
+    irq-load-balancing.crio.io: disable
+    cpu-quota.crio.io: disable
+    k8s.v1.cni.cncf.io/networks: '[
+      {
+       "name": "hwoffload9",
+       "namespace": "default"
+      },
+      {
+       "name": "hwoffload10",
+       "namespace": "default"
+      }
+    ]'
+spec:
+  restartPolicy: Never
+  containers:
+  - name: dpdk-testpmd
+    image: quay.io/krister/centos8_nfv-container-dpdk-testpmd:latest
+----

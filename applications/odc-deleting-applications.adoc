@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="odc-deleting-applications"]
+= 取消应用程序
+include::_attributes/common-attributes.adoc[]
+:context: odc-deleting-applications
+
+toc::[]
+
+您可以删除项目中创建的应用程序。
+
+include::modules/odc-deleting-applications-using-developer-perspective.adoc[leveloffset=+1]

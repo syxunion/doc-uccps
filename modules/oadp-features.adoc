@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/application_backup_and_restore/oadp-features-plugins.adoc
+
+:_content-type: CONCEPT
+[id="oadp-features_{context}"]
+= OADP 功能
+
+Uccp API 用于数据保护(OADP)支持以下功能：
+
+备份::
+您可以备份集群中的所有资源，或者您可以按类型、命名空间或标签过滤资源。
++
+OADP 通过将 Kubernetes 对象和内部镜像保存为对象存储上的存档文件来备份 Kubernetes 对象和内部镜像。OADP 使用原生云快照 API 或通过容器存储接口(CSI)创建快照来备份持久性卷(PV)。对于不支持快照的云供应商，OADP 使用 Restic 备份资源和 PV 数据。
+
+恢复::
+您可以从备份中恢复资源和 PV。您可以恢复备份中的所有对象，或者根据命名空间、PV 或标签过滤恢复的对象。
+
+调度::
+您可以通过指定的间隔调度备份。
+
+Hooks::
+您可以使用 hook 在 pod 上的容器中运行命令，如 `fsfreeze` 以冻结文件系统。您可以将 hook 配置为在备份或恢复之前或之后运行。恢复 hook 可以在 init 容器或应用程序容器中运行。

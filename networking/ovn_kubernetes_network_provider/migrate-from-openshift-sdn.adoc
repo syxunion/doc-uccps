@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="migrate-from-openshift-sdn"]
+= 从 OpenShift SDN 集群网络供应商迁移
+include::_attributes/common-attributes.adoc[]
+:context: migrate-from-openshift-sdn
+
+toc::[]
+
+作为集群管理员，您可以从 OpenShift SDN CNI 集群网络供应商迁移到 OVN-Kubernetes Container Network Interface (CNI) 集群网络供应商。
+
+
+include::modules/nw-ovn-kubernetes-migration-about.adoc[leveloffset=+1]
+
+include::modules/nw-ovn-kubernetes-migration.adoc[leveloffset=+1]

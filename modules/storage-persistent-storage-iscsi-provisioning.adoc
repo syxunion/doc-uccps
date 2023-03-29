@@ -1,0 +1,26 @@
+// Module included in the following assemblies
+//
+// * storage/persistent_storage-iscsi.adoc
+
+[id="persistent-storage-iscsi-provisioning_{context}"]
+= 置备
+在将存储作为卷挂载到统信容器云管理平台之前，请确认它已存在于底层的基础架构中。iSCSI 需要的是 iSCSI 目标门户，一个有效的 iSCSI 限定名称 (IQN) ，一个有效的 LUN 号码，文件系统类型，以及 `persistenceVolume` API。
+
+.`PersistentVolume` 对象定义
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iscsi-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+     targetPortal: 10.16.154.81:3260
+     iqn: iqn.2014-12.example.server:storage.target00
+     lun: 0
+     fsType: 'ext4'
+----

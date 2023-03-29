@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-autoscaling-developer.adoc
+
+:_content-type: REFERENCE
+[id="serverless-target-utilization_{context}"]
+= 并发目标使用率
+
+此值指定自动扩展实际的目标并发限制的百分比。这也称为指定运行副本的热性（hotness），允许自动扩展在达到定义的硬限制前进行扩展。
+
+例如，如果 `containerConcurrency` 值设置为 10，并且 `target-utilization-percentage` 值设置为 70%，则自动扩展会在所有现有副本的平均并发请求数量达到 7 时创建一个新的副本。编号为 7 到 10 的请求仍然会被发送到现有的副本，但达到 `containerConcurrency` 值后会启动额外的副本。
+
+.使用 target-utilization-percentage 注解配置的服务示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target-utilization-percentage: "70"
+...
+----

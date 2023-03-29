@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// networking/multiple_networks/about-virtual-routing-and-forwarding.adoc
+
+:_content-type: CONCEPT
+[id="cnf-about-virtual-routing-and-forwarding_{context}"]
+= 关于虚拟路由和转发
+
+虚拟路由和转发（VRF）设备与 IP 规则相结合，提供了创建虚拟路由和转发域的能力。VRF 减少了 CNF 所需的权限数量，并可提高二级网络网络拓扑的可见性。VRF 用于提供多租户功能，例如，每个租户都有自己的唯一的路由表且需要不同的默认网关。
+
+进程可将套接字绑定到 VRF 设备。通过绑定套接字的数据包使用与 VRF 设备关联的路由表。VRF 的一个重要特性是，它只影响 OSI 模型层 3 以上的流量，因此 L2 工具（如 LLDP）不会受到影响。这可让优先级更高的 IP 规则（如基于策略的路由）优先于针对特定流量的 VRF 设备规则。
+
+[id="cnf-benefits-secondary-networks-telecommunications-operators_{context}"]
+== 这对针对电信业使用的 pod 的从属网络提供了好处
+
+在电信业，每个 CNF(Cloud Native Function, 云原生网络功能) 都可连接到共享相同地址空间的多个不同的网络。这些从属网络可能会与集群的主网络 CIDR 冲突。使用 CNI VRF 插件，网络功能可使用相同的 IP 地址连接到不同的客户基础架构，使不同的客户保持隔离。IP 地址与 统信容器云管理平台 IP 空间重叠。CNI VRF 插件还可减少 CNF 所需的权限数量，并提高从属网络的网络拓扑的可见性。

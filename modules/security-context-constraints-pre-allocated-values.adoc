@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-security-context-constraints.adoc
+
+:_content-type: CONCEPT
+[id="security-context-constraints-pre-allocated-values_{context}"]
+= 关于预分配安全性上下文约束值
+
+准入控制器清楚安全性上下文约束 (SCC) 中的某些条件，这些条件会触发它从命名空间中查找预分配值并在处理 Pod 前填充 SCC。每个 SCC 策略都独立于其他策略进行评估，每个策略的预分配值（若为允许）与 Pod 规格值聚合，为运行中 Pod 中定义的不同 ID 生成最终值。
+
+以下 SCC 导致准入控制器在 Pod 规格中没有定义范围时查找预分配值：
+
+. 以下 SCC 导致准入控制器在 Pod 规格中没有定义范围时查找预分配值：
+`RunAsUser` 策略为 `MustRunAsRange` 且未设置最小或最大值。准入查找 `openshift.io/sa.scc.uid-range` 注解来填充范围字段。
+. `SELinuxContext` 策略为 `MustRunAs` 且未设定级别。准入查找 `openshift.io/sa.scc.mcs` 注解来填充级别。
+. `FSGroup` 策略为 `MustRunAs`。准入查找 `openshift.io/sa.scc.supplemental-groups` 注解。
+. `SupplementalGroups` 策略为 `MustRunAs`。准入查找 `openshift.io/sa.scc.supplemental-groups` 注解。
+
+在生成阶段，安全性上下文提供程序会对 Pod 中未具体设置的参数值使用默认值。默认值基于所选的策略：
+
+. `RunAsAny` 和 `MustRunAsNonRoot` 策略不提供默认值。如果 Pod 需要参数值，如组 ID，您必须在 Pod 规格中定义这个值。
+. `MustRunAs`（单值）策略提供始终使用的默认值。例如，对于组 ID，即使 Pod 规格定义了自己的 ID 值，命名空间的默认参数值也会出现在 Pod 的组中。
+. `MustRunAsRange` 和 `MustRunAs` （基于范围）策略提供范围的最小值。与单值 MustRunAs 策略一样，命名空间的默认参数值出现在运行的 Pod 中。如果基于范围的策略可以配置多个范围，它会提供配置的第一个范围的最小值。
+
+[注意]
+====
+如果命名空间上不存在 `openshift.io/sa.scc.supplemental-groups` 注解，则 `FSGroup` 和 `SupplementalGroups` 策略回退到 `openshift.io/sa.scc.uid-range` 注解。如果两者都不存在，则不创建 SCC。
+====
+
+[注意]
+====
+默认情况下，基于注解的 `FSGroup` 策略使用基于注解的最小值的单个范围来配置其自身。例如，如果您的注解显示为 1/3，则 FSGroup 策略使用最小值和最大值 1 配置其自身。如果要允许 FSGroup 字段接受多个组，可以配置不使用注解的自定义 SCC。
+====
+
+[注意]
+====
+`openshift.io/sa.scc.supplemental-groups` 注解接受以逗号分隔的块列表，格式为 `<start>/<length` 或 `<start>-<end>`。`openshift.io/sa.scc.uid-range` 注解只接受一个块。
+====

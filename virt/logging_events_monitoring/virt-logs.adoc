@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="virt-logs"]
+= Viewing virtual machine logs
+include::_attributes/common-attributes.adoc[]
+:context: virt-logs
+
+toc::[]
+
+include::modules/virt-about-vm-logs.adoc[leveloffset=+1]
+
+include::modules/virt-viewing-virtual-machine-logs-cli.adoc[leveloffset=+1]
+
+include::modules/virt-viewing-virtual-machine-logs-web.adoc[leveloffset=+1]

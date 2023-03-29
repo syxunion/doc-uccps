@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="red-hat-openshift-data-foundation"]
+= Uccp Container Storage
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-ocs
+
+toc::[]
+
+Uccp Container Storage 是统信容器云管理平台支持的文件、块和对象存储的持久性存储供应商，可以在内部或混合云环境中使用。作为存储解决方案，Uccp Container Storage 与统信容器云管理平台完全集成，用于部署、管理和监控。
+
+具体使用及讲解请参考文档《统信容器云管理平台解决方案用户手册-附加组件-容器存储组件》。

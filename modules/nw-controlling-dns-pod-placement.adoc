@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * networking/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-controlling-dns-pod-placement_{context}"]
+= 控制 DNS pod 放置
+
+DNS Operator 有两个守护进程集：一个用于 CoreDNS，另一个用于管理 `/etc/hosts` 文件。`/etc/hosts` 的守护进程集必须在每个节点主机上运行，以便为集群镜像 registry 添加条目来支持拉取镜像。安全策略可以禁止节点对之间的通信，这会阻止 CoreDNS 的守护进程集在每个节点上运行。
+
+作为集群管理员，您可以使用自定义节点选择器将 CoreDNS 的守护进程集配置为在某些节点上运行或不运行。
+
+
+.先决条件
+
+* 已安装 oc CLI。
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+* 要防止某些节点间的通信，请配置 `spec.nodePlacement.nodeSelector` API 字段：
+
+. 修改名为 `default` 的 DNS Operator 对象：
++
+[source, terminal]
+----
+$ oc edit dns.operator/default
+----
++
+. 指定在 `spec.nodePlacement.nodeSelector` API 字段中只包含 control plane 节点的节点选择器：
++
+[source,yaml]
+----
+ spec:
+   nodePlacement:
+     nodeSelector:
+       node-role.kubernetes.io/worker: ""
+----
+
+* 要允许 CoreDNS 的守护进程集在节点上运行，请配置污点和容限：
++
+. 修改名为 `default` 的 DNS Operator 对象：
++
+[source,terminal]
+----
+$ oc edit dns.operator/default
+----
++
+. 为污点指定污点键和一个容忍度：
++
+[source,yaml]
+----
+ spec:
+   nodePlacement:
+     tolerations:
+     - effect: NoExecute
+       key: "dns-only"
+       operators: Equal
+       value: abc
+       tolerationSeconds: 3600 <1>
+----
+<1> 如果污点是 `dns-only`，它可以无限期地被容许。您可以省略 `tolerationSeconds`。

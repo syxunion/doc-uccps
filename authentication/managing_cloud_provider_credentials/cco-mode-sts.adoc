@@ -1,0 +1,113 @@
+:_content-type: ASSEMBLY
+[id="cco-mode-sts"]
+= 在 STS 中使用手动模式
+include::_attributes/common-attributes.adoc[]
+:context: cco-mode-sts
+
+toc::[]
+
+Amazon Web Services（AWS）支持使用 STS 的手动模式。
+
+在带有 STS 的手动模式中，各个统信容器云管理平台集群组件使用 AWS Secure Token Service（STS）来分配提供简短、有限权限安全凭证的组件 IAM 角色。这些凭证与特定于发布 AWS API 调用的每个组件的 IAM 角色关联。
+
+使用适当配置的 AWS IAM OpenID Connect（OIDC）身份提供程序以及 AWS IAM 角色会自动请求新的和刷新的凭证。统信容器云管理平台 为服务帐户令牌签名，这些令牌由 AWS IAM 信任，并可投射到 pod 中并用于身份验证。令牌会在一小时后刷新。
+
+使用带有 STS 的手动模式更改为各个统信容器云管理平台组件提供的 AWS 凭证的内容。
+
+
+.使用长期凭证的 AWS secret 格式
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: <target-namespace> <1>
+  name: <target-secret-name> <2>
+data:
+  aws_access_key_id: <base64-encoded-access-key-id>
+  aws_secret_access_key: <base64-encoded-secret-access-key>
+----
+<1> 组件的命名空间。
+<2> 组件 secret 的名称。
+
+.使用 STS 的 AWS secret 格式
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: <target-namespace> <1>
+  name: <target-secret-name> <2>
+stringData:
+  credentials: |-
+    [default]
+    sts_regional_endpoints = regional
+    role_name: <operator-role-name> <3>
+    web_identity_token_file: <path-to-token> <4>
+----
+<1> 组件的命名空间。
+<2> 组件 secret 的名称。
+<3> 组件的 IAM 角色。
+<4> pod 中服务帐户令牌的路径。通常这是统信容器云管理平台组件的 `/var/run/secrets/openshift/serviceaccount/token`。
+
+//Supertask: Installing an OCP cluster configured for manual mode with STS
+[id="sts-mode-installing"]
+== 使用 STS 为手动模式安装统信容器云管理平台集群
+
+要安装配置为在带有 STS 的手动模式中使用 Cloud Credential Operator（CCO）的集群：
+
+//[pre-4.8]. xref:../../authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc#sts-mode-installing-manual-config_cco-mode-sts[Create the required AWS resources]
+配置 Cloud Credential Operator 工具。
+单独创建所需的 AWS 资源，或使用一个命令创建。
+运行统信容器云管理平台安装程序
+验证集群是否使用简短提供的凭证。
+
+[注意]
+====
+因为在使用 STS 时集群以手动模式运行，所以无法使用所需的权限为组件创建新凭证。当升级到不同版本的统信容器云管理平台时，通常会有新的 AWS 权限要求。在升级使用 STS 的集群前，集群管理员必须手动确保 AWS 权限足以用于现有组件，并可供任何新组件使用。
+====
+
+//[pre-4.8]Task part 1: Creating AWS resources manually
+//include::modules/sts-mode-installing-manual-config.adoc[leveloffset=+2]
+
+//Task part 1: Configuring the Cloud Credential Operator utility
+include::modules/cco-ccoctl-configuring.adoc[leveloffset=+2]
+
+[id="sts-mode-create-aws-resources-ccoctl"]
+=== 使用 Cloud Credential Operator 实用程序创建 AWS 资源
+
+您可以使用 CCO 实用程序（ccoctl） 单独创建所需的 AWS 资源，或使用单个命令来创建。
+
+//Task part 2a: Creating the required AWS resources individually
+include::modules/cco-ccoctl-creating-individually.adoc[leveloffset=+3]
+
+//Task part 2b: Creating the required AWS resources all at once
+include::modules/cco-ccoctl-creating-at-once.adoc[leveloffset=+3]
+
+//Task part 3: Run the OCP installer
+include::modules/sts-mode-installing-manual-run-installer.adoc[leveloffset=+2]
+
+//Task part 4: Verify that the cluster is using short-lived credentials
+include::modules/sts-mode-installing-verifying.adoc[leveloffset=+2]
+
+[id="sts-mode-upgrading"]
+== 使用 STS 为手动模式升级统信容器云管理平台集群
+
+您要升级到的统信容器云管理平台版本的发行镜像包含 `ccoctl` 二进制文件的版本，以及特定于该发行版本的 `CredentialsRequest` 对象列表。
+
+:context: sts-mode-upgrading
+
+//Task part 1: Configuring the Cloud Credential Operator utility
+include::modules/cco-ccoctl-configuring.adoc[leveloffset=+2]
+
+include::modules/cco-ccoctl-upgrading.adoc[leveloffset=+2]
+
+include::modules/manually-maintained-credentials-upgrade.adoc[leveloffset=+2]
+
+//Task part 3: Run the OCP installer
+//include::modules/sts-mode-installing-manual-run-installer.adoc[leveloffset=+2]
+
+//Task part 4: Verify that the cluster is using short-lived credentials
+//include::modules/sts-mode-installing-verifying.adoc[leveloffset=+2]

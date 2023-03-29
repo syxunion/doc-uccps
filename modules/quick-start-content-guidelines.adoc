@@ -1,0 +1,160 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="quick-start-content-guidelines_{context}"]
+= 快速开始内容指南
+
+[id="quick-start-content-guidelines-card-copy_{context}"]
+== Card copy
+
+您可以在快速开始卡上自定义标题及描述，但您无法自定义状态。
+
+* 将您的描述长度限制为一到两句。
+* 从操作动词开始，并告知用户其目的。正确的示例：
++
+----
+Create a serverless application.
+----
+
+[id="quick-start-content-guidelines-introduction_{context}"]
+== 简介
+
+点一个快速启动卡后，一个侧边面板滑盘将快速启动并列出它里面的任务。
+
+* 使您的简介内容更加简洁、明确、易于理解。
+* 说明快速开始的目的。用户应在开始之前了解快速开始的目的。
+* 为用户提供一个操作，而不是快速开始。
+** *正确的示例*：
++
+----
+In this quick start, you will deploy a sample application to {product-title}.
+----
+** *不正确的示例*：
++
+----
+This quick start shows you how to deploy a sample application to {product-title}.
+----
+* 根据特性的复杂程度，简介应保持在最多 4 到 5 句。介绍不要太长。
+* 列出简介内容后快速开始的任务，并以操作动词启动每个任务。不要指定任务数量，因为每次添加或删除任务时都需要更新副本。
+** *正确的示例*:
++
+----
+Tasks to complete: Create a serverless application; Connect an event source; Force a new revision
+----
+** *不正确的示例*:
++
+----
+You will complete these 3 tasks: Creating a serverless application; Connecting an event source; Forcing a new revision
+----
+
+[id="quick-start-content-guidelines-task-steps_{context}"]
+== Task steps
+
+用户点 *Start* 后会出现一系列步骤，它们必须执行这些操作来完成快速开始。
+
+在编写任务步骤时遵循这些常规指南：
+
+* 对于按钮和标签使用 "Click"。在选择框、单选按钮和下拉菜单中使用"选择"。
+* 使用 "Click" 而不是 "Click on"
+** *正确的示例*：
++
+----
+Click OK.
+----
+** *不正确的示例*：
++
+----
+Click on the OK button.
+----
+
+* 告诉用户如何在 *管理员* 和 *开发者* 视角间如何切换。即使您认为某个用户可能已经处于正确的视角，最好仍为用户提供相应的操作说明，使其确定位于正确的位置。
++
+示例：
++
+----
+Enter the Developer perspective: In the main navigation, click the dropdown menu and select Developer.
+Enter the Administrator perspective: In the main navigation, click the dropdown menu and select Admin.
+----
+
+* 使用 "Location, action" 结构。告诉用户要做什么前先告诉用户到什么地方。
+** *正确的示例：*:
++
+----
+In the node.js deployment, hover over the icon.
+----
+** *不正确的示例*：
++
+----
+Hover over the icon in the node.js deployment.
+----
+
+* 保持您的产品术语大写一致。
+* 如果您必须指定一个菜单类型或使用列表作为下拉菜单，使用 "dropdown"（一个单词，没有短横线）。
+* 明确区分用户动作和产品功能的附加信息。
+** *User action*:
++
+----
+Change the time range of the dashboard by clicking the dropdown menu and selecting time range.
+----
+** *额外信息*:
++
+----
+To look at data in a specific time frame, you can change the time range of the dashboard.
+----
+
+* 避免方向性的语言，如 "In the top-right corner, click the icon"。因为当 UI 布局改变时，方向语言就有可能变为不正确。另外，桌面用户对于具有不同屏幕大小的用户来说，方向可能是不正确的。反之，使用它的名称来标识项。
+** *正确的示例*:
++
+----
+In the navigation menu, click Settings.
+----
+** *不正确的示例*:
++
+----
+In the left-hand menu, click Settings.
+----
+* 不要只使用颜色来标识项，如 "Click the gray circle"。颜色标识符对受限制的用户，尤其是无法识别颜色的用户可能不可用。相反，使用它的名称或复制来标识项目，如 button copy。
+** *正确的示例*:
++
+----
+The success message indicates a connection.
+----
+** *不正确的示例*:
++
+----
+The message with a green icon indicates a connection.
+----
+
+* 一致性地使用第二人称（you）：
+** *正确的示例*:
++
+----
+Set up your environment.
+----
+** *不正确的示例*:
++
+----
+Let's set up our environment.
+----
+
+[id="quick-start-content-guidelines-check-your-work-module_{context}"]
+== Check your work module
+
+* 用户完成一个步骤后会出现一个 *Check your work* 模块。这个模块提示用户回答"是"或对步骤结果没有问题，这使得他们有机会复核他们的工作。对于这个模块，您只需要写一个是或不需要问题。
+** 如果用户的回答是 *Yes*，会出现一个标记。
+** 如果用户的回答是 *No*， 会出现一个出错信息，其中包含相关文档的链接。然后，用户可以选择返回并再次进行尝试。
+
+[id="quick-start-content-guidelines-formatting-UI-elements_{context}"]
+== 格式化 UI 元素
+
+使用以下指南格式化 UI 元素：
+
+* 按钮、下拉菜单、标签、字段和其他 UI 控制的副本复制：在 UI 中写入副本并加粗体。
+* 所有其他 UI 元素-包括页面、窗口和面板名称：在 UI 中写入该文件并加粗体。
+* 代码或用户输入的文本：使用 monospaced 字体。
+* 提示：如果包含到导航或 masthead 元素的提示，则使用您链接的文本。
+* CLI 命令：使用 monospaced 字体。
+* 在运行文本时，在命令中使用粗体 monospaced 字体。
+* 如果参数或选项是一个变量值，使用 monospaced 字体。
+* 参数使用粗体的 monospaced 字体，选项使用 monospaced 字体。

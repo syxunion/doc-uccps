@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+//*builds/build-strategies.adoc
+//*builds/understanding-image-builds
+
+[id="builds-strategy-pipeline-build_{context}"]
+= Pipeline 构建
+
+[重要]
+====
+Pipeline 构建策略在 统信容器云管理平台 4 中弃用。基于 Tekton 的 统信容器云管理平台 Pipelines 中带有等效且改进的功能。
+
+统信容器云管理平台 上的 Jenkins 镜像被完全支持，用户可以按照 Jenkins 用户文档在作业中定义 jenkinsfile，或者将其存储在 Source Control Management 系统中。
+====
+
+采用 Pipeline 构建策略时，开发人员可以定义 Jenkins 管道，供 Jenkins 管道插件使用。构建可以由 统信容器云管理平台 启动、监控和管理，其方式与任何其他构建类型相同。
+
+Pipeline 工作流在 `jenkinsfile` 中定义，或直接嵌入在构建配置中，或者在 Git 存储库中提供并由构建配置引用。
+
+//The first time a project defines a build configuration using a Pipeline
+//strategy, {product-title} instantiates a Jenkins server to execute the
+//pipeline. Subsequent Pipeline build configurations in the project share this
+//Jenkins server.
+
+//[role="_additional-resources"]
+//.Additional resources
+
+//* Pipeline build configurations require a Jenkins server to manage the
+//pipeline execution.

@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-custom-event-sources.adoc
+
+:_content-type: REFERENCE
+[id="serverless-containersource-reference_{context}"]
+= 容器源参考
+
+您可以通过创建 `ContainerSource` 对象来使用容器作为事件源。您可以在创建 `ContainerSource` 对象时配置多个参数。
+
+`ContainerSource` 对象支持以下字段：
+
+[cols=3*,options="header"]
+|===
+|字段
+|描述
+|必需或可选
+
+|`apiVersion`
+|指定 API 版本，如 `sources.knative.dev/v1`.
+|必需
+
+|`kind`
+|将此资源对象标识为 `ContainerSource`  对象。
+|必需
+
+|`metadata`
+|指定唯一标识 `ContainerSource` 对象的元数据。例如， `name`.
+|必需
+
+|`spec`
+|指定此 `ContainerSource` 对象的配置信息。
+|必需
+
+|`spec.sink`
+|对解析为 URI 作为 sink 的对象的引用。
+|必需
+
+|`spec.template`
+|`ContainerSource` `template` 对象的 规格。
+|必需
+
+|`spec.ceOverrides`
+|定义覆盖来控制发送到 sink 的事件的输出格式和修改。
+|选填
+
+|===
+
+.模板参数示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: ContainerSource
+metadata:
+  name: test-heartbeats
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/openshift-knative/heartbeats:latest
+          name: heartbeats
+          args:
+            - --period=1
+          env:
+            - name: POD_NAME
+              value: "mypod"
+            - name: POD_NAMESPACE
+              value: "event-test"
+  ...
+----
+
+[id="serverless-containersource-reference-cloudevent-overrides_{context}"]
+== CloudEvent 覆盖
+
+`ceOverrides` 定义提供覆盖控制发送到 sink 的 CloudEvent 输出格式和修改。您可以为 `ceOverrides` 定义配置多个字段。
+
+`ceOverrides`  定义支持以下字段：
+
+[cols=3*,options="header"]
+|===
+|字段
+|描述
+|必需 或 可选
+
+|`extensions`
+|指定在出站事件中添加或覆盖哪些属性。每个 `extensions` 键值对在事件上作为属性扩展进行独立设置。
+|选择
+
+|===
+
+[注意]
+====
+仅允许有效的 CloudEvent 属性名称作为扩展。您无法从扩展覆盖配置设置 spec 定义的属性。例如，您无法修改 type 属性。
+====
+
+.CloudEvent Overrides 示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: ContainerSource
+metadata:
+  name: test-heartbeats
+spec:
+  ...
+  ceOverrides:
+    extensions:
+      extra: this is an extra attribute
+      additional: 42
+----
+
+ 这会在`subject` 上设置 `K_CE_OVERRIDES` 环境变量：
+
+.输出示例
+[source,terminal]
+----
+{ "extensions": { "extra": "this is an extra attribute", "additional": "42" } }
+----

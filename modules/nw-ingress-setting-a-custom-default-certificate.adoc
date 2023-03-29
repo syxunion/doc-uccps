@@ -1,0 +1,97 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-setting-a-custom-default-certificate_{context}"]
+= nw-ingress-setting-a-custom-default-certificate.adoc
+
+作为管理员，您可以通过创建 Secret 资源并编辑 IngressController 自定义资源 (CR)，将 Ingress Controller 配置为使用自定义证书。
+
+.先决条件
+
+* 您必须在 PEM 编码文件中有一个证书/密钥对，其中该证书由可信证书认证机构签名，或者由您在一个自定义 PKI 中配置的私有可信证书认证机构签名。
+
+* 您的证书满足以下要求：
+
+** 该证书对入口域有效。
+
+** 证书使用 `subjectAltName` 扩展来指定通配符域，如 `*.apps.uccp.example.com`。
+
+* 您必须有一个 `IngressController` CR。您可以使用默认值：
++
+[source,terminal]
+----
+$ oc --namespace openshift-ingress-operator get ingresscontrollers
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      AGE
+default   10m
+----
+
+[注意]
+====
+如果您有中间证书，则必须将其包含在包含自定义默认证书的 secret 的 `tls.crt` 文件中。指定证书时指定的顺序是相关的; 在任意服务器证书后列出您的中间证书。
+====
+
+.流程
+
+以下步骤假定自定义证书和密钥对位于当前工作目录下的 `tls.crt` 和 `tls.key` 文件中。替换 `tls.crt` 和 `tls.key` 的实际路径名。在创建 Secret 资源并在 IngressController CR 中引用它时，您也可以将 `custom-certs-default` 替换成另一名称。
+
+[注意]
+====
+此操作会导致使用滚动部署策略重新部署 Ingress Controller。
+====
+
+. 使用 `tls.crt` 和 `tls.key` 文件，创建在 `openshift-ingress` 命名空间中包含自定义证书的 Secret 资源。
++
+[source,terminal]
+----
+$ oc --namespace openshift-ingress create secret tls custom-certs-default --cert=tls.crt --key=tls.key
+----
++
+. 更新 IngressController CR，以引用新的证书 Secret：
++
+[source,terminal]
+----
+$ oc patch --type=merge --namespace openshift-ingress-operator ingresscontrollers/default \
+  --patch '{"spec":{"defaultCertificate":{"name":"custom-certs-default"}}}'
+----
++
+. 验证更新是否已生效：
++
+[source,terminal]
+----
+$ oc get --namespace openshift-ingress-operator ingresscontrollers/default \
+  --output jsonpath='{.spec.defaultCertificate}'
+----
++
+.输出示例
+[source,text]
+----
+map[name:custom-certs-default]
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来设置自定义默认证书：
+
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  defaultCertificate:
+    name: custom-certs-default
+----
+====
++
+证书 Secret 名称应该与用来更新 CR 的值匹配。
+
+修改了 IngressController CR 后，Ingress Operator 将更新 Ingress Controller 的部署以使用自定义证书。

@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-nfs"]
+= 使用 NFS 的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-nfs
+
+toc::[]
+
+统信容器云管理平台集群可以使用 NFS 来置备持久性存储。持久性卷 (PV) 和持久性卷声明 (PVC) 提供了在项目间共享卷的方法。虽然 PV 定义中包含的与 NFS 相关的信息也可以直接在 `Pod` 中定义，但是这样做不会使创建的卷作为一个特定的集群资源，从而可能会导致卷冲突。
+
+include::modules/storage-persistent-storage-nfs-provisioning.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-nfs-enforcing-disk-quota.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-nfs-volume-security.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-nfs-group-ids.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-nfs-user-ids.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-nfs-selinux.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-nfs-export-settings.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-nfs-reclaiming-resources.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-nfs-additional-configuration.adoc[leveloffset=+1]

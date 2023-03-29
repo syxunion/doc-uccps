@@ -1,0 +1,25 @@
+// Module included in the following assemblies
+//
+// * /serverless/about-serverless.adoc
+
+:_content-type: CONCEPT
+[id="about-knative-serving_{context}"]
+= Knative Serving
+
+Knative Serving可以帮助需要创建、部署和管理 link:https://www.redhat.com/en/topics/cloud-native-apps[云原生应用程序]。 的开发人员。它以 Kubernetes 自定义资源定义 (CRD) 的形式提供一组对象，用于定义和控制 {product-title} 集群上无服务器工作负载的行为。
+
+开发人员使用这些 CRD 创建自定义资源（CR）实例，这些实例可作为构建块用于处理复杂用例。例如：
+
+* 快速部署无服务器容器。
+* 自动缩放 pod。
+
+[id="about-knative-serving-resources_{context}"]
+== Knative Serving 资源
+
+服务:: `service.serving.knative.dev` CRD 会自动管理工作负载的生命周期，以确保应用程序通过网络部署并可访问。每次用户创建的服务或自定义资源发生变化时，它都会创建一个路由、配置和新修订。Knative 中进行的大多数开发人员交互都是通过修改服务进行的。
+
+修订:: `revision.serving.knative.dev` CRD 是每次对工作负载进行修改所涉及代码和配置的时间点快照。所有修订均为不可变对象，可以根据需要保留。
+
+路由:: `route.serving.knative.dev` CRD 可将网络端点映射到一个或多个修订。您可通过多种方式管理流量，包括部分流量和指定路由。
+
+配置:: `configuration.serving.knative.dev` CRD 可保持部署所需状态。它可在使编程过程和配置配置过程相互分离。修改配置则会创建一个新修订。

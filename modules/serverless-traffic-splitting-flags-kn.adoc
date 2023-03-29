@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-traffic-management.adoc
+
+:_content-type: REFERENCE
+[id="serverless-traffic-splitting-flags-kn_{context}"]
+= Knative CLI 流量管理标志
+
+The Knative (`kn`) CLI 支持作为 `kn service update` 命令的一部分对服务的流量块进行流量操作。
+
+下表显示流量分割标志、值格式和标志执行的操作汇总。 *Repetition* 列表示在 `kn service update` 命令中是否允许重复标志的特定值。
+
+[cols=4*,options="header"]
+|===
+|标记
+|值
+|操作
+|Repetition
+
+|`--traffic`
+|`RevisionName=Percent`
+|为 RevisionName 提供 Percent 的流量
+|是
+
+|`--traffic`
+|`Tag=Percent`
+|为带有 Tag的修订版本提供 Percent 的流量
+|是
+
+|`--traffic`
+|`@latest=Percent`
+|为最新可用的修订版本提供 Percent 的流量
+|否
+
+|`--tag`
+|`RevisionName=Tag`
+|为 RevisionName 提供 Tag
+|是
+
+|`--tag`
+|`@latest=Tag`
+|为最新可用的修订版本提供 Tag
+|否
+
+|`--untag`
+|`Tag`
+|从修订中删除 Tag
+|是
+|===
+
+[id="serverless-traffic-splitting-flags-kn-precedence_{context}"]
+== 多个标志和顺序优先级
+
+A所有流量相关标志均可使用单一 `kn service update` 命令指定。 `kn` 定义这些标志的优先级。不考虑使用命令时指定的标志顺序。
+
+通过 kn 评估标志时，标志的优先级如下：
+
+. `--untag`: 带有此标志的所有引用修订版本均将从流量块中移除。
+. `--tag`: 修订版本将按照流量块中的指定进行标记。
+. `--traffic`: 为引用的修订版本分配一部分流量分割。
+
+您可以将标签添加到修订版本，然后根据您设置的标签来分割流量。

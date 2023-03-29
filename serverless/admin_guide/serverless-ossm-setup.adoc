@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="serverless-ossm-setup"]
+= 将 Service Mesh 与 Uccps Serverless 集成
+:context: serverless-ossm-setup
+
+toc::[]
+
+Uccps Serverless Operator 提供 Kourier 作为 Knative 的默认入口。但是，无论是否启用了 Kourier，您都可以在 Uccps Serverless 中使用 Service Mesh。禁用 Kourier 集成后，您可以配置 Kourier ingress 不支持的额外网络和路由选项，如 mTLS 功能。
+
+
+[id="prerequsites_serverless-ossm-setup"]
+== 先决条件
+
+* 以下流程中的示例使用域 `example.com`。这个域的示例证书被用作为子域证书签名的证书颁发机构（CA）。
++
+要在部署中完成并验证这些步骤，您需要由广泛信任的公共 CA 签名的证书或您的机构提供的 CA。根据您的域、子域和 CA 调整命令示例。
+
+* 您必须配置通配符证书，以匹配 {product-title} 集群的域。例如，如果您的 {product-title}  控制台地址是 `https://console-openshift-console.apps.openshift.example.com`，您必须配置通配符证书，以便域为 `*.apps.openshift.example.com`。有关配置通配符证书的更多信息，请参阅创建证书来加密传入的外部流量。
+
+* 如果要使用任何域名，包括不是默认 统信容器云管理平台 集群域子域的域名，您必须为这些域设置域映射。
+
+include::modules/serverless-ossm-external-certs.adoc[leveloffset=+1]
+// without kourier
+include::modules/serverless-ossm-setup.adoc[leveloffset=+1]
+include::modules/serverless-ossm-enabling-serving-metrics.adoc[leveloffset=+1]
+// With kourier
+include::modules/serverless-ossm-setup-with-kourier.adoc[leveloffset=+1]
+include::modules/serverless-ossm-secret-filtering.adoc[leveloffset=+1]

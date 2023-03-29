@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="adding-user-preferences"]
+= 添加用户首选项
+include::_attributes/common-attributes.adoc[]
+:context: adding-user-preferences
+
+toc::[]
+
+您可以更改您的配置集的默认首选项以满足您的要求。您可以设置默认项目、拓扑视图（图形/列表）、编辑介质（格式或 YAML）以及语言首选项。
+
+对用户首选项所做的更改会自动保存。
+
+include::modules/odc-setting-user-preferences.adoc[leveloffset=+1]

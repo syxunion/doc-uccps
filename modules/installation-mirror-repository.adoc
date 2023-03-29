@@ -1,0 +1,179 @@
+// Module included in the following assemblies:
+//
+// * installing/install_config/installing-restricted-networks-preparations.adoc
+// * openshift_images/samples-operator-alt-registry.adoc
+// * installing/installing-rhv-restricted-network.adoc
+
+:_content-type: PROCEDURE
+[id="installation-mirror-repository_{context}"]
+= 镜像（mirror）统信容器云管理平台 镜像存储库
+
+镜像要在集群安装或升级过程中使用的 统信容器云管理平台 镜像仓库。
+
+.先决条件
+
+* 您的镜像主机可访问互联网。
+* 您已将镜像 registry 配置为在受限网络中使用，并可访问您配置的证书和凭证。
+* 您已从 UnionTech Uccps Cluster Manager 下载了 pull secret，并已修改为包含镜像存储库身份验证信息。
+* 如果您使用自签名证书，已在证书中指定 Subject Alternative Name。
+
+.流程
+
+在镜像主机上完成以下步骤：
+
+. 查看 统信容器云管理平台 下载页面，以确定您要安装的 统信容器云管理平台 版本，并决定 Repository Tags 页中的相应标签（tag）。
+
+. 设置所需的环境变量：
+.. 导出发行版本信息：
++
+[source,terminal]
+----
+$ OCP_RELEASE=<release_version>
+----
++
+对于 `<release_version>`，请指定与 统信容器云管理平台 版本对应的标签，用于您的架构，如 `1.20`。
+
+.. 导出本地 registry 名称和主机端口：
++
+[source,terminal]
+----
+$ LOCAL_REGISTRY='<local_registry_host_name>:<local_registry_host_port>'
+----
++
+对于 `<local_registry_host_name>`，请指定镜像存储库的 registry 域名；对于 `<local_registry_host_port>`，请指定用于提供内容的端口。
+
+.. 导出要进行镜像的存储库名称：
++
+[source,terminal]
+----
+$ LOCAL_REPOSITORY='<local_repository_name>'
+----
++
+对于 `<local_repository_name>`，请指定要在 registry 中创建的仓库名称，如 ocp4/Uccps4。
+
+.. 导出要进行镜像的存储库名称：
++
+[source,terminal]
+----
+$ PRODUCT_REPO='openshift-release-dev'
+----
++
+对于生产环境版本，必须指定 `Uccps-release-dev`。
+
+[source,terminal]
+----
+$ PRODUCT_REPO='openshift'
+----
+
+.. 导出 registry pull secret 的路径：
++
+[source,terminal]
+----
+$ LOCAL_SECRET_JSON='<path_to_pull_secret>'
+----
++
+对于 `<path_to_pull_secret>`，请指定您创建的镜像 registry 的 pull secret 的绝对路径和文件名。
+
+.. 导出发行版本镜像：
++
+[source,terminal]
+----
+$ RELEASE_NAME="ocp-release"
+----
++
+对于生产环境版本，您必须指定 `ocp-release`。
+
+.. 为您的服务器导出构架类型，如 x86_64：
++
+[source,terminal]
+----
+$ ARCHITECTURE=<server_architecture>
+----
+
+.. 导出托管镜像的目录的路径：
++
+[source,terminal]
+----
+$ REMOVABLE_MEDIA_PATH=<path> <1>
+----
+<1> 指定完整路径，包括开始的前斜杠(/)字符。
+
+. 将版本镜像(mirror)到镜像 registry：
+** 如果您的镜像主机无法访问互联网，请执行以下操作：
+... 将可移动介质连接到连接到互联网的系统。
+... 查看要镜像的镜像和配置清单：
++
+[source,terminal]
+----
+$ oc adm release mirror -a ${LOCAL_SECRET_JSON}  \
+     --from=quay.io/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE} \
+     --to=${LOCAL_REGISTRY}/${LOCAL_REPOSITORY} \
+     --to-release-image=${LOCAL_REGISTRY}/${LOCAL_REPOSITORY}:${OCP_RELEASE} --dry-run
+----
+
+
+... 记录上一命令输出中的 `imageContentSources` 部分。您的镜像信息与您的镜像存储库相对应，您必须在安装过程中将 `imageContentSources` 部分添加到 `install-config.yaml` 文件中。
+... 将镜像镜像到可移动介质的目录中：
++
+[source,terminal]
+----
+$ oc adm release mirror -a ${LOCAL_SECRET_JSON} --to-dir=${REMOVABLE_MEDIA_PATH}/mirror quay.io/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE}-${ARCHITECTURE}
+----
+
+... Take the media to the restricted network environment and upload the images to the local container registry.
+[source,terminal]
+----
+$ oc image mirror -a ${LOCAL_SECRET_JSON} --from-dir=${REMOVABLE_MEDIA_PATH}/mirror "file://openshift/release:${OCP_RELEASE}*" ${LOCAL_REGISTRY}/${LOCAL_REPOSITORY} <1>
+----
++
+<1> `对于 REMOVABLE_MEDIA_PATH`，您必须使用与镜像镜像时指定的同一路径。
++
+** 如果本地容器 registry 连接到镜像主机，请执行以下操作：
+... 使用以下命令直接将发行版镜像推送到本地 registry:
++
+[source,terminal]
+----
+$ oc adm release mirror -a ${LOCAL_SECRET_JSON}  \
+     --from=quay.io/${PRODUCT_REPO}/${RELEASE_NAME}:${OCP_RELEASE}-${ARCHITECTURE} \
+     --to=${LOCAL_REGISTRY}/${LOCAL_REPOSITORY} \
+     --to-release-image=${LOCAL_REGISTRY}/${LOCAL_REPOSITORY}:${OCP_RELEASE}-${ARCHITECTURE}
+----
++
+该命令将发行信息提取为摘要，其输出包括安装集群时所需的 `imageContentSources` 数据。
+
+... 记录上一命令输出中的 `imageContentSources` 部分。您的镜像信息与您的镜像存储库相对应，您必须在安装过程中将 `imageContentSources` 部分添加到 `install-config.yaml` 文件中。
++
+[注意]
+====
+镜像名称在镜像过程中被修补到 Quay.io， podman 镜像将在 bootstrap 虚拟机的 registry 中显示 Quay.io。
+====
+
+. 要创建基于您镜像内容的安装程序，请提取内容并将其固定到发行版中：
+** 如果您的镜像主机无法访问互联网，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm release extract -a ${LOCAL_SECRET_JSON} --command=openshift-install "${LOCAL_REGISTRY}/${LOCAL_REPOSITORY}:${OCP_RELEASE}"
+----
+** 如果本地容器 registry 连接到镜像主机，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm release extract -a ${LOCAL_SECRET_JSON} --command=openshift-install "${LOCAL_REGISTRY}/${LOCAL_REPOSITORY}:${OCP_RELEASE}-${ARCHITECTURE}"
+----
++
+[重要]
+====
+要确保将正确的镜像用于您选择的 统信容器云管理平台 版本，您必须从镜像内容中提取安装程序。
+
+您必须在有活跃互联网连接的机器上执行这个步骤。
+
+如果您位于断开连接的环境中,请使用 --image 标志作为 must-gather 的一部分，指向有效负载镜像。
+====
++
+. 对于使用安装程序置备的基础架构的集群，运行以下命令：
++
+[source,terminal]
+----
+$ openshift-install
+----

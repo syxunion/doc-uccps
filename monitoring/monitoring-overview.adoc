@@ -1,0 +1,28 @@
+:_content-type: ASSEMBLY
+[id="monitoring-overview"]
+= Monitoring overview
+include::_attributes/common-attributes.adoc[]
+:context: 监控概述
+
+toc::[]
+
+[id="about-openshift-monitoring"]
+== 关于 统信容器云管理平台 监控
+
+[role="_abstract"]
+统信容器云管理平台 包括一个预配置、预安装和自我更新的监控堆栈，可为核心平台组件提供监控。您还可以选择为用户定义的项目启用监控。
+
+集群管理员可以使用支持的配置对监控堆栈进行配置。统信容器云管理平台 提供了与监控相关的现成的最佳实践。
+
+其中默认包括一组警报，可立即就集群问题通知集群管理员。统信容器云管理平台 Web 控制台中的默认仪表板包括集群指标的直观表示，以帮助您快速了解集群状态。使用 统信容器云管理平台 Web 控制台，您可以 查看和管理指标、警报，并查看监控仪表板。
+
+在 统信容器云管理平台 Web 控制台的 *Observe* 部分中，您可以访问和管理监控功能，如 指标、警报、监控仪表板和指标目标。
+
+安装 统信容器云管理平台 后，集群管理员可以选择性地为用户定义的项目启用监控。通过使用此功能，集群管理员、开发人员和其他用户可以指定在其自己的项目中如何监控服务和 Pod。作为集群管理员，您可以查找常见问题的回答，如用户指标不可用，以及 Prometheus 对监控问题进行故障排除的磁盘空间高可用性。
+
+// Understanding the monitoring stack
+include::modules/monitoring-understanding-the-monitoring-stack.adoc[leveloffset=+1]
+include::modules/monitoring-default-monitoring-components.adoc[leveloffset=+2]
+include::modules/monitoring-default-monitoring-targets.adoc[leveloffset=+2]
+include::modules/monitoring-components-for-monitoring-user-defined-projects.adoc[leveloffset=+2]
+include::modules/monitoring-targets-for-user-defined-projects.adoc[leveloffset=+2]

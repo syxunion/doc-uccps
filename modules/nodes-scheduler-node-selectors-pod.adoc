@@ -1,0 +1,210 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-selector.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-node-selectors-pod_{context}"]
+= 使用节点选择器控制 pod 放置
+
+您可以使用节点上的 pod 和标签上的节点选择器来控制 pod 的调度位置。使用节点选择器时，统信容器云管理平台 会将 pod 调度到包含匹配标签的节点。
+
+您可为节点、机器集或机器配置添加标签。将标签添加到机器集可确保节点或机器停机时，新节点具有标签。如果节点或机器停机，添加到节点或机器配置的标签不会保留。
+
+要将节点选择器添加到现有 pod 中，将节点选择器添加到该 pod 的控制对象中，如 ReplicaSet 对象、DaemonSet 对象、StatefulSet 对象、Deployment 对象或 DeploymentConfig 对象。任何属于该控制对象的现有 pod 都会在具有匹配标签的节点上重新创建。如果要创建新 pod，可以将节点选择器直接添加到 Pod 规格中。
+
+[注意]
+====
+您不能直接将节点选择器添加到现有调度的 pod 中。
+====
+
+.先决条件
+
+要将节点选择器添加到现有 pod 中，请确定该 pod 的控制对象。例如 `router-default-66d5cf9464-m2g75` pod  由 `router-default-66d5cf9464` 副本集控制：
+
+----
+$ oc describe pod router-default-66d5cf9464-7pwkc
+
+Name:               router-default-66d5cf9464-7pwkc
+Namespace:          openshift-ingress
+
+....
+
+Controlled By:      ReplicaSet/router-default-66d5cf9464
+----
+
+The web console lists the controlling object under `ownerReferences` in the pod YAML:
+
+----
+  ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: router-default-66d5cf9464
+      uid: d81dd094-da26-11e9-a48a-128e7edf0312
+      controller: true
+      blockOwnerDeletion: true
+----
+
+.流程
+
+. 通过使用机器集或直接编辑节点，为节点添加标签：
+
+* 在创建节点时，使用  `MachineSet` 对象向由机器集管理的节点添加标签：
+
+.. 运行以下命令，将标签添加到 MachineSet 对象中：
++
+----
+$ oc patch MachineSet <name> --type='json' -p='[{"op":"add","path":"/spec/template/spec/metadata/labels", "value":{"<key>"="<value>","<key>"="<value>"}}]'  -n openshift-machine-api
+----
++
+例如：
++
+----
+$ oc patch MachineSet abc612-msrtw-worker-us-east-1c  --type='json' -p='[{"op":"add","path":"/spec/template/spec/metadata/labels", "value":{"type":"user-node","region":"east"}}]'  -n openshift-machine-api
+----
++
+[TIP]
+====
+您还可以应用以下 YAML 来向机器集中添加标签：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  template:
+    spec:
+      metadata:
+        labels:
+          region: "east"
+          type: "user-node"
+----
+====
+
+.. 使用 oc edit 命令验证标签是否已添加到 MachineSet 对象中：
++
+例如：
++
+----
+$ oc edit MachineSet abc612-msrtw-worker-us-east-1c -n openshift-machine-api
+----
++
+.MachineSet 对象示例
+[source,yaml]
++
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+
+....
+
+spec:
+...
+  template:
+    metadata:
+...
+    spec:
+      metadata:
+        labels:
+          region: east
+          type: user-node
+....
+----
+
+* 直接向节点添加标签：
+
+.. 为节点编辑 Node 对象：
++
+[source,terminal]
+----
+$ oc label nodes <name> <key>=<value>
+----
++
+例如，若要为以下节点添加标签：
++
+[source,terminal]
+----
+$ oc label nodes ip-10-0-142-25.ec2.internal type=user-node region=east
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来向节点添加标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    type: "user-node"
+    region: "east"
+----
+====
+
+.. 验证标签是否已添加到节点：
++
+[source,terminal]
+----
+$ oc get nodes -l type=user-node,region=east
+----
++
+.示例输出
+[source,terminal]
+----
+NAME                          STATUS   ROLES    AGE   VERSION
+ip-10-0-142-25.ec2.internal   Ready    worker   17m   v1.23.0
+----
+
+. 验证标签是否已添加到节点：
++
+* 要将节点选择器添加到现有和未来的 pod，请向 pod 的控制对象添加节点选择器：
++
+.带有标签的 ReplicaSet 对象示例
+[source,yaml]
+----
+kind: ReplicaSet
+
+....
+
+spec:
+
+....
+
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        ingresscontroller.operator.openshift.io/deployment-ingresscontroller: default
+        pod-template-hash: 66d5cf9464
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        node-role.kubernetes.io/worker: ''
+        type: user-node <1>
+----
+<1> 添加节点选择器。
+
+* 要将节点选择器添加到一个特定的新 pod，直接将选择器添加到 Pod 对象中：
++
+.使用节点选择器的 Pod 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+
+....
+
+spec:
+  nodeSelector:
+    region: east
+    type: user-node
+----
++
+[注意]
+====
+您不能直接将节点选择器添加到现有调度的 pod 中。
+====

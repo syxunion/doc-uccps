@@ -1,0 +1,84 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/nodes-secondary-scheduler-configuring.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-secondary-scheduler-pod-console_{context}"]
+= 使用二级调度程序调度 pod
+
+要使用次要调度程序调度 pod，请在容器集定义中设置 `schedulerName` 字段。
+
+.先决条件
+
+* 您可以使用 `cluster-admin` 权限访问集群。
+* 访问 统信容器云管理平台 web 控制台。
+* 安装了 Secondary Scheduler Operator for UnionTech Uccps。
+* 配置了二级调度程序。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+. 导航到 *Workloads* -> *Pods*.
+. 点 *Create Pod*.
+. 在 YAML 编辑器中，输入所需的 pod 配置并添加 `schedulerName` 字段:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+  schedulerName: secondary-scheduler <1>
+----
+<1> `schedulerName` 字段必须与配置辅助调度程序时在配置映射中定义的名称匹配。
+
+. 点 *Create*.
+
+.验证
+
+. 登录 Uccps  CLI.
+. 使用以下命令描述 pod：
++
+[source,terminal]
+----
+$ oc describe pod nginx -n default
+----
++
+.输出示例
+[source,text]
+----
+Name:         nginx
+Namespace:    default
+Priority:     0
+Node:         ci-ln-t0w4r1k-72292-xkqs4-worker-b-xqkxp/10.0.128.3
+...
+Events:
+  Type    Reason          Age   From                 Message
+  ----    ------          ----  ----                 -------
+  Normal  Scheduled       12s   secondary-scheduler  Successfully assigned default/nginx to ci-ln-t0w4r1k-72292-xkqs4-worker-b-xqkxp
+...
+----
+
+. 在 events 表中，找到与 `Successfully assigned <namespace>/<pod_name> to <node_name>`  类似的消息到 <node_name > 的事件。
+. 在 "From" 列中，验证事件是否从次要调度程序生成，而不是由默认调度程序生成。
++
+[注意]
+====
+您还可以检查 `openshift-secondary-scheduler-namespace` 中的  `secondary-scheduler-*`  pod 日志，以验证 pod 已由次要调度程序调度。
+====
+
+////
+Due to a UI bug, can't verify via console. Bug should be fixed in 4.11 hopefully, and if so, update to use the console steps:
+
+.Verification
+. Navigate to the *Events* tab for the pod.
+. Find the event with a message similar to `Successfully assigned <namespace>/<pod_name> to <node_name>`.
+. Verify that the event was generated from the secondary scheduler and not the default scheduler.
+////

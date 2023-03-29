@@ -1,0 +1,37 @@
+:_content-type: REFERENCE
+
+[id="ephemeral-storage-additional-details-about-volumeattributes-on-shared-resource-pod-volumes_{context}"]
+= 有关共享资源 pod 卷上的 VolumeAttributes 的更多详情
+
+[role="_abstract"]
+以下属性通过多种方式影响共享资源 pod 卷：
+
+* `volumeAttributes` 属性中的 `refreshResource` 属性。
+* Shared Resource CSI Driver 配置中的 `refreshResources` 属性。
+* `volumeAttributes` 属性中的 `sharedSecret` 和 `sharedConfigMap` 属性。
+
+== refreshResource 属性
+
+Shared Resource CSI Driver 遵循卷的 `volumeAttributes` 属性中的 `refreshResource` 属性。此属性控制，在 卷最初置备为 pod 启动的过程中，对底层 `Secret` 或 `ConfigMap` 对象的内容的更新会被复制到卷中。`refreshResource` 的默认值为 true，这意味着内容会被更新。
+
+[重要]
+====
+如果 Shared Resource CSI Driver 配置禁用了对 `sharedSecret` 和 `SharedConfigMap` 自定义资源(CR)实例的刷新，则 `volumeAttribute` 属性中的 `refreshResource` 属性没有作用。这个属性的目的是在通常允许刷新时为特定卷挂载禁用刷新。
+====
+
+== `refreshResources` 属性
+
+您可以使用全局交换机启用或禁用共享资源刷新。这个切换是 Shared Resource CSI Driver 的 `csi-driver-shared-resource-config` 配置映射中的 `refreshResources` 属性，您可以在 `openshift-cluster-csi-drivers` 命名空间中找到。如果将这个 `refreshResources` 属性设置为 false，则卷的初始置备后不会更新卷中存储的 `Secret` 或 `ConfigMap` 对象相关内容。
+
+[重要]
+====
+使用此共享资源 CSI 驱动程序配置来禁用刷新会影响所有使用共享资源 CSI Driver 的卷挂载，无论这些卷的 volumeAttributes 属性中的 refreshResource 属性是什么。
+====
+
+== 在为 pod 置备共享资源卷前验证 volumeAttribute
+
+在单个卷的 `volumeAttributes` 中，您必须将 `sharedSecret` 或 `sharedConfigMap` 属性的值设置为 `SharedSecret` 或 `SharedConfigMap` CS 实例的值。否则，当在 pod 启动过程中置备卷时，验证会检查 该卷的卷Attributes，并在以下条件下向 kubelet 返回错误：
+
+* `sharedSecret` 和 `sharedConfigMap` 属性都指定了值。
+* `sharedSecret` 或 `sharedConfigMap` 属性都没有指定值。
+* `sharedSecret` 或 `sharedConfigMap` 属性的值不与集群中的 `SharedSecret` 或 `SharedConfigMap` CR 实例的名称对应。

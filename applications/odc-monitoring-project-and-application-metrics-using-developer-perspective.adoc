@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="odc-monitoring-project-and-application-metrics-using-developer-perspective"]
+= 使用开发者视角监控项目和应用程序的指标
+include::_attributes/common-attributes.adoc[]
+:context: monitoring-project-and-application-metrics-using-developer-perspective
+
+toc::[]
+
+
+*开发者* 视角中的 *观察* 视图提供了监控项目或应用程序指标的选项，如 CPU、内存和带宽使用情况以及网络相关信息。
+
+[id="prerequisites_odc-monitoring-project-and-application-metrics-using-developer-perspective"]
+== 先决条件
+
+* 已登陆到 web 控制台并切换到开发者 视角。
+* 您已在统信容器云管理平台上创建并部署了应用程序。
+
+include::modules/odc-monitoring-your-project-metrics.adoc[leveloffset=+1]
+
+include::modules/odc-monitoring-your-application-metrics.adoc[leveloffset=+1]

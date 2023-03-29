@@ -1,0 +1,65 @@
+:_content-type: ASSEMBLY
+:context: post-install-storage-configuration
+[id="post-install-storage-configuration"]
+= 安装后存储配置
+include::_attributes/common-attributes.adoc[]
+:gluster: GlusterFS
+:gluster-native: Containerized GlusterFS
+:gluster-external: External GlusterFS
+:gluster-install-link: https://docs.gluster.org/en/latest/Install-Guide/Overview/
+:gluster-admin-link: https://docs.gluster.org/en/latest/Administrator%20Guide/overview/
+:gluster-role-link: https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_storage_glusterfs
+ifdef::openshift-enterprise,openshift-webscale[]
+:gluster: Red Hat Gluster Storage
+:gluster-native: converged mode
+:gluster-external: independent mode
+:gluster-install-link: https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/installation_guide/
+:gluster-admin-link: https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/administration_guide/
+:cns-link: https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/container-native_storage_for_openshift_container_platform/
+endif::[]
+
+toc::[]
+
+安装 统信容器云管理平台 后，您可以按照自己的要求进一步扩展和自定义集群，包括存储配置。
+
+[id="post-install-dynamic-provisioning"]
+== 动态置备
+
+include::modules/dynamic-provisioning-about.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-available-plugins.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-defining-storage-class.adoc[leveloffset=+1]
+
+include::modules/dynamic-provisioning-storage-class-definition.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-annotations.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-cinder-definition.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-gce-definition.adoc[leveloffset=+2]
+
+// include::modules/dynamic-provisioning-gluster-definition.adoc[leveloffset=+2]
+
+// include::modules/dynamic-provisioning-ceph-rbd-definition.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-vsphere-definition.adoc[leveloffset=+2]
+
+include::modules/ovirt-csi-driver-storage-class.adoc[leveloffset=+2]
+
+include::modules/dynamic-provisioning-change-default-class.adoc[leveloffset=+1]
+
+[id="post-install-optimizing-storage"]
+== 优化存储
+
+优化存储有助于最小化所有资源中的存储使用。通过优化存储，管理员可帮助确保现有存储资源以高效的方式工作。
+
+include::modules/available-persistent-storage-options.adoc[leveloffset=+1]
+
+include::modules/recommended-configurable-storage-technology.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 推荐的 etcd 实践
+

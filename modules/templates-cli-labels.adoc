@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+//  * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-cli-labels_{context}"]
+= 添加标签
+
+标签 (label) 用于管理和组织所生成的对象，如 pod。模板中指定的标签应用于从模板生成的每个对象。
+
+.流程
+
+* 从以下命令行在模板中添加标签：
++
+[source,terminal]
+----
+$ oc process -f <filename> -l name=otherLabel
+----

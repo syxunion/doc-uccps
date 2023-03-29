@@ -1,0 +1,93 @@
+// Module included in the following assemblies:
+//
+// * builds/securing-builds-by-strategy.adoc
+
+
+:_content-type: PROCEDURE
+[id="builds-disabling-build-strategy-globally_{context}"]
+= 在全局范围内禁用构建策略访问
+
+要在全局范围内阻止对特定构建策略的访问，请以具有集群管理源权限的用户身份登录，从 `system:authenticated` 组中移除对应的角色，再应用注解 `rbac.authorization.kubernetes.io/autoupdate: "false"` 以防止它们在 API 重启后更改。以下示例演示了如何禁用 Docker 构建策略。
+
+.流程
+
+. 应用 `rbac.authorization.kubernetes.io/autoupdate` 注解：
++
+[source,terminal]
+----
+$ oc edit clusterrolebinding system:build-strategy-docker-binding
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "false" <1>
+  creationTimestamp: 2018-08-10T01:24:14Z
+  name: system:build-strategy-docker-binding
+  resourceVersion: "225"
+  selfLink: /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/system%3Abuild-strategy-docker-binding
+  uid: 17b1f3d4-9c3c-11e8-be62-0800277d20bf
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:build-strategy-docker
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:authenticated
+----
+<1> 将 `rbac.authorization.kubernetes.io/autoupdate` 注解的值更改为 `"false"`。
+
+. 移除角色：
++
+[source,terminal]
+----
+$ oc adm policy remove-cluster-role-from-group system:build-strategy-docker system:authenticated
+----
+
+. 确保也从这些角色中移除构建策略子资源：
++
+[source,terminal]
+----
+$ oc edit clusterrole admin
+----
++
+[source,terminal]
+----
+$ oc edit clusterrole edit
+----
+
+. 对于每个角色，指定与要禁用的策略资源对应的子资源。
+
+.. 为 *admin* 禁用 docker Build 策略：
++
+[source,yaml]
+----
+kind: ClusterRole
+metadata:
+  name: admin
+...
+- apiGroups:
+  - ""
+  - build.openshift.io
+  resources:
+  - buildconfigs
+  - buildconfigs/webhooks
+  - builds/custom <1>
+  - builds/source
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+...
+----
+<1> 添加 `builds/custom` 和 `builds/source`，以在全局范围内为具有 *admin* 角色的用户禁用 docker 构建。

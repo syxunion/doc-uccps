@@ -1,0 +1,291 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-security-context-constraints.adoc
+
+:_content-type: CONCEPT
+[id="security-context-constraints-about_{context}"]
+= 关于安全性上下文约束
+
+与 RBAC 资源控制用户访问的方式类似，管理员可以使用安全性上下文约束 (SCC) 来控制 Pod 的权限。这些权限包括 Pod 可以执行的操作以及它们可以访问的资源。您可以使用 SCC 定义 Pod 运行必须满足的一组条件，以便其能被系统接受。
+
+通过安全性上下文约束，管理员可以控制：
+
+* pod 是否可以使用 `allowPrivilegedContainer` 标志运行特权容器。
+* 使用 `allowPrivilegeEscalation` 标记限制 pod。
+* 容器可以请求的功能
+* 将主机目录用作卷
+* 容器的 `SELinux` 上下文
+* 容器用户 ID
+* 使用主机命名空间和网络
+* 拥有 pod 卷的 `FSGroup` 的分配
+* 允许的补充组的配置
+* 容器是否需要对其 root 文件系统进行写访问权限
+* 卷类型的使用
+* 允许的 `seccomp` 配置集的配置
+
+[重要]
+====
+不要在统信容器云管理平台中的任何命名空间上设置 `openshift.io/run-level` 标签。此标签供内部统信容器云管理平台组件用来管理主要 API 组的启动。如果设置了 `openshift.io/run-level` 标签，则不会将 SCC 应用到该命名空间中的 pod，从而导致该命名空间中运行的任何工作负载都具有高度特权。
+====
+
+[id="default-sccs_{context}"]
+== 默认安全性上下文约束
+
+集群包含多个默认安全性上下文约束 (SCC)，如下表所述。将 Operator 或其他组件安装到统信容器云管理平台时，可能会安装额外的 SCC。
+
+[重要]
+====
+不要修改默认 SCC。自定义默认 SCC 可能会导致在一些平台 Pod 部署或统信容器云管理平台升级时出现问题。在统信容器云管理平台某些版本之间的升级过程中，默认 SCC 的值被重置为默认值，这会丢弃对这些 SCC 的所有自定义。
+
+相反，请根据需要创建新的 SCC。
+====
+
+.默认安全性上下文约束
+[cols="1,3a",options="header"]
+|===
+|安全性上下文约束 |描述
+
+|`anyuid`
+| 提供 `restricted` SCC 的所有功能，但允许用户使用任何 UID 和任何 GID 运行。
+
+|`hostaccess`
+|允许访问所有主机命名空间，但仍要求使用分配至命名空间的 UID 和 SELinux 上下文运行容器集。
+
+[警告]
+====
+此 SCC 允许主机访问命名空间、文件系统和 PID。它应当仅由受信任的容器集使用。请谨慎授予。
+====
+
+|`hostmount-anyuid`
+|提供 `restricted` SCC 的所有功能，但允许主机以任何 UID 和系统中的任何 GID 挂载和运行。
+
+[警告]
+====
+此 SCC 允许主机文件系统作为任何 UID 访问，包括 UID 0。请谨慎授予。
+====
+
+|`hostnetwork`
+|允许使用主机网络和主机端口，但仍要求使用分配至命名空间的 UID 和 SELinux 上下文运行容器集。
+
+[警告]
+====
+如果在 control plane 主机上运行额外的工作负载，在提供 `hostnetwork` 访问权限时要谨慎。在 control plane 主机上运行 `hostnetwork` 的工作负载是集群中的 root 用户，必须相应地信任它。
+====
+
+|`node-exporter`
+|用于 Prometheus 节点导出器。
+
+[警告]
+====
+此 SCC 允许主机文件系统作为任何 UID 访问，包括 UID 0。请谨慎授予。
+====
+
+|`nonroot`
+|提供 `restricted` SCC 的所有功能，但允许用户使用任何非 root UID 运行。用户必须指定 UID，否则必须在容器运行时清单中指定。
+
+|`privileged`
+|允许访问所有特权和主机功能，并且能够以任何用户、任何组、任何 FSGroup 以及任何 SELinux 上下文运行。
+
+[警告]
+====
+这是最宽松的 SCC，应仅用于集群管理。请谨慎授予。
+====
+
+特权 SCC 允许：
+
+* 用户运行特权 Pod
+* Pod 将主机目录挂载为卷
+* Pod 以任意用户身份运行
+* Pod 使用任意 MCS 标签运行
+* Pod 使用主机的 IPC 命名空间
+* Pod 使用主机的 PID 命名空间
+* Pod 使用任何 FSGroup
+* Pod 使用任何补充组
+* Pod 使用任何 seccomp 配置集
+* Pod 请求任何功能
+
+[注意]
+====
+在 Pod 规格中设置 `privileged: true` 并不一定会选择特权 SCC。如果用户有权使用，则具有 `allowPrivilegedContainer: true` 并有最高优先级的 SCC 会被选择。
+====
+
+|`restricted`
+|拒绝访问所有主机功能，并且要求使用 UID 运行容器集，以及分配至命名空间的 SELinux 上下文。这是一个新安装可以提供的最严格的 SCC，经过身份验证的用户会默认使用它。
+
+受限的 SCC：
+
+* 确保 Pod 无法以特权方式运行
+* 确保 Pod 无法挂载主机目录卷
+* 要求 Pod 以预先分配的 UID 范围内的用户运行
+* 要求 pod 使用预先分配的 MCS 标签运行
+* 允许 Pod 使用任何 FSGroup
+* 允许 pod 使用任何补充组
+
+[注意]
+====
+有限制的 SCC 是系统默认提供的、有最严格限制的 SCC。但是，您可以创建一个更加严格的自定义 SCC。例如，您可以创建一个 SCC，它将 readOnlyRootFS 限制为 true，并允许 PrivilegeEscalation 为 false。
+====
+
+|===
+
+[id="scc-settings_{context}"]
+== 安全性上下文约束设置
+
+安全性上下文约束 (SCC) 由控制 Pod 可访问的安全功能的设置和策略组成。这些设置分为三个类别：
+
+[cols="1,3",options="header"]
+|===
+|类别
+|描述
+
+|由布尔值控制
+|此类型的字段默认为限制性最强的值。例如，`AllowPrivilegedContainer` 若未指定，则始终设为 false。
+
+|由允许的集合控制
+|针对集合检查此类型的字段，以确保其值被允许。
+
+|由策略控制
+a|具有生成某个值的策略的条目提供以下功能：
+
+* 生成值的机制，以及
+* 确保指定值属于允许值集合的机制。
+
+|===
+
+CRI-O 具有以下默认能力列表，允许用于 pod 的每个容器：
+
+* `CHOWN`
+* `DAC_OVERRIDE`
+* `FSETID`
+* `FOWNER`
+* `SETGID`
+* `SETUID`
+* `SETPCAP`
+* `NET_BIND_SERVICE`
+* `KILL`
+
+容器使用此默认列表中的功能，但 Pod 清单作者可以通过请求额外功能或移除某些默认行为来修改列表。使用 `allowedCapabilities`、`defaultAddCapabilities` 和 `requiredDropCapabilities` 参数来控制来自容器集的此类请求。通过这些参数，您可以指定可以请求哪些功能，哪些必须添加到每一个容器，哪些必须被每个容器禁止或丢弃。
+
+[注意]
+====
+您可以通过将 `requiredDropCapabilities` 参数设置为 `ALL` 来丢弃容器的所有功能。
+====
+
+[id="authorization-SCC-strategies_{context}"]
+== 安全性上下文约束策略
+
+.RunAsUser
+
+* `MustRunAs` - 需要配置 `runAsUser`。使用配置的 `runAsUser` 作为默认值。针对配置的 `runAsUser` 进行验证。
+* `MustRunAsRange` - 如果不使用预分配值，则需要定义最小值和最大值。使用最小值作为默认值。针对整个允许范围进行验证。
+* `MustRunAsNonRoot` - 需要 Pod 提交为具有非零 runAsUser 或具有镜像中定义的 USER 指令。不提供默认值。
+* `RunAsAny` - 不提供默认值。允许指定任何 `runAsUser`。
+
+.SELinuxContext
+
+* `MustRunAs `- 如果不使用预分配的值，则需要配置 `seLinuxOptions`。使用 `seLinuxOptions` 作为默认值。针对 `seLinuxOptions` 进行验证。
+* `RunAsAny` - 不提供默认值。允许指定任何 `seLinuxOptions`。
+
+.SupplementalGroups
+
+* `MustRunAs` - 如果不使用预分配值，则需要至少指定一个范围。使用第一个范围内的最小值作为默认值。针对所有范围进行验证
+* `RunAsAny` - 不提供默认值。允许指定任何 `supplementalGroups`。
+
+.FSGroup
+
+* `MustRunAs` - 如果不使用预分配值，则需要至少指定一个范围。使用第一个范围内的最小值作为默认值。针对第一个范围内的第一个 ID 进行验证。
+* `RunAsAny` - 不提供默认值。允许指定任何 `fsGroup`` ID。
+
+[id="authorization-controlling-volumes_{context}"]
+== 控制卷
+
+通过设置 SCC 的 volumes 字段，控制特定卷类型的使用。此字段的允许值与创建卷时定义的卷来源对应：
+
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore[`awsElasticBlockStore`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#azuredisk[`azureDisk`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#azurefile[`azureFile`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#cephfs[`cephFS`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#cinder[`cinder`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#configmap[`configMap`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#downwardapi[`downwardAPI`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#emptydir[`emptyDir`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#fc[`fc`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#flexvolume[`flexVolume`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#flocker[`flocker`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#gcepersistentdisk[`gcePersistentDisk`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#gitrepo[`gitRepo`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#glusterfs[`glusterfs`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#hostpath[`hostPath`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#iscsi[`iscsi`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#nfs[`nfs`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim[`persistentVolumeClaim`]
+* `photonPersistentDisk`
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#portworxvolume[`portworxVolume`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#projected[`projected`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#quobyte[`quobyte`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#rbd[`rbd`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#scaleio[`scaleIO`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#secret[`secret`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#storageos[`storageos`]
+* link:https://kubernetes.io/docs/concepts/storage/volumes/#vspherevolume[`vsphereVolume`]
+* *** (允许使用所有卷类型的一个特殊值)
+* `none` (禁止使用所有卷类型的一个特殊值。仅为向后兼容而存在。)
+
+为新 SCC 推荐的允许卷最小集合是 `configMap`、`downAPI`、`emptyDir`、`persistentVolumeClaim`、`secret` 和 `projected`。
+
+[注意]
+====
+允许卷类型列表并不完整，因为每次发布新版统信容器云管理平台时都会添加新的类型。
+====
+
+[注意]
+====
+为向后兼容，使用 `allowHostDirVolumePlugin` 将覆盖 `volumes` 字段中的设置。例如，如果 `allowHostDirVolumePlugin` 设为 `false`，但在 volumes 字段中是允许，则将移除 `volumes` 中的 `hostPath` 值。
+====
+
+
+[id="admission_{context}"]
+== 准入控制
+利用 SCC 的准入控制可以根据授予用户的能力来控制资源的创建。
+
+就 SCC 而言，这意味着准入控制器可以检查上下文中提供的用户信息以检索一组合适的 SCC。这样做可确保 Pod 具有相应的授权，能够提出与其操作环境相关的请求或生成一组要应用到 Pod 的约束。
+
+准入用于授权 Pod 的 SCC 集合由用户身份和用户所属的组来决定。另外，如果 Pod 指定了服务帐户，则允许的 SCC 集合包括服务帐户可访问的所有约束。
+
+准入使用以下方法来创建 Pod 的最终安全性上下文：
+
+. 检索所有可用的 SCC。
+. 为请求上未指定的安全性上下文设置生成字段值。
+. 针对可用约束来验证最终设置。
+
+如果找到了匹配的约束集合，则接受 Pod。如果请求不能与 SCC 匹配，则拒绝 Pod。
+
+Pod 必须针对 SCC 验证每一个字段。以下示例中只有其中两个字段必须验证：
+
+[注意]
+====
+这些示例是在使用预分配值的策略上下文中。
+====
+
+*FSGroup SCC 策略为 `MustRunAs`*
+
+如果 Pod 定义了 `fsGroup` ID，该 ID 必须等于默认的 `fsGroup` ID。否则，Pod 不会由该 SCC 验证，而会评估下一个 SCC。
+
+如果 `SecurityContextConstraints.fsGroup` 字段的值为 `RunAsAny`，并且 Pod 规格省略了 `Pod.spec.securityContext.fsGroup`，则此字段被视为有效。注意在验证过程中，其他 SCC 设置可能会拒绝其他 Pod 字段，从而导致 Pod 失败。
+
+*`SupplementalGroups SCC` 策略为 `MustRunAs`*
+
+如果 Pod 规格定义了一个或多个 `supplementalGroups ID`，则 Pod 的 ID 必须等于命名空间的 `openshift.io/sa.scc.supplemental-groups` 注解中的某一个 ID。否则，Pod 不会由该 SCC 验证，而会评估下一个 SCC。
+
+如果 `SecurityContextConstraints.supplementalGroups` 字段的值为 `RunAsAny`，并且 Pod 规格省略了 `Pod.spec.securityContext.supplementalGroups`，则此字段被视为有效。注意在验证过程中，其他 SCC 设置可能会拒绝其他 Pod 字段，从而导致 Pod 失败。
+
+[id="scc-prioritization_{context}"]
+== 安全性上下文约束优先级
+
+安全性上下文约束 (SCC) 具有一个优先级字段，它会影响准入控制器尝试验证请求时的排序。在排序时，高优先级 SCC 移到集合的前面。确定了可用 SCC 的完整集合后，按照以下方式排序：
+
+. 优先级最高的在前，nil 视为 0 优先级
+. 如果优先级相等，则 SCC 按照限制性最强到最弱排序
+. 如果优先级和限制性都相等，则 SCC 按照名称排序
+
+默认情况下，授权给集群管理员的 `anyuid` SCC 在 SCC 集合中具有优先权。这使得集群管理员能够以任意用户运行 Pod，而不必在 Pod 的 `SecurityContext` 中指定 `RunAsUser`。若有需要，管理员仍然可以指定 `RunAsUser`。

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmap-create-from-console_{context}"]
+= 在 统信容器云管理平台 Web 控制台中创建配置映射
+
+您可以在 统信容器云管理平台 Web 控制台中创建配置映射。
+
+.流程
+
+* 以集群管理员身份创建配置映射：
++
+. 在 Administrator 视角中，选择 `工作负载` -> `配置映射`.
++
+. 在该页面右上方选择 *创建配置映射*.
++
+. 输入配置映射的内容。
++
+. 选择 *Create*.
+
+* 以开发者身份创建配置映射：
++
+. 在 开发者 视角中，选择 `Config Maps`.
++
+. 在该页面右上方选择 *创建配置映射*.
++
+. 输入配置映射的内容。
++
+. 选择 *Create*.

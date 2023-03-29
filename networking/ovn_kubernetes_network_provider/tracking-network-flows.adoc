@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+[id="tracking-network-flows"]
+= 跟踪网络流
+include::_attributes/common-attributes.adoc[]
+:context: tracking-network-flows
+
+toc::[]
+
+作为集群管理员，您可以从集群中收集有关 pod 网络流的信息，以帮助以下区域：
+
+* 监控 pod 网络上的入口和出口流量。
+
+* 对性能问题进行故障排除。
+
+* 为容量规划和安全审计收集数据。
+
+当您启用网络流的集合时，只会收集与流量相关的元数据。例如，不会收集实际的数据包数据，而是只收集协议、源地址、目标地址、端口号、字节数和其他数据包级别的信息。
+
+数据采用以下一种或多种记录格式收集：
+
+* NetFlow
+
+* sFlow
+
+* IPFIX
+
+当您使用一个或多个收集器 IP 地址和端口号配置 Cluster Network Operator（CNO）时，Operator 会在每个节点上配置 Open vSwitch（OVS），以将网络流记录发送到每个收集器。
+
+您可以将 Operator 配置为将记录发送到多种类型的网络流收集器。例如，您可以将记录发送到 NetFlow 收集器，并将记录发送到 sFlow 收集器。
+
+当 OVS 向收集器发送数据时，每种类型的收集器接收相同的记录。例如，如果您配置两个 NetFlow 收集器，节点上的 OVS 会将相同的记录发送到两个收集器。如果您还配置了两个 sFlow 收集器，则两个 sFlow 收集器将接收相同的记录。但是，每个收集器类型都具有唯一的记录格式。
+
+收集网络流数据并将记录发送到收集器会影响性能。节点处理数据包的速度较慢。如果性能影响太大，您可以删除收集器的目的地，以禁用收集网络流数据并恢复性能。
+
+
+include::modules/nw-network-flows-object.adoc[leveloffset=+1]
+
+include::modules/nw-network-flows-create.adoc[leveloffset=+1]
+
+include::modules/nw-network-flows-delete.adoc[leveloffset=+1]

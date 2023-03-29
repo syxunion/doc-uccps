@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * operators/operator-reference.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: CONCEPT
+[id="machine-config-overview-{context}"]
+= 机器配置概述
+
+Machine Config Operator（MCO）管理对 systemd、CRI-O 和 Kubelet、内核、Network Manager 和其他系统功能的更新。它还提供了一个 `MachineConfig` CRD，它可以在主机上写入配置文件（请参阅 machine-config-operator）。了解 MCO 的作用以及如何与其他组件交互对于对 统信容器云管理平台 集群进行高级系统级更改至关重要。以下是您应该了解的 MCO、机器配置以及它们的使用方式：
+
+* 机器配置可以对每个系统的操作系统上的文件或服务进行特定的更改，代表一个 统信容器云管理平台 节点池。
+
+* MCO 应用对机器池中的操作系统的更改。所有 统信容器云管理平台 集群都以 worker 和 control plane 节点池开头。通过添加更多角色标签，您可以配置自定义节点池。例如，您可以设置一个自定义的 worker 节点池，其中包含应用程序所需的特定硬件功能。但是，本节中的示例着重介绍了对默认池类型的更改。
++
+[重要]
+====
+一个节点可以应用多个标签来指示其类型，如 `master` 或 `worker`，但只能是一个 *单一* 机器配置池的成员。
+====
+
+* 在将 统信容器云管理平台 安装到磁盘前，必须先进行一些机器配置。在大多数情况下，这可以通过创建直接注入 统信容器云管理平台 安装程序进程中的机器配置来实现，而不必作为安装后机器配置运行。在其他情况下，您可能需要在 统信容器云管理平台 安装程序启动时传递内核参数时进行裸机安装，以完成诸如设置每个节点的 IP 地址或高级磁盘分区等操作。
+
+* MCO 管理机器配置中设置的项目。MCO 不会覆盖您对系统进行的手动更改，除非明确告知 MCO 管理冲突文件。换句话说，MCO 只提供您请求的特定更新，它不会声明对整个节点的控制。
+
+* 强烈建议手动更改节点。如果您需要退出某个节点并启动一个新节点，则那些直接更改将会丢失。
+
+* MCO 只支持写入 `/etc` 和 `/var` 目录里的文件，虽然有些目录的符号链接可以通过符号链接到那些区域之一来写入。例如 `/opt` 和 `/usr/local` 目录。
+
+* Ignition 是 MachineConfig 中使用的配置格式。详情请参阅 Ignition 配置规格 v3.2.0。
+
+* 虽然 Ignition 配置设置可以在 统信容器云管理平台 安装时直接交付，且以 MCO 提供 Ignition 配置的方式格式化，但 MCO 无法查看这些原始 Ignition 配置是什么。因此，您应该在部署 Ignition 配置前将 Ignition 配置设置嵌套到机器配置中。
+
+* 当由 MCO 管理的文件在 MCO 之外更改时，Machine Config Daemon（MCD）会将该节点设置为 `degraded`。然而，它不会覆盖这个错误的文件，它应该继续处于 `degraded`（降级）状态。
+
+* 使用机器配置的一个关键原因是，当您为 统信容器云管理平台 集群中的池添加新节点时，会应用它。`machine-api-operator` 置备一个新机器， MCO 配置它。
+
+MCO 使用 Ignition 作为配置格式。统信容器云管理平台 4.6 从 Ignition 配置规格版本 2 移到版本 3。
+
+== 机器配置可以更改什么？
+MCO 可更改的组件类型包括：
+
+* **config**: 创建 Ignition 配置对象（请参阅 Ignition 配置规格），以完成修改 统信容器云管理平台 机器上的文件、systemd 服务和其他功能，包括：
+- **Configuration files**: 创建或覆盖 `/var` 或 `/etc` 目录中的文件。
+- **systemd units**: 在附加设置中丢弃并设置 systemd 服务的状态，或者添加到现有 systemd 服务中。
+- **用户和组**: 在安装后更改 passwd 部分中的 SSH 密钥。
+
+[重要]
+====
+只有 `core` 用户才支持通过机器配置更改 SSH 密钥。
+====
+* **kernelArguments**: 在 统信容器云管理平台 节点引导时在内核命令行中添加参数。
+* **kernelType**: （可选）使用非标准内核而不是标准内核。使用 `realtime` 来使用 RT 内核（用于 RAN）。这只在选择的平台上被支持。
+* **fips**: 启用 FIPS 模式。不应在安装时设置 FIPS，而不是安装后的步骤。
+
+[重要]
+====
+只有在 `x86_64` 架构中的 统信容器云管理平台 部署支持 FIPS 验证的/Modules in Process 加密库。
+====
+* **extensions**: 通过添加所选预打包软件来扩展 Uswift 功能。对于这个功能，可用的扩展程序包括 usbguard 和内核模块。
+* **Custom resources (用于 `ContainerRuntime` 和 `Kubelet`)**: 在机器配置外，MCO 管理两个特殊自定义资源，用于修改 CRI-O 容器运行时设置（ContainerRuntime CR）和 Kubelet 服务（`Kubelet` CR）。
+
+MCO 不是更改 统信容器云管理平台 节点上的操作系统组件的唯一 Operator。其他 Operator 也可以修改操作系统级别的功能。一个例子是 Node Tuning Operator，它允许您通过 Tuned 守护进程配置集进行节点级别的性能优化。
+
+安装后可以进行的 MCO 配置任务包括在以下步骤中。如需在 统信容器云管理平台 安装过程中或之前完成的系统配置任务，请参阅 Uswift 裸机安装的描述。
+
+在某些情况下，节点上的配置与当前应用的机器配置指定不完全匹配。这个状态被称为 配置偏移。Machine Config Daemon(MCD)定期检查节点是否有配置偏移。如果 MCD 检测到配置偏移，MCO 会将节点标记为 降级(degraded)，直到管理员更正节点配置。降级的节点在线且可操作，但无法更新。有关配置偏移的更多信息，请参阅 _了解配置偏移检测_。
+

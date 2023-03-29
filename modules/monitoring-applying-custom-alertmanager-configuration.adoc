@@ -1,0 +1,103 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="applying-custom-alertmanager-configuration_{context}"]
+= 应用自定义 Alertmanager 配置
+
+您可以通过编辑 `openshift-monitoring` 项目中的 `alertmanager-main` secret ，覆盖默认的 Alertmanager 配置。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+要从 CLI 更改 Alertmanager 配置：
+
+. 将当前活跃的 Alertmanager 配置输出到 `alertmanager.yaml` 文件：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get secret alertmanager-main --template='{{ index .data "alertmanager.yaml" }}' | base64 --decode > alertmanager.yaml
+----
++
+. 编辑 `alertmanager.yaml` 中的配置：
++
+[source,yaml]
+----
+global:
+  resolve_timeout: 5m
+route:
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: default
+  routes:
+  - match:
+      alertname: Watchdog
+    repeat_interval: 5m
+    receiver: watchdog
+  - match:
+      service: <your_service> <1>
+    routes:
+    - match:
+        <your_matching_rules> <2>
+      receiver: <receiver> <3>
+receivers:
+- name: default
+- name: watchdog
+- name: <receiver>
+#  <receiver_configuration>
+----
+<1> `service` 指定触发警报的服务。
+<2> `<your_matching_rules>` 指定目标警报。
+<3> `receiver` 指定用于该警报的接收器。
++
+以下 Alertmanager 配置示例将 PagerDuty 配置为警报接收器：
++
+[source,yaml,subs=quotes]
+----
+global:
+  resolve_timeout: 5m
+route:
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: default
+  routes:
+  - match:
+      alertname: Watchdog
+    repeat_interval: 5m
+    receiver: watchdog
+  *- match:
+      service: example-app
+    routes:
+    - match:
+        severity: critical
+      receiver: team-frontend-page*
+receivers:
+- name: default
+- name: watchdog
+*- name: team-frontend-page
+  pagerduty_configs:
+  - service_key: "_your-key_"*
+----
++
+采用此配置时，由 `example-app` 服务触发的、严重性为 `critical` 的警报将使用 team-frontend-page 接收器发送。通常情况下，这些类型的警报会传给个人或关键响应团队。
++
+. 应用文件中的新配置：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring create secret generic alertmanager-main --from-file=alertmanager.yaml --dry-run=client -o=yaml |  oc -n openshift-monitoring replace secret --filename=-
+----
+
+要从 统信容器云管理平台 Web 控制台更改 Alertmanager 配置：
+
+. 导航到 web 控制台的 *管理员* -> *Cluster Settings* -> *Configuration* -> *Alertmanager* -> *YAML*  页面。
+
+. 修改 YAML 配置文件。
+
+. 选择 *Save*。

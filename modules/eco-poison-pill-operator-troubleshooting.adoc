@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/eco-poison-pill-operator.adoc
+:_content-type: REFERENCE
+[id="troubleshooting-poison-pill-operator_{context}"]
+= 对 Poison Pill Operator 进行故障排除
+
+[id="general-troubleshooting-poison-pill-operator_{context}"]
+== 常规故障排除
+
+Issue::
+您需要对 Poison Pill Operator 的问题进行故障排除。
+
+解决方案::
+检查 Operator 日志。
+
+[id="checking-daemon-set_{context}"]
+== 检查守护进程集
+Issue:: 已安装 Poison Pill Operator，但守护进程集不可用。
+
+解决方案:: 检查 Operator 日志中的错误或警告。
+
+[id="unsuccessful_remediation{context}"]
+== 失败的补救
+Issue:: 一个不健康的节点没有被修复。
+
+Resolution:: 运行以下命令验证 PoisonPillRemediation CR 是否已创建：
++
+[source,terminal]
+----
+$ oc get ppr -A
+----
++
+如果 `MachineHealthCheck` 控制器在节点关闭不健康时没有创建 PoisonPillRemediation CR，请检查 `MachineHealthCheck` 控制器的日志。此外，请确保 MachineHealthCheck CR 包含使用补救模板所需的规范。
++
+如果创建了 `PoisonPillRemediation` ，请确保其名称与不健康节点或机器对象匹配。
+
+[id="daemon-set-exists_{context}"]
+== 即使卸载 Poison Pill Operator 后也会存在守护进程集
+Issue:: 即使在卸载 Operator 后，Poison Pill 守护进程集也会存在。
+
+Resolution:: 要删除 Poison Pill 守护进程集，请手动删除 PoisonPillConfig CR。运行以下命令：
++
+[source,terminal]
+----
+$ oc delete ds <poison-pill-ds> -n <namespace>
+----
++
+[source,terminal]
+----
+$ oc delete ppc <poison-pill-config> -n <namespace>
+----
++
+[source,terminal]
+----
+$ oc delete pprt <poison-pill-remediation-template> -n <namespace>
+----

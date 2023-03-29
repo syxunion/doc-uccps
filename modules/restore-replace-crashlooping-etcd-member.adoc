@@ -1,0 +1,231 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/replacing-unhealthy-etcd-member.adoc
+
+:_content-type: PROCEDURE
+[id="restore-replace-crashlooping-etcd-member_{context}"]
+= 替换其 etcd Pod 处于 crashlooping 状态的不健康 etcd 成员
+
+此流程详细介绍了替换因 etcd pod 处于 crashlooping 状态造成不健康的 etcd 成员的步骤。
+
+.先决条件
+
+* 您已找出不健康的 etcd 成员。
+* 已确认 etcd pod 处于 crashlooping 状态。
+* 您可以使用具有 cluster-admin 角色的用户访问集群。
+* 已进行 etcd 备份。
++
+[重要]
+====
+执行此流程前务必要进行 etcd 备份，以便在遇到任何问题时可以恢复集群。
+====
+
+.流程
+
+. 停止处于 crashlooping 状态的 etcd pod。
+
+.. 对处于 crashlooping 状态的节点进行调试。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc debug node/ip-10-0-131-183.ec2.internal <1>
+----
+<1> 不健康节点的名称。
+
+.. 将您的根目录改为主机：
++
+[source,terminal]
+----
+sh-4.2# chroot /host
+----
+
+.. 将现有 etcd pod 文件从 Kubelet 清单目录中移出：
++
+[source,terminal]
+----
+sh-4.2# mkdir /var/lib/etcd-backup
+----
++
+[source,terminal]
+----
+sh-4.2# mv /etc/kubernetes/manifests/etcd-pod.yaml /var/lib/etcd-backup/
+----
+
+.. 将 etcd 数据目录移到不同的位置：
++
+[source,terminal]
+----
+sh-4.2# mv /var/lib/etcd/ /tmp
+----
++
+现在您可以退出节点 shell。
+
+. 删除不健康的成员。
+
+.. 选择一个不在受影响节点上的 pod。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc get pods -n openshift-etcd | grep -v etcd-quorum-guard | grep etcd
+----
++
+.输出示例
+[source,terminal]
+----
+etcd-ip-10-0-131-183.ec2.internal                2/3     Error       7          6h9m
+etcd-ip-10-0-164-97.ec2.internal                 3/3     Running     0          6h6m
+etcd-ip-10-0-154-204.ec2.internal                3/3     Running     0          6h6m
+----
+
+.. 连接到正在运行的 etcd 容器，传递没有在受影响节点上的 pod 的名称。
++
+在一个终端中使用 cluster-admin 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc rsh -n openshift-etcd etcd-ip-10-0-154-204.ec2.internal
+----
+
+.. 查看成员列表：
++
+[source,terminal]
+----
+sh-4.2# etcdctl member list -w table
+----
++
+.输出示例
+[source,terminal]
+----
++------------------+---------+------------------------------+---------------------------+---------------------------+
+|        ID        | STATUS  |             NAME             |        PEER ADDRS         |       CLIENT ADDRS        |
++------------------+---------+------------------------------+---------------------------+---------------------------+
+| 62bcf33650a7170a | started | ip-10-0-131-183.ec2.internal | https://10.0.131.183:2380 | https://10.0.131.183:2379 |
+| b78e2856655bc2eb | started |  ip-10-0-164-97.ec2.internal |  https://10.0.164.97:2380 |  https://10.0.164.97:2379 |
+| d022e10b498760d5 | started | ip-10-0-154-204.ec2.internal | https://10.0.154.204:2380 | https://10.0.154.204:2379 |
++------------------+---------+------------------------------+---------------------------+---------------------------+
+----
++
+记录不健康的 etcd 成员的 ID 和名称，因为稍后需要这些值。
+
+.. 通过向 `etcdctl member remove` 命令提供 ID 来删除不健康的 etcd 成员 :
++
+[source,terminal]
+----
+sh-4.2# etcdctl member remove 62bcf33650a7170a
+----
++
+.输出示例
+[source,terminal]
+----
+Member 62bcf33650a7170a removed from cluster ead669ce1fbfb346
+----
+
+.. 再次查看成员列表，并确认成员已被删除：
++
+[source,terminal]
+----
+sh-4.2# etcdctl member list -w table
+----
++
+.输出示例
+[source,terminal]
+----
++------------------+---------+------------------------------+---------------------------+---------------------------+
+|        ID        | STATUS  |             NAME             |        PEER ADDRS         |       CLIENT ADDRS        |
++------------------+---------+------------------------------+---------------------------+---------------------------+
+| b78e2856655bc2eb | started |  ip-10-0-164-97.ec2.internal |  https://10.0.164.97:2380 |  https://10.0.164.97:2379 |
+| d022e10b498760d5 | started | ip-10-0-154-204.ec2.internal | https://10.0.154.204:2380 | https://10.0.154.204:2379 |
++------------------+---------+------------------------------+---------------------------+---------------------------+
+----
++
+现在您可以退出节点 shell。
+
+
+
+. 删除已删除的不健康 etcd 成员的旧 secret。
+
+.. 列出已删除的不健康 etcd 成员的 secret。
++
+[source,terminal]
+----
+$ oc get secrets -n openshift-etcd | grep ip-10-0-131-183.ec2.internal <1>
+----
+<1> 之前在这个过程中记录的不健康 etcd 成员的名称。
++
+有一个对等的、服务和指标的 secret，如以下输出所示：
++
+.输出示例
+[source,terminal]
+----
+etcd-peer-ip-10-0-131-183.ec2.internal              kubernetes.io/tls                     2      47m
+etcd-serving-ip-10-0-131-183.ec2.internal           kubernetes.io/tls                     2      47m
+etcd-serving-metrics-ip-10-0-131-183.ec2.internal   kubernetes.io/tls                     2      47m
+----
+
+.. 删除已删除的不健康 etcd 成员的 secret。
+
+... 删除 peer（对等）secret:
++
+[source,terminal]
+----
+$ oc delete secret -n openshift-etcd etcd-peer-ip-10-0-131-183.ec2.internal
+----
+
+... 删除 serving secret:
++
+[source,terminal]
+----
+$ oc delete secret -n openshift-etcd etcd-serving-ip-10-0-131-183.ec2.internal
+----
+
+... 删除 metrics secret:
++
+[source,terminal]
+----
+$ oc delete secret -n openshift-etcd etcd-serving-metrics-ip-10-0-131-183.ec2.internal
+----
+
+. 强制 etcd 重新部署。
++
+在一个终端中使用 `cluster-admin` 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc patch etcd cluster -p='{"spec": {"forceRedeploymentReason": "single-master-recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge <1>
+----
+<1> `forceRedeploymentReason` 值必须是唯一的，这就是为什么附加时间戳的原因。
++
+当 etcd 集群 Operator 执行重新部署时，它会确保所有控制平面节点都有可正常工作的 etcd pod。
+
+
+.验证
+
+* 确认新成员可用且健康。
+
+.. 连接到正在运行的 etcd 容器：
++
+在一个终端中使用 cluster-admin 用户连接到集群，运行以下命令：
++
+[source,terminal]
+----
+$ oc rsh -n openshift-etcd etcd-ip-10-0-154-204.ec2.internal
+----
+
+.. 验证所有成员是否健康：
++
+[source,terminal]
+----
+sh-4.2# etcdctl endpoint health
+----
++
+.输出示例
+[source,terminal]
+----
+https://10.0.131.183:2379 is healthy: successfully committed proposal: took = 16.671434ms
+https://10.0.154.204:2379 is healthy: successfully committed proposal: took = 16.698331ms
+https://10.0.164.97:2379 is healthy: successfully committed proposal: took = 16.621645ms
+----

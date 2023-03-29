@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+
+[id="setting-up-metrics-collection-for-user-defined-projects_{context}"]
+= 为用户定义的项目设置指标集合
+
+您可以创建一个 `ServiceMonitor` 资源，从用户定义的项目中的服务端点提取指标。这假设您的应用程序使用 Prometheus 客户端库向 `/metrics` 规范名称公开指标。
+
+本节介绍了如何在用户定义的项目中部署示例服务，然后创建一个  `ServiceMonitor` 资源来定义应该如何监控该服务。

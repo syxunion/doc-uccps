@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * web_console/disabling-web-console.adoc
+
+[id="web-console-disable_{context}"]
+= 禁用Web控制台
+
+您可以通过编辑 `consoles.operator.openshift.io` 资源来禁用Web控制台。
+
+* 编辑 `consoles.operator.openshift.io` 资源：
++
+[source,terminal]
+----
+$ oc edit consoles.operator.openshift.io cluster
+----
++
+以下示例显示了资源中可以修改的参数：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  managementState: Removed <1>
+----
+<1> 将 `managementState` 参数值设置为 `Removed` 以禁用Web控制台。此参数的其他有效值是Managed（启用由集群控制的控制台），`Unmanaged`（启用由用户控制管理的Web控制台）。

@@ -1,0 +1,170 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-custom-event-sources.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-sinkbinding-kn_{context}"]
+= 使用 Knative CLI 创建接收器绑定
+
+您可以使用  `kn source binding create` 命令通过 Knative (kn) CLI 创建接收器绑定。使用 Knative CLI 创建事件源提供了比直接修改 YAML 文件更精简且直观的用户界面。
+
+.先决条件
+
+* 在集群中安装了  {ServerlessOperatorName} 和 Knative Eventing。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 安装 Knative (`kn`) CLI.
+* 安装 Uccps CLI (`oc`).
+
+[注意]
+====
+以下操作过程要求您创建 YAML 文件。
+
+如果更改了示例中使用的 YAML 文件的名称，则需要更新对应的 CLI 命令。
+====
+
+.流程
+
+. 要检查接收器绑定是否已正确设置，请创建一个 Knative 事件显示服务或事件 sink，在日志中转储传入的信息：
++
+[source,terminal]
+----
+$ kn service create event-display --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+----
+
+. 创建将事件定向到该服务的接收器绑定实例：
++
+[source,terminal]
+----
+$ kn source binding create bind-heartbeat --subject Job:batch/v1:app=heartbeat-cron --sink ksvc:event-display
+----
+
+. 创建 CronJob 对象。
+
+.. 创建 cron 任务 YAML 文件：
++
+.Cron Job YAML 文件示例
+[source,yaml]
+----
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: heartbeat-cron
+spec:
+  # Run every minute
+  schedule: "* * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        app: heartbeat-cron
+        bindings.knative.dev/include: "true"
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: single-heartbeat
+              image: quay.io/openshift-knative/heartbeats:latest
+              args:
+                - --period=1
+              env:
+                - name: ONE_SHOT
+                  value: "true"
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+----
++
+[IMPORTANT]
+====
+要使用接收器绑定，您必须手动在 Knative CR 中添加 `bindings.knative.dev/include=true`  标签。
+
+例如，要将此标签添加到  `CronJob` CR，请将以下行添加到 `Job` CR YAML 定义中：
+
+[source,yaml]
+----
+  jobTemplate:
+    metadata:
+      labels:
+        app: heartbeat-cron
+        bindings.knative.dev/include: "true"
+----
+
+====
++
+.. 创建 cron job：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 输入以下命令并检查输出，检查是否正确映射了控制器：
++
+[source,terminal]
+----
+$ kn source binding describe bind-heartbeat
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         bind-heartbeat
+Namespace:    demo-2
+Annotations:  sources.knative.dev/creator=minikube-user, sources.knative.dev/lastModifier=minikub ...
+Age:          2m
+Subject:
+  Resource:   job (batch/v1)
+  Selector:
+    app:      heartbeat-cron
+Sink:
+  Name:       event-display
+  Resource:   Service (serving.knative.dev/v1)
+
+Conditions:
+  OK TYPE     AGE REASON
+  ++ Ready     2m
+----
+
+.验证
+
+您可以通过查看消息 dumper 功能日志，来验证 Kubernetes 事件是否已发送到 Knative 事件。
+
+* 您可以输入以下命令来查看消息转储程序功能日志：
++
+[source,terminal]
+----
+$ oc get pods
+----
++
+[source,terminal]
+----
+$ oc logs $(oc get pod -o name | grep event-display) -c user-container
+----
++
+.输出示例
+[source,terminal]
+----
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 1.0
+  type: dev.knative.eventing.samples.heartbeat
+  source: https://knative.dev/eventing-contrib/cmd/heartbeats/#event-test/mypod
+  id: 2b72d7bf-c38f-4a98-a433-608fbcdd2596
+  time: 2019-10-18T15:23:20.809775386Z
+  contenttype: application/json
+Extensions,
+  beats: true
+  heart: yes
+  the: 42
+Data,
+  {
+    "id": 1,
+    "label": ""
+  }
+----

@@ -1,0 +1,13 @@
+// Module included in the following assemblies
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: CONCEPT
+[id="serverless-tag-to-digest-resolution_{context}"]
+= tag-to-digest 解析
+
+如果 Knative Serving 控制器可以访问容器 registry，Knative Serving 会在创建服务的修订时将镜像标签解析为摘要。这被称为 tag-to-digest 解析，有助于为部署提供一致性。
+
+要让控制器访问 OpenShift Container Platform 上的容器 registry，您必须创建一个 secret，然后配置控制器自定义证书。您可以通过修改 KnativeServing 自定义资源 (CR) 中的 `controller-custom-certs` spec 来配置控制器自定义证书。secret 必须位于与 `KnativeServing` CR 相同的命名空间中。
+
+如果 `KnativeServing` CR 中不包含 secret，此设置默认为使用公钥基础架构 (PKI) 。在使用 PKI 时，集群范围的证书会使用 `config-service-sa` 配置映射自动注入到 Knative Serving 控制器。 {ServerlessOperatorName} 使用集群范围证书填充 `config-service-sa` 配置映射，并将配置映射作为卷挂载到控制器。

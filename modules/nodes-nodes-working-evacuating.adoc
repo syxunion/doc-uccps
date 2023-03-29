@@ -1,0 +1,104 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-working.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-working-evacuating_{context}"]
+= 了解如何撤离节点上的 pod
+
+通过撤离 pod，您可以迁移给定的一个或多个节点上的所有或选定 pod。
+
+您只能撤离由复制控制器支持的 pod。复制控制器在其他节点上创建新 pod，并从指定节点移除现有的 pod。
+
+裸机 pod（即不由复制控制器支持的 pod）默认情况下不受影响。您可以通过指定 pod 选择器来撤离一小部分 pod。pod 选择器基于标签，因此带有指定标签的所有 pod 都将被撤离。
+
+.流程
+
+. 在执行 pod 驱除前，标记不可调度的节点。
+
+.. 将节点标记为不可调度。
++
+[source,terminal]
+----
+$ oc adm cordon <node1>
+----
++
+.输出示例
+[source,terminal]
+----
+node/<node1> cordoned
+----
+
+.. 检查节点状态为 `Ready,SchedulingDisabled`:
++
+[source,terminal]
+----
+$ oc get node <node1>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        STATUS                     ROLES     AGE       VERSION
+<node1>     Ready,SchedulingDisabled   worker    1d        v1.24.0
+----
+
+. 使用以下方法之一驱除 pod:
+
+** 在一个或多个节点上驱除所有或选定的 pod：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> [--pod-selector=<pod_selector>]
+----
+
+** 使用 `--force` 选项强制删除裸机 pod。设为 true 时，即使存在不由复制控制器、副本集、作业、守护进程设置或有状态设置管理的 pod，也会继续执行删除：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> --force=true
+----
+
+** 使用 `--grace-period` 以秒为单位设置一个期限，以便每个 pod 能够安全地终止。如果为负，则使用 pod 中指定的默认值：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> --grace-period=-1
+----
+
+** 忽略由守护进程集管理的 pod，将 `--ignore-daemonsets` 标记设为 `true`：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> --ignore-daemonsets=true
+----
+
+** 使用 `--timeout` 标记来设置在放弃前要等待的时长。值为 0 时设定无限时长：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> --timeout=5s
+----
+
+** 即使存在使用 `emptyDir` 的 pod 使用 `--delete-emptydir-data` 标记（设为 true ）,也仍然删除 pod。节点排空时会删除本地数据：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2> --delete-emptydir-data=true
+----
+
+** 把 `--dry-run` 选项设为 true，它会列出将要迁移的对象而不实际执行撤离：
++
+[source,terminal]
+----
+$ oc adm drain <node1> <node2>  --dry-run=true
+----
++
+您可以使用 `--selector=<node_selector>` 选项来撤离选定节点上的 pod，而不指定具体的节点名称（如 <node1> <node2>）。
+
+. 完成后将节点标记为可调度。
++
+[source,terminal]
+----
+$ oc adm uncordon <node1>
+----

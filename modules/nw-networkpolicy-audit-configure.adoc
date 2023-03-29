@@ -1,0 +1,229 @@
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-audit-configure_{context}"]
+= 为集群配置网络策略审计
+
+作为集群管理员，您可以自定义集群的网络策略审计日志记录。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+* 要自定义网络策略审计日志记录配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc edit network.operator.openshift.io/cluster
+----
++
+[提示]
+====
+您还可以自定义并应用以下 YAML 来配置审计日志记录：
+
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  defaultNetwork:
+    ovnKubernetesConfig:
+      policyAuditConfig:
+        destination: "null"
+        maxFileSize: 50
+        rateLimit: 20
+        syslogFacility: local0
+----
+====
+
+.验证
+
+. 要创建带有网络策略的命名空间，请完成以下步骤：
+.. 创建命名空间进行验证：
++
+[source,terminal]
+----
+$ cat <<EOF| oc create -f -
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: verify-audit-logging
+  annotations:
+    k8s.ovn.org/acl-logging: '{ "deny": "alert", "allow": "alert" }'
+EOF
+----
++
+.输出示例
+[source,text]
+----
+namespace/verify-audit-logging created
+----
+
+.. 启用审计日志记录：
++
+[source,terminal]
+----
+$ oc annotate namespace verify-audit-logging k8s.ovn.org/acl-logging='{ "deny": "alert", "allow": "alert" }'
+----
++
+[source,text]
+----
+namespace/verify-audit-logging annotated
+----
+
+.. 为命名空间创建网络策略：
++
+[source,terminal]
+----
+$ cat <<EOF| oc create -n verify-audit-logging -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+spec:
+  podSelector:
+    matchLabels:
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-same-namespace
+spec:
+  podSelector: {}
+  policyTypes: 
+   - Ingress
+   - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress: 
+    - to: 
+       - namespaceSelector: 
+          matchLabels: 
+            namespace: verify-audit-logging
+EOF
+----
++
+.输出示例
+[source,text]
+----
+networkpolicy.networking.k8s.io/deny-all created
+networkpolicy.networking.k8s.io/allow-from-same-namespace created
+----
+
+. 为 default 命名空间中的源流量创建 pod：
++
+[source,terminal]
+----
+$ cat <<EOF| oc create -n default -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+spec:
+  containers:
+    - name: client
+      image: registry.access.redhat.com/rhel7/rhel-tools
+      command: ["/bin/sh", "-c"]
+      args:
+        ["sleep inf"]
+EOF
+----
+
+. 在 `verify-audit-logging` 命名空间中创建两个 pod：
++
+[source,terminal]
+----
+$ for name in client server; do
+cat <<EOF| oc create -n verify-audit-logging -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ${name}
+spec:
+  containers:
+    - name: ${name}
+      image: registry.access.redhat.com/rhel7/rhel-tools
+      command: ["/bin/sh", "-c"]
+      args:
+        ["sleep inf"]
+EOF
+done
+----
++
+.输出示例
+[source,text]
+----
+pod/client created
+pod/server created
+----
+
+. 要生成流量并生成网络策略审计日志条目，请完成以下步骤：
+
+.. 在 `verify-audit-logging` 命名空间中获取名为 `server` 的 pod 的 IP 地址：
++
+[source,terminal]
+----
+$ POD_IP=$(oc get pods server -n verify-audit-logging -o jsonpath='{.status.podIP}')
+----
+
+.. 从 default 命名空间中名为 `client` 的 pod 中 ping 上一个命令的 IP 地址，并确认所有数据包都已丢弃：
++
+[source,terminal]
+----
+$ oc exec -it client -n default -- /bin/ping -c 2 $POD_IP
+----
++
+.输出示例
+[source,text]
+----
+PING 10.128.2.55 (10.128.2.55) 56(84) bytes of data.
+
+--- 10.128.2.55 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 2041ms
+----
+
+.. 从 `verify-audit-logging` 命名空间中名为 client 的 pod 中 ping `POD_IP` shell 环境变量中保存的 IP 地址，并确认允许所有数据包：
++
+[source,terminal]
+----
+$ oc exec -it client -n verify-audit-logging -- /bin/ping -c 2 $POD_IP
+----
++
+.输出示例
+[source,text]
+----
+PING 10.128.0.86 (10.128.0.86) 56(84) bytes of data.
+64 bytes from 10.128.0.86: icmp_seq=1 ttl=64 time=2.21 ms
+64 bytes from 10.128.0.86: icmp_seq=2 ttl=64 time=0.440 ms
+
+--- 10.128.0.86 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 0.440/1.329/2.219/0.890 ms
+----
+
+. 显示网络策略审计日志中的最新条目：
++
+[source,terminal]
+----
+$ for pod in $(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node --no-headers=true | awk '{ print $1 }') ; do
+    oc exec -it $pod -n openshift-ovn-kubernetes -- tail -4 /var/log/ovn/acl-audit-log.log
+  done
+----
++
+.输出示例
+[source,text]
+----
+Defaulting container name to ovn-controller.
+Use 'oc describe pod/ovnkube-node-hdb8v -n openshift-ovn-kubernetes' to see all of the containers in this pod.
+2021-06-13T19:33:11.590Z|00005|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_deny-all", verdict=drop, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:39,dl_dst=0a:58:0a:80:02:37,nw_src=10.128.2.57,nw_dst=10.128.2.55,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+2021-06-13T19:33:12.614Z|00006|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_deny-all", verdict=drop, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:39,dl_dst=0a:58:0a:80:02:37,nw_src=10.128.2.57,nw_dst=10.128.2.55,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+2021-06-13T19:44:10.037Z|00007|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_allow-from-same-namespace_0", verdict=allow, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:3b,dl_dst=0a:58:0a:80:02:3a,nw_src=10.128.2.59,nw_dst=10.128.2.58,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+2021-06-13T19:44:11.037Z|00008|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_allow-from-same-namespace_0", verdict=allow, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:3b,dl_dst=0a:58:0a:80:02:3a,nw_src=10.128.2.59,nw_dst=10.128.2.58,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+----

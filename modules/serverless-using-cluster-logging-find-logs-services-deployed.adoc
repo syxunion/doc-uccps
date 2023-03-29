@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * serverless/monitor/cluster-logging-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="using-cluster-logging-to-find-logs-for-services-deployed-with-knative-serving_{context}"]
+= 使用 Uccps Logging 查找通过 Knative Serving 部署的服务的日志
+
+使用 Uccps Logging，应用程序写入控制台的日志将在 Elasticsearch 中收集。以下流程概述了如何使用 Knative Serving 将这些功能应用到所部署的应用程序中。
+
+.先决条件
+
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 获取 Kibana 路由：
++
+[source,terminal]
+----
+$ oc -n openshift-logging get route kibana
+----
+
+. 使用路由的 URL 导航到 Kibana 仪表板并登录。
+
+. 检查是否将索引设置为 *.all*。如果索引未设置为 *.all*，则只会列出 OpenShift 系统日志。
+
+. 使用 `knative-serving` 命名空间过滤日志。在搜索框中输入服务的过滤器来过滤结果。
++
+.过滤器示例
+[source,terminal]
+----
+kubernetes.namespace_name:default AND kubernetes.labels.serving_knative_dev\/service:{service_name}
+----
++
+除此之外还可使用 `/configuration`  或 `/revision` 来过滤。
+
+. 您可使用  `kubernetes.container_name:<user_container>` 来缩小搜索范围，只显示由您的应用程序生成的日志。否则，会显示来自 queue-proxy 的日志。
+
+[注意]
+====
+在应用程序中使用基于 JSON 的结构化日志记录，以便在生产环境中快速过滤这些日志。
+====

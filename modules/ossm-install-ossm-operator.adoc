@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// - service_mesh/v1x/installing-ossm.adoc
+// - service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-install-ossm-operator_{context}"]
+= Installing the Operators
+
+要安装 {SMProductName}，　请按照以下顺序安装 Operator。为每个 Operator 重复上述步骤。
+
+* OpenShift Elasticsearch
+* {JaegerName}
+* Kiali
+* {SMProductName}
+
+[NOTE]
+====
+如果您已经安装了 OpenShift Elasticsearch Operator 作为 OpenShift Logging 的一部分，则不需要再次安装 OpenShift Elasticsearch Operator。 {JaegerName} 将使用已安装的 OpenShift Elasticsearch Operator 创建 Elasticsearch 实例。
+====
+
+.Procedure
+
+. 以具有 `cluster-admin` 角色的用户身份登录到 {product-title} 控制台。
+
+. 在 {product-title} Web 控制台中， 点击 *Operators* -> *OperatorHub*.
+
+. 在过滤器框中输入Operator 名称，再选择 Operator 的 Red Hat 版本。不支持 Operator 的社区版本。
+
+. 点  *安装*。
+
+. 在每个 Operator 的 *Install Operator* 页面中，接受默认设置。
+
+. 点 *安装*。等待 Operator 安装完毕，然后为列表中的下一个 Operator 重复这些步骤。
++
+* OpenShift Elasticsearch Operator 安装在 `openshift-operators-uniontech` 命名空间中，并可用于集群中的所有命名空间。
+* {JaegerName} 平台安装在 `openshift-distributed-tracing` 命名空间中，可用于集群中的所有命名空间。
+* Kiali and {SMProductName} Operators 安装在 `openshift-operators` 命名空间中，并可用于集群中的所有命名空间。
+
+. 安装完所有四个 Operator 后，点 *Operators* -> *安装的 Operators* 来验证是否安装了您的 Operator。

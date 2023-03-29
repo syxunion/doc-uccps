@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-using-brokers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-list-broker-kn_{context}"]
+= 使用 Knative CLI 列出现有代理
+
+使用 Knative (`kn`) CLI 列出代理提供了精简且直观的用户界面。您可以使用 `kn broker list` 命令列出集群中的现有代理。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title}  集群中。
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+* 列出所有存在的代理：
++
+[source,terminal]
+----
+$ kn broker list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      URL                                                                     AGE   CONDITIONS   READY   REASON
+default   http://broker-ingress.knative-eventing.svc.cluster.local/test/default   45s   5 OK / 5     True
+----

@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-local-volume"]
+= 使用本地卷的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-local
+
+toc::[]
+
+统信容器云管理平台可以使用本地卷来置备持久性存储。本地持久性卷允许您使用标准持久性卷声明接口访问本地存储设备，如磁盘或分区。
+
+无需手动将 pod 调度到节点即可使用本地卷，因为系统了解卷节点的约束。但是，本地卷仍会受到底层节点可用性的影响，而且并不适用于所有应用程序。
+
+[注意]
+====
+本地卷只能用作静态创建的持久性卷。
+====
+
+具体使用及讲解请参考文档《统信容器云管理平台解决方案用户手册-附加组件-本地存储组件》。
+

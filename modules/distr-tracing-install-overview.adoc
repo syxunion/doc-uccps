@@ -1,0 +1,20 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-installing.adoc
+////
+
+:_content-type: CONCEPT
+[id="distr-tracing-install-overview_{context}"]
+= 统信容器云管理平台分布式追踪安装概述
+
+安装统信容器云管理平台分布式追踪的步骤如下：
+
+* 查看文档并确定您的部署策略。
+
+* 如果您的部署策略需要持久性存储，请通过 OperatorHub 安装 统信容器云管理平台搜索引擎。
+
+* 通过 OperatorHub 安装 统信容器云管理平台分布式追踪 Operator。
+
+* 修改自定义资源 YAML 文件，以支持您的部署策略。
+
+* 在统信容器云管理平台环境中部署一个或多个 统信容器云管理平台分布式追踪平台的实例。

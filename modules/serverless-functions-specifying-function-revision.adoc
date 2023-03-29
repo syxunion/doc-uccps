@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-on-cluster-builds.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-functions-specifying-function-revision_{context}"]
+= 指定功能修订
+
+在集群中构建和部署功能时，您必须通过指定存储库中的 Git 存储库、分支和子目录来指定功能代码的位置。如果使用主分支，则不需要指定分支。同样，如果功能位于存储库的根目录，则不需要指定 子目录。您可以在 `func.yaml` 配置文件中指定这些参数，或使用带有 `kn func deploy` 命令的标志。
+
+.先决条件
+
+* {pipelines-title} must be installed on your cluster.
+
+* 已安装 Uccps CLI（oc）。
+
+* 已安装 Knative (kn) CLI。
+
+.流程
+
+* 部署功能：
++
+[source,terminal]
+----
+$ kn func deploy --remote \ <1>
+                 --git-url <repo-url> \ <2>
+                 [--git-branch <branch>] \ <3>
+                 [--git-dir <function-dir>] <4>
+----
++
+--
+<1> 使用 `--remote` 标志时，构建远程运行。
+<2> 将 `<repo-url>` 替换为 Git 存储库的 URL。
+<3> 将 `<branch>` 替换为 Git 分支、标签或提交。如果对 主分支 使用最新的提交，您可以跳过此标志。
+<4> 如果 `<function-dir>` 与存储库根目录不同，请将 <function-dir> 替换为包含该函数的目录。
+--
++
+例如：
++
+[source,terminal]
+----
+$ kn func deploy --remote \
+                 --git-url https://example.com/alice/myfunc.git \
+                 --git-branch my-feature \
+                 --git-dir functions/example-func/
+----

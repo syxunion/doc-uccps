@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/understanding-odo.adoc
+
+:_content-type: CONCEPT
+[id="odo-core-concepts_{context}"]
+
+= odo 核心概念
+
+odo 将 Kubernetes 概念抽象化为开发人员熟悉的术语：
+
+Application::
+使用 云原生方法 开发的典型应用，用于执行特定的任务。
++
+_应用程序_ 示例包括在线视频流、在线购物和酒店预订系统。
+
+组件::
+一组可单独运行和部署的 Kubernetes 资源。云原生应用是一系列小、独立、松散耦合的 _组件_。
++
+_组件_ 示例包括 API 后端、Web 界面和支付后端。
+
+Project::
+包含源代码、测试和库的单一单元。
+
+Context::
+包含单一组件的源代码、测试、库和 `odo` 配置文件的目录。
+
+URL::
+公开组件的机制可从集群外部访问。
+
+存储::
+集群中的持久性存储。它会在重启和组件重建过程中保留数据。
+
+服务::
+为组件提供额外的功能的外部应用程序。
++
+_服务_ 示例包括 PostgreSQL、MySQL、Redis 和 RabbitMQ。
++
+在 odo 中，服务从 Uccps Service Catalog 置备，且必须在集群中启用。
+
+devfile::
+用于定义容器化开发环境的开放式标准，使开发人员工具可以简化和加速工作流。如需更多信息，请参阅文档 https://devfile.io。
++
+您可以连接到公开可用的 _devfile_ registry，也可以安装安全 registry。

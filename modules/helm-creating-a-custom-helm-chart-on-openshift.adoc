@@ -1,0 +1,77 @@
+:_content-type: PROCEDURE
+[id="creating-a-custom-helm-chart-on-openshift_{context}"]
+= 在统信容器云管理平台上创建自定义 Helm chart
+
+.流程
+. 创建一个新项目
++
+[source,terminal]
+----
+$ oc new-project nodejs-ex-k
+----
+
+. 下载包含统信容器云管理平台对象的示例 Node.js chart：
++
+[source,terminal]
+----
+$ git clone https://github.com/utccp/helm-charts
+----
+
+. 进入包含 chart 示例的目录：
++
+[source,terminal]
+----
+$ cd helm-charts/alpha/nodejs-ex-k/
+----
+
+. 编辑 `Chart.yaml` 文件并添加 chart 描述：
++
+[source,yaml]
+----
+apiVersion: v2 
+name: nodejs-ex-k 
+description: A Helm chart for Uccp
+----
+
+. 验证 chart 格式是否正确：
++
+[source,terminal]
+----
+$ helm lint
+----
++
+.输出示例
+[source,terminal]
+----
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+----
+
+. 前往上一个目录级别：
++
+[source,terminal]
+----
+$ cd ..
+----
+
+. 安装 chart：
++
+[source,terminal]
+----
+$ helm install nodejs-chart nodejs-ex-k
+----
+
+. 验证 chart 是否已成功安装：
++
+[source,terminal]
+----
+$ helm list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+nodejs-chart nodejs-ex-k 1 2019-12-05 15:06:51.379134163 -0500 EST deployed nodejs-0.1.0  1.16.0
+----

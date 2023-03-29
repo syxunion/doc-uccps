@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="scaling-cluster-monitoring-operator"]
+= Scaling the Cluster Monitoring Operator
+include::_attributes/common-attributes.adoc[]
+:context: cluster-monitoring-operator
+
+toc::[]
+
+{product-title} exposes metrics that the Cluster Monitoring Operator collects and stores in the Prometheus-based monitoring stack. As an administrator, you can view system resources, containers, and components metrics in one dashboard interface, Grafana.
+
+include::modules/prometheus-database-storage-requirements.adoc[leveloffset=+1]
+
+include::modules/configuring-cluster-monitoring.adoc[leveloffset=+1]

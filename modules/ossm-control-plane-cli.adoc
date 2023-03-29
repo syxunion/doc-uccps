@@ -1,0 +1,86 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v2x/ossm-create-smcp.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-control-plane-deploy-cli_{context}"]
+= Deploying the {SMProductShortName} control plane using the CLI
+
+您可以使用命令行部署基本的 `ServiceMeshControlPlane` 。 
+
+.Prerequisites
+
+* 必须安装 {SMProductName} 。
+* 访问 Uccps CLI（oc）。
+
+.Procedure
+
+. 以具有 `cluster-admin` 角色的用户身份登录 {product-title} CLI 。
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:6443
+----
++
+. 创建一个名为 `istio-system`的项目。
++
+[source,terminal]
+----
+$ oc new-project istio-system
+----
++
+. 使用以下示例，创建一个名为 `istio-installation.yaml` 的 `ServiceMeshControlPlane` 文件。{SMProductShortName} control plane  的版本决定了与 Operator 版本无关的可用功能。
++
+.版本 2.3 istio-installation.yaml 示例
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+  namespace: istio-system
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    type: Jaeger
+    sampling: 10000
+  addons:
+    jaeger:
+      name: jaeger
+      install:
+        storage:
+          type: Memory
+    kiali:
+      enabled: true
+      name: kiali
+    grafana:
+      enabled: true
+----
++
+. 运行以下命令来部署 {SMProductShortName} control plane，其中 `<istio_installation.yaml>` 包含到您的文件的完整路径。
++
+[source,terminal]
+----
+$ oc create -n istio-system -f <istio_installation.yaml>
+----
++
+. 要观察 pod 部署的进度，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get pods -n istio-system -w
+----
++
+您应该看到类似如下的输出：
++
+[source,terminal]
+----
+NAME                                   READY   STATUS    RESTARTS   AGE
+grafana-b4d59bd7-mrgbr                 2/2     Running   0          65m
+istio-egressgateway-678dc97b4c-wrjkp   1/1     Running   0          108s
+istio-ingressgateway-b45c9d54d-4qg6n   1/1     Running   0          108s
+istiod-basic-55d78bbbcd-j5556          1/1     Running   0          108s
+jaeger-67c75bd6dc-jv6k6                2/2     Running   0          65m
+kiali-6476c7656c-x5msp                 1/1     Running   0          43m
+prometheus-58954b8d6b-m5std            2/2     Running   0          66m
+----

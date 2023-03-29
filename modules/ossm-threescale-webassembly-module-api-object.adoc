@@ -1,0 +1,29 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-api-object_{context}"]
+= The 3scale WebAssembly module api object
+
+3scale WebAssembly 模块的 `api` 顶级字符串定义模块要使用的配置版本。
+
+[NOTE]
+====
+api 对象的不存在或不受支持的版本会导致 3scale WebAssembly 模块无法正常运行.
+====
+
+.`api` 顶级字符串示例
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: threescale-wasm-auth
+  namespace: bookinfo
+spec:
+  config:
+    api: v1
+...
+----
+
+`api` 条目定义配置的其余值。唯一接受的值是 `v1`。破坏与当前配置兼容性或需要更多使用 `v1` 的模块无法处理的逻辑的新设置将需要不同的值。

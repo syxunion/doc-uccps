@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * serverless/knative_serving/serverless-custom-domains.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-domain-mapping-odc-developer_{context}"]
+= 使用 开发者 视角将自定义域映射到服务
+
+您可以通过将您自己的自定义域名映射到 Knative 服务来自定义 Knative 服务域。您可以使用 统信容器云管理平台 控制台的 *开发者* 视角将 `DomainMapping` 自定义资源 (CR) 映射到 Knative 服务。
+
+.先决条件
+
+* 已登陆到 web 控制台。
+* 处于 Developer 视角。
+* 在集群中安装了统信容器云管理平台无服务和 Knative Serving。这必须由集群管理员完成。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 您已创建了 Knative 服务，并控制要映射到该服务的自定义域。
++
+
+.流程
+
+. 导航到 *拓扑* 页面。
+
+. 右键单击要映射到某个域的服务，然后选择包含服务名称的 *Edit* 选项。例如，如果该服务命名为 example-service，请选择 *Edit example-service* 选项。
+
+. 在 *Advanced options* 部分中，点 *Show advanced Routing options*。
+.. 如果要映射到该服务的域映射 CR 已存在，您可以在 *域映射* 列表中选择。
+.. 如果要创建新域映射 CR，在框中输入域名，然后选择 *Create* 选项。例如，如果您在 `example.com` 键入，则 *Create* 选项为 *Create "example.com"*。
+
+. 6.单击 *Save*，将更改保存到您的服务。
+
+.验证
+
+. 导航到 *拓扑* 页面 
+
+. 单击您创建的服务。
+
+. 在服务信息窗口的 *Resources* 选项卡中，您可以看到您映射到 *域映射* 中列出的服务的域。

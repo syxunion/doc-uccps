@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/installing-odo.adoc
+
+:_content-type: PROCEDURE
+[id="installing-odo-on-linux_{context}"]
+
+= 在 Linux 中安装 odo
+
+`odo CLI` 可作为二进制文件下载，并为多个操作系统和架构提供 tarball.
+
+.流程
+
+. 进入内容网关，再下载适用于您的操作系统和架构的适当文件。
+** 如果下载二进制文件，请将其重命名为 `odo` ：
++
+[source,terminal]
+----
+$ curl -L https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/latest/odo-linux-amd64 -o odo
+----
+** 如果下载 tarball，解压二进制文件：
++
+[source,terminal]
+----
+$ curl -L https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/latest/odo-linux-amd64.tar.gz -o odo.tar.gz
+$ tar xvzf odo.tar.gz
+----
+. 更改二进制的权限：
++
+[source,terminal]
+----
+$ chmod +x <filename>
+----
+. 将 `odo` 二进制文件放到 `PATH` 中的目录中。
++
+要查看您的 `PATH`，请执行以下命令：
++
+[source,terminal]
+----
+$ echo $PATH
+----
+. 验证您的系统中现在可用的 odo：
++
+[source,terminal]
+----
+$ odo version
+----

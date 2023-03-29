@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * applications/application-health.adoc
+
+:_content-type: PROCEDURE
+[id="application-health-configuring_{context}"]
+= 使用 CLI 配置健康检查
+
+要配置就绪度、存活度和启动探测，将一个或多个探测添加到包含要执行健康检查的容器的 pod 规格中
+
+[注意]
+====
+如果要在现有 pod 中添加或编辑健康检查，您必须编辑 pod 部署配置，或者在 web 控制台中使用 *开发者* 视角。您不能使用 CLI 添加或编辑现有 pod 的健康检查。
+====
+
+.流程
+
+为容器添加探测：
+
+. 创建 `Pod` 对象来添加一个或多个探测：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: health-check
+  name: my-application
+spec:
+  containers:
+  - name: my-container 
+    args:
+    image: utccp/goproxy:0.1
+    livenessProbe: 
+      tcpSocket:  
+        port: 8080 
+      initialDelaySeconds: 15 
+      periodSeconds: 20 
+      timeoutSeconds: 10 
+    readinessProbe: 
+      httpGet: 
+        host: my-host 
+        scheme: HTTPS 
+        path: /healthz
+        port: 8080 
+    startupProbe: 
+      exec: 
+        command: 
+        - cat
+        - /tmp/healthy
+      failureThreshold: 30 
+      periodSeconds: 20 
+      timeoutSeconds: 10 
+----
++
+[注意]
+====
+如果 `initialDelaySeconds` 的值低于 `periodSeconds` 值，则第一个就绪度探测会因计时器的问题在两个阶段间进行。
+
+`timeoutSeconds` 值必须小于 `periodSeconds` 值。
+====
+
+. 创建 `Pod` 对象：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+. 验证健康检查 pod 的状态：
++
+[source,terminal]
+----
+$ oc describe pod health-check
+----
++
+.输出示例
+[source,terminal]
+----
+Events:
+  Type    Reason     Age   From                                  Message
+  ----    ------     ----  ----                                  -------
+  Normal  Scheduled  9s    default-scheduler                     Successfully assigned openshift-logging/liveness-exec to ip-10-0-143-40.ec2.internal
+  Normal  Pulling    2s    kubelet, ip-10-0-143-40.ec2.internal  pulling image "k8s.gcr.io/liveness"
+  Normal  Pulled     1s    kubelet, ip-10-0-143-40.ec2.internal  Successfully pulled image "k8s.gcr.io/liveness"
+  Normal  Created    1s    kubelet, ip-10-0-143-40.ec2.internal  Created container
+  Normal  Started    1s    kubelet, ip-10-0-143-40.ec2.internal  Started container
+----
++
+以下是重启容器失败的探测的输出：
++
+.不健康容器存活度检查输出示例
+[source,terminal]
+----
+$ oc describe pod pod1
+----
++
+.输出示例
+[source,terminal]
+----
+....
+
+Events:
+  Type     Reason          Age                From                                               Message
+  ----     ------          ----               ----                                               -------
+  Normal   Scheduled       <unknown>                                                             Successfully assigned aaa/liveness-http to ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj
+  Normal   AddedInterface  47s                multus                                             Add eth0 [10.129.2.11/23]
+  Normal   Pulled          46s                kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Successfully pulled image "k8s.gcr.io/liveness" in 773.406244ms
+  Normal   Pulled          28s                kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Successfully pulled image "k8s.gcr.io/liveness" in 233.328564ms
+  Normal   Created         10s (x3 over 46s)  kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Created container liveness
+  Normal   Started         10s (x3 over 46s)  kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Started container liveness
+  Warning  Unhealthy       10s (x6 over 34s)  kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Liveness probe failed: HTTP probe failed with statuscode: 500
+  Normal   Killing         10s (x2 over 28s)  kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Container liveness failed liveness probe, will be restarted
+  Normal   Pulling         10s (x3 over 47s)  kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Pulling image "k8s.gcr.io/liveness"
+  Normal   Pulled          10s                kubelet, ci-ln-37hz77b-f76d1-wdpjv-worker-b-snzrj  Successfully pulled image "k8s.gcr.io/liveness" in 244.116568ms
+----

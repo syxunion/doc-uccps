@@ -1,0 +1,10 @@
+:_content-type: ASSEMBLY
+[id="serverless-brokers"]
+= 代理
+include::_attributes/common-attributes.adoc[]
+:context: serverless-brokers
+
+toc::[]
+
+include::snippets/serverless-brokers-intro.adoc[]
+include::modules/serverless-broker-types.adoc[leveloffset=+1]

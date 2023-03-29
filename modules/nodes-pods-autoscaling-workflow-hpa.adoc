@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-autoscaling-workflow-hpa_{context}"]
+= HPA 的工作原理？
+
+pod 横向自动扩展(HPA)扩展了 pod 自动扩展的概念。HPA 允许您创建和管理一组负载均衡的节点。当给定的 CPU 或内存阈值被超过时，HPA 会自动增加或减少 pod 数量。
+
+.HPA 的高级别工作流
+
+HPA 是 Kubernetes 自动扩展 API 组中的 API 资源。自动扩展器充当控制循环，在同步周期内默认为 15 秒。在此期间，控制器管理器会根据 HPA 的 YAML 文件中定义的 CPU、内存使用率或两者查询 CPU、内存使用或两者。控制器管理器为 HPA 为目标的每个 pod 来获取来自每个 pod 资源指标（如 CPU 或内存）的资源指标的利用率指标。
+
+如果设置了使用值目标，控制器会将利用率值视为各个 pod 中容器对等资源请求的百分比。然后，控制器需要所有目标 pod 的平均利用率，并生成一个用于缩放所需副本数的比率。HPA 配置为从 metrics.k8s.io 获取指标（由 metrics 服务器提供）。由于指标评估的动态性质，副本的数量在扩展一组副本期间会波动。
+
+[注意]
+====
+要实现 HPA，所有目标 pod 都必须在其容器上设置了一个资源请求。
+====

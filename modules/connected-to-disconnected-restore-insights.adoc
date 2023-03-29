@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+:_content-type: PROCEDURE
+[id="connected-to-disconnected-restore-insights_{context}"]
+= 恢复降级的 Insights Operator
+
+从网络断开集群的连接会导致集群丢失互联网连接。Insights Operator 会降级，因为它需要访问 UnionTech Insights。
+
+本节描述了如何从降级的 Insights Operator 恢复。
+
+.流程
+
+. 编辑 `.dockerconfigjson` 文件以删除 `cloud.openshift.com` 条目，例如：
++
+[source,terminal]
+----
+"cloud.openshift.com":{"auth":"<hash>","email":"user@example.com"}
+----
+
+. 保存这个文件。
+
+. 使用编辑的 `.dockerconfigjson` 文件更新集群 secret：
++
+[source,terminal]
+----
+$ oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=./.dockerconfigjson
+----
+
+. 验证 Insights Operator 不再降级：
++
+[source,terminal]
+----
+$ oc get co insights
+----
++
+.输出示例
+[source,terminal]
+----
+NAME       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+insights   4.5.41    True        False         False      3d
+----
+
+

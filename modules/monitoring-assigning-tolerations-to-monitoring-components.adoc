@@ -1,0 +1,124 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="assigning-tolerations-to-monitoring-components_{context}"]
+= 为监控组件分配容忍（tolerations）
+
+您可以为任何监控堆栈组件分配容忍，以便将其移到污点。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有  `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI CLI (`oc`)。
+
+.流程
+
+. 编辑 `ConfigMap` 对象：
+** *要将容限分配给监控 统信容器云管理平台 核心项目的组件*:
+.. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 为组件指定 `tolerations` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    <component>:
+      tolerations:
+        <toleration_specification>
+----
++
+相应地替换 `<component>` 和 `<toleration_specification>` 。
++
+例如， `oc adm taint nodes node1 key1=value1:NoSchedule` 会将一个键为 `key1` 且值为 `value1` 的污点添加到 `node1` 这会防止监控组件在 `node1` 上部署 Pod，除非为该污点配置了容限。以下示例将 `alertmanagerMain` 组件配置为容许示例污点：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    alertmanagerMain:
+      tolerations:
+      - key: "key1"
+        operator: "Equal"
+        value: "value1"
+        effect: "NoSchedule"
+----
+
+** *要将容限分配给监控用户定义的项目的组件*：
+.. 在 `openshift-user-workload-monitoring` 项目中编辑  `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 为组件指定 `tolerations` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    <component>:
+      tolerations:
+        <toleration_specification>
+----
++
+相应地替换 `<component>` 和 `<toleration_specification>` 
++
+例如，, `oc adm taint nodes node1 key1=value1:NoSchedule` 会将一个键为 `key1` 且值为 `value1` 的污点添加到  `node1` 。这会防止监控组件在 `node1` 上部署 Pod，除非为该污点配置了容限。以下示例将 `thanosRuler` 组件配置为容许示例污点：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    thanosRuler:
+      tolerations:
+      - key: "key1"
+        operator: "Equal"
+        value: "value1"
+        effect: "NoSchedule"
+----
+
+. 保存文件以使改变生效。这样就会自动应用新组件放置配置。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到  `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

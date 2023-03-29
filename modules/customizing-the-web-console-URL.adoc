@@ -1,0 +1,99 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="customizing-the-web-console-url_{context}"]
+= 自定义控制台路由
+
+对于 `console` 和 `downloads` 路由，自定义路由功能使用 `ingress` 配置路由 API。如果 `console` 自定义路由在 ingress 配置和 `console-operator` 配置中都设置时，新的 `ingress` 配置自定义路由配置有高的优先级。带有 `console-operator` 配置的路由配置已弃用。
+
+[id="customizing-the-console-route_{context}"]
+== 自定义控制台路由
+
+您可以通过在集群 Ingress 配置的 `spec.componentRoutes` 字段中设置自定义主机名和 TLS 证书来自定义控制台路由。
+
+.先决条件
+
+* 已使用具有管理特权的用户身份登录集群。
+* 您已在 `openshift-config` 命名空间中创建了包含 TLS 证书和密钥的 secret。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
++
+[提示]
+====
+您可以使用 `oc create secret tls` 命令创建 TLS secret。
+====
+
+.流程
+
+. 编辑集群 `Ingress` 配置：
++
+[source,terminal]
+----
+$ oc edit ingress.config.openshift.io cluster
+----
+
+. 设置自定义主机名以及可选的服务证书和密钥：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+spec:
+  componentRoutes:
+    - name: console
+      namespace: openshift-console
+      hostname: <custom_hostname> <1>
+      servingCertKeyPairSecret:
+        name: <secret_name> <2>
+----
+<1> 自定义主机名.
+<2> 对 `openshift-config` 命名空间中的 secret 的引用，该 secret 包含 TLS 证书 (`tls.crt`) 和密钥 (`tls.key`)。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
+
+. 保存文件以使改变生效。
+
+[id="customizing-the-download-route_{context}"]
+== 自定义下载路由
+
+您可以通过在集群 `Ingress` 配置的 `spec.componentRoutes` 字段中设置自定义主机名和 TLS 证书来自定义下载路由。
+
+.先决条件
+
+* 已使用具有管理特权的用户身份登录集群。
+* 您已在 `openshift-config` 命名空间中创建了包含 TLS 证书和密钥的 secret。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
++
+[提示]
+====
+您可以使用 `oc create secret tls` 命令创建 TLS secret。
+====
+
+.流程
+
+. 编辑集群 `Ingress` 配置：
++
+[source,terminal]
+----
+$ oc edit ingress.config.openshift.io cluster
+----
+
+. 设置自定义主机名以及可选的服务证书和密钥：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+spec:
+  componentRoutes:
+    - name: downloads
+      namespace: openshift-console
+      hostname: <custom_hostname> <1>
+      servingCertKeyPairSecret:
+        name: <secret_name> <2>
+----
+<1> 自定义主机名。
+<2> 对 `openshift-config` 命名空间中的 secret 的引用，该 secret 包含 TLS 证书 (`tls.crt`) 和密钥 (`tls.key`)。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
+
+. 保存文件以使改变生效。

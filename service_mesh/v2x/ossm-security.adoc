@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="ossm-security"]
+= Security
+include::_attributes/common-attributes.adoc[]
+:context: ossm-security
+
+toc::[]
+
+如果您的服务网格应用程序由一组复杂的微服务组成，您可以使用 {SMProductName} 来定制这些服务间的通信安全性。{product-title}  的基础架构以及 {SMProductShortName} 的流量管理功能可帮助您管理应用程序的复杂性和安全微服务。
+
+.开始前
+
+如果您有一个项目，请将项目添加到 xref:../../service_mesh/v2x/ossm-create-mesh.adoc#ossm-member-roll-create_ossm-create-mesh[`ServiceMeshMemberRoll` 资源中]。
+
+如果您没有项目，请安装  xref:../../service_mesh/v2x/ossm-create-mesh.adoc#ossm-tutorial-bookinfo-overview_ossm-create-mesh[Bookinfo 示例应用程序]并将其添加到`ServiceMeshMemberRoll` 资源中。示例应用程序可以帮助演示安全概念。
+
+include::modules/ossm-security-mtls.adoc[leveloffset=+1]
+
+include::modules/ossm-config-sec-mtls-mesh.adoc[leveloffset=+2]
+
+include::modules/ossm-config-sidecar-mtls.adoc[leveloffset=+3]
+
+include::modules/ossm-config-sidecar-out-mtls.adoc[leveloffset=+2]
+
+include::modules/ossm-config-mtls-min-max.adoc[leveloffset=+2]
+
+include::modules/ossm-validate-encryption-kiali.adoc[leveloffset=+2]
+
+include::modules/ossm-security-auth-policy.adoc[leveloffset=+1]
+
+include::modules/ossm-security-cipher.adoc[leveloffset=+1]

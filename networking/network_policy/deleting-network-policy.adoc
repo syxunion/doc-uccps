@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="deleting-network-policy"]
+= 删除网络策略
+include::_attributes/common-attributes.adoc[]
+:context: deleting-network-policy
+
+toc::[]
+
+以具有 admin 角色的用户，您可以从命名空间中删除网络策略。
+
+include::modules/nw-networkpolicy-delete.adoc[leveloffset=+1]

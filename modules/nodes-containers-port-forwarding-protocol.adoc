@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-port-forwarding.adoc
+
+[id="nodes-containers-port-forwarding-protocol_{context}"]
+= 用于从客户端发起端口转发的协议
+
+客户端通过向 Kubernetes API 服务器发出请求，来发起向 pod 转发端口的操作：
+
+----
+/proxy/nodes/<node_name>/portForward/<namespace>/<pod>
+----
+
+在以上 URL 中：
+
+- `<node_name>` 是节点的 FQDN。
+- `<namespace>` 是目标 pod 的命名空间。
+- `<pod>` 是目标 pod 的名称。
+
+例如：
+
+----
+/proxy/nodes/node123.openshift.com/portForward/myns/mypod
+----
+
+向 API 服务器发送端口转发请求后，客户端会将连接升级到支持多路复用的流；当前实施使用 Hy ptertext Transfer Protocol 版本 2(HTTP/2)。
+
+客户端创建 port 标头中包含 pod 中目标端口的流。写入流的所有数据都通过 Kubelet 传送到目标 pod 和端口。同样，针对被转发连接从 pod 发送的所有数据都会被传回客户端上的同一流。
+
+在完成端口转发请求后，客户端关闭所有流、升级的连接和底层连接。

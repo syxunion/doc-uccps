@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-taints-tolerations
+[id="nodes-scheduler-taints-tolerations"]
+= 使用节点污点控制 pod 放置
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+通过污点和容限，节点可以控制哪些 pod 应该（或不应该）调度到节点上。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-scheduler-taints-tolerations-about.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-taints-tolerations-adding.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-taints-tolerations-adding-machineset.adoc[leveloffset=+2]
+
+include::modules/nodes-scheduler-taints-tolerations-binding.adoc[leveloffset=+2]
+
+include::modules/nodes-scheduler-taints-tolerations-projects.adoc[leveloffset=+2]
+
+include::modules/nodes-scheduler-taints-tolerations-special.adoc[leveloffset=+2]
+
+include::modules/nodes-scheduler-taints-tolerations-removing.adoc[leveloffset=+1]
+
+//Removed per upstream docs modules/nodes-scheduler-taints-tolerations-evictions.adoc[leveloffset=+1]

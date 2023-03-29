@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+:_content-type: PROCEDURE
+[id="quotas-creating-a-quota_{context}"]
+= 创建配额
+
+您可以通过创建配额，来约束给定项目中的资源使用量。
+
+.流程
+
+. 在一个文件中定义配额。
+
+. 使用该文件创建配额，并将其应用到项目：
++
+[source,terminal]
+----
+$ oc create -f <file> [-n <project_name>]
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f core-object-counts.yaml -n demoproject
+----

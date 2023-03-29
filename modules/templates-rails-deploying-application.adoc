@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+// * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-deploying-application_{context}"]
+= 将应用程序部署至 统信容器云管理平台
+
+您可将您的应用程序部署至 统信容器云管理平台。
+
+创建 rails-app 项目后，您将自动切换到新的项目命名空间。
+
+在 统信容器云管理平台 中部署应用程序涉及三个步骤：
+
+* 从 统信容器云管理平台 的 PostgreSQL 镜像创建数据库服务。
+* 从 统信容器云管理平台 的 Ruby 2.0 构建程序镜像和 Ruby on Rails 源代码创建前端服务，这些服务将与数据库服务相连接。
+* 为应用程序创建路由。
+
+.流程
+
+* 要部署 Ruby on Rails 应用程序，请为应用程序创建一个新项目：
++
+[source,terminal]
+----
+$ oc new-project rails-app --description="My Rails application" --display-name="Rails Application"
+----

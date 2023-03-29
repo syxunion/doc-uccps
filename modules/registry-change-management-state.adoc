@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-baremetal.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-vsphere.adoc
+
+:_content-type: PROCEDURE
+[id="registry-change-management-state_{context}"]
+= 更改镜像 registry 的管理状态
+
+要启动镜像 registry，您必须将 Image Registry Operator 配置的 `managementState` 从 `Removed` 改为 `Managed`。
+
+.流程
+
+* 将 `managementState`  Image Registry Operator 配置从 `Removed` 改为 `Managed`。例如：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+----

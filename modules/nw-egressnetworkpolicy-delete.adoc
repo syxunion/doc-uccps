@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift-sdn/removing-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/removing-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "openshift-sdn-egress-firewall"]
+:kind: EgressNetworkPolicy
+:res: egressnetworkpolicy
+:cni: OpenShift SDN
+endif::[]
+ifeval::["{context}" == "removing-egress-firewall-ovn"]
+:kind: EgressFirewall
+:res: egressfirewall
+:cni: OVN-Kubernetes
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-egressnetworkpolicy-delete_{context}"]
+= 删除 EgressNetworkPolicy 对象
+
+作为集群管理员，您可以从项目中删除出口防火墙。
+
+.先决条件
+
+* 使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商插件的集群。
+* 安装 Uccp CLI (`oc`).
+* 您需要使用集群管理员身份登陆到集群。
+
+.流程
+
+. 查找项目的 EgressNetworkPolicy 对象的名称。将 `<project>` 替换为项目的名称。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get -n <project> {res}
+----
+
+. 输入以下命令删除 EgressNetworkPolicy 对象。将 `<project>` 替换为项目名称，`<name>` 替换为对象名称。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc delete -n <project> {res} <name>
+----
+
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::res[]
+:!res:
+endif::[]
+ifdef::cni[]
+:!cni:
+endif::[]

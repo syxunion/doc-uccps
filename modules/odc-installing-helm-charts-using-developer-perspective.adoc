@@ -1,0 +1,29 @@
+:_content-type: PROCEDURE
+[id="odc-installing-helm-charts-using-developer-perspective_{context}"]
+= 使用开发者视角安装 Helm chart
+
+您可以使用 web 控制台中的 *开发者* 视角或 CLI 从 *开发者目录* 中列出的 Helm chart 中选择并安装 chart。您可以通过安装 Helm chart 来创建 Helm 发行版本，并在 web 控制台的 *开发者* 视角中查看它们。
+
+.先决条件
+* 已登陆到 web 控制台并切换到 开发者 视角。
+
+.流程
+通过 *开发者目录* 提供的 Helm chart 来创建 Helm 发行版本：
+
+. 在 *开发者* 视角中，进入 *+添加* 视图并选择一个项目。然后点击开发者目录下的 *Helm Chart* 选项来查看开发者目录中的所有 Helm Chart。
+. 选择一个 chart，查看它的描述信息、README 和其他与之相关的信息。
+. 点 *安装 Helm Chart*。
++
+. 在 安装 Helm Chart 页面中：
+.. 在 *发行名称* 项中输入 *发行版本* 的唯一名称。
+.. 从 chart 版本 下拉列表中选择所需的 *chart 版本*。
+.. 使用 *表单视图* 或 *YAML 视图* 配置 Helm Chart。
++
+[注意]
+====
+在可用情况下，您可以在 *YAML 视图* 和 *表单视图* 间切换。在不同视图间切换时数据会被保留。
+====
++
+.. 点击 *安装* 创建 Helm 发行版本。*拓扑* 视图将会显示，其中包括了发行版本。如果 Helm chart 带有发行注记，则 chart 会被预先选择，右侧面板会显示该发行版本的发行注记。
+
+您可以使用侧面面板上的 *操作* 按钮或右键点击 Helm 发行版本来升级、回滚或卸载 Helm 发行版本。

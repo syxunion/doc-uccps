@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-using-the-cli_{context}"]
+= 使用 CLI 从模板创建对象
+
+您可以使用 CLI 来处理模板，并使用所生成的配置来创建对象。

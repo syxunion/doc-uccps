@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-applications.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-init-containers-apps_{context}"]
+= 配置 init 容器
+
+Init 容器是 pod 中应用程序容器之前运行的专用容器。它们通常用于为应用程序实施初始化逻辑，其中可能包括运行设置脚本或下载所需的配置。
+
+[注意]
+====
+Init 容器可能会导致应用程序的启动时间较长，应该谨慎地用于无服务器应用程序，这应该经常被扩展或缩减.
+====
+
+单个 Knative 服务 spec 支持多个 init 容器。如果没有提供模板名称，Knative 提供一个默认的可配置命名模板。通过在 Knative Service 对象 spec 中添加适当的值，可以设置 init 容器模板。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+* 在将 init 容器用于 Knative 服务前，管理员必须在 `KnativeServing` 自定义资源(CR) 中添加 `kubernetes.podspec-init-containers` 标志。
+
+.流程
+
+* 将 `initContainers` spec 添加到 Knative `Service` 对象中：
++
+.服务规格示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+...
+spec:
+  template:
+    spec:
+      initContainers:
+        - imagePullPolicy: IfNotPresent <1>
+          image: <image_uri> <2>
+          volumeMounts: <3>
+            - name: data
+              mountPath: /data
+...
+----
+<1> 镜像下载时的镜像拉取策略。
+<2> init 容器镜像的 URI。
+<3> 卷在容器文件系统中挂载的位置。

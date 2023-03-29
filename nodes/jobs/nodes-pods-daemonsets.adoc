@@ -1,0 +1,52 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-daemonsets
+[id="nodes-pods-daemonsets"]
+= 使用 daemonset 在节点上自动运行后台任务
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+作为管理员，您可以创建并使用守护进程集在 统信容器云管理平台 集群的特定节点或所有节点上运行 pod 副本。
+
+守护进程集确保所有（或部分）节点都运行 pod 的副本。当节点添加到集群中时，pod 也会添加到集群中。当节点从集群中移除时，这些 pod 也会通过垃圾回收而被移除。删除守护进程集会清理它创建的 pod。
+您可以使用 daemonset 创建共享存储，在集群的每一节点上运行日志 pod，或者在每个节点上部署监控代理。
+
+为安全起见，只有集群管理员才能创建守护进程集。
+
+如需有关守护进程集的更多信息，请参阅 Kubernetes 文档。
+
+[重要]
+====
+守护进程集调度与项目的默认节点选择器不兼容。如果您没有禁用它，守护进程集会与默认节点选择器合并，从而受到限制。这会造成在合并后节点选择器没有选中的节点上频繁地重新创建 pod，进而给集群带来意外的负载。
+====
+
+== 通过默认调度程序调度
+
+守护进程集确保所有有资格的节点都运行 pod 的副本。通常，Kubernetes 调度程序会选择要在其上运行 pod 的节点。但是，以前守护进程集 pod 由守护进程集控制器创建并调度。这会引发以下问题：
+
+* pod 行为不一致：等待调度的普通 pod 被创建好并处于待处理状态，但守护进程集 pod 没有以待处理的状态创建。这会给用户造成混淆。
+* Pod 抢占由默认调度程序处理。启用抢占后，守护进程集控制器将在不考虑 pod 优先级和抢占的前提下做出调度决策。
+
+统信容器云管理平台 中默认启用  *ScheduleDaemonSetPods* 功能允许您使用默认调度程序而不是守护进程集控制器来调度守护进程集，具体方法是添加 NodeAffinity 术语到守护进程集 pod，而不是 .spec.nodeName 术语。然后，默认调度程序用于将 pod 绑定到目标主机。如果守护进程集的节点关联性已经存在，它会被替换掉。守护进程设置控制器仅在创建或修改守护进程集 pod 时执行这些操作，且不会对守护进程集的 spec.template 进行任何更改。
+
+[source,yaml]
+----
+nodeAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+    - matchFields:
+      - key: metadata.name
+        operator: In
+        values:
+        - target-host-name
+----
+
+另外， `node.kubernetes.io/unschedulable:NoSchedule` 容限会自动添加到守护进程设置 Pod 中。在调度守护进程设置 pod 时，默认调度程序会忽略不可调度的节点。
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-pods-daemonsets-creating.adoc[leveloffset=+1]

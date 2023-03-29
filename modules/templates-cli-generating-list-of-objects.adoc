@@ -1,0 +1,83 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-cli-generating-list-of-objects_{context}"]
+= 生成对象列表
+
+您可以使用 CLI 来处理定义模板的文件，以便将对象列表返回到标准输出。
+
+.流程
+
+. 处理定义模板的文件进以将对象列表返回到标准输出：
++
+[source,terminal]
+----
+$ oc process -f <filename>
+----
++
+或者，如果模板已上传到当前项目：
++
+[source,terminal]
+----
+$ oc process <template_name>
+----
++
+. 通过处理模板并将输出传送至 oc create 来从模板创建对象：
++
+[source,terminal]
+----
+$ oc process -f <filename> | oc create -f -
+----
++
+或者，如果模板已上传到当前项目：
++
+[source,terminal]
+----
+$ oc process <template> | oc create -f -
+----
++
+. 您可以为每个要覆盖的 <name>=<value> 对添加 `-p` 选项，以覆盖文件中定义的任何参数值。参数引用可能会出现在模板项目内的任何文本字段中。
++
+例如，在以下部分中，模板的 POSTGRESQL_USER 和 POSTGRESQL_DATABASE 参数被覆盖，以输出带有自定义环境变量的配置：
++
+.. 从模板创建对象列表
++
+[source,terminal]
+----
+$ oc process -f my-rails-postgresql \
+    -p POSTGRESQL_USER=bob \
+    -p POSTGRESQL_DATABASE=mydatabase
+----
++
+.. JSON 文件可重定向到文件，也可直接应用，而无需通过将已处理的输出传送到 `oc create` 命令来上传模板：
++
+[source,terminal]
+----
+$ oc process -f my-rails-postgresql \
+    -p POSTGRESQL_USER=bob \
+    -p POSTGRESQL_DATABASE=mydatabase \
+    | oc create -f -
+----
++
+.. 如有大量参数，可将其保存到文件中，然后将此文件传递到 `oc process`：
++
+[source,terminal]
+----
+$ cat postgres.env
+POSTGRESQL_USER=bob
+POSTGRESQL_DATABASE=mydatabase
+----
++
+[source,terminal]
+----
+$ oc process -f my-rails-postgresql --param-file=postgres.env
+----
++
+.. 此外，您还可使用 `"-"` 作为 `--param-file` 的参数，从标准输入中读取环境：
++
+[source,terminal]
+----
+$ sed s/bob/alice/ postgres.env | oc process -f my-rails-postgresql --param-file=-
+----

@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-marking-as-bindable_{context}"]
+= 将模板标记为可绑定
+
+Template Service Broker 会在目录中为其了解的每个模板对象公告一个服务。默认情况下，每个服务均会公告为“可绑定”，表示允许最终用户绑定制备的服务。
+
+.流程
+
+模板创建者可以防止最终用户绑定从给定模板制备的服务。
+
+* 通过将注解 `template.Uccps.io/bindable: "false"` 添加至模板中，防止最终用户绑定从给定模板制备的服务。

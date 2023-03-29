@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+[id="nodes-containers-projected-volumes-about_{context}"]
+= 使用 Downward API 向容器公开 pod 信息
+
+Downward API 包含 pod 的名称、项目和资源值等信息。容器可以使用环境变量或卷插件来消耗来自 Downward API 的信息。
+
+pod 中的字段通过 `FieldRef`API 类型来选择。`FieldRef` 有两个字段：
+
+[options="header"]
+|===
+|字段 |描述
+
+|`fieldPath`
+|要选择的字段的路径，这相对于 pod。
+
+|`apiVersion`
+|要在其中解释 fieldPath 选择器的 API 版本。
+|===
+
+目前，v1 API 中的有效选择器包括：
+
+[options="header"]
+|===
+|选择器 |描述
+
+|`metadata.name`
+|pod 的名称。在环境变量和卷中均受支持。
+
+|`metadata.namespace`
+|Tpod 的命名空间。在环境变量和卷中均受支持。
+
+|`metadata.labels`
+|pod 的标签。仅在卷中支持，环境变量中不支持。
+
+|`metadata.annotations`
+|pod 的注解。仅在卷中支持，环境变量中不支持。
+
+|`status.podIP`
+|pod 的 IP。仅在环境变量中支持，卷中不支持。
+|===
+
+若未指定 `apiVersion` 字段，则默认为所属 pod 模板的 API 版本。

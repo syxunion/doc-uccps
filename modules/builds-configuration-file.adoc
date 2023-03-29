@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * builds/build-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="builds-configuration-file_{context}"]
+= 配置构建设置
+
+您可以通过编辑 `build.config.openshift.io/cluster` 资源来配置构建设置。
+
+.流程
+
+* 编辑 `build.config.openshift.io/cluster` 资源：
++
+[source,terminal]
+----
+$ oc edit build.config.openshift.io/cluster
+----
++
+以下是 `build.config.openshift.io/cluster` 资源的示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Build<1>
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2019-05-17T13:44:26Z"
+  generation: 2
+  name: cluster
+  resourceVersion: "107233"
+  selfLink: /apis/config.openshift.io/v1/builds/cluster
+  uid: e2e9cc14-78a9-11e9-b92b-06d6c7da38dc
+spec:
+  buildDefaults:<2>
+    defaultProxy:<3>
+      httpProxy: http://proxy.com
+      httpsProxy: https://proxy.com
+      noProxy: internal.com
+    env:<4>
+    - name: envkey
+      value: envvalue
+    gitProxy:<5>
+      httpProxy: http://gitproxy.com
+      httpsProxy: https://gitproxy.com
+      noProxy: internalgit.com
+    imageLabels:<6>
+    - name: labelkey
+      value: labelvalue
+    resources:<7>
+      limits:
+        cpu: 100m
+        memory: 50Mi
+      requests:
+        cpu: 10m
+        memory: 10Mi
+  buildOverrides:<8>
+    imageLabels:<9>
+    - name: labelkey
+      value: labelvalue
+    nodeSelector:<10>
+      selectorkey: selectorvalue
+    tolerations:<11>
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/builds
+operator: Exists
+----
+<1> `Build`: 包含有关如何处理构建的集群范围内信息。规范且唯一有效的名称是 `cluster`。
+<2> `buildDefaults`: 控制构建的默认信息。
+<3> `defaultProxy`: 包含所有构建操作的默认代理设置，包括镜像拉取或推送以及源代码下载。
+<4> `env`: 一组应用到构建的默认环境变量，条件是构建中不存在指定的变量。
+<5> `gitProxy`: 仅包含 Git 操作的代理设置。如果设置，这将覆盖所有 Git 命令的任何代理设置，例如 `git clone`。
+<6> `imageLabels`: 应用到生成的镜像的标签列表。您可以通过在 `BuildConfig` 中提供具有相同名称的标签来覆盖默认标签。
+<7> `resources`: 定义执行构建的资源要求。
+<8> `buildOverrides`: 控制构建的覆盖设置。
+<9> `imageLabels`: 应用到生成的镜像的标签列表。如果您在 `BuildConfig` 中提供了与此表中名称相同的标签，您的标签将会被覆盖。
+<10> `nodeSelector`: 一个选择器，必须为 true 才能使构建 Pod 适合节点。
+<11> `tolerations`: 一个容忍度列表，覆盖构建 Pod 上设置的现有容忍度。

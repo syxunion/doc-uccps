@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="understanding-buildconfigs"]
+= 了解构建配置
+include::_attributes/common-attributes.adoc[]
+:context: understanding-builds
+
+toc::[]
+
+以下小节定义了构建、构建配置和可用的主要构建策略的概念。
+
+include::modules/builds-buildconfig.adoc[leveloffset=+1]

@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="creating-alert-routing-for-user-defined-projects_{context}"]
+= 为用户定义的项目创建警报路由
+ 
+[重要]
+====
+[subs="attributes+"]
+用户定义的项目的警报路由只是一个技术预览功能。技术预览功能可能并不完整。不推荐在生产环境中使用它们。这些技术预览功能可以使用户提早试用新的功能，并有机会在开发阶段提供反馈意见。
+====
+
+[role="_abstract"]
+如果您是一个带有 alert-routing-edit 角色的非管理员用户，您可以创建或编辑用户定义的项目的警报路由。
+
+.先决条件
+
+* 集群管理员为用户定义的项目启用了监控。
+* 集群管理员为用户定义的项目启用了警报路由。
+* 您以具有您要为其创建警报路由的项目的 `alert-routing-edit` 角色的用户身份登录。
+* 已安装 Uccps  CLI (`oc`).
+
+.流程
+
+. 创建用于警报路由的 YAML 文件。此流程中的示例使用名为  `example-app-alert-routing.yaml` 的文件。
+
+. 在文件中添加 `AlertmanagerConfig` YAML  定义。例如：
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: example-routing
+  namespace: ns1
+spec:
+  route:
+    receiver: default
+    groupBy: [job]
+  receivers:
+  - name: default
+    webhookConfigs:
+    - url: https://example.org/post
+----
++
+[注意]
+====
+对于用户定义的警报规则，用户定义的路由范围到定义资源的命名空间。例如，AlertmanagerConfig 对象中为命名空间 ns1 定义的路由配置仅适用于同一命名空间中的 `PrometheusRules` 资源。
+====
++
+. 保存这个文件。
+
+. 将资源应用到集群：
++
+[source,terminal]
+----
+$ oc apply -f example-app-alert-routing.yaml
+----
++
+配置会自动应用到 Alertmanager pod。

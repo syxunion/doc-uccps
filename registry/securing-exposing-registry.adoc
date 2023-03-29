@@ -1,0 +1,12 @@
+:_content-type: ASSEMBLY
+:context: securing-exposing-registry
+[id="securing-exposing-registry"]
+= 开放registry
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+默认情况下，统信容器云管理平台 registry在集群安装期间是加密的，它需要使用TLS进行访问。与早期版本的统信容器云管理平台不同，安装时registry不会向集群外部公开。
+
+include::modules/registry-exposing-default-registry-manually.adoc[leveloffset=+1]
+include::modules/registry-exposing-secure-registry-manually.adoc[leveloffset=+1]

@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/installing-ossm.adoc
+
+
+:_content-type: PROCEDURE
+[id="ossm-remove-cleanup_{context}"]
+= 清理 Operator 资源
+
+您可以使用  {SMProductName} 控制台手动删除  {product-title} 后保留的资源。
+
+.先决条件
+
+* 具有集群管理访问权限的帐户。
+* 访问 Uccps CLI (`oc`).
+
+.流程
+
+. 以集群管理员身份登录到 {product-title} CLI
+
+. 在卸载 Operators 后运行以下命令清理资源。如果您要在没有服务网格的情况下将分布式追踪平台用作独立服务，请不要删除 Jaeger 资源。
++
+[NOTE]
+====
+Uccps Elasticsearch Operator 默认安装在 `openshift-operators-uniontech` 中。其他 Operator 默认安装在 `openshift-operators` 命名空间中。如果在另一个命名空间中安装了 Operator，将 `openshift-operators` 替换为安装了 {SMProductName} Operator 的项目的名称。
+====
++
+[source,terminal]
+----
+$ oc delete validatingwebhookconfiguration/openshift-operators.servicemesh-resources.maistra.io
+----
++
+[source,terminal]
+----
+$ oc delete mutatingwebhookconfiguration/openshift-operators.servicemesh-resources.maistra.io
+----
++
+[source,terminal]
+----
+$ oc delete svc maistra-admission-controller -n openshift-operators
+----
++
+[source,terminal]
+----
+$ oc -n openshift-operators delete ds -lmaistra-version
+----
++
+[source,terminal]
+----
+$ oc delete clusterrole/istio-admin clusterrole/istio-cni clusterrolebinding/istio-cni
+----
++
+[source,terminal]
+----
+$ oc delete clusterrole istio-view istio-edit
+----
++
+[source,terminal]
+----
+$ oc delete clusterrole jaegers.jaegertracing.io-v1-admin jaegers.jaegertracing.io-v1-crdview jaegers.jaegertracing.io-v1-edit jaegers.jaegertracing.io-v1-view
+----
++
+[source,terminal]
+----
+$ oc get crds -o name | grep '.*\.istio\.io' | xargs -r -n 1 oc delete
+----
++
+[source,terminal]
+----
+$ oc get crds -o name | grep '.*\.maistra\.io' | xargs -r -n 1 oc delete
+----
++
+[source,terminal]
+----
+$ oc get crds -o name | grep '.*\.kiali\.io' | xargs -r -n 1 oc delete
+----
++
+[source,terminal]
+----
+$ oc delete crds jaegers.jaegertracing.io
+----
++
+[source,terminal]
+----
+$ oc delete cm -n openshift-operators maistra-operator-cabundle
+----
++
+[source,terminal]
+----
+$ oc delete cm -n openshift-operators istio-cni-config
+----
++
+[source,terminal]
+----
+$ oc delete sa -n openshift-operators istio-cni
+----

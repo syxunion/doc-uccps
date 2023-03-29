@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-access-build-logs_{context}"]
+= 访问构建日志
+
+您可以使用 Web 控制台或 CLI 访问构建日志。
+
+.流程
+
+* 要直接使用构建来流传输日志，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe build <build_name>
+----

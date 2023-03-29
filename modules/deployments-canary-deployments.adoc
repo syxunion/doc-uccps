@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+[id="deployments-canary-deployments_{context}"]
+= Canary 部署
+
+统信容器云管理平台 中的所有滚动部署都属于 Canary 部署；在替换所有旧实例前测试新的版本（Canary）。如果就绪度检查永不成功，则移除 Canary 实例，并且自动回滚 `部署配置`。
+
+就绪度检查是应用程序代码的一部分，并且可以尽可能的精密，确保新实例就绪可用。如果您必须对应用程序进行更复杂的检查（比如向新实例发送真实用户负载），请考虑实施自定义部署或使用蓝绿部署策略。

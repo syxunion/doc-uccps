@@ -1,0 +1,182 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="moving-monitoring-components-to-different-nodes_{context}"]
+= 将监控组件移到其他节点
+
+您可以将任何监控堆栈组件移到特定的节点。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件：*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在  `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑 `ConfigMap` 对象：
+** *要移动用于监控 统信容器云管理平台 核心项目的组件*:
+.. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+..在 `data/config.yaml`下为组件指定 `nodeSelector` 约束：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    <component>:
+      nodeSelector:
+        <node_key>: <node_value>
+        <node_key>: <node_value>
+        <...>
+----
++
+相应地替换 `<component>` ，并将 `<node_key>: <node_value>` 替换为用于指定目标节点组的键值对映射。通常只使用一个键值对。
++
+组件只能在以各个指定键值对作为标签的节点上运行。节点也可以有附加标签。
++
+[重要]
+====
+许多监控组件都通过在集群中的不同节点间使用多个 Pod 来部署，以维持高可用性。将监控组件移到带标签的节点时，确保有足够的匹配节点来保持组件的弹性。如果只指定了一个标签，请确保有足够的节点包含该标签，以便将该组件的所有 Pod 分布到不同的节点。另外，您还可以指定多个标签，每个都与单个节点相关。
+====
++
+[注意]
+====
+如果在配置 `nodeSelector` 约束后监控组件仍然处于 `Pending` 状态，请检查 Pod 日志中与污点和容限相关的错误。
+====
++
+F例如，要将 统信容器云管理平台 核心项目的监控组件移到带有 `nodename: controlplane1`, `nodename: worker1`, `nodename: worker2`, 和 `nodename: worker2` 标签的特定节点中，请使用：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusOperator:
+      nodeSelector:
+        nodename: controlplane1
+    prometheusK8s:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+    alertmanagerMain:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+    kubeStateMetrics:
+      nodeSelector:
+        nodename: worker1
+    grafana:
+      nodeSelector:
+        nodename: worker1
+    telemeterClient:
+      nodeSelector:
+        nodename: worker1
+    k8sPrometheusAdapter:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+    openshiftStateMetrics:
+      nodeSelector:
+        nodename: worker1
+    thanosQuerier:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+----
+
+** *要移动用于监控用户定义的项目的组件*:
+.. 在 `openshift-user-workload-monitoring` 项目中编辑  `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 在 `data/config.yaml`  下为组件指定  `nodeSelector` 约束：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    <component>:
+      nodeSelector:
+        <node_key>: <node_value>
+        <node_key>: <node_value>
+        <...>
+----
++
+相应地替换  `<component>` ，并将 `<node_key>: <node_value>` 替换为用于指定目标节点的键值对映射。通常只使用一个键值对。
++
+组件只能在以各个指定键值对作为标签的节点上运行。节点也可以有附加标签。
++
+[重要]
+====
+许多监控组件都通过在集群中的不同节点间使用多个 Pod 来部署，以维持高可用性。将监控组件移到带标签的节点时，确保有足够的匹配节点来保持组件的弹性。如果只指定了一个标签，请确保有足够的节点包含该标签，以便将该组件的所有 Pod 分布到不同的节点。另外，您还可以指定多个标签，每个都与单个节点相关。
+====
++
+[注意]
+====
+如果在配置 `nodeSelector` 约束后监控组件仍然处于 `Pending` 状态，请检查 Pod 日志中与污点和容限相关的错误。
+====
++
+例如，要将监控用户定义的项目的组件移到带有 `nodename: worker1`, `nodename: worker2`, 和 `nodename: worker2` 标签的特定 worker 节点，请使用：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheusOperator:
+      nodeSelector:
+        nodename: worker1
+    prometheus:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+    thanosRuler:
+      nodeSelector:
+        nodename: worker1
+        nodename: worker2
+----
+
+. 保存文件以使改变生效。受新配置影响的组件会自动移到新节点上。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到  `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

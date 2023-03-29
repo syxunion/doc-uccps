@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+[id="nfs-volume-security_{context}"]
+= NFS 卷安全
+
+这部分论述了 NFS 卷安全性，其中包括匹配的权限和 SELinux 考虑。用户需要了解 POSIX 权限、进程 UID 、supplemental 组和 SELinux 的基本知识。
+
+软件开发人员可以使用 PVC 名称，或直接在 Pod 定义中 volumes 部分使用 NFS 插件来请求 NFS 存储。
+
+NFS 服务器中的 `/etc/exports` 文件包含可访问的 NFS 目录。目标 NFS 目录有 POSIX 拥有者和组群 ID。统信容器云管理平台NFS 插件使用相同的 POSIX 所有者权限及在导出的 NFS 目录中找到的权限挂载容器的 NFS 目录。然而，容器实际运行时所使用的 UID 与 NFS 挂载的所有者的 UID 不同。这是所需的行为。
+
+例如，目标 NFS 目录在 NFS 服务器中，如下所示：
+
+[[nfs-export]]
+[source,terminal]
+----
+$ ls -lZ /opt/nfs -d
+----
+
+.输出示例
+[source,terminal]
+----
+drwxrws---. nfsnobody 5555 unconfined_u:object_r:usr_t:s0   /opt/nfs
+----
+[source,terminal]
+----
+$ id nfsnobody
+----
+.输出示例
+[source,terminal]
+----
+uid=65534(nfsnobody) gid=65534(nfsnobody) groups=65534(nfsnobody)
+----
+
+为了可以访问目录，容器必须匹配 SELinux 标签，并使用 UID `65534`、`nfsnobody` 的所有者，或其 supplemental 组的 `5555` 运行。
+
+[注意]
+====
+所有者 ID `65534` 只是一个示例。虽然 NFS 的 `root_squash` 把 `root`，`uid 0` 映射到 nfsnobody，uid `65534`，但 NFS 导出的所有者 ID 可能是任意值。NFS 导出的所有者不需要是 `65534` 。
+====

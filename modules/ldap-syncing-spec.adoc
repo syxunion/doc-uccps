@@ -1,0 +1,228 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+[id="ldap-syncing-spec_{context}"]
+= LDAP 同步配置规格
+
+配置文件的对象规格如下。请注意，不同的模式对象有不同的字段。例如，v1.ActiveDirectoryConfig 没有 groupsQuery 字段，而 v1.RFC2307Config 和 v1.AugmentedActiveDirectoryConfig 都有这个字段。
+
+[重要]
+====
+不支持二进制属性。所有来自 LDAP 服务器的属性数据都必须采用 UTF-8 编码字符串的格式。例如，切勿将 `对象GUID` 等二进制属性用作 ID 属性。您必须改为使用字符串属性，如 `sAMAccountName` 或 `userPrincipalName`。
+====
+
+[[sync-ldap-v1-ldapsyncconfig]]
+== v1.LDAPSyncConfig
+
+`LDAPSyncConfig` 包含定义 LDAP 组同步所需的配置选项。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`kind`
+|代表此对象所代表的 REST 资源的字符串值。服务器可以从客户端向其提交请求的端点推断。无法更新。采用驼峰拼写法 (CamelCase)。更多信息： link:https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#types-kinds[]
+|字符串
+
+|`apiVersion`
+|定义对象的此表示法的版本控制模式。服务器应该将识别的模式转换为最新的内部值，并可拒绝未识别的值。更多信息： link:https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#resources[]
+|字符串
+
+|`url`
+|主机是要连接到的 LDAP 服务器的方案、主机和端口： `scheme://host:port`
+|字符串
+
+|`bindDN`
+|要绑定到 LDAP 服务器的可选 DN。
+|字符串
+
+|`bindPassword`
+|在搜索阶段要绑定的可选密码。 |v1.字符串Source
+
+|`insecure`
+|若为 `true`，则表示连接不应使用 TLS。若为 false，则 `ldaps:// URL` 使用 TLS 进行连接，并且使用  link:https://tools.ietf.org/html/rfc2830[] 中指定的 StartTLS 将 `ldap:// URL` 升级为 TLS 连接。如果将 insecure 设为 true，则无法使用 `ldaps:// URL`。
+|布尔值
+
+|`ca`
+|在向服务器发出请求时使用的可选的可信证书颁发机构捆绑包。若为空，则使用默认的系统根证书。
+|字符串
+
+|`groupUIDNameMapping`
+|LDAP 组 UID 与统信容器云管理平台组名称的可选直接映射。
+|对象
+
+|`rfc2307`
+|包含用于从设置的 LDAP 服务器提取数据的配置，其格式类似于 RFC2307：第一类组和用户条目，以及由列出其成员的组条目的多值属性决定的组成员资格。
+|v1.RFC2307Config
+
+|`activeDirectory`
+|包含用于从设置的 LDAP 服务器提取数据的配置，其格式与 Active Directory 中使用的类似：第一类用户条目，以及由列出所在组的成员的多值属性决定的组成员资格。
+|v1.ActiveDirectoryConfig
+
+|`augmentedActiveDirectory`
+|包含用于从设置的 LDAP 服务器提取数据的配置，其格式与上面描述的 Active Directory 中使用的类似，再另加一项：有第一类组条目，它们用来保存元数据而非组成员资格。
+|v1.AugmentedActiveDirectoryConfig
+|===
+
+[[sync-ldap-v1-Stringsource]]
+== v1.StringSource
+
+`StringSource` 允许指定内联字符串，或通过环境变量或文件从外部指定。当它只包含一个字符串值时，它会编列为一个简单 JSON 字符串。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`value`
+|指定明文值，或指定加密值（如果指定了 `keyFile`）。
+|字符串
+
+|`env`
+|指定包含明文值或加密值（如果指定了 `keyFile`）的环境变量。
+|字符串
+
+|`file`
+|指定包含明文值或加密值（如果指定了 `keyFile`）的环境变量。
+|字符串
+
+|`keyFile`
+|引用包含用于解密值的密钥的文件。
+|字符串
+|===
+
+[[sync-ldap-v1-ldapquery]]
+== v1.LDAPQuery
+
+`LDAPQuery`  包含构建 LDAP 查询时所需的选项。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`baseDN`
+|所有搜索都应从中开始的目录分支的 DN。
+|字符串
+
+|`scope`
+|搜索的可选范围。可以是 base（仅基本对象）、one（基本级别上的所有对象）或 sub（整个子树）。若未设置，则默认为 sub。
+|字符串
+
+|`derefAliases`
+|与别名相关的可选搜索行为。可以是 `never`（从不解引用别名）、`search`（仅在搜索中解引用）、`base`（仅在查找基本对象时解引用）或 `always`（始终解引用）。若未设置，则默认为 `always`。
+|字符串
+
+|`timeout`
+|包含所有对服务器的请求在放弃等待响应前应保持待定的时间限制，以秒为单位。如果是 0，则不会实施客户端一侧的限制。
+|整数
+
+|`filter`
+|使用基本 DN 从 LDAP 服务器检索所有相关条目的有效 LDAP 搜索过滤器。
+|字符串
+
+|`pageSize`
+|最大首选页面大小，以 LDAP 条目数衡量。页面大小为 0 表示不进行分页。
+|整数
+|===
+
+[[sync-ldap-v1-rfc2307config]]
+== v1.RFC2307Config
+
+`RFC2307Config` 包含必要的配置选项，用于定义 LDAP 组同步如何使用 RFC2307 模式与 LDAP 服务器交互。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`groupsQuery`
+|包含用于返回组条目的 LDAP 查询模板。
+|v1.LDAPQuery
+
+|`groupUIDAttribute`
+|定义 LDAP 组条目上的哪个属性将解释为其唯一标识符。(`ldapGroupUID`)。
+|字符串
+
+|`groupNameAttributes`
+|定义 LDAP 组条目上的哪些属性将解释为用于统信容器云管理平台组的名称。
+|字符串 array
+
+|`groupMembershipAttributes`
+|定义 LDAP 组条目上哪些属性将解释为其成员。这些属性中包含的值必须可由 `UserUIDAttribute` 查询。
+|字符串 array
+
+|`usersQuery`
+|包含用于返回用户条目的 LDAP 查询模板。
+|v1.LDAPQuery
+
+|`userUIDAttribute`
+|定义 LDAP 用户条目上的哪个属性将解释为其唯一标识符。它必须与 `GroupMembershipAttributes` 中找到的值对应。
+|字符串
+
+|`userNameAttributes`
+|定义要使用 LDAP 用户条目上的哪些属性，以用作其统信容器云管理平台用户名。使用第一个带有非空值的属性。这应该与您的 `LDAPPasswordIdentityProvider` 的 `PreferredUsername` 设置匹配。统信容器云管理平台 组记录中用作用户名称的属性。多数安装中首选mail 或 `sAMAccountName`。
+|字符串数组
+
+|`tolerateMemberNotFoundErrors`
+|决定在遇到缺失的用户条目时 LDAP 同步任务的行为。若为 true，则容许找不到任何匹配项的 LDAP 用户查询，并且只记录错误。若为 false，则 LDAP 同步任务在用户查询找不到匹配项时将失败。默认值为 false。如果此标志设为 true，则配置错误的 LDAP 同步任务可导致组成员资格被移除，因此建议谨慎使用此标志。
+|布尔值
+
+|`tolerateMemberOutOfScopeErrors`
+|决定在遇到超出范围的用户条目时 LDAP 同步任务的行为。如果为 true，则容许超出为所有用户查询给定的基本 DN 范围的 LDAP 用户查询，并且仅记录错误。若为 false，则当用户查询在所有用户查询指定的基本 DN 范围外搜索时，LDAP 同步任务将失败。如果此标志设为 true，则配置错误的 LDAP 同步任务可导致组中缺少用户，因此建议谨慎使用此标志。
+|布尔值
+|===
+
+[[sync-ldap-v1-activedirectoryconfig]]
+== v1.ActiveDirectoryConfig
+
+`ActiveDirectoryConfig` 包含必要的配置选项，用于定义 LDAP 组同步如何使用 Active Directory 模式与 LDAP 服务器交互。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`usersQuery`
+|包含用于返回用户条目的 LDAP 查询模板。
+|v1.LDAPQuery
+
+|`userNameAttributes`
+|定义 LDAP 用户条目上的哪些属性将解释为其统信容器云管理平台用户名。统信容器云管理平台 组记录中用作用户名称的属性。多数安装中首选 `mail` 或 `sAMAccountName`。
+|字符串数组
+
+|`groupMembershipAttributes`
+|定义 LDAP 用户条目上的哪些属性将解释为它所属的组。
+|字符串数组
+|===
+
+[[sync-ldap-v1-augmentedactivedirectoryconfig]]
+== v1.AugmentedActiveDirectoryConfig
+
+`AugmentedActiveDirectoryConfig` 包含必要的配置选项，用于定义 LDAP 组同步如何使用增强 Active Directory 模式与 LDAP 服务器交互。
+
+[options="header"]
+|===
+|名称 |描述 |模式
+
+|`usersQuery`
+|包含用于返回用户条目的 LDAP 查询模板。
+|v1.LDAPQuery
+
+|`userNameAttributes`
+|定义 LDAP 用户条目上的哪些属性将解释为其统信容器云管理平台用户名。统信容器云管理平台 组记录中用作用户名称的属性。多数安装中首选`mail` 或 `sAMAccountName`。
+|字符串 array
+
+|`groupMembershipAttributes`
+|Defines which attributes on an LDAP user entry will be interpreted as the groups it is a member of.
+|字符串 array
+
+|`groupsQuery`
+|定义 LDAP 用户条目上的哪些属性将解释为它所属的组。
+|v1.LDAPQuery
+
+|`groupUIDAttribute`
+|定义 LDAP 组条目上的哪个属性将解释为其唯一标识符。(`ldapGroupUID`)。
+|字符串
+
+|`groupNameAttributes`
+|定义 LDAP 组条目上的哪些属性将解释为用于统信容器云管理平台组的名称。
+|字符串数组
+|===

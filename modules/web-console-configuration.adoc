@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * web_console/configuring-web-console.adoc
+
+[id="web-console-configuration_{context}"]
+= Configuring the web console
+
+您可以通过编辑 `console.config.openshift.io` 资源来配置Web控制台设置。
+
+* 编辑 `console.config.openshift.io` 资源：
++
+[source,terminal]
+----
+$ oc edit console.config.openshift.io cluster
+----
++
+以下是控制台的资源定义示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  authentication:
+    logoutRedirect: "" <1>
+status:
+  consoleURL: "" <2>
+----
+<1> 指定用户注销后，Web控制台要加载页面的URL。如果未指定，则用户将会返回到Web控制台的登录页面。通过指定 `logoutRedirect`  URL，用户可以使用身份供应商的单点注销（SLO）功能销毁其单点登录会话。
+<2> Web 控制台 URL。要将它更新为自定义值，请参阅 *自定义 Web 控制台 URL*。

@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-autoscaling-creating-web-console_{context}"]
+= 使用 Web 控制台创建 pod 横向自动扩展
+
+在 web 控制台中，您可以创建一个 pod 横向自动扩展(HPA)，用于指定要在 `Deployment` 或 `DeploymentConfig` 对象上运行的 pod 的最小和最大数量。您还可以定义 pod 的目标 CPU 或内存用量。
+
+[注意]
+====
+HPA 不能添加到作为 Operator 支持服务、Knative 服务或 Helm chart 一部分的部署中。
+====
+
+.流程
+
+在 web 控制台中创建 HPA：
+
+. 在 *拓扑* 视图中，点击节点公开侧面板。
+. 在 *Actions* 下拉列表中，选择 *Add HorizontalPodAutoscaler* 来打开 *Add HorizontalPodAutoscaler* 表单。
++
+. 在 *Add HorizontalPodAutoscaler* 表单中，定义名称、最小和最大 pod 限值、CPU 和内存用量，并点 *Save*.
++
+[注意]
+====
+如果缺少 CPU 和内存用量的值，则会显示警告。
+====
+
+在 web 控制台中编辑 HPA：
+
+. 在 *Topology* 视图中，点击节点公开侧面板。
+. 在 *Actions* 下拉列表中，选择 *Edit HorizontalPodAutoscaler* 来打开 *Edit Horizontal Pod Autoscaler* 表单。
+. 在 *Edit Horizontal Pod Autoscaler* 表单中，编辑最小和最大 pod 限值以及 CPU 和内存用量，然后点 *Save*.
+
+[注意]
+====
+在 web 控制台中创建或编辑 pod 横向自动扩展时，您可以从  *Form 视图* 切换到 *YAML 视图*.
+====
+
+在 web 控制台中删除 HPA：
+
+. 在 *Topology* 视图中，点击节点公开侧面板。
+. 在 *Actions* 下拉列表中，选择 *Remove HorizontalPodAutoscaler*.
+. 在确认弹出窗口中点击  *Remove* 删除 HPA。

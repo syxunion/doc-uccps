@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent_storage-csi.adoc
+
+[id="csi-driver-daemonset_{context}"]
+= CSI 驱动程序守护进程集
+
+CSI 驱动程序守护进程集在每个节点上运行一个 pod，它允许统信容器云管理平台挂载 CSI 驱动程序提供的存储，并使用它作为持久性卷 (PV) 的用户负载 (pod) 。安装了 CSI 驱动程序的 pod 包含以下容器：
+
+* 一个 CSI 驱动程序注册器，它会在节点上运行的 `openshift-node` 服务中注册 CSI 驱动程序。在节点上运行的 `openshift-node` 进程然后使用节点上可用的 UNIX 域套接字直接连接到 CSI 驱动程序。
+* 一个 CSI 驱动程序。
+
+在节点上部署的 CSI 驱动程序应该在存储后端中拥有尽量少的凭证。统信容器云管理平台只使用节点插件的 CSI 调用集合，如`NodePublish/NodeUnpublish` 和 `NodeStage/NodeUnstage` （如果这些调用已被实现）。

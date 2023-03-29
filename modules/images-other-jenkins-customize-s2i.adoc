@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-customize-s2i_{context}"]
+= 通过 Source-to-image 自定义 Jenkins 镜像
+
+要自定义官方 统信容器云管理平台 Jenkins 镜像，您可以使用该镜像作为 Source-to-image（S2I）构建程序。
+
+您可使用 S2I 来复制自定义 Jenkins 任务定义，添加其它插件，或使用您自己的自定义配置来替换所提供的 `config.xml` 文件。
+
+要在 Jenkins 镜像中包括您的修改，必须要有采用以下目录结构的 Git 存储库：
+
+`plugins`::
+该目录包含要复制到 Jenkins 中的二进制 Jenkins 插件。
+
+`plugins.txt`::
+该文件使用以下语法列出要安装的插件:
+
+----
+pluginId:pluginVersion
+----
+
+`configuration/jobs`::
+该目录包含 Jenkins 任务定义。
+
+`configuration/config.xml`::
+该文件包含您的自定义 Jenkins 配置。
+
+`configuration/` 目录的内容会被复制到 `/var/lib/jenkins/` 目录中，以便也可以包括其他文件，如 `credentials.xml`。
+
+.构建配置示例在 统信容器云管理平台 中自定义 Jenkins 镜像
+[source,yaml]
+----
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: custom-jenkins-build
+spec:
+  source:                       <1>
+    git:
+      uri: https://github.com/custom/repository
+    type: Git
+  strategy:                     <2>
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: jenkins:2
+        namespace: openshift
+    type: Source
+  output:                       <3>
+    to:
+      kind: ImageStreamTag
+      name: custom-jenkins:latest
+----
+
+<1> `source` 参数使用上述布局定义源 Git 存储库。
+<2> `strategy` 参数定义用作构建的源镜像的原始 Jenkins 镜像。
+<3> `output` 参数定义可用于部署配置的生成自定义 Jenkins 镜像，而非官方 Jenkins 镜像。

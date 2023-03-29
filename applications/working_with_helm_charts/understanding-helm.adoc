@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="understanding-helm"]
+= 了解 Helm
+include::_attributes/common-attributes.adoc[]
+:context: understanding-helm
+
+toc::[]
+
+[role="_abstract"]
+Helm 是一个软件包管理程序，它简化了应用程序和服务部署到 统信容器云管理平台 集群的过程。
+
+Helm 使用名为 charts 的打包格式。Helm chart 是描述 统信容器云管理平台 资源的一个文件集合。
+
+在集群中运行的一个 chart 实例被称为 release。当每次一个 chart 在集群中安装时，一个新的 release 会被创建。
+
+在每次安装 chart，或一个版本被升级或回滚时，都会创建增量修订版本。
+
+
+== 主要特性
+
+Helm 提供以下功能：
+
+* 搜索存储在 chart 存储库中的一个大型 chart 集合。
+* 修改现有 chart。
+* 使用 统信容器云管理平台 或 Kubernetes 资源创建自己的 chart。
+* 将应用程序打包为 chart 并共享。

@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/ephemeral-storage-csi-inline.adoc
+
+:_content-type: CONCEPT
+[id="ephemeral-storage-csi-inline-overview_{context}"]
+= CSI 内联临时卷概述
+
+通常，由 Container Storage Interface（CSI）驱动程序支持的卷只能用于 `PersistentVolume` 和 `PersistentVolumeClaim` 对象的组合。
+
+通过此功能，可以在 `Pod` 规格中直接指定 CSI 卷，而不是在 `PersistentVolume` 中指定。内联卷是临时的，在 pod 重启后不会保留。
+
+== 支持限制
+
+在默认情况下，统信容器云管理平台支持 CSI 内联临时卷，但有以下限制：
+
+* 仅支持 CSI 驱动程序。不支持 in-tree 和 FlexVolumes。
+* 共享资源 CSI 驱动程序支持内联临时卷作为技术预览功能。
+* 社区或存储供应商提供其他支持这些卷的 CSI 驱动程序。按照 CSI 驱动程序供应商提供的说明进行操作。
+
+CSI 驱动程序可能没有实现内联卷功能，包括 `Ephemera`l 能力。详情请查看 CSI 驱动程序文档。

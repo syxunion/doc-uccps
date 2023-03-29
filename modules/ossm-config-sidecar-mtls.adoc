@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-config.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-security-mtls-sidecars-incoming-services_{context}"]
+= Configuring sidecars for incoming connections for specific services
+
+您还可以通过创建策略为各个服务配置 mTLS。
+
+.流程
+
+. 使用以下示例创建 YAML 文件：
++
+.PeerAuthentication  策略示例 policy.yaml
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: <namespace>
+spec:
+  mtls:
+    mode: STRICT
+----
++
+.. 将 `<namespace>` 替换为该服务所在的命名空间。
+
+. 运行以下命令，在服务所在的命名空间中创建资源。它必须与您刚才创建的 Policy 资源中的 `namespace` 字段匹配。
++
+[source,terminal]
+----
+$ oc create -n <namespace> -f <policy.yaml>
+----
+
+[NOTE]
+====
+如果您不使用自动 mTLS，并且要将 PeerAuthentication 设置为 STRICT，则必须为您的服务创建一个 DestinationRule 资源.
+====

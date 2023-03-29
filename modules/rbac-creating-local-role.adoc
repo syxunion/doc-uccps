@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+
+[id="creating-local-role_{context}"]
+= 创建本地角色
+
+您可以为项目创建本地角色，然后将其绑定到用户。
+
+.流程
+
+. 要为项目创建本地角色，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create role <name> --verb=<verb> --resource=<resource> -n <project>
+----
++
+在此命令中，指定：
++
+--
+* `<name>`, 本地角色的名称
+* `<verb>`, 以逗号分隔的、应用到角色的操作动词列表
+* `<resource>`, 角色应用到的资源
+* `<project>`, 项目名称
+--
++
+例如，要创建一个本地角色来允许用户查看 `blue` 项目中的 Pod，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create role podview --verb=get --resource=pod -n blue
+----
+
+. 要将新角色绑定到用户，运行以下命令：
++
+[source,terminal]
+----
+$ oc adm policy add-role-to-user podview user2 --role-namespace=blue -n blue
+----
+

@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-setting-triggers_{context}"]
+= 设置部署触发器
+
+.流程
+
+. 您可以使用 `oc set triggers` 命令为 `部署配置` 设置部署触发器。例如，要设置镜像更改触发器，请使用以下命令：
++
+[source,terminal]
+----
+$ oc set triggers dc/<dc_name> \
+    --from-image=<project>/<image>:<tag> -c <container_name>
+----

@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="troubleshooting-monitoring-issues"]
+= 监控问题的故障排除
+include::_attributes/common-attributes.adoc[]
+:context: troubleshooting-monitoring-issues
+
+toc::[]
+
+// Investigating why user-defined metrics are unavailable
+include::modules/monitoring-investigating-why-user-defined-metrics-are-unavailable.adoc[leveloffset=+1]
+
+// Determining why Prometheus is consuming a lot of disk space
+include::modules/monitoring-determining-why-prometheus-is-consuming-disk-space.adoc[leveloffset=+1]
+

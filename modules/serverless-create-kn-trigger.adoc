@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-kn-trigger_{context}"]
+= 使用 Knative CLI 创建触发器
+
+使用 Knative (kn) CLI 创建触发器通过直接修改 YAML 文件，提供更精简且直观的用户界面。您可以使用 `kn trigger create` 命令创建触发器。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+* 已安装 Knative (`kn`) CLI.
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+* 创建触发器：
++
+[source,terminal]
+----
+$ kn trigger create <trigger_name> --broker <broker_name> --filter <key=value> --sink <sink_name>
+----
++
+或者，您可以创建触发器并使用代理注入同时创建 default 代理：
++
+[source,terminal]
+----
+$ kn trigger create <trigger_name> --inject-broker --filter <key=value> --sink <sink_name>
+----
++
+默认情况下，触发器会将发送到代理的所有事件转发到订阅到该代理的 sink。通过对触发器使用 `--filter` 属性，您可以从代理过滤事件，这样订阅者才会根据您定义的标准接收一小部分事件。

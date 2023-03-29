@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="cli-osdk-install"]
+= 安装 Operator SDK CLI
+include::_attributes/common-attributes.adoc[]
+:context: cli-osdk-install
+
+toc::[]
+
+Operator SDK 提供了一个命令行界面（CLI）工具，Operator 开发人员可使用它来构建、测试和部署 Operator。您可以在工作站上安装 Operator SDK CLI，以便准备开始编写自己的 Operator。
+
+具有集群管理员访问权限的 operator 作者（如 统信容器云管理平台）可以使用 Operator SDK CLI 根据 Go、Ansible 或 Helm 开发自己的 Operator。Kubebuilder 作为基于 Go 的 Operator 的构建解决方案嵌入到 Operator SDK 中，这意味着现有的 Kubebuilder 项目可以象 Operator SDK 一样使用并继续工作。
+
+如需有关 Operator SDK 的完整文档，请参阅 Operators。
+
+[注意]
+====
+统信容器云管理平台 4.9 及之后的版本支持 Operator SDK v1.16.0。
+====
+
+include::modules/osdk-installing-cli-linux-macos.adoc[leveloffset=+1]

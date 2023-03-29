@@ -1,0 +1,151 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-validating-smcp_{context}"]
+= Validating the Service Mesh control plane installation
+
+在创建 {SMProductShortName} control plane时，Service Mesh Operator 使用您在 `ServiceMeshControlPlane` 资源文件中指定的参数进行以下操作：
+
+* 创建 Istio 组件并部署以下 pod：
+** `istiod`
+** `istio-ingressgateway`
+** `istio-egressgateway`
+** `grafana`
+** `prometheus`
+* 调用 Kiali Operator 根据 SMCP 或 Kiali 自定义资源中的配置创建 Kaili 部署。
++
+[NOTE]
+====
+您可以查看 Kiali Operator 中的 Kiali 组件，而不是 Service Mesh Operator。
+====
++
+* 调用 {JaegerName} Operator ，以根据 SMCP 或 Jaeger 自定义资源中的配置创建分布式追踪平台组件。
++
+[NOTE]
+====
+您可以在 {JaegerName} Operator  和 Elasticsearch Operator 下的  Elasticsearch 组件中查看 Jaeger 组件，而不是 Service Mesh Operator。
+====
++
+.通过{product-title}  控制台
+
+您可以在 {product-title} 控制台中验证 {SMProductShortName} 安装。
+
+. 导航到  *Operators* -> *安装的 Operators*.
+. 选择 `<istio-system>` 命名空间。
+. 选择  {SMProductName} Operator.
+.. 点 *Istio Service Mesh Control Plane* 标签页。
+.. 点  control plane 的名称，例如 `basic`.
+.. 若要查看部署所创建的资源，可单击 *Resources* 选项卡。您可以使用过滤器来缩小您的视图，例如，检查所有 *Pods* 的状态是否为 `running`.
+.. 如果 SMCP 状态指示任何问题，请检查 YAML 文件中的 `status:` 输出以了解更多信息。
+.. 返回到 *Operators* -> *安装的 Operators*.
+
+. 选择 Uccps Elasticsearch Operator。
+.. 点 *Elasticsearch* 标签页。
+.. 点 部署的名称，如  `elasticsearch`.
+.. 若要查看部署创建的资源，请点 *Resources* 选项卡。
+.. 如果状态 `Status` c状态列有任何问题，请检查  *YAML* 选项卡中的 `status:` 输出以了解更多信息。
+.. 返回到  *Operators* -> *安装的Operators*.
+
+. 选择  {JaegerName} Operator.
+.. 点 *Jaeger* 标签页。
+.. 点 部署的名称，如 `jaeger`.
+.. 若要查看部署所创建的资源，可单击 *Resources* 选项卡。
+.. 如果 `Status` 列显示任何问题，请检查 *YAML* 选项卡中的 `status:` 输出以了解更多信息。
+.. 导航到 *Operators* -> *安装的 Operators*.
+
+. 选择 Kiali Operator。
+.. 点 *Istio Service Mesh Control Plane* 标签页。
+.. 点 部署的名称，如 `kiali`.
+.. 若要查看部署所创建的资源，可单击 *Resources* 选项卡。
+.. 如果 `Status` 列显示任何问题，请检查 *YAML* 选项卡中的 `status:` 输出以了解更多信息。
+
+.从命令行
+
+. 运行以下命令，以查看 Service Mesh control plane pod 是否可用并正在运行，其中 `istio-system` 是安装 SMCP 的命名空间。
++
+[source,terminal]
+----
+$ oc get pods -n istio-system
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                   READY   STATUS    RESTARTS   AGE
+grafana-6776785cfc-6fz7t               2/2     Running   0          102s
+istio-egressgateway-5f49dd99-l9ppq     1/1     Running   0          103s
+istio-ingressgateway-6dc885c48-jjd8r   1/1     Running   0          103s
+istiod-basic-6c9cc55998-wg4zq          1/1     Running   0          2m14s
+jaeger-6865d5d8bf-zrfss                2/2     Running   0          100s
+kiali-579799fbb7-8mwc8                 1/1     Running   0          46s
+prometheus-5c579dfb-6qhjk              2/2     Running   0          115s
+----
++
+. 使用以下命令检查 Service Mesh control plane 部署的状态。使用部署 SMCP 的命名空间替换  `istio-system` 。
++
+[source,terminal]
+----
+$ oc get smcp -n <istio-system>
+----
++
+当 STATUS 列是 `ComponentsReady` 时，安装成功完成。
++
+.输出示例
+[source,terminal]
+----
+NAME    READY   STATUS            PROFILES      VERSION   AGE
+basic   10/10   ComponentsReady   ["default"]   2.1.3     4m2s
+----
+
++
+如果修改并重新部署了 Service Mesh control plane，其状态应该会显示 `UpdateSuccessful` 。
++
+.输出示例
+[source,terminal]
+----
+NAME            READY     STATUS             TEMPLATE   VERSION   AGE
+basic-install   10/10     UpdateSuccessful   default     v1.1     3d16h
+----
++
+. 如果 SMCP 状态指示了 `ComponentsReady` 以外的任何内容，请检查 SCMP 资源中的 `status:` 输出以获取更多信息。
++
+[source,terminal]
+----
+$ oc describe smcp <smcp-name> -n <controlplane-namespace>
+----
++
+.输出示例
++
+[source,terminal]
+----
+$ oc describe smcp basic -n istio-system
+----
++
+. 使用以下命令检查 Jaeger 部署的状态，其中 `istio-system` 是部署 SMCP 的命名空间。
++
+[source,terminal]
+----
+$ oc get jaeger -n <istio-system>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     STATUS    VERSION   STRATEGY   STORAGE   AGE
+jaeger   Running   1.30.0    allinone   memory    15m
+----
++
+. 使用以下命令检查 Kiali 部署的状态，其中 `istio-system` 是部署 SMCP 的命名空间。
++
+[source,terminal]
+----
+$ oc get kiali -n <istio-system>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME    AGE
+kiali   15m
+----

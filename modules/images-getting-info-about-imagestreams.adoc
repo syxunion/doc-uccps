@@ -1,0 +1,82 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+:_content-type: PROCEDURE
+[id="images-getting-info-about-imagestreams_{context}"]
+= 获取有关镜像流的信息
+
+您可获取有关镜像流的常规信息及其指向的所有标签的详细信息。
+
+.流程
+
+* 获取有关镜像流的常规信息及其指向的所有标签的详细信息：
++
+[source,terminal]
+----
+$ oc describe is/<image-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe is/python
+----
++
+.输出示例
+[source,terminal]
+----
+Name:			python
+Namespace:		default
+Created:		About a minute ago
+Labels:			<none>
+Annotations:		openshift.io/image.dockerRepositoryCheck=2017-10-02T17:05:11Z
+Docker Pull Spec:	docker-registry.default.svc:5000/default/python
+Image Lookup:		local=false
+Unique Images:		1
+Tags:			1
+
+3.5
+  tagged from centos/python-35-centos7
+
+  * centos/python-35-centos7@sha256:49c18358df82f4577386404991c51a9559f243e0b1bdc366df25
+      About a minute ago
+----
+
+* 获取有关特定镜像流标签的所有可用信息：
++
+[source,terminal]
+----
+$ oc describe istag/<image-stream>:<tag-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe istag/python:latest
+----
++
+.输出示例
+[source,terminal]
+----
+Image Name:	sha256:49c18358df82f4577386404991c51a9559f243e0b1bdc366df25
+Docker Image:	centos/python-35-centos7@sha256:49c18358df82f4577386404991c51a9559f243e0b1bdc366df25
+Name:		sha256:49c18358df82f4577386404991c51a9559f243e0b1bdc366df25
+Created:	2 minutes ago
+Image Size:	251.2 MB (first layer 2.898 MB, last binary layer 72.26 MB)
+Image Created:	2 weeks ago
+Author:		<none>
+Arch:		amd64
+Entrypoint:	container-entrypoint
+Command:	/bin/sh -c $STI_SCRIPTS_PATH/usage
+Working Dir:	/opt/app-root/src
+User:		1001
+Exposes Ports:	8080/tcp
+Docker Labels:	build-date=20170801
+----
+
+[注意]
+====
+输出的信息多于显示的信息。
+====

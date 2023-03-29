@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-troubleshooting-operators_{context}"]
+= Troubleshooting service mesh Operators
+
+如果遇到 Operator 问题：
+
+* 验证 Operator 订阅状态。
+* 验证您安装的 Operator 是受支持的统信版本。
+* 验证您有 `cluster-admin` 角色来安装 {SMProductName}.
+* 检查 Operator pod 日志中是否存在与安装 Operator 相关的问题。
+
+[NOTE]
+====
+您只能通过 OpenShift 控制台安装 Operator，无法从命令行访问 OperatorHub。
+====
+
+== 查看 Operator pod 日志
+
+您可以使用 `oc logs` 命令查看 Operator 日志。红帽可能会要求提供日志来帮助解决支持问题单。
+
+.流程
+
+* 要查看 Operator pod 日志，请输入以下命令：
++
+[source,terminal]
+----
+$ oc logs -n openshift-operators <podName>
+----
++
+例如，
++
+[source,terminal]
+----
+$ oc logs -n openshift-operators istio-operator-bb49787db-zgr87
+----
+
+//If your pod fails to start, you may need to use the `--previous` option to see the logs of the last attempt.

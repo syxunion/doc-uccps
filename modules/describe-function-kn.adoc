@@ -1,0 +1,35 @@
+:_content-type: PROCEDURE
+[id="describe-function-kn_{context}"]
+= Describing a function
+
+`kn func info` 命令输出有关已部署功能的信息，如功能名称、镜像、命名空间、Knative 服务信息、路由信息和事件订阅。
+
+.流程
+
+* 描述函数：
++
+[source,termnal]
+----
+$ kn func info [-f <format> -n <namespace> -p <path>]
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn func info -p function/example-function
+----
++
+.输出示例
+[source,terminal]
+----
+Function name:
+  example-function
+Function is built in image:
+  docker.io/user/example-function:latest
+Function is deployed as Knative Service:
+  example-function
+Function is deployed in namespace:
+  default
+Routes:
+  http://example-function.default.apps.ci-ln-g9f36hb-d5d6b.origin-ci-int-aws.dev.rhcloud.com
+----

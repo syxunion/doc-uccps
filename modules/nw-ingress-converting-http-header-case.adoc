@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * ingress/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-converting-http-header-case_{context}"]
+= 转换 HTTP 标头的大小写
+
+默认情况下，`HAProxy 2.2` 使用小写的 HTTP 标头名称，例如，会将 `Host: xyz.com` 更改为 `host: xyz.com`。如果旧应用程序对 HTTP 标头名称中使用大小写敏感，请使用 Ingress Controller `spec.httpHeaders.headerNameCaseAdjustments` API 字段进行调整来适应旧的应用程序，直到它们被改变。
+
+[重要]
+====
+由于 统信容器云管理平台 1.2 包含 HAProxy 2.2，因此请确保在升级前使用 `spec.httpHeaders.headerNameCaseAdjustments` 添加必要的配置。
+====
+
+.先决条件
+
+* 已安装 Uccp CLI(oc)。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+作为集群管理员，您可以使用 `oc patch` 命令，或设置 Ingress Controller YAML 文件中的 `HeaderNameCaseAdjustments` 字段来转换 HTTP 标头的大小写。
+
+* 使用 `oc patch` 命令设置一个 HTTP 标头的大小写情况。
+
+. 输入 `oc patch` 命令将 HTTP `host` 标头改为 `Host`：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontrollers/default --type=merge --patch='{"spec":{"httpHeaders":{"headerNameCaseAdjustments":["Host"]}}}'
+----
++
+. 输入 `oc patch` 命令将 HTTP `host` 标头改为 `Host`：
++
+[source,terminal]
+----
+$ oc annotate routes/my-application haproxy.router.openshift.io/h1-adjust-case=true
+----
++
+然后，Ingress Controller 会根据指定调整 host 请求标头。
+
+//Extra example if needed
+////
+* This example changes the HTTP `cache-control` header to `Cache-Control`:
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontrollers/default --type=json --patch='[{"op":"add","path":"/spec/httpHeaders/headerNameCaseAdjustments/-","value":"Cache-Control"}]'
+----
++
+The Ingress Controller adjusts the `cache-control` response header as specified.
+////
+
+* 通过配置 Ingress Controller YAML 文件，使用 `HeaderNameCaseAdjustments` 字段指定调整。
+
+. 以下 Ingress Controller YAML 示例将 HTTP/1 请求的 host 标头调整为 Host，以便可以适当地注解路由：
++
+.Ingress Controller YAML 示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  httpHeaders:
+    headerNameCaseAdjustments:
+    - Host
+----
++
+. Ingress Controller YAML 示例
++
+.路由 YAML 示例
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/h1-adjust-case: true <1>
+  name: my-application
+  namespace: my-application
+spec:
+  to:
+    kind: Service
+    name: my-application
+----
+<1> 将 `haproxy.router.openshift.io/h1-adjust-case` 设置为 true。

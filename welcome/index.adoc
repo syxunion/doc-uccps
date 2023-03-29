@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="welcome-index"]
+= 统信容器云管理平台 v1.2 文档
+include::_attributes/common-attributes.adoc[]
+:context: welcome-index
+
+[.lead]
+欢迎阅读 *统信容器云管理平台官方文档 V1.2* 在这里您可以了解统信容器云管理平台并开始探索其特性。
+
+
+要浏览 统信容器云管理平台官方文档 V1.2，可以:
+
+* 使用左侧导航栏浏览文档。

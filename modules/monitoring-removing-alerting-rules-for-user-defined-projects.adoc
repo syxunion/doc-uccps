@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="removing-alerting-rules-for-user-defined-projects_{context}"]
+= 为用户定义的项目删除警报规则
+
+您可以为用户定义的项目删除警报规则。
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 对于您要创建警报规则的项目，您已作为具有 `monitoring-rules-edit` 角色的用户登录。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+* 要删除 `<namespace>` 中的规则 `<foo>`，请运行以下命令：
++
+[source,terminal]
+----
+$ oc -n <namespace> delete prometheusrule <foo>
+----

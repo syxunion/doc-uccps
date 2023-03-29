@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="ossm-production"]
+= Configuring Service Mesh for production
+include::_attributes/common-attributes.adoc[]
+:context: ossm-architecture
+toc::[]
+
+当您准备从基本安装迁移到生产环境时，您必须配置 control plane、追踪和安全证书以满足生产要求。
+
+.Prerequisites
+
+* 安装和配置 {SMProductName}.
+* 在暂存环境中测试您的配置。
+
+include::modules/ossm-smcp-prod.adoc[leveloffset=+1]

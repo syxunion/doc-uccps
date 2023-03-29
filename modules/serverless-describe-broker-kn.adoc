@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-using-brokers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-describe-broker-kn_{context}"]
+= 使用 Knative CLI 描述现有代理
+
+使用 Knative (kn) 描述代理提供了精简且直观的用户界面。您可以使用 `kn broker describe` 命令通过 Knative CLI 输出集群中现有代理的信息。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+* 已安装 Knative(`kn`) CLI.
+
+.流程
+
+* 描述现有代理：
++
+[source,terminal]
+----
+$ kn broker describe <broker_name>
+----
++
+.使用 default broker 的命令示例
+[source,terminal]
+----
+$ kn broker describe default
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         default
+Namespace:    default
+Annotations:  eventing.knative.dev/broker.class=MTChannelBasedBroker, eventing.knative.dev/creato ...
+Age:          22s
+
+Address:
+  URL:    http://broker-ingress.knative-eventing.svc.cluster.local/default/default
+
+Conditions:
+  OK TYPE                   AGE REASON
+  ++ Ready                  22s
+  ++ Addressable            22s
+  ++ FilterReady            22s
+  ++ IngressReady           22s
+  ++ TriggerChannelReady    22s
+----

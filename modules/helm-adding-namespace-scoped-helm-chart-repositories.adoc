@@ -1,0 +1,89 @@
+// Module included in the following assemblies:
+//
+// * applications/working_with_helm_charts/configuring-custom-helm-chart-repositories.adoc
+
+:_content-type: PROCEDURE
+[id="adding-namespace-scoped-helm-chart-repositories.adoc_{context}"]
+= 添加命名空间范围的自定义 Helm Chart 仓库
+
+[role="_abstract"]
+Helm 仓库的集群范围的 `HelmChartRepository` 自定义资源定义(CRD)可帮助管理员将 Helm 仓库添加为自定义资源。命名空间范围的 `ProjectHelmChartRepository` CRD 允许具有适当基于角色的访问控制(RBAC)权限的项目成员创建其所选 Helm 仓库资源，但仅限于其命名空间。此项目成员可从集群范围和命名空间范围 Helm 仓库资源中看到 chart。
+
+[注意]
+====
+* 管理员可以限制用户创建命名空间范围的 Helm 仓库资源。通过限制用户，管理员具有通过命名空间角色而不是集群角色来控制 RBAC 的灵活性。这可避免用户不必要的权限，并防止访问未经授权的服务或应用程序。
+* 添加命名空间范围的 Helm 仓库不会影响现有集群范围的 Helm 仓库的行为。
+====
+
+作为具有适当 RBAC 权限的普通用户或项目成员，您可以在集群中添加自定义命名空间范围的 Helm Chart 仓库，并在 *开发者目录* 中启用这些仓库中的 Helm chart 访问 Helm chart。
+
+.流程
+
+. 要添加新的命名空间范围的 Helm Chart 仓库，您必须将 Helm Chart 仓库自定义资源(CR)添加到命名空间中。
++
+.命名空间范围的 Helm Chart 仓库 CR 示例
+
+[source,yaml]
+----
+apiVersion: helm.openshift.io/v1beta1
+kind: ProjectHelmChartRepository
+metadata:
+  name: <name>
+spec:
+  url: https://my.chart-repo.org/stable
+
+  # optional name that might be used by console
+  name: <chart-repo-display-name>
+
+  # optional and only needed for UI purposes
+  description: <My private chart repo>
+
+  # required: chart repository URL
+  connectionConfig:
+    url: <helm-chart-repository-url>
+----
++
+例如，要将 Azure 示例 chart 存储库添加到 `my-namespace` 命名空间，请运行：
++
+[source,terminal]
+----
+$ cat <<EOF | oc apply --namespace my-namespace -f -
+apiVersion: helm.openshift.io/v1beta1
+kind: ProjectHelmChartRepository
+metadata:
+  name: azure-sample-repo
+spec:
+  name: azure-sample-repo
+  connectionConfig:
+    url: https://raw.githubusercontent.com/Azure-Samples/helm-charts/master/docs
+EOF
+----
++
+检查输出来验证是否创建了命名空间范围的 Helm Chart Repository 
++
+.输出示例
+----
+projecthelmchartrepository.helm.openshift.io/azure-sample-repo created
+----
+
+. 导航到 web 控制台中的 *开发者目录* ，以验证 `my-namespace` 命名空间中是否显示了来自 Chart 仓库的 Helm chart。
++
+例如，使用 *Chart 仓库* 过滤器从仓库搜索 Helm chart。
++
+或者，运行：
++
+[source,terminal]
+----
+$ oc get projecthelmchartrepositories --namespace my-namespace
+----
++
+.输出示例
+----
+NAME                     AGE
+azure-sample-repo        1m
+----
++
+[注意]
+====
+如果集群管理员或具有适当 RBAC 权限的常规用户删除特定命名空间中的所有 chart 存储库，那么您无法查看 *+添加* 视图、*开发者目录* 以及用于该特定命名空间的左侧导航面板中的 Helm 选项。
+====

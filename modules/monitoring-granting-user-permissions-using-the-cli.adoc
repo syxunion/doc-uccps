@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="granting-user-permissions-using-the-cli_{context}"]
+= 使用 CLI 授予用户权限
+
+您可以使用 Uccps CLI (`oc`) 授予用户权限来监控其自己的项目。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 要将角色分配到的用户帐户已存在。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+* 为项目的用户分配一个监控角色：
++
+[source,terminal]
+----
+$ oc policy add-role-to-user <role> <user> -n <namespace> <1>
+----
+<1> 将 `<role>` 替换为 `monitoring-rules-view`, `monitoring-rules-edit`, 或 `monitoring-edit`.
++
+[重要]
+====
+无论您选择什么角色，必须以集群管理员的身份将其与特定项目进行绑定。
+====
++
+例如，将  `<role>` 替换为 `monitoring-edit`, `<user>`  替换为 `johnsmith`, and `<namespace>` 替换为 `ns1`。这会为用户 `johnsmith` 分配在 `ns1` 命名空间内设置指标数据收集以及创建警报规则的权限。

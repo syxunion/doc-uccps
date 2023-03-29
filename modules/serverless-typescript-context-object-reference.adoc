@@ -1,0 +1,153 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-reference-guide.adoc
+
+:_content-type: REFERENCE
+[id="serverless-typescript-context-object-reference_{context}"]
+= TypeScript 上下文对象引用
+
+该 上下文 对象具有多个属性，可供函数开发人员访问。访问这些属性可提供有关传入 HTTP 请求的信息，并将输出写入集群日志。0
+
+[id="serverless-typescript-context-object-reference-log_{context}"]
+== log
+
+提供一个日志记录对象，可用于将输出写入集群日志。日志遵循 Pino 日志记录 API。
+
+.日志示例
+[source,javascript]
+----
+export function handle(context: Context): string {
+    // log the incoming request body's 'hello' parameter
+    if (context.body) {
+      context.log.info((context.body as Record<string, string>).hello);
+    } else {
+      context.log.info('No data received');
+    }
+    return 'OK';
+}
+----
+
+您可以使用 `kn func invoke` 命令访问功能：
+
+.示例命令
+[source,terminal]
+----
+$ kn func invoke --target 'http://example.function.com'
+----
+
+.输出示例
+[source,terminal]
+----
+{"level":30,"time":1604511655265,"pid":3430203,"hostname":"localhost.localdomain","reqId":1,"msg":"Processing customer"}
+----
+
+您可以将日志级别更改为 `fatal`, `error`, `warn`, `info`, `debug`, `trace`, 或 `silent` 之一。为此，请使用 `config` 命令将其中的一个值分配给环境变量 `FUNC_LOG_LEVEL` ，以更改 `logLevel` 的值
+
+[id="serverless-typescript-context-object-reference-query_{context}"]
+== query
+
+返回请求的查询字符串（如果有），作为键值对。这些属性也可在上下文对象本身中找到。
+
+.查询示例
+[source,javascript]
+----
+export function handle(context: Context): string {
+      // log the 'name' query parameter
+    if (context.query) {
+      context.log.info((context.query as Record<string, string>).name);
+    } else {
+      context.log.info('No data received');
+    }
+    return 'OK';
+}
+
+----
+
+您可以使用 `kn func invoke` 命令访问功能：
+
+.示例命令
+[source,terminal]
+----
+$ kn func invoke --target 'http://example.function.com' --data '{"name": "tiger"}'
+----
+
+.输出示例
+[source,terminal]
+----
+{"level":30,"time":1604511655265,"pid":3430203,"hostname":"localhost.localdomain","reqId":1,"msg":"tiger"}
+{"level":30,"time":1604511655265,"pid":3430203,"hostname":"localhost.localdomain","reqId":1,"msg":"tiger"}
+----
+
+[id="serverless-typescript-context-object-reference-body_{context}"]
+== 正文（body）
+
+返回请求正文（如果有）。如果请求正文包含 JSON 代码，这将会进行解析，以便属性可以直接可用。
+
+.body 示例
+[source,javascript]
+----
+export function handle(context: Context): string {
+    // log the incoming request body's 'hello' parameter
+    if (context.body) {
+      context.log.info((context.body as Record<string, string>).hello);
+    } else {
+      context.log.info('No data received');
+    }
+    return 'OK';
+}
+----
+
+您可以使用 `kn func invoke`  命令访问功能：
+
+.示例命令
+[source,terminal]
+----
+$ kn func invoke --target 'http://example.function.com' --data '{"hello": "world"}'
+----
+
+.输出示例
+[source,terminal]
+----
+{"level":30,"time":1604511655265,"pid":3430203,"hostname":"localhost.localdomain","reqId":1,"msg":"world"}
+----
+
+[id="serverless-typescript-context-object-reference-headers_{context}"]
+== 标头
+
+将 HTTP 请求标头返回为对象。
+
+.标头示例
+[source,javascript]
+----
+export function handle(context: Context): string {
+    // log the incoming request body's 'hello' parameter
+    if (context.body) {
+      context.log.info((context.headers as Record<string, string>)['custom-header']);
+    } else {
+      context.log.info('No data received');
+    }
+    return 'OK';
+}
+----
+
+您可以使用 `curl`命令调用该函数：
+
+.示例命令
+[source,terminal]
+----
+$ curl -H'x-custom-header: some-value’' http://example.function.com
+----
+
+.输出示例
+[source,terminal]
+----
+{"level":30,"time":1604511655265,"pid":3430203,"hostname":"localhost.localdomain","reqId":1,"msg":"some-value"}
+----
+
+[id="serverless-typescript-context-object-reference-http-requests_{context}"]
+== HTTP 请求
+
+方法:: 以字符串形式返回 HTTP 请求方法。
+httpVersion:: 以字符串形式返回 HTTP 版本。
+httpVersionMajor:: 将 HTTP 主版本号返回为字符串。
+httpVersionMinor:: 以字符串形式返回 HTTP 次要版本号。

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+// * assembly/openshift_images/managing-image-streams.adoc
+
+:_content-type: PROCEDURE
+[id="images-imagestream-import-images-private-registry_{context}"]
+= 从私有容器镜像仓库（registry）导入镜像和镜像流
+
+镜像流可以被配置为从需要身份验证的私有镜像仓库中导入标签和镜像元数据。如果您将 Cluster Samples Operator 用来拉取内容的位置改为 registry.redhat.io 以外的位置，则适用这个过程。
+
+[注意]
+====
+从不安全或安全容器镜像仓库导入时，secret 中定义的容器镜像仓库 URL 必须包含 :80 端口后缀，或在尝试从容器仓库仓库导入时不使用 secret。
+====
+
+.流程
+
+. 您必须通过输入以下命令来创建一个用于存储凭证的 `secret` 对象：
++
+[source,terminal]
+----
+$ oc create secret generic <secret_name> --from-file=.dockerconfigjson=<file_absolute_path> --type=kubernetes.io/dockerconfigjson
+----
++
+. 配置 secret 后，请创建新镜像流或输入 oc import-image 命令：
++
+[source,terminal]
+----
+$ oc import-image <imagestreamtag> --from=<image> --confirm
+----
++
+在导入过程中，统信容器云管理平台 会提取 secret，并将其提供给远程方。

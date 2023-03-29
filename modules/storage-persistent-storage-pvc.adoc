@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * storage/understanding-persistent-storage.adoc
+
+[id="persistent-volume-claims_{context}"]
+= 持久性卷声明 (PVC)
+
+每个 `PersistentVolumeClaim` 对象都会包括一个 `spec` 和 `status`，它们分别代表了声明的规格和状态。例如：
+
+.`PersistentVolumeClaim` 对象定义示例
+[source,yaml]
+----
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: myclaim <1>
+spec:
+  accessModes:
+    - ReadWriteOnce <2>
+  resources:
+    requests:
+      storage: 8Gi <3>
+  storageClassName: gold <4>
+status:
+  ...
+----
+<1> PVC 名称
+<2> 访问模式，用来指定读写权限及挂载权限。
+<3> PVC 可用的存储量
+<4> 声明所需的 `StorageClass` 的名称
+
+[id="pvc-storage-class_{context}"]
+== 存储类
+
+另外，通过在 `storageClassName` 属性中指定存储类的名称，声明可以请求一个特定的存储类。只有具有请求的类的 PV（ `storageClassName` 的值与 PVC 中的值相同）才会与 PVC 绑定。集群管理员可配置动态置备程序为一个或多个存储类提供服务。集群管理员可根据需要创建与 PVC 的规格匹配的 PV。
+
+
+[重要]
+====
+根据使用的平台，Cluster Storage Operator 可能会安装一个默认的存储类。这个存储类由 Operator 拥有和控制。不能在定义注解和标签之外将其删除或修改。如果需要实现不同的行为，则必须定义自定义存储类。
+====
+
+集群管理员也可以为所有 PVC 设置默认存储类。当配置了默认存储类时， PVC 必须明确要求将存储类 `StorageClass` 或 `storageClassName` 设为 ""， 以便绑定到没有存储类的 PV。
+
+[注意]
+====
+如果一个以上的存储类被标记为默认，则只能在 `storageClassName` 被显式指定时才能创建 PVC。因此，应只有一个存储类被设置为默认值。
+====
+
+[id="pvc-access-modes_{context}"]
+== 访问模式
+
+声明在请求带有特定访问权限的存储时，使用与卷相同的格式。
+
+[id="pvc-resources_{context}"]
+== Resources
+
+像 pod 一样，声明可以请求具体数量的资源。在这种情况下，请求用于存储。同样的资源模型适用于卷和声明。
+
+[id="pvc-claims-as-volumes_{context}"]
+== 声明作为卷
+
+pod 通过将声明作为卷来访问存储。在使用声明时，声明需要和 pod 位于同一个命名空间。集群在 pod 的命名空间中找到声明，并使用它来使用这个声明后台的 `PersistentVolume`。卷被挂载到主机和 pod 中，例如：
+
+.挂载卷到主机和 pod 示例
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: dockerfile/nginx
+      volumeMounts:
+      - mountPath: "/var/www/html" <1>
+        name: mypd <2>
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim <3>
+----
+<1> 在 pod 中挂载卷的路径。
+<2> 要挂载的卷的名称。不要挂载到容器 root、`/` 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统（如主机的 `/dev/pts` 文件）。使用 /host 挂载主机是安全的。
+<3> 要使用的 PVC 名称（存在于同一命名空间中）。

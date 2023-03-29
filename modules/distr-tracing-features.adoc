@@ -1,0 +1,18 @@
+////
+This module included in the following assemblies:
+-service_mesh/v2x/ossm-architecture.adoc
+-dist_tracing_arch/distr-tracing-architecture.adoc
+////
+
+[id="distr-tracing-features_{context}"]
+= {DTProductName} 功能
+
+{DTProductName} 提供了一下的功能：
+
+* 与 Kiali 集成 – 当正确配置时，您可以从 Kiali 控制台查看分布式追踪数据。
+
+* 高可伸缩性 – {DTShortName} 后端设计具有单一故障点，而且能够按照业务需求进行扩展。
+
+* 分布式上下文发布 – 允许您通过不同的组件连接数据以创建完整的端到端的 trace。
+
+* 与 Zipkin 的后向兼容性 – {DTProductName} 有 API，它能将其用作 Zipkin 的简易替代品，但红帽在此发行版本中不支持 Zipkin 的兼容性。

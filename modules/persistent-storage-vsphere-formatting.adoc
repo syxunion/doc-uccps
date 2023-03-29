@@ -1,0 +1,10 @@
+// Module included in the following assemblies
+//
+// * storage/persistent_storage/persistent-storage-vsphere.adoc
+
+[id="vsphere-formatting-volumes_{context}"]
+= 格式化 VMware vSphere 卷
+
+在统信容器云管理平台挂载卷并将其传递给容器之前，它会检查卷是否包含由 PersistentVolume（PV）定义中 fsType 参数值指定的文件系统。如果没有使用文件系统格式化设备，该设备中的所有数据都会被清除，设备也会自动格式化为指定的文件系统。
+
+因为统信容器云管理平台在首次使用卷前会进行格式化，所以您可以使用未格式化的 vSphere 卷作为 PV。

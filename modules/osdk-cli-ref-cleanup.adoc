@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-cleanup_{context}"]
+= cleanup
+
+`operator-sdk cleanup` 命令会销毁并删除为通过 run 命令部署的 Operator 创建的资源。
+
+.`cleanup` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-h`, `--help`
+|`run bundle` 子命令的帮助输出。
+
+|`--kubeconfig` (string)
+|用于 CLI 请求的 kubeconfig 文件的路径。
+
+|`n`, `--namespace` (string)
+|如果存在，代表在其中运行 CLI 请求的命名空间。
+
+|`--timeout <duration>`
+|失败前，等待命令完成的时间。默认值为 `2m0s`。
+
+|===

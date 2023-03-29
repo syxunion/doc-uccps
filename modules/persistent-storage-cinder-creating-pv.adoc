@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent_storage-cinder.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-cinder-creating-pv_{context}"]
+= 创建持久性卷
+
+您必须在对象定义中定义持久性卷 (PV) ，然后才能在统信容器云管理平台中创建它：
+
+.流程
+
+. 将对象定义保存到文件中。
++
+.cinder-persistentvolume.yaml
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "PersistentVolume"
+metadata:
+  name: "pv0001" <1>
+spec:
+  capacity:
+    storage: "5Gi" <2>
+  accessModes:
+    - "ReadWriteOnce"
+  cinder: <3>
+    fsType: "ext3" <4>
+    volumeID: "f37a03aa-6212-4c62-a805-9ce139fab180" <5>
+----
+<1> 持久性卷声明或 Pod 使用的卷名称。
+<2> 为这个卷分配的存储量。
+<3> 为 UnionTech UStack Platform（有栈）Cinder 卷指定 cinder。
+<4> 当这个卷被第一次挂载时，文件系统会被创建。
+<5> 要使用的 Cinder 卷。
++
+[重要]
+====
+在卷被格式化并置备后，不要更改 `fstype` 参数的值。更改此值可能会导致数据丢失和 pod 失败。
+====
+
+. 创建在上一步中保存的对象定义文件。
++
+[source,terminal]
+----
+$ oc create -f cinder-persistentvolume.yaml
+----

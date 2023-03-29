@@ -1,0 +1,153 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-trigger-management_{context}"]
+= 触发器管理命令
+
+== eventlistener
+管理 EventListeners。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn eventlistener -h
+----
+
+== eventlistener delete
+删除一个 EventListener。
+
+.示例：删除命令空间中的 `mylistener1` 和 `mylistener2` EventListeners
+[source,terminal]
+----
+$ tkn eventlistener delete mylistener1 mylistener2 -n myspace
+----
+== eventlistener describe
+描述 EventListener。
+
+.示例：描述命名空间中的 `mylistener` EventListener
+[source,terminal]
+----
+$ tkn eventlistener describe mylistener -n myspace
+----
+
+== eventlistener list
+列出 EventListeners。
+
+.示例： 列出命名空间中的所有 EventListeners
+[source,terminal]
+----
+$ tkn eventlistener list -n myspace
+----
+
+== eventlistener logs
+显示 EventListener 的日志。
+
+.示例： 在一个命名空间中显示 `mylistener` EventListener 的日志
+[source,terminal]
+----
+$ tkn eventlistener logs mylistener -n myspace
+----
+
+== triggerbinding
+管理 TriggerBindings。
+
+.示例： 显示 TriggerBindings 帮助信息
+[source,terminal]
+----
+$ tkn triggerbinding -h
+----
+
+== triggerbinding delete
+删除 TriggerBinding。
+
+.示例：删除一个命名空间中的 `mybinding1` 和 `mybinding2` TriggerBindings
+[source,terminal]
+----
+$ tkn triggerbinding delete mybinding1 mybinding2 -n myspace
+----
+== triggerbinding describe
+描述 TriggerBinding。
+
+.示例：描述命名空间中的 `mybinding` TriggerBinding
+[source,terminal]
+----
+$ tkn triggerbinding describe mybinding -n myspace
+----
+
+== triggerbinding list
+列出 TriggerBindings。
+
+.示例： 列出命名空间中的所有 TriggerBindings
+[source,terminal]
+----
+$ tkn triggerbinding list -n myspace
+----
+
+== triggertemplate
+管理 TriggerTemplates。
+
+.示例： 显示 TriggerTemplate 帮助
+[source,terminal]
+----
+$ tkn triggertemplate -h
+----
+== triggertemplate delete
+Delete a TriggerTemplate.
+
+.Example: Delete `mytemplate1` and `mytemplate2` TriggerTemplates in a namespace
+[source,terminal]
+----
+$ tkn triggertemplate delete mytemplate1 mytemplate2 -n `myspace`
+----
+== triggertemplate describe
+删除 TriggerTemplate。
+
+.示例：删除命名空间中的 `mytemplate1` 和 mytemplate2 TriggerTemplates
+[source,terminal]
+----
+$ tkn triggertemplate describe mytemplate -n `myspace`
+----
+
+== triggertemplate list
+列出 TriggerTemplates。
+
+.示例： 列出命名空间中的所有 TriggerTemplates
+[source,terminal]
+----
+$ tkn triggertemplate list -n myspace
+----
+== clustertriggerbinding
+管理 ClusterTriggerBindings。
+
+.示例： 显示 ClusterTriggerBindings 帮助信息
+[source,terminal]
+----
+$ tkn clustertriggerbinding -h
+----
+
+== clustertriggerbinding delete
+删除 ClusterTriggerBinding。
+
+.示例： 删除 `myclusterbinding1` 和 `myclusterbinding2` ClusterTriggerBindings
+[source,terminal]
+----
+$ tkn clustertriggerbinding delete myclusterbinding1 myclusterbinding2
+----
+== clustertriggerbinding describe
+描述 ClusterTriggerBinding。
+
+.示例： 描述 `myclusterbinding` ClusterTriggerBinding
+[source,terminal]
+----
+$ tkn clustertriggerbinding describe myclusterbinding
+----
+
+== clustertriggerbinding list
+列出 ClusterTriggerBindings。
+
+.示例： 列出所有 ClusterTriggerBindings
+[source,terminal]
+----
+$ tkn clustertriggerbinding list
+----

@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="kn-plugins"]
+= Knative CLI 插件
+include::_attributes/common-attributes.adoc[]
+:context: kn-plugins
+
+toc::[]
+
+Knative (`kn`) CLI CLI 支持使用插件，这允许您通过添加不是核心发行版本一部分的自定义命令和其他共享命令来扩展 `kn` 安装的功能。Knative (`kn`) CLI 插件的使用方式与主 `kn` 功能相同。
+
+目前，统信支持  `kn-source-kafka` 插件和 `kn-event` 插件。
+
+:FeatureName: The `kn-event` plugin
+// kn event commands
+include::modules/serverless-build-events-kn.adoc[leveloffset=+1]
+include::modules/serverless-send-events-kn.adoc[leveloffset=+1]

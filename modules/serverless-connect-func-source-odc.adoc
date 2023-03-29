@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-connect-func-source-odc_{context}"]
+= 使用 开发者 视角将事件源连接到函数
+
+函数作为 Knative 服务部署到 {product-title} 集群中。当使用 {product-title} web 控制台创建事件源时，您可以指定事件从该源发送到的部署函数。
+
+.先决条件
+
+* Uccps  Serverless Operator、Knative Serving 和 Knative Eventing 已在统信容器云管理平台集群中安装。
+* 已登陆到 web 控制台，且处于 *开发者* 视角。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在统信容器云管理平台中创建应用程序和其他工作负载。
+* 您已创建并部署了函数。
+
+.流程
+
+. 进入 *+添加* -> *事件源* 并选择您要创建的事件源类型，创建任何类型的事件源。
+
+. 2.在 *创建事件源* 表单视图的 *Sink* 部分，在 *资源* 列表中选择您的函数。
+
+. 点 *创建*.
+
+.验证
+
+您可以通过查看  *拓扑* 页面来验证事件源是否已创建并连接到该函数。
+
+. 在 *开发者* 视角中，导航到  *拓扑*.
+
+. 查看事件源并点连接的函数来查看右侧面板中的函数详情。

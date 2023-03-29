@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * monitoring/monitoring-overview.adoc
+
+:_content-type: REFERENCE
+[id="default-monitoring-targets_{context}"]
+= 默认监控目标
+
+除了堆栈本身的组件外，默认监控堆栈还监控：
+
+* CoreDNS
+* Elasticsearch （如果安装了 Logging）
+* etcd
+* Fluentd （如果安装了 Logging）
+* HAProxy
+* Image registry
+* Kubelets
+* Kubernetes API 服务器
+* Kubernetes 控制管理器
+* Kubernetes 调度程序
+* Metering （如果安装了 Metering）
+* OpenShift API 服务器
+* OpenShift Controller Manager
+* Operator Lifecycle Manager (OLM)
+
+[注意]
+====
+每个 统信容器云管理平台 组件负责自己的监控配置。对于 统信容器云管理平台 组件监控的问题，请在 Bugzilla 中针对具体组件（而非常规的监控组件）创建一个程序错误报告。
+====
+
+其他 统信容器云管理平台 框架组件也可能会公开指标。

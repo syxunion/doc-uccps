@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-s2i-override-builder-image-scripts_{context}"]
+= 覆盖 source-to-image 构建器镜像脚本
+
+您可以覆盖构建器镜像提供的 `assemble`、`run` 和 `save-artifacts` source-to-image(S2I)脚本。
+
+.流程
+
+要覆盖构建器镜像提供的 `assemble`、`run` 和 `save-artifacts S2I` 脚本，请执行以下任一操作：
+
+* 在应用程序源存储库的 `.s2i/bin` 目录中提供 `assemble`、`run` 或 `save-artifacts` 脚本。
+* 提供包含脚本的目录的 URL，作为策略定义的一部分。例如：
++
+[source,yaml]
+----
+strategy:
+  sourceStrategy:
+    from:
+      kind: "ImageStreamTag"
+      name: "builder-image:latest"
+    scripts: "http://somehost.com/scripts_directory" <1>
+----
+<1> 此路径会将 `run`、`assemble` 和 `save-artifacts` 附加到其中。如果找到任何或所有脚本，将使用它们代替镜像中提供的同名脚本。
+
+[注意]
+====
+位于 `scripts`  URL 的文件优先于源存储库的 `.s2i/bin` 中的文件。
+====

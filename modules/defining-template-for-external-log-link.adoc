@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="defining-template-for-external-log-links_{context}"]
+= 为外部日志链接定义模板
+
+如果您连接到可帮助您浏览日志的服务，但需要以特定的方式生成 URL，则可以为链接定义一个模板。
+
+.先决条件
+
+* 您必须具有管理员特权。
+
+.流程
+
+. 在 *Administration* -> *Custom Resource Definitions* 点 *ConsoleExternalLogLink*.
+. 选择 *Instances* 标签
+. 点击 *Create Console External Log Link* 并编辑文件：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleExternalLogLink
+metadata:
+  name: example
+spec:
+  hrefTemplate: >-
+    https://example.com/logs?resourceName=${resourceName}&containerName=${containerName}&resourceNamespace=${resourceNamespace}&podLabels=${podLabels}
+  text: Example Logs
+----

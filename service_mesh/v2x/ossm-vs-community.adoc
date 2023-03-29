@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="ossm-vs-community"]
+= Service Mesh and Istio differences
+include::_attributes/common-attributes.adoc[]
+:context: ossm-vs-istio
+
+toc::[]
+
+{SMProductName} 与 Istio 安装的不同之处在于提供额外功能或在 {product-title} 上部署时处理不同之处。
+
+// The following include statements pull in the module files that comprise the assembly.
+
+include::modules/ossm-vs-istio.adoc[leveloffset=+1]
+
+include::modules/ossm-multitenant.adoc[leveloffset=+1]
+
+include::modules/ossm-kiali-service-mesh.adoc[leveloffset=+1]
+
+include::modules/ossm-jaeger-service-mesh.adoc[leveloffset=+1]

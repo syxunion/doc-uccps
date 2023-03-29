@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * /serverless/install/install-serverless-operator.adoc
+
+:_content-type: REFERENCE
+[id="serverless-cluster-sizing-req_{context}"]
+= 定义集群大小要求
+
+要安装和使用 {ServerlessProductName}，  {product-title} 集群必须正确定义大小。
+
+
+使用 Uccps Serverless 的最低要求是集群有 10 个 CPU 和 40GB 内存。默认情况下，每个 Pod 需要大约 400m 的 CPU，最下的要求基于此值。
+
+运行 Uccps Serverless 的总大小要求取决于安装的组件以及部署的应用程序，并因部署的不同而有所不同。

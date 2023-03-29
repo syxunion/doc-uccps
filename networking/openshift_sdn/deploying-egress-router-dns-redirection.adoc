@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="deploying-egress-router-dns-redirection"]
+= 以 DNS 代理模式部署出口路由器 pod
+include::_attributes/common-attributes.adoc[]
+:context: deploying-egress-router-dns-redirection
+
+toc::[]
+
+作为集群管理员，您可以将配置为代理流量的出口路由器 pod 部署到指定的 DNS 名称和 IP 地址。
+
+include::modules/nw-egress-router-pod.adoc[leveloffset=+1]
+
+include::modules/nw-egress-router-dest-var.adoc[leveloffset=+1]
+
+include::modules/nw-egress-router-dns-mode.adoc[leveloffset=+1]

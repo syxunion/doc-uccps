@@ -1,0 +1,197 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/deploying-egress-router-ovn-redirection.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-router-redirect-mode-ovn_{context}"]
+= 以重定向模式部署出口路由器
+
+您可以部署出口路由器，将其自身保留源 IP 地址的流量重定向到一个或多个目标 IP 地址。
+
+添加出口路由器后，需要使用保留源 IP 地址的客户端 pod 必须修改为连接到出口路由器，而不是直接连接到目标 IP。
+
+.先决条件
+
+* 安装 Uccp  CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建出口路由器定义。
+
+. 为确保其他 pod 可以找到出口路由器 pod 的 IP 地址，请创建一个使用出口路由器的服务，如下例所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-1
+spec:
+  ports:
+  - name: web-app
+    protocol: TCP
+    port: 8080
+  type: ClusterIP
+  selector:
+    app: egress-router-cni <.>
+----
+<.> 指定出口路由器的标签。显示的值由 Cluster Network Operator 添加，且不可配置。
++
+创建服务后，您的 Pod 可以连接到该服务。出口路由器 pod 将流量重定向到目标 IP 地址中对应的端口。连接来自保留的源 IP 地址。
+
+.验证
+
+要验证 Cluster Network Operator 是否启动了出口路由器，请完成以下步骤：
+
+. 查看 Operator 为出口路由器创建的网络附加定义：
++
+[source,terminal]
+----
+$ oc get network-attachment-definition egress-router-cni-nad
+----
++
+网络附加定义的名称不可配置。
++
+.输出示例
++
+[source,terminal]
+----
+NAME                    AGE
+egress-router-cni-nad   18m
+----
+
+. 查看出口路由器 pod 的部署：
++
+[source,terminal]
+----
+$ oc get deployment egress-router-cni-deployment
+----
++
+部署的名称不可配置。
++
+.输出示例
++
+[source,terminal]
+----
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+egress-router-cni-deployment   1/1     1            1           18m
+----
+
+. 查看出口路由器 pod 的状态：
++
+[source,terminal]
+----
+$ oc get pods -l app=egress-router-cni
+----
++
+.输出示例
++
+[source,terminal]
+----
+NAME                                            READY   STATUS    RESTARTS   AGE
+egress-router-cni-deployment-575465c75c-qkq6m   1/1     Running   0          18m
+----
+
+. 查看出口路由器 pod 的日志和路由表。
+
+// Terminology from support-collecting-network-trace.adoc
+.. 获取出口路由器 pod 的节点名称：
++
+[source,terminal]
+----
+$ POD_NODENAME=$(oc get pod -l app=egress-router-cni -o jsonpath="{.items[0].spec.nodeName}")
+----
+
+.. 在目标节点上进入一个 debug 会话。此步骤被实例化为一个名为 `<node_name>-debug` 的 debug pod:
++
+[source,terminal]
+----
+$ oc debug node/$POD_NODENAME
+----
+
+.. 将 `/host` 设为 debug shell 中的根目录。debug pod 在 pod 中的 /host 中挂载主机 的 root 文件系统。将根目录改为 /host，您可以从主机的可执行路径中运行二进制文件：
++
+[source,terminal]
+----
+# chroot /host
+----
+
+.. 在 `chroot` 环境控制台中显示出口路由器日志：
++
+[source,terminal]
+----
+# cat /tmp/egress-router-log
+----
++
+.输出示例
+[source,terminal]
+----
+2021-04-26T12:27:20Z [debug] Called CNI ADD
+2021-04-26T12:27:20Z [debug] Gateway: 192.168.12.1
+2021-04-26T12:27:20Z [debug] IP Source Addresses: [192.168.12.99/24]
+2021-04-26T12:27:20Z [debug] IP Destinations: [80 UDP 10.0.0.99/30 8080 TCP 203.0.113.26/30 80 8443 TCP 203.0.113.27/30 443]
+2021-04-26T12:27:20Z [debug] Created macvlan interface
+2021-04-26T12:27:20Z [debug] Renamed macvlan to "net1"
+2021-04-26T12:27:20Z [debug] Adding route to gateway 192.168.12.1 on macvlan interface
+2021-04-26T12:27:20Z [debug] deleted default route {Ifindex: 3 Dst: <nil> Src: <nil> Gw: 10.128.10.1 Flags: [] Table: 254}
+2021-04-26T12:27:20Z [debug] Added new default route with gateway 192.168.12.1
+2021-04-26T12:27:20Z [debug] Added iptables rule: iptables -t nat PREROUTING -i eth0 -p UDP --dport 80 -j DNAT --to-destination 10.0.0.99
+2021-04-26T12:27:20Z [debug] Added iptables rule: iptables -t nat PREROUTING -i eth0 -p TCP --dport 8080 -j DNAT --to-destination 203.0.113.26:80
+2021-04-26T12:27:20Z [debug] Added iptables rule: iptables -t nat PREROUTING -i eth0 -p TCP --dport 8443 -j DNAT --to-destination 203.0.113.27:443
+2021-04-26T12:27:20Z [debug] Added iptables rule: iptables -t nat -o net1 -j SNAT --to-source 192.168.12.99
+----
++
+当您启动出口路由器时，通过创建 `EgressRouter` 对象来启动出口路由器时，日志文件位置和日志记录级别不可配置，如下所述。
+
+.. 在 `chroot` 环境控制台中获取容器 ID：
++
+[source,terminal]
+----
+# crictl ps --name egress-router-cni-pod | awk '{print $1}'
+----
++
+.输出示例
+[source,terminal]
+----
+CONTAINER
+bac9fae69ddb6
+----
+
+.. 确定容器的进程 ID。在本例中，容器 ID 是 `bac9fae69ddb6`：
++
+[source,terminal]
+----
+# crictl inspect -o yaml bac9fae69ddb6 | grep 'pid:' | awk '{print $2}'
+----
++
+.输出示例
+[source,terminal]
+----
+68857
+----
+
+.. 输入容器的网络命名空间：
++
+[source,terminal]
+----
+# nsenter -n -t 68857
+----
+
+.. 显示路由表：
++
+[source,terminal]
+----
+# ip route
+----
++
+在以下示例输出中，net1 网络接口是默认路由。集群网络的流量使用 eth0 网络接口。`192.168.12.0/24` 网络的流量使用 net1 网络接口，并来自保留源 IP 地址 `192.168.12.99`。pod 将所有其他流量路由到网关的 IP 地址 `192.168.12.1`。不显示服务网络的路由。
++
+.输出示例
+[source,terminal]
+----
+default via 192.168.12.1 dev net1
+10.128.10.0/23 dev eth0 proto kernel scope link src 10.128.10.18
+192.168.12.0/24 dev net1 proto kernel scope link src 192.168.12.99
+192.168.12.1 dev net1
+----

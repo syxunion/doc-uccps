@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="nodes-descheduler"]
+= 使用 descheduler 驱除 pod
+include::_attributes/common-attributes.adoc[]
+:context: nodes-descheduler
+
+toc::[]
+
+xref:../../nodes/scheduling/nodes-scheduler-about.adoc#nodes-scheduler-about[调度程序] 被用来决定最适合托管新 pod 的节点，而 descheduler 可以用来驱除正在运行的 pod，从而使 pod 能够重新调度到更合适的节点上。
+
+// About the descheduler
+include::modules/nodes-descheduler-about.adoc[leveloffset=+1]
+
+// Descheduler profiles
+include::modules/nodes-descheduler-profiles.adoc[leveloffset=+1]
+
+// Installing the descheduler
+include::modules/nodes-descheduler-installing.adoc[leveloffset=+1]
+
+// Configuring the descheduler profiles
+include::modules/nodes-descheduler-configuring-profiles.adoc[leveloffset=+1]
+
+// Configuring the descheduler interval
+include::modules/nodes-descheduler-configuring-interval.adoc[leveloffset=+1]
+
+// Uninstalling the descheduler
+include::modules/nodes-descheduler-uninstalling.adoc[leveloffset=+1]

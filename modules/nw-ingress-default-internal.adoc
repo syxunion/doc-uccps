@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-default-internal_{context}"]
+= 将集群的默认 Ingress Controller 配置为内部
+
+您可以通过删除并重新它来将默认 Ingress Controller 配置为内部。
+
+[警告]
+====
+如果云供应商是 Microsoft Azure，则必须至少有一个指向节点的公共负载均衡器。如果不这样做，所有节点都将丢失到互联网的出站连接。
+====
+
+[重要]
+====
+如果要更改 `IngressController` 的 `scope`，您可以在创建自定义资源(CR)后更改 `.spec.endpointPublishingStrategy.loadBalancer.scope` 参数。
+====
+
+.先决条件
+
+* 安装 Uccp CLI（oc）。
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 通过删除并重新创建集群，将 默认 Ingress Controller 配置为内部。
++
+[source,terminal]
+----
+$ oc replace --force --wait --filename - <<EOF
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  namespace: openshift-ingress-operator
+  name: default
+spec:
+  endpointPublishingStrategy:
+    type: LoadBalancerService
+    loadBalancer:
+      scope: Internal
+EOF
+----

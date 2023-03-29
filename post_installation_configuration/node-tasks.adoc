@@ -1,0 +1,144 @@
+:_content-type: ASSEMBLY
+:context: post-install-node-tasks
+[id="post-install-node-tasks"]
+= 安装后的节点任务
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+安装 统信容器云管理平台 后，您可以通过某些节点任务进一步根据要求扩展和自定义集群。
+
+ifndef::openshift-origin[]
+[id="post-install-config-adding-rhel-compute"]
+== 在 统信容器云管理平台 集群中添加 UOS20 计算机器
+理解并使用 UOS20 计算节点。
+
+include::modules/rhel-compute-overview.adoc[leveloffset=+2]
+include::modules/rhel-compute-requirements.adoc[leveloffset=+2]
+
+include::modules/csr-management.adoc[leveloffset=+3]
+include::modules/rhel-preparing-playbook-machine.adoc[leveloffset=+2]
+include::modules/rhel-preparing-node.adoc[leveloffset=+2]
+include::modules/rhel-adding-node.adoc[leveloffset=+2]
+include::modules/rhel-ansible-parameters.adoc[leveloffset=+2]
+endif::[]
+
+[id="post-install-config-adding-fcos-compute"]
+== 将 Uswift 计算机器添加到 统信容器云管理平台 集群
+
+您可以在裸机上的 统信容器云管理平台 集群中添加更多 UnionTech Enterprise Linux Uswift（Uswift）计算机器。
+
+在将更多计算机器添加到在裸机基础架构上安装的集群之前，必须先创建 Uswift 机器供其使用。您可以使用 ISO 镜像或网络 PXE 引导来创建机器。
+
+//Prerequisites also in adding-bare-metal-compute-user-infra.adoc
+=== 先决条件
+
+* 您在裸机上安装了集群。
+* 您有用来创建集群的安装介质和 UnionTech Enterprise Linux Uswift（Uswift）镜像。如果您没有这些文件，需要按照安装过程的说明获得这些文件。
+
+include::modules/machine-user-infra-machines-iso.adoc[leveloffset=+2]
+
+include::modules/machine-user-infra-machines-pxe.adoc[leveloffset=+2]
+
+include::modules/installation-approve-csrs.adoc[leveloffset=+2]
+
+
+[id="post-installation-config-deploying-machine-health-checks"]
+== 部署机器健康检查
+
+理解并部署机器健康检查。
+
+include::modules/machine-user-provisioned-limitations.adoc[leveloffset=+2]
+include::modules/machine-health-checks-about.adoc[leveloffset=+2]
+include::modules/machine-health-checks-resource.adoc[leveloffset=+2]
+include::modules/machine-health-checks-creating.adoc[leveloffset=+2]
+include::modules/machineset-manually-scaling.adoc[leveloffset=+2]
+include::modules/differences-between-machinesets-and-machineconfigpool.adoc[leveloffset=+2]
+
+include::modules/recommended-node-host-practices.adoc[leveloffset=+1]
+include::modules/create-a-kubeletconfig-crd-to-edit-kubelet-parameters.adoc[leveloffset=+2]
+include::modules/modify-unavailable-workers.adoc[leveloffset=+2]
+include::modules/master-node-sizing.adoc[leveloffset=+2]
+include::modules/setting-up-cpu-manager.adoc[leveloffset=+2]
+
+[id="post-install-huge-pages"]
+== 巨页
+了解并配置巨页。
+
+include::modules/what-huge-pages-do.adoc[leveloffset=+2]
+include::modules/how-huge-pages-are-consumed-by-apps.adoc[leveloffset=+2]
+include::modules/configuring-huge-pages.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-plugins-about.adoc[leveloffset=+1]
+include::modules/nodes-pods-plugins-device-mgr.adoc[leveloffset=+2]
+include::modules/nodes-pods-plugins-install.adoc[leveloffset=+2]
+
+[id="post-install-taints-tolerations"]
+== 污点和容限
+了解污点和容限
+
+include::modules/nodes-scheduler-taints-tolerations-about.adoc[leveloffset=+2]
+include::modules/nodes-scheduler-taints-tolerations-adding.adoc[leveloffset=+2]
+include::modules/nodes-scheduler-taints-tolerations-adding-machineset.adoc[leveloffset=+2]
+include::modules/nodes-scheduler-taints-tolerations-binding.adoc[leveloffset=+2]
+include::modules/nodes-scheduler-taints-tolerations-special.adoc[leveloffset=+2]
+include::modules/nodes-scheduler-taints-tolerations-removing.adoc[leveloffset=+2]
+
+[id="post-install-topology-manager"]
+== 拓扑管理器
+理解并使用拓扑管理器。
+
+include::modules/topology-manager-policies.adoc[leveloffset=+2]
+include::modules/setting-up-topology-manager.adoc[leveloffset=+2]
+include::modules/pod-interactions-with-topology-manager.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-resource-requests.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-override.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-override-deploy-console.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-resource-override-deploy-cli.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-resource-configure.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-node-overcommit.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-overcommit-resources-containers.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-qos-about.adoc[leveloffset=+2]
+
+include::modules/nodes-qos-about-swap.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-configure-nodes.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-enforcing.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-resources.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-disable.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-project-overcommit.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-overcommit-project-disable.adoc[leveloffset=+2]
+
+
+[id="post-install-garbage-collection"]
+== 使用垃圾回收释放节点资源
+理解并使用垃圾回收。
+
+include::modules/nodes-nodes-garbage-collection-containers.adoc[leveloffset=+2]
+include::modules/nodes-nodes-garbage-collection-images.adoc[leveloffset=+2]
+include::modules/nodes-nodes-garbage-collection-configuring.adoc[leveloffset=+2]
+
+[id="post-using-node-tuning-operator"]
+== 使用 Node Tuning Operator
+理解并使用 Node Tuning Operator。
+
+include::modules/node-tuning-operator.adoc[leveloffset=+2]
+include::modules/accessing-an-example-cluster-node-tuning-operator-specification.adoc[leveloffset=+2]
+include::modules/custom-tuning-specification.adoc[leveloffset=+2]
+include::modules/cluster-node-tuning-operator-default-profiles-set.adoc[leveloffset=+2]
+include::modules/node-tuning-operator-supported-tuned-daemon-plug-ins.adoc[leveloffset=+2]
+
+include::modules/nodes-nodes-managing-max-pods-proc.adoc[leveloffset=+1]

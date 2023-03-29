@@ -1,0 +1,57 @@
+:_content-type: ASSEMBLY
+:context: post-install-machine-configuration-tasks
+[id="post-install-machine-configuration-tasks"]
+= 安装后机器配置任务
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+有时您需要更改 统信容器云管理平台 节点上运行的操作系统。这包括更改网络时间服务的设置、添加内核参数或者以特定的方式配置日志。
+
+除了一些特殊功能外，通过创建称为 Machine Config Operator 管理的 `MachineConfig` 对象，可以对 统信容器云管理平台 节点上的操作系统进行大多数更改。
+
+本节中的任务介绍了如何使用 Machine Config Operator 的功能在 统信容器云管理平台 节点上配置操作系统功能。
+
+[id="understanding-the-machine-config-operator"]
+== 了解 Machine Config Operator
+
+include::modules/machine-config-operator.adoc[leveloffset=+2]
+include::modules/machine-config-overview.adoc[leveloffset=+2]
+include::modules/machine-config-drift-detection.adoc[leveloffset=+2]
+include::modules/checking-mco-status.adoc[leveloffset=+2]
+
+[id="using-machineconfigs-to-change-machines"]
+== 使用 MachineConfig 对象配置节点
+
+您可以使用本节中的任务创建 MachineConfig 对象，修改 统信容器云管理平台 节点上运行的文件、systemd 单元文件和其他操作系统功能。有关使用机器配置的更多信息，请参阅有关 添加 或 更新 SSH 授权密钥、验证镜像签名、启用 SCTP 的内容。 为 统信容器云管理平台 配置 iSCSI initiatorname。
+
+统信容器云管理平台 支持 Ignition 规格版本 3.2。您创建的所有新机器配置都应该基于 Ignition 规格版本 3.2。如果要升级 统信容器云管理平台 集群，任何现有的 Ignition 规格版本 2.x 机器配置将自动转换为规格版本 3.2。
+
+在某些情况下，节点上的配置与当前应用的机器配置指定不完全匹配。这个状态被称为 _配置偏移_。Machine Config Daemon(MCD)定期检查节点是否有配置偏移。如果 MCD 检测到配置偏移，MCO 会将节点标记为 降级(degraded)，直到管理员更正节点配置。降级的节点在线且可操作，但无法更新。有关配置偏移的更多信息，请参阅了解配置偏移检测。
+
+[提示]
+====
+使用 "Configuring chrony time service" 部分作为如何将其他配置文件添加到 统信容器云管理平台 节点的模型。
+====
+
+include::modules/installation-special-config-chrony.adoc[leveloffset=+2]
+include::modules/cnf-disable-chronyd.adoc[leveloffset=+2]
+include::modules/nodes-nodes-kernel-arguments.adoc[leveloffset=+2]
+include::modules/rhcos-enabling-multipath-day-2.adoc[leveloffset=+2]
+include::modules/nodes-nodes-cgroups-2.adoc[leveloffset=+1]
+include::modules/nodes-nodes-rtkernel-arguments.adoc[leveloffset=+2]
+include::modules/machineconfig-modify-journald.adoc[leveloffset=+2]
+
+include::modules/rhcos-add-extensions.adoc[leveloffset=+2]
+include::modules/rhcos-load-firmware-blobs.adoc[leveloffset=+2]
+
+[id="configuring-machines-with-custom-resources"]
+== 配置 MCO 相关的自定义资源
+
+除了管理 `MachineConfig` 对象外，MCO 管理两个自定义资源（CR）：`KubeletConfig` 和 `ContainerRuntimeConfig`。这些 CR 可让您更改节点级别的设置，这会影响到 Kubelet 和 CRI-O 容器运行时服务的行为。
+
+include::modules/create-a-kubeletconfig-crd-to-edit-kubelet-parameters.adoc[leveloffset=+2]
+include::modules/create-a-containerruntimeconfig-crd.adoc[leveloffset=+2]
+include::modules/set-the-default-max-container-root-partition-size-for-overlay-with-crio.adoc[leveloffset=+2]
+
+

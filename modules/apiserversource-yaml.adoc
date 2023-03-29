@@ -1,0 +1,217 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-apiserversource.adoc
+
+:_content-type: PROCEDURE
+[id="apiserversource-yaml_context"]
+= 使用 YAML 文件创建 API 服务器源
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以可重复的方式描述事件源。要使用 YAML 创建 API 服务器源，您必须创建一个 YAML 文件来定义 `ApiServerSource`对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 您已在与 API 服务器源 YAML 文件中定义的相同的命名空间中创建 `default` 代理。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+include::snippets/serverless-service-account-apiserversource.adoc[]
+
+. 将 API 服务器源创建为 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1alpha1
+kind: ApiServerSource
+metadata:
+  name: testevents
+spec:
+  serviceAccountName: events-sa
+  mode: Resource
+  resources:
+    - apiVersion: v1
+      kind: Event
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+----
+
+. 应用 `ApiServerSource` YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 要检查 API 服务器源是否已正确设置，请创建一个 Knative 服务作为 YAML 文件，在日志中转储传入的信息：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+----
+
+. 应用 `Service` YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 创建一个 `Trigger` 对象作为一个 YAML 文件，该文件将事件从 `default` 代理过滤到上一步中创建的服务：
++
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: event-display-trigger
+  namespace: default
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+----
+
+. 应用 `Trigger` YAML 文件
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 通过在 default 命名空间中启动 pod 来创建事件：
++
+[source,terminal]
+----
+$ oc create deployment hello-node --image=quay.io/openshift-knative/knative-eventing-sources-event-display
+----
+
+. 输入以下命令并检查输出，检查是否正确映射了控制器：
++
+[source,terminal]
+----
+$ oc get apiserversource.sources.knative.dev testevents -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1alpha1
+kind: ApiServerSource
+metadata:
+  annotations:
+  creationTimestamp: "2020-04-07T17:24:54Z"
+  generation: 1
+  name: testevents
+  namespace: default
+  resourceVersion: "62868"
+  selfLink: /apis/sources.knative.dev/v1alpha1/namespaces/default/apiserversources/testevents2
+  uid: 1603d863-bb06-4d1c-b371-f580b4db99fa
+spec:
+  mode: Resource
+  resources:
+  - apiVersion: v1
+    controller: false
+    controllerSelector:
+      apiVersion: ""
+      kind: ""
+      name: ""
+      uid: ""
+    kind: Event
+    labelSelector: {}
+  serviceAccountName: events-sa
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+----
+
+.验证
+
+要验证 Kubernetes 事件是否已发送到 Knative，您可以查看消息转储程序功能日志。
+
+. 输入以下命令来获取 pod：
++
+[source,terminal]
+----
+$ oc get pods
+----
+. 输入以下命令来查看 pod 的消息转储程序功能日志：
++
+[source,terminal]
+----
+$ oc logs $(oc get pod -o name | grep event-display) -c user-container
+----
++
+.输出示例
+[source,terminal]
+----
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 1.0
+  type: dev.knative.apiserver.resource.update
+  datacontenttype: application/json
+  ...
+Data,
+  {
+    "apiVersion": "v1",
+    "involvedObject": {
+      "apiVersion": "v1",
+      "fieldPath": "spec.containers{hello-node}",
+      "kind": "Pod",
+      "name": "hello-node",
+      "namespace": "default",
+       .....
+    },
+    "kind": "Event",
+    "message": "Started container",
+    "metadata": {
+      "name": "hello-node.159d7608e3a3572c",
+      "namespace": "default",
+      ....
+    },
+    "reason": "Started",
+    ...
+  }
+----
+
+.删除 API 服务器源
+
+. 删除触发器：
++
+[source,terminal]
+----
+$ oc delete -f trigger.yaml
+----
+
+. 删除事件源：
++
+[source,terminal]
+----
+$ oc delete -f k8s-events.yaml
+----
+
+. 删除服务帐户、集群角色和集群绑定：
++
+[source,terminal]
+----
+$ oc delete -f authentication.yaml
+----

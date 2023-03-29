@@ -1,0 +1,120 @@
+// Module included in the following assemblies:
+//
+// nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: PROCEDURE
+[id="installing-maintenance-operator-using-cli_{context}"]
+= 使用 CLI 安装 Node Maintenance Operator
+您可以使用 Uccps CLI(oc)安装 Node Maintenance Operator。
+
+您可以在自己的命名空间中或 `openshift-operators` 命名空间中安装 Node Maintenance Operator。
+
+要在您自己的命名空间中安装 Operator，请按照以下步骤执行。
+
+要在 `openshift-operators` 命名空间中安装 Operator，请跳至步骤 3，因为需要新的 `Namespace` 自定义资源(CR)和 `OperatorGroup` CR 的步骤。
+
+.先决条件
+
+* 安装 Uccps  CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 为 Node Maintenance Operator 创建一个 `Namespace`` CR：
+.. 定义 `Namespace CR`` 并保存 YAML 文件，如  `node-maintenance-namespace.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nmo-test
+----
+.. 要创建 `Namespace` CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create -f node-maintenance-namespace.yaml
+----
+
+. 创建 `OperatorGroup CR：
+.. 定义 `OperatorGroup`` CR 并保存 YAML 文件，如  `node-maintenance-operator-group.yaml`:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: node-maintenance-operator
+  namespace: nmo-test
+----
+.. 要创建 `OperatorGroup CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create -f node-maintenance-operator-group.yaml
+----
+
+. 创建一个 `Subscription` CR：
+.. 定义 `Subscription` CR，并保存 YAML 文件，如  `node-maintenance-subscription.yaml`:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: node-maintenance-operator
+  namespace: nmo-test <1>
+spec:
+  channel: stable
+  InstallPlaneApproval: Automatic
+  name: node-maintenance-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  StartingCSV: node-maintenance-operator.v4.10.0
+----
++
+<1> 指定您要安装 Node Maintenance Operator 的命名空间。
++
+[重要]
+====
+要在 `openshift-operators` 命名空间中安装 Node Maintenance Operator，请在 `Subscription` CR 中指定 `openshift-operators` 。
+====
+
+.. 要创建 `Subscription` CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create -f node-maintenance-subscription.yaml
+----
+
+.验证
+
+. 检查 CSV 资源来验证安装是否成功：
++
+[source,terminal]
+----
+$ oc get csv -n openshift-operators
+----
++
+.输出示例
+
+[source,terminal]
+----
+NAME                               DISPLAY                     VERSION   REPLACES  PHASE
+node-maintenance-operator.v4.10    Node Maintenance Operator   4.10                Succeeded
+----
+. 验证 Node Maintenance Operator 是否正在运行：
++
+[source,terminal]
+----
+$ oc get deploy -n openshift-operators
+----
++
+.输出示例
+
+[source,terminal]
+----
+NAME                                           READY   UP-TO-DATE   AVAILABLE   AGE
+node-maintenance-operator-controller-manager   1/1     1            1           10d
+----

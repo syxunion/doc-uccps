@@ -1,0 +1,9 @@
+[id="odc-labels-and-annotations-used-for-topology-view_{context}"]
+= 用于拓扑视图的标签和注解
+
+*拓扑* 使用下列标签和注解：
+
+节点中显示的图标:: 节点中的图标是通过使用 `app.openshift.io/runtime` 标签（随后是 `app.kubernetes.io/name` 标签）查找匹配图标来定义的。这种匹配是通过预定义的图标集合来完成的。
+到源代码编辑器或源的链接:: `app.openshift.io/vcs-ur`i 注解用于创建源代码编辑器的链接。
+节点连接器:: `app.openshift.io/connects-to` 注解用于连接节点。
+应用程序分组:: `app.kubernetes.io/part-of=<appname>` 标签用于对应用程序、服务和组件进行分组。

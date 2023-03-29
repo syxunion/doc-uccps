@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-configuring
+[id="nodes-pods-configuring"]
+= 为 pod 配置统信容器云管理平台
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+作为管理员，您可以为 pod 创建和维护高效的集群。
+
+通过确保集群高效运行，您可以使用一些工具为开发人员提供更好的环境，例如，pod 退出时的行为，确保始终有所需数量的 pod 在运行，何时重启设计为只运行一次的 pod，限制 pod 可以使用的带宽，以及如何在中断时让 pod 保持运行。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-pods-configuring-restart.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-configuring-bandwidth.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-pod-disruption-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-pod-disruption-configuring.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configuring-pod-critical.adoc[leveloffset=+1]
+
+// modules/nodes-pods-configuring-run-once.adoc[leveloffset=+1]
+
+

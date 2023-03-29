@@ -1,0 +1,271 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/rollback-to-openshift-sdn.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ovn-kubernetes-rollback_{context}"]
+= 将默认 CNI 网络供应商回滚到 OpenShift SDN
+
+作为集群管理员，您可以将集群回滚到 OpenShift SDN Container Network Interface（CNI）集群网络供应商。在回滚过程中，您必须重新引导集群中的每个节点。
+
+[重要]
+====
+只有迁移到 OVN-Kubernetes 失败时才会回滚到 OpenShift SDN。
+====
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+* 在使用 OVN-Kubernetes CNI 集群网络供应商配置的基础架构上安装集群。
+
+.流程
+
+. 停止由 Machine Config Operator（MCO）管理的所有机器配置池：
+
+** 停止 master 配置池：
++
+[source,terminal]
+----
+$ oc patch MachineConfigPool master --type='merge' --patch \
+  '{ "spec": { "paused": true } }'
+----
+
+** 停止 worker 机器配置池：
++
+[source,terminal]
+----
+$ oc patch MachineConfigPool worker --type='merge' --patch \
+  '{ "spec":{ "paused" :true } }'
+----
+
+. 要开始迁移，请输入以下命令将集群网络供应商重新设置为 OpenShift SDN：
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type='merge' \
+  --patch '{ "spec": { "migration": { "networkType": "OpenShiftSDN" } } }'
+
+$ oc patch Network.config.openshift.io cluster --type='merge' \
+  --patch '{ "spec": { "networkType": "OpenShiftSDN" } }'
+----
+
+. 可选： 您可以自定义 OpenShift SDN 的以下设置，以满足您的网络基础架构的要求：
++
+--
+* 最大传输单元（MTU）
+* VXLAN 端口
+--
++
+要自定义之前记录的设置或其中的一个设置，进行自定义并输入以下命令。如果您不需要更改默认值，请从补丁中省略该键。
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge \
+  --patch '{
+    "spec":{
+      "defaultNetwork":{
+        "openshiftSDNConfig":{
+          "mtu":<mtu>,
+          "vxlanPort":<port>
+    }}}}'
+----
++
+--
+`mtu`::
+VXLAN 覆盖网络的 MTU。这个值通常是自动配置的；但是，如果集群中的节点没有都使用相同的 MTU，那么您必须将此值明确设置为比最小节点 MTU 的值小 50。
+`port`::
+VXLAN 覆盖网络的 UDP 端口。如果没有指定值，则默认为 `4789`。端口不能与 OVN-Kubernetes 使用的生成端口相同。Geneve 端口的默认值为 `6081`。
+--
++
+.patch 命令示例
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge \
+  --patch '{
+    "spec":{
+      "defaultNetwork":{
+        "openshiftSDNConfig":{
+          "mtu":1200
+    }}}}'
+----
+
+. 等待 Multus 守护进程集的 rollout 完成。
++
+[source,terminal]
+----
+$ oc -n openshift-multus rollout status daemonset/multus
+----
++
+Multus pod 的名称格式为 `multus-<xxxxx>`，其中 `<xxxxxxx>` 是字母的随机序列。pod 可能需要一些时间才能重启。
++
+.输出示例
+[source,text]
+----
+Waiting for daemon set "multus" rollout to finish: 1 out of 6 new pods have been updated...
+...
+Waiting for daemon set "multus" rollout to finish: 5 of 6 updated pods are available...
+daemon set "multus" successfully rolled out
+----
+
+. 要完成回滚，请重新引导集群中的每个节点。例如，您可以使用类似如下的 bash 脚本。这个脚本假定您可以使用 ssh 连接到每个主机，并将 sudo 配置为不提示输入密码。
++
+[source,bash]
+----
+#!/bin/bash
+
+for ip in $(oc get nodes  -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}')
+do
+   echo "reboot node $ip"
+   ssh -o StrictHostKeyChecking=no core@$ip sudo shutdown -r -t 3
+done
+----
++
+如果无法使用 ssh 访问，您可能无法通过基础架构供应商的管理门户重新引导每个节点。
+
+. 重新引导集群中的节点后，启动所有机器配置池：
++
+--
+* 启动 master 配置池：
++
+[source,terminal]
+----
+$ oc patch MachineConfigPool master --type='merge' --patch \
+  '{ "spec": { "paused": false } }'
+----
+
+* 启动 worker 配置池：
++
+[source,terminal]
+----
+$ oc patch MachineConfigPool worker --type='merge' --patch \
+  '{ "spec": { "paused": false } }'
+----
+--
++
+当 MCO 更新每个配置池中的机器时，它会重新引导每个节点。
++
+默认情况下，MCO 会在一个时间段内为每个池更新一台机器，因此迁移完成所需要的时间会随集群大小的增加而增加。
+
+. 确认主机上新机器配置的状态：
+.. 要列出机器配置状态和应用的机器配置名称，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe node | egrep "hostname|machineconfig"
+----
++
+.输出示例
+[source,terminal]
+----
+kubernetes.io/hostname=master-0
+machineconfiguration.openshift.io/currentConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/desiredConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/reason:
+machineconfiguration.openshift.io/state: Done
+----
++
+验证以下语句是否正确：
++
+--
+ * `machineconfiguration.openshift.io/state` 字段的值为 `Done`.
+ * `machineconfiguration.openshift.io/currentConfig` 字段的值等于 `machineconfiguration.openshift.io/desiredConfig` 字段的值。
+--
+
+.. 要确认机器配置正确，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get machineconfig <config_name> -o yaml
+----
++
+这里的 `<config_name>` 是 `machineconfiguration.openshift.io/currentConfig` 字段中机器配置的名称。
+
+. 确认迁移成功完成：
+
+.. 要确认默认 CNI 网络供应商是 OVN-Kubernetes，请输入以下命令。`status.networkType` 的值必须是 OpenShiftSDN。
++
+[source,terminal]
+----
+$ oc get network.config/cluster -o jsonpath='{.status.networkType}{"\n"}'
+----
+
+.. 要确认集群节点处于 `Ready` 状态，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get nodes
+----
+
+.. 如果节点一直处于 NotReady 状态，检查机器配置守护进程 pod 日志并解决所有错误。
+
+... 运行以下命令列出 pod：
++
+[source,terminal]
+----
+$ oc get pod -n openshift-machine-config-operator
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                         READY   STATUS    RESTARTS   AGE
+machine-config-controller-75f756f89d-sjp8b   1/1     Running   0          37m
+machine-config-daemon-5cf4b                  2/2     Running   0          43h
+machine-config-daemon-7wzcd                  2/2     Running   0          43h
+machine-config-daemon-fc946                  2/2     Running   0          43h
+machine-config-daemon-g2v28                  2/2     Running   0          43h
+machine-config-daemon-gcl4f                  2/2     Running   0          43h
+machine-config-daemon-l5tnv                  2/2     Running   0          43h
+machine-config-operator-79d9c55d5-hth92      1/1     Running   0          37m
+machine-config-server-bsc8h                  1/1     Running   0          43h
+machine-config-server-hklrm                  1/1     Running   0          43h
+machine-config-server-k9rtx                  1/1     Running   0          43h
+----
++
+配置守护进程 pod 的名称使用以下格式： `machine-config-daemon-<seq>`。<seq> 值是一个随机的 5 个字符的字母数字序列。
+
+... 要显示上一输出中显示的每个机器配置守护进程 pod 的 pod 日志，请输入以下命令：
++
+[source,terminal]
+----
+$ oc logs <pod> -n openshift-machine-config-operator
+----
++
+其中 `pod` 是机器配置守护进程 pod 的名称。
+
+... 解决上一命令输出中显示的日志中的任何错误。
+
+.. 要确认您的 pod 不在错误状态，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get pods --all-namespaces -o wide --sort-by='{.spec.nodeName}'
+----
++
+如果节点上的 pod 处于错误状态，请重新引导该节点。
+
+. 只有在迁移成功且集群处于良好状态时完成以下步骤：
+
+.. 要从 Cluster Network Operator 配置对象中删除迁移配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type='merge' \
+  --patch '{ "spec": { "migration": null } }'
+----
+
+.. 要删除 OVN-Kubernetes 配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type='merge' \
+  --patch '{ "spec": { "defaultNetwork": { "ovnKubernetesConfig":null } } }'
+----
+
+.. 要删除 OVN-Kubernetes 网络供应商命名空间，请输入以下命令：
++
+[source,terminal]
+----
+$ oc delete namespace openshift-ovn-kubernetes
+----

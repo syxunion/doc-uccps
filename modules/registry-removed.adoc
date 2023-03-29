@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_bare_metal/installing-bare-metal-network-customizations.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vmc/installing-vmc.adoc
+// * installing/installing_vmc/installing-vmc-customizations.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned.adoc
+// * installing/installing_vsphere/installing-restricted-networks-installer-provisioned-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * registry/configuring-registry-operator.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-baremetal.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-vsphere.adoc
+
+[id="registry-removed_{context}"]
+= 安装过程中删除的镜像 registry
+
+在不提供可共享对象存储的平台上，Uccp Image Registry Operator bootstraps 本身为 `Removed`。这允许 `utccp-installer` 在这些平台类型上完成安装。
+
+安装后，您必须编辑 Image Registry Operator 配置，将 `managementState` 从 `Removed` 切换到 Managed。
+
+[注意]
+====
+Prometheus 控制台提供了一个 `ImageRegistryRemoved` 警报，例如：
+
+"Image Registry has been removed. `ImageStreamTags`, `BuildConfigs` and `DeploymentConfigs` which reference `ImageStreamTags` may not work as expected. Please configure storage and update the config to `Managed` state by editing configs.imageregistry.operator.openshift.io."
+====

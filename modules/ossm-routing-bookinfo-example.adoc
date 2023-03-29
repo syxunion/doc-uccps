@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+[id="ossm-routing-bookinfo_{context}"]
+= Bookinfo routing tutorial
+
+Service Mesh Bookinfo 示例应用程序包含四个独立的微服务，每个服务都有多个版本。安装 Bookinfo 示例应用程序后， `reviews` 微服务的三个不同版本同时运行。
+
+当您在浏览器中访问 Bookinfo 应用 `/product` 页面并多次刷新时，有时书的评论输出中会包含星号分级，而其它时候则没有。如果没有可路由的显式默认服务版本，Service Mesh 会将请求路由到所有可用版本。
+
+本教程可帮助您应用将所有流量路由到微服务的 v1 （版本 1）的规则。之后，您可以根据 HTTP 请求标头值应用一条规则来路由流量。
+
+.先决条件：
+
+* 部署 Bookinfo 示例应用程序以使用以下示例。

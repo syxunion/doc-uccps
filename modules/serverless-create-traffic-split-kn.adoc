@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-traffic-management.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-traffic-split-kn_{context}"]
+= Creating a traffic split by using the Knative CLI
+
+使用 Knative (`kn`) CLI 创建流量分割功能，通过直接修改 YAML 文件，提供更精简且直观的用户界面。您可以使用 `kn service update` 命令在服务修订版本间分割流量。
+
+.先决条件
+
+* 在集群中安装了  {ServerlessOperatorName} 和 Knative Serving。
+* 已安装 Knative (`kn`) CLI.
+* 您已创建了 Knative 服务。
+
+.流程
+
+* 使用带有标准 `kn service update` 命令的 `--traffic` 标签指定服务修订版本以及您要路由到它的流量百分比：
++
+.Example command
+[source,terminal]
+----
+$ kn service update <service_name> --traffic <revision>=<percentage>
+----
++
+Where:
++
+** `<service_name>` 是您要为其配置流量路由的 Knative 服务的名称。
+** `<revision>` 是您要配置为接收流量百分比的修订版本。您可以使用 --tag 标志指定修订版本的名称，或指定分配给修订版本的标签。
+** `<percentage>` 是您要发送到指定修订版本的流量百分比。
+
+* 可选： `--traffic` 标志可在一个命令中多次指定。例如，如果您有一个标记为 `@latest` 的修订版本以及名为 `stable`, 的修订版本，您可以指定您要分割到每个修订版本的流量百分比：
++
+.示例命令
+[source,terminal]
+----
+$ kn service update example-service --traffic @latest=20,stable=80
+----
++
+如果您有多个修订版本，且没有指定应分割到最后一个修订版本的流量百分比， `--traffic` 标志可以自动计算此设置。例如，如果您有一个第三个版本名为 `example` ，则使用以下命令：
++
+.示例命令
+[source,terminal]
+----
+$ kn service update example-service --traffic @latest=10,stable=60
+----
++
+剩余的 30% 的流量被分成 `example` 修订，即使未指定。

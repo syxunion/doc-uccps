@@ -1,0 +1,21 @@
+:_content-type: ASSEMBLY
+[id="advanced-build-operations"]
+= 执行高级构建
+include::_attributes/common-attributes.adoc[]
+:context: advanced-build-operations
+
+toc::[]
+
+以下小节提供了有关高级构建操作的说明，包括设置构建资源和最长持续时间、将构建分配给节点、串联构建、修剪构建，以及构建运行策略。
+
+include::modules/builds-setting-build-resources.adoc[leveloffset=+1]
+
+include::modules/builds-setting-maximum-duration.adoc[leveloffset=+1]
+
+include::modules/builds-assigning-builds-to-nodes.adoc[leveloffset=+1]
+
+include::modules/builds-chaining-builds.adoc[leveloffset=+1]
+
+include::modules/builds-build-pruning.adoc[leveloffset=+1]
+
+include::modules/builds-build-run-policy.adoc[leveloffset=+1]

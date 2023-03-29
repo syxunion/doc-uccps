@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-custom-event-sources.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-odc-create-containersource_{context}"]
+= 使用 Web 控制台创建容器源
+
+在集群中安装 Knative Eventing 后，您可以使用 Web 控制台创建容器源。使用 {product-title} Web 控制台提供了一个简化且直观的用户界面来创建事件源。
+
+.先决条件
+
+* 已登陆到 {product-title}  Web 控制台。
+* {ServerlessOperatorName}, Knative Serving 和 Knative Eventing 已在 {product-title} 集群中安装。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title}  中创建应用程序和其他工作负载。
+
+.流程
+
+. 在 *开发者* 视角中，导航到 *+添加* → *事件源*。此时会显示  *事件源s* 页面。
+
+. 选择 *容器源* ，然后点 *创建 事件源*。此时会显示 *创建 事件源*  页面。
+
+. 使用 *Form view* 或 *YAML view* 配置 *容器源* 设置：
++
+[注意]
+====
+您可以在 *Form* view 和 *YAML* view 间进行切换。在不同视图间切换时数据会被保留。
+====
+.. 在 *Image* 字段中，输入您要在由容器源创建的容器中运行的镜像的 URI。
+.. 在 *Name* 字段中输入镜像的名称。
+.. 可选：在 *Arguments* 参数字段中，输入要传递给容器的任何参数。
+// Optional? Add options and what they mean.
+// Same for env variables...
+.. 可选：在 *Environment variables* 字段中，添加容器中要设置的任何环境变量。
+.. 在 *Sink* 部分，添加一个接收器，其中将容器源的事件路由到其中。如果使用 *Form* 视图，您可以从以下选项中选择：
+... 选择 *Resource* 使用频道、代理或服务作为事件源的接收器。
+... 选择 *URI* ，以指定容器源的事件路由到的位置。
+
+. 配置完容器源后，点 *创建*.

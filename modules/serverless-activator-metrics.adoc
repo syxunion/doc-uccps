@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-activator-metrics_{context}"]
+= 激活器指标
+
+您可以使用以下指标了解应用在流量通过激活器时如何响应。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`request_concurrency`
+|路由到激活器的并发请求数，或者报告周期内平均并发请求数
+|量表
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`request_count`
+|要激活的请求数。这些是从活动器处理程序实现的请求
+|计数
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`, |整数 （无单位）
+
+|`request_latencies`
+|已实现的路由请求的响应时间（毫秒）。
+|Histogram
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`
+|Milliseconds
+|===

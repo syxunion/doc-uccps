@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="odc-providing-project-permissions-using-developer-perspective_{context}"]
+= 使用开发者视角为您的项目提供访问权限
+
+您可以使用 *开发者* 视角中的 *Project* 视图来授予或撤销对项目的访问权限。
+
+.流程
+将用户添加到项目，并为用户提供 *Admin*、*Edit* 或 *View* 访问权限：
+
+. 在 *开发者* 视角中,导航到 *项目* 视图。
+. 在 *项目* 页面中,选择 *项目访问* 选项卡。
+. 点击 *添加访问* 为默认权限添加新权限行。
++
+.为项目添加用户权限
+image::odc_project_permissions.png[]
+. 输入用户名，点 *选择一个角色* 下拉列表，然后选择适当的角色。
+. 点击 *保存* 添加新权限。
+
+您还可以使用：
+
+* *选择一个角色* 下拉列表修改现有用户的访问权限。
+* *删除访问图标* 以完全删除现有用户对项目的访问权限。
+
+[注意]
+====
+此处基于角色的高级访问控制是在 *管理员视角* 的 *角色* 和 *角色绑定* 视图中管理的。
+====

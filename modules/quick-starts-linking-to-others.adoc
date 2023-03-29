@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+:_content-type: PROCEDURE
+[id="linking-to-other-quick-starts_{context}"]
+= 连接到其他快速开始
+
+.流程
+
+* 在 YAML 文件的 `nextQuickStart` 部分，提供您要链接的快速开始的 `name` 而不是 `displayName`。例如：
++
+[source,yaml]
+----
+nextQuickStart:
+  - add-healthchecks
+----

@@ -1,0 +1,121 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-managing-max-pods.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-managing-max-pods-about_{context}"]
+= 配置每个节点的最大 pod 数量
+
+有两个参数控制可调度到节点的 pod 数量上限，分别为 `podsPerCore` 和 `maxPods`。如果您同时使用这两个选项，则取两者中较小的限制来限制节点上的 pod 数。
+
+例如，如果将一个有 4 个处理器内核的节点上的 podsPerCore 设置为 10，则该节点上允许的 pod 数量上限为 40。
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` CRD 关联的标签：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: "2022-11-16T15:34:25Z"
+  generation: 4
+  labels:
+    pools.operator.machineconfiguration.openshift.io/worker: "" <1>
+  name: worker
+----
+<1> 标签会出现在 Labels 下。
++
+[提示]
+====
+如果标签不存在，请添加键/值对，例如：
+
+----
+$ oc label machineconfigpool worker custom-kubelet=small-pods
+----
+====
+
+.流程
+
+. 为配置更改创建自定义资源 (CR)。
++
+.`max-pods` CR 配置示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: set-max-pods <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/worker: "" <2>
+  kubeletConfig:
+    podsPerCore: 10 <3>
+    maxPods: 250 <4>
+----
+<1> 为 CR 分配一个名称。
+<2> 指定要应用配置更改的标签。
+<3> 根据节点的处理器内核数限制节点上可运行的 pod 数量。
+<4> 将节点上可运行的 pod 数量指定为一个固定值，而不考虑节点的属性。
++
+[注意]
+====
+将 podsPerCore 设置为 0 可禁用这个限制。
+====
++
+在上例中，podsPerCore 的默认值为 10，maxPods 的默认值则为 250。这意味着，除非节点有 25 个以上的内核，否则 podsPerCore 就是默认的限制因素。
+
+. 运行以下命令来创建 CR：
++
+[source,terminal]
+----
+$ oc create -f <file_name>.yaml
+----
+
+.验证
+
+. 列出 MachineConfigPool CRD 以查看是否应用了更改。如果 Machine Config Controller 抓取到更改，则 UPDATING 列会报告 True：
++
+[source,terminal]
+----
+$ oc get machineconfigpools
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     CONFIG                        UPDATED   UPDATING   DEGRADED
+master   master-9cc2c72f205e103bb534   False     False      False
+worker   worker-8cecd1236b33ee3f8a5e   False     True       False
+----
++
+更改完成后，UPDATED 列会报告 True。
++
+[source,terminal]
+----
+$ oc get machineconfigpools
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     CONFIG                        UPDATED   UPDATING   DEGRADED
+master   master-9cc2c72f205e103bb534   False     True       False
+worker   worker-8cecd1236b33ee3f8a5e   True      False      False
+----

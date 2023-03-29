@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+//nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: PROCEDURE
+[id="eco-resuming-node-maintenance-web-console_{context}"]
+= 使用 Web 控制台从维护模式恢复节点
+
+要从维护模式恢复节点，您可以使用 Web 控制台删除 `NodeMaintenance` 自定义资源(CR)。
+ 
+.先决条件
+
+* 以具有 `cluster-admin` 权限的用户身份登录。
+* 从 *OperatorHub* 安装 Node Maintenance Operator。
+
+.流程
+
+. 从 Web 控制台中的 *Administrator* 视角，导航到  *Operators* → *Installed Operators*.
+
+. 从 Operator 列表中选择 Node Maintenance Operator。
+
+. 在 *Node Maintenance* 选项卡中，选择您要删除的  `NodeMaintenance` CR 。
+
+. 点击节点末尾的 Options 菜单 kebab 并选择 *Delete NodeMaintenance*。
+
+.验证
+
+. 在 统信容器云管理平台 控制台中，点 *Compute → Nodes*.
+
+. 检查您删除 `NodeMaintenance` CR  的节点的 Status 列，并验证其状态是否为 `Ready`.

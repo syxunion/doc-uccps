@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/what-deployments-are.adoc
+
+[id="deployments-replicationcontrollers_{context}"]
+= 复制控制器
+
+复制控制器确保任何时候都运行指定数量的 pod 副本。如果 pod 退出或被删除，复制控制器会做出反应，实例化更多 pod 来达到定义的数量。同样，如果运行中的数量超过所需的数目，它会根据需要删除相应数量的 Pod，使其与定义的数量相符。
+
+复制控制器配置包括：
+
+* 需要的副本数量，可在运行时调整。
+* 创建复制 `Pod` 时要使用的 Pod 定义。
+* 用于标识受管 pod 的选择器。
+
+选择器是分配给由复制控制器管理的 pod 的一组标签。这些标签包含在复制控制器实例化的 `Pod` 定义中。复制控制器使用选择器来决定已在运行的 pod 实例数量，以便根据需要进行调整。
+
+复制控制器不会基于负载或流量执行自动扩展，因为复制控制器不会跟踪它们。相反，这需要由外部自动缩放器调整其副本数。
+
+以下是复制控制器的示例定义：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: frontend-1
+spec:
+  replicas: 1 
+  selector:   
+    name: frontend
+  template:   
+    metadata:
+      labels: 
+        name: frontend <5>
+    spec:
+      containers:
+      - image: openshift/hello-openshift
+        name: helloworld
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      restartPolicy: Always
+----

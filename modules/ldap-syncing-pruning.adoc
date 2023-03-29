@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+[id="ldap-syncing-pruning_{context}"]
+= 运行组修剪任务
+
+如果创建组的 LDAP 服务器上的记录已不存在，管理员也可以选择从统信容器云管理平台记录中移除这些组。修剪任务将接受用于同步任务的相同同步配置文件以及白名单或黑名单。
+
+例如：
+
+[source,terminal]
+----
+$ oc adm prune groups --sync-config=/path/to/ldap-sync-config.yaml --confirm
+----
+
+[source,terminal]
+----
+$ oc adm prune groups --whitelist=/path/to/whitelist.txt --sync-config=/path/to/ldap-sync-config.yaml --confirm
+----
+
+[source,terminal]
+----
+$ oc adm prune groups --blacklist=/path/to/blacklist.txt --sync-config=/path/to/ldap-sync-config.yaml --confirm
+----

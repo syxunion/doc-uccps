@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-overcommit-node-disable_{context}"]
+= 禁用节点过量使用
+
+启用之后，可以在每个节点上禁用过量使用。
+
+.流程
+
+要在节点中禁用过量使用，请在该节点上运行以下命令：
+
+[source,terminal]
+----
+$ sysctl -w vm.overcommit_memory=0
+----

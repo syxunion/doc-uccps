@@ -1,0 +1,133 @@
+// Module included in the following assemblies:
+//
+// * registry/configuring_registry_storage/configuring-registry-storage.adoc
+
+:_content-type: PROCEDURE
+[id="installation-registry-osp-creating-custom-pvc_{context}"]
+= 在有栈上运行的集群中使用自定义存储配置镜像 registry
+
+在 Uniontech UStack Platform（有栈）上安装集群后，您可以使用位于 registry 存储的特定可用区的 Cinder 卷。
+
+.流程
+
+. 创建一个 YAML 文件，用于指定要使用的存储类和可用性区域。例如：
++
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: custom-csi-storageclass
+provisioner: cinder.csi.openstack.org
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  availability: <availability_zone_name>
+----
++
+[注意]
+====
+统信容器云管理平台不验证您选择的可用区是否存在。应用配置前，请验证可用性区域的名称。
+====
+
+. 在命令行中应用配置：
++
+[source,terminal]
+----
+$ oc apply -f <storage_class_file_name>
+----
++
+.输出示例
+[source,terminal]
+----
+storageclass.storage.k8s.io/custom-csi-storageclass created
+----
+
+. 创建一个 YAML 文件，用于指定使用存储类和 `openshift-image-registry` 命名空间的持久性卷声明（PVC）。例如：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: csi-pvc-imageregistry
+  namespace: openshift-image-registry <1>
+  annotations:
+    imageregistry.openshift.io: "true"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi <2>
+  storageClassName: <your_custom_storage_class> <3>
+----
+<1> 输入命名空间 `openshift-image-registry`。此命名空间允许 Cluster Image Registry Operator 使用 PVC。
+<2> 可选：调整卷大小。
+<3> 输入您创建的存储类的名称。
+
+. 在命令行中应用配置：
++
+[source,terminal]
+----
+$ oc apply -f <pvc_file_name>
+----
++
+.输出示例
+[source,terminal]
+----
+persistentvolumeclaim/csi-pvc-imageregistry created
+----
+
+. 将镜像 registry 配置中的原始持久性卷声明替换为新声明：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster --type 'json' -p='[{"op": "replace", "path": "/spec/storage/pvc/claim", "value": "csi-pvc-imageregistry"}]'
+----
++
+.输出示例
+[source,terminal]
+----
+config.imageregistry.operator.openshift.io/cluster patched
+----
++
+接下来的几分钟内，配置将更新。
+
+.验证
+
+确认 registry 正在使用您定义的资源：
+
+. 验证 PVC 声明值是否与您在 PVC 定义中提供的名称相同：
++
+[source,terminal]
+----
+$ oc get configs.imageregistry.operator.openshift.io/cluster -o yaml
+----
++
+.输出示例
+[source,terminal]
+----
+...
+status:
+    ...
+    managementState: Managed
+    pvc:
+      claim: csi-pvc-imageregistry
+...
+----
+
+. 验证 PVC 的状态是否为 `Bound`：
++
+[source,terminal]
+----
+$ oc get pvc -n openshift-image-registry csi-pvc-imageregistry
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                   STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS             AGE
+csi-pvc-imageregistry  Bound    pvc-72a8f9c9-f462-11e8-b6b6-fa163e18b7b5   100Gi      RWO            custom-csi-storageclass  11m
+----

@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="serverless-functions-setup"]
+= 设置 Uccps Serverless 功能
+:context: serverless-functions-setup
+
+toc::[]
+
+为改进应用程序代码部署的过程，您可以使用统信容器云管理平台无服务器 部署无状态、事件驱动的功能，作为统信容器云管理平台上的 Knative 服务。如果要开发功能，您必须完成设置步骤。
+
+[id="prerequisites_serverless-functions-setup"]
+== 先决条件
+
+要在集群中启用 Uccps Serverless 功能，您必须完成以下步骤：
+
+* 在集群中安装了 Uccps  Serverless Operator 和 Knative Serving。
++
+[注意]
+====
+功能部署为 Knative 服务。如果要将事件驱动的架构与您的功能搭配使用，还必须安装 Knative Eventing。
+====
+* 已安装 oc CLI
+
+* 已安装Knative (kn) CLI。安装 Knative CLI 可让您使用 kn func 命令来创建和管理功能。
+
+* 已安装 Docker Container Engine 或 Podman 版本 3.4.7 或更高版本
+
+* 您可以访问可用的镜像 registry。
+
+* 如果您使用 Quay.iom 作为镜像 registry，您必须确保存储库不是私有的，或者按照统信容器云管理平台文档中有关允许 Pod 引用其他安全 registry 中的镜像的内容进行操作。
+
+include::modules/serverless-functions-podman.adoc[leveloffset=+1]

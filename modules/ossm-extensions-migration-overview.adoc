@@ -1,0 +1,90 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-extensions-migration-overview_{context}"]
+= Migrating from `ServiceMeshExtension` to `WasmPlugin` resources
+
+`ServiceMeshExtension` 中已弃用的{SMProductName} version 2.2, API 已在  {SMProductName} version 2.3中删除。如果使用  `ServiceMeshExtension` API，则必须迁移到 `WasmPlugin` API 来继续使用 WebAssembly 扩展。
+
+API 非常相似。迁移由两个步骤组成：
+
+. 重命名您的插件文件并更新模块打包。
+
+. 创建引用更新的容器镜像的 WasmPlugin 资源。
+
+[id="ossm-extensions-migration-api-changes_{context}"]
+== API changes
+
+新的`WasmPlugin` API 与 `ServiceMeshExtension` 类似，但有一些区别，特别是在字段名称中：
+
+
+.`ServiceMeshExtensions` and `WasmPlugin` 之间的字段变化
+[options="header"]
+[cols="a, a"]
+|===
+|ServiceMeshExtension |WasmPlugin
+|`spec.config`
+|`spec.pluginConfig`
+
+|`spec.workloadSelector`
+|`spec.selector`
+
+|`spec.image`
+|`spec.url`
+
+//Question about the case here, is WasmPlugin app caps?
+|`spec.phase` 有效值: PreAuthN, PostAuthN, PreAuthZ, PostAuthZ, PreStats, PostStats
+|`spec.phase` 有效值: <empty>, AUTHN, AUTHZ, STATS
+|===
+
+以下是如何将 `ServiceMeshExtension` 资源转换为 `WasmPlugin` 资源的示例。
+
+.ServiceMeshExtension 资源
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: header-append
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      app: httpbin
+  config:
+    first-header: some-value
+    another-header: another-value
+  image: quay.io/maistra-dev/header-append-filter:2.2
+  phase: PostAuthZ
+  priority: 100
+----
+
+.新的 WasmPlugin 资源等同于上面的 ServiceMeshExtension
+[source,yaml]
+----
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: header-append
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  url: oci://quay.io/maistra-dev/header-append-filter:2.2
+  phase: STATS
+  pluginConfig:
+    first-header: some-value
+    another-header: another-value
+----
+
+[id="ossm-extensions-migration-format-changes_{context}"]
+== Container image format changes
+
+新的 `WasmPlugin` 容器镜像格式与  `ServiceMeshExtensions` 类似，其区别如下：
+
+* `ServiceMeshExtension` 容器格式需要在容器文件系统的根目录中名为 `manifest.yaml` 的元数据文件。 `WasmPlugin` 容器格式不需要 `manifest.yaml` 文件。
+
+* 之前可能具有任何文件名的  `.wasm` f 文件（实际插件）必须命名为 `plugin.wasm`，且必须位于容器文件系统的根目录中。

@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-generate-kustomize_{context}"]
+= kustomize
+
+`generate kustomize` 子命令包含为 Operator 生成 Kustomize 数据的子命令。
+
+[id="osdk-cli-ref-generate-kustomize-manifests_{context}"]
+== manifests
+
+`generate kustomize manifests` 子命令生成或重新生成 Kustomize 基础以及 `config/manifests` 目录中的 `kustomization.yaml` 文件，用于其他 Operator SDK 命令构建捆绑包清单。在默认情况下，这个命令会以互动方式询问 UI 元数据，即清单基础的重要组件，除非基础已存在或设置了 `--interactive=false` 标志。
+
+.`generate kustomize manifests` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`--apis-dir` (string)
+|API 类型定义的根目录。
+
+|`-h`, `--help`
+|`generate kustomize manifests` 的帮助信息。
+
+|`--input-dir` (string)
+|包含现有 Kustomize 文件的目录。
+
+|`--interactive`
+|当设置为 false 时，如果没有 Kustomize 基础，则会出现交互式命令提示符来接受自定义元数据。
+
+|`--output-dir` (string)
+|写入 Kustomize 文件的目录。
+
+|`--package` (string)
+|软件包名称。
+
+|`-q`, `--quiet`
+|在静默模式下运行。
+
+|===

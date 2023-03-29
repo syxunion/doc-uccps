@@ -1,0 +1,41 @@
+////
+Module included in the following assemblies:
+-ossm-vs-community.adoc
+////
+
+[id="ossm-multitenant-install_{context}"]
+= Multitenant installations
+
+上游 Istio 采用单一租户方法，{SMProductName} 支持集群中的多个独立的 control plane。 {SMProductName} 使用多租户 Operator 来管理 control plane 生命周期。
+
+{SMProductName} 默认安装多租户control plane。您可以指定可以访问 {SMProductShortName} 项目，并将 {SMProductShortName} 与其他 control plane 实例隔离。
+
+[id="ossm-mt-vs-clusterwide_{context}"]
+== Multitenancy versus cluster-wide installations
+
+多租户安装和集群范围安装之间的主要区别在于使用的权限范围。组件不再使用集群范围的 Role Based Access Control（RBAC）资源 `ClusterRoleBinding`.
+
+`ServiceMeshMemberRoll` `members` 列表中的每个项目都将为每个与 control plane 部署关联的服务帐户都有一个 `RoleBinding` 每个 control plane 部署只会监视这些成员项目。每个成员项目都有一个 `maistra.io/member-of` 标签，其中 `member-of` 值是包含 control plane 安装的项目。
+
+{SMProductName} 配置每个成员项目以确保自身、control plane 和其它成员项目间的网络连接。具体的配置根据 {product-title} 软件定义网络 (SDN) 的配置而有所不同。更多详情请参阅“关于 OpenShift SDN”。
+
+如果 {product-title} 集群被配置为使用 SDN 插件：
+
+* *`NetworkPolicy`*: {SMProductName} 在每个成员项目中创建一个 `NetworkPolicy` 资源，允许从其它成员和 control plane 到 pod 的入站网络数据。如果从 {SMProductShortName} 中删除了一个成员，则这个 `NetworkPolicy` 资源会从项目中删除。
++
+[NOTE]
+====
+这也限制了到成员项目的入站网络数据。如果需要来自非成员项目的入站网络数据，则需要创建一个 `NetworkPolicy` 来允许这些流量通过.
+====
+
+* *Multitenant*: {SMProductName} 将每个成员项目的 `NetNamespace` 加入到 control plane 项目的 `NetNamespace`  (相当于运行 `oc adm pod-network join-projects --to control-plane-project member-project`)。如果您从 {SMProductShortName}　中删除一个成员，它的 `NetNamespace` 与 control plane 分离 (相当于运行 `oc adm pod-network isolate-projects member-project`)。
+
+* *Subnet*: 没有执行其他配置
+
+[id="ossm-cluster-scoped-resources_{context}"]
+== Cluster scoped resources
+
+上游 Istio 会依赖于两个集群范围的资源。 `MeshPolicy` 和 `ClusterRbacConfig` 。它们与多租户集群不兼容并已被替换，如下所述。
+
+* _ServiceMeshPolicy_　替换了用于配置 control-plane-wide 验证策略的 MeshPolicy。 这必须与 control plane 在同一个项目中创建。
+* _ServicemeshRbacConfig_ 替换 ClusterRbacConfig 以配置基于 control-plane 范围角色的访问控制。这必须与 control plane 在同一个项目中创建。

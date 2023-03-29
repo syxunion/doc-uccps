@@ -1,0 +1,39 @@
+:_content-type: ASSEMBLY
+[id="understanding-multiple-networks"]
+= 了解多网络
+include::_attributes/common-attributes.adoc[]
+:context: understanding-multiple-networks
+
+toc::[]
+
+在 Kubernetes 中，容器联网由实现了 Container Network Interface (CNI) 的网络插件负责。
+
+统信容器云管理平台 使用 Multus CNI 插件来实现对 CNI 插件的链接。在集群安装过程中，您要配置 _default_ pod 网络。默认网络处理集群中的所有一般网络流量。您可以基于可用的 CNI 插件定义额外网络，并将一个或多个这种网络附加到 pod。您可以根据需要为集群定义多个额外网络。这可让您灵活地配置提供交换或路由等网络功能的 pod。
+
+[id="additional-network-considerations"]
+== 额外网络使用场景
+
+您可以在需要网络隔离的情况下使用额外网络，包括分离数据平面与控制平面。隔离网络流量对以下性能和安全性原因很有用：
+
+性能:: 您可以在两个不同的平面上发送流量，以管理每个平面上流量的多少。
+安全性:: 您可以将敏感的流量发送到专为安全考虑而管理的网络平面，也可隔离不能在租户或客户间共享的私密数据。
+
+集群中的所有 pod 仍然使用集群范围的默认网络，以维持整个集群中的连通性。每个 pod 都有一个 `eth0` 接口，附加到集群范围的 pod 网络。您可以使用 `oc exec -it <pod_name> -- ip a` 命令来查看 pod 的接口。如果您添加使用 Multus CNI 的额外网络接口，则名称为 `net1`、`net2`、…​、`netN`。
+
+要将额外网络接口附加到 pod，您必须创建配置来定义接口的附加方式。您可以使用 `NetworkAttachmentDefinition` 自定义资源（CR）来指定各个接口。各个 CR 中的 CNI 配置定义如何创建该接口。
+
+[id="additional-networks-provided"]
+== 统信容器云管理平台 中的额外网络
+
+统信容器云管理平台 提供以下 CNI 插件，以便在集群中创建额外网络：
+
+ * *bridge*: xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-bridge-object_configuring-additional-network[配置基于网桥的额外网络]，
+以允许同一主机上的 pod 相互通信，并与主机通信。
+
+* *host-device*: xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-host-device-object_configuring-additional-network[配置 host-device 额外网络，] 以允许 pod 访问主机系统上的物理以太网网络设备。
+
+ * *ipvlan*: xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-ipvlan-object_configuring-additional-network[配置基于 ipvlan 的额外网络，] 以允许主机上的 Pod 与其他主机和那些主机上的 pod 通信，这类似于基于 macvlan 的额外网络。与基于 macvlan 的额外网络不同，每个 pod 共享与父级物理网络接口相同的 MAC 地址。
+
+ * *macvlan*: xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-macvlan-object_configuring-additional-network[配置基于 macvlan 的额外网络，] 以允许主机上的 Pod 通过使用物理网络接口与其他主机和那些主机上的 Pod 通信。附加到基于 macvlan 的额外网络的每个 pod 都会获得一个唯一的 MAC 地址。
+ 
+ * *SR-IOV*: xref:../../networking/hardware_networks/about-sriov.adoc#about-sriov[配置基于 SR-IOV 的额外网络，] 以允许 pod 附加到主机系统上支持 SR-IOV 的硬件的虚拟功能(VF)接口。

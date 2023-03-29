@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-pod-affinity.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-pod-anti-affinity-configuring_{context}"]
+= 配置 pod 反关联性规则
+
+以下步骤演示了一个简单的双 pod 配置，它创建一个带有某标签的 pod，以及一个使用反关联性偏好规则来尝试阻止随着该 pod 一起调度的 pod。
+
+.流程
+
+. 创建在 Pod spec 中带有特定标签的 pod:
++
+[source,yaml]
+----
+$ cat team4.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-s2
+  labels:
+    security: S2
+spec:
+  containers:
+  - name: security-s2
+    image: docker.io/ocpqe/hello-pod
+----
+
+. 在创建其他 pod 时，编辑 Pod spec 来设置以下参数：
+
+. 使用 `podAntiAffinity` 小节配置  `requiredDuringSchedulingIgnoredDuringExecution` 参数或  `preferredDuringSchedulingIgnoredDuringExecution` 参数：
++
+.. 为节点指定一个 1 到 100 的权重。优先选择权重最高的节点。
++
+..指定必须满足的键和值。如果您希望新 pod 不与另一个 pod 一起调度，请使用与第一个 pod 上标签相同的 key 和 value 参数。
++
+[source,yaml]
+----
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+----
++
+.. 为偏好规则指定一个 1 到 100 的权重。
++
+.. 指定一个 operator。运算符可以是 `In`, `NotIn`, `Exists`, 或 `DoesNotExist` 例如，使用运算符 In 来要求节点上存在该标签。
+
+. 指定 topologyKey，这是一个预填充的 Kubernetes 标签，供系统用于表示这样的拓扑域。
+
+. 创建 pod。
++
+[source,terminal]
+----
+$ oc create -f <pod-spec>.yaml
+----

@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+[id="configurable-monitoring-components_{context}"]
+= 可配置的监控组件
+
+下表显示了您可以配置的监控组件，以及 `cluster-monitoring-config` 和  `user-workload-monitoring-config` `ConfigMap` 中用来指定这些组件的键：
+.可配置的监控组件
+[options="header"]
+|====
+|组件 |cluster-monitoring-config配置映射键|user-workload-monitoring-config 配置映射键
+|Prometheus Operator |`prometheusOperator` |`prometheusOperator`
+|Prometheus |`prometheusK8s` |`prometheus`
+|Alertmanager |`alertmanagerMain` |
+|kube-state-metrics |`kubeStateMetrics` |
+|openshift-state-metrics |`openshiftStateMetrics` |
+|Grafana |`grafana` |
+|Telemeter Client |`telemeterClient` |
+|Prometheus Adapter |`k8sPrometheusAdapter` |
+|Thanos Querier |`thanosQuerier` |
+|Thanos Ruler | |`thanosRuler`
+|====
+
+[注意]
+====
+Prometheus 键在 `cluster-monitoring-config` `ConfigMap` 对象中称为 `prometheusK8s` ，在 `user-workload-monitoring-config` `ConfigMap` 对象中称为 `prometheus`
+====

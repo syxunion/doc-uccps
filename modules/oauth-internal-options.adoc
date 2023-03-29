@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-internal-oauth.adoc
+
+[id="oauth-internal-options_{context}"]
+= 内部 OAuth 服务器选项
+
+内部 OAuth 服务器可使用几个配置选项。
+
+[id="oauth-token-duration_{context}"]
+== OAuth 令牌期间选项
+
+内部 OAuth 服务器生成两种令牌：
+
+[cols="1,2",options="header"]
+|===
+
+|令牌
+|描述
+
+|访问令牌
+|存在时间较长的令牌，用于授权对 API 的访问。
+
+|授权代码
+|存在时间较短的令牌，仅用于交换访问令牌。
+
+|===
+
+您可以为两种类型的令牌配置默认的期间。若有需要，可使用 OAuthClient 对象定义覆盖访问令牌的期间。
+
+[id="oauth-grant-options_{context}"]
+== OAuth 授权选项
+
+当 OAuth 服务器收到用户之前没有授予权限的客户端的令牌请求时，OAuth 服务器采取的操作取决于 OAuth 客户端的授权策略。
+
+请求令牌的 OAuth 客户端必须提供自己的授权策略。
+
+您可以应用以下默认方法：
+
+[cols="1,2",options="header"]
+|===
+
+|授权选项
+|描述
+
+|`auto`
+|自动批准授权并重试请求。
+
+|`prompt`
+|提示用户批准或拒绝授权。
+
+|===

@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-plugins.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-plugins-install_{context}"]
+= 启用设备管理器
+
+启用设备管理器来实现设备插件，在不更改上游代码的情况下公告专用硬件。
+
+设备管理器提供了一种使用称为设备插件的插件来广告专用节点硬件资源的机制。
+
+. 输入以下命令为您要配置的节点类型获取与静态 `MachineConfigPool` CRD 关联的标签。执行以下步骤之一：
+
+.. 查看机器配置：
++
+[source,terminal]
+----
+# oc describe machineconfig <name>
+----
++
+例如：
++
+[source,terminal]
+----
+# oc describe machineconfig 00-worker
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         00-worker
+Namespace:
+Labels:       machineconfiguration.openshift.io/role=worker <1>
+----
+<1> 设备管理器所需标签。
+
+.流程
+
+. 为配置更改创建自定义资源 (CR)。
++
+.设备管理器 CR 配置示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: devicemgr <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+       machineconfiguration.openshift.io: devicemgr <2>
+  kubeletConfig:
+    feature-gates:
+      - DevicePlugins=true <3>
+----
+<1> 为 CR 分配一个名称。
+<2> 输入来自机器配置池的标签。
+<3> 将 `DevicePlugins` 设置为 'true`.
+
+. 创建设备管理器：
++
+[source,terminal]
+----
+$ oc create -f devicemgr.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+kubeletconfig.machineconfiguration.openshift.io/devicemgr created
+----
+
+. 通过确认节点上已创建了 *_/var/lib/kubelet/device-plugins/kubelet.sock_* 确保已启用了设备管理器。这是设备管理器 gRPC 服务器在其上侦听新插件注册的 UNIX 域套接字。只有启用了设备管理器，才会在 Kubelet 启动时创建此 sock 文件。

@@ -1,0 +1,34 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: CONCEPT
+[id="serverless-quarkus-cloudevent-attributes_{context}"]
+= CloudEvent 属性
+
+如果您需要读取或写入 CloudEvent 的属性，如 `type` 或 `subject` 您可以使用 `CloudEvent<T>` 通用接口和 `CloudEventBuilder` 构建器。`<T>` 类型参数必须是允许的类型之一。
+
+在以下示例中， `CloudEventBuilder` 用于返回处理订购的成功或失败：
+
+[source,java]
+----
+public class Functions {
+
+    private boolean _processPurchase(Purchase purchase) {
+        // do stuff
+    }
+
+    public CloudEvent<Void> processPurchase(CloudEvent<Purchase> purchaseEvent) {
+        System.out.println("subject is: " + purchaseEvent.subject());
+
+        if (!_processPurchase(purchaseEvent.data())) {
+            return CloudEventBuilder.create()
+                    .type("purchase.error")
+                    .build();
+        }
+        return CloudEventBuilder.create()
+                .type("purchase.success")
+                .build();
+    }
+}
+----

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * storage/expanding-persistent-volume.adoc
+
+:_content-type: PROCEDURE
+[id="expanding-pvc-filesystem_{context}"]
+= 使用文件系统扩展持久性卷声明（PVC）
+
+对基于需要调整文件系统大小的卷类型（如 GCE、PD、EBS 和 Cinder）的 PVC 进行扩展分为两个步骤。这个过程包括在云供应商中扩展卷对象，然后在实际节点中扩展文件系统。
+
+只有在使用这个卷启动新的 pod 时，才会在该节点中扩展文件系统。
+
+.先决条件
+
+* 控制 `StorageClass` 对象必须将 `allowVolumeExpansion` 设置为 true。
+
+.流程
+
+. 通过编辑 `spec.resources.requests` 来修改 PVC 并请求一个新的大小。例如，下面的命令将 `ebs`  PVC 扩展到 8 Gi。
++
+[source,yaml]
+----
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ebs
+spec:
+  storageClass: "storageClassWithFlagSet"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi <1>
+----
+<1> 将 `spec.resources.requests` 改为一个较大的值来扩展 PVC。
+
+. 重新定义云供应商对象大小后， PVC 被设置为 `FileSystemResizePending`。输入以下命令检查条件：
++
+[source,terminal]
+----
+$ oc describe pvc <pvc_name>
+----
+
+. 当云供应商对象完成重新定义大小时，`PersistentVolume` 对象中的 `PersistentVolume.Spec.Capacity` 会显示新请求的大小。此时，您可从 PVC 创建或重新创建新 Pod 来完成文件系统大小调整。当 Pod 运行后，新请求的大小就可用，同时 `FileSystemResizePending` 条件从 PVC 中删除。

@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * web_console/dynamic-plug-ins.adoc
+
+:_content-type: PROCEDURE
+[id="adding-tab-to-pods-page_{context}"]
+= 在 Pod 页面中添加标签页
+以下流程在 *Pod Details* 页中添加一个标签页，作为插件的一个示例扩展。
+
+.流程
+
+. 在 `console-extensions.json` 文件中添加以下内容：
++
+[source,json]
+
+----
+{
+  "type": "console.tab/horizontalNav",
+  "properties": {
+    "page": {
+      "name": "Example Tab",
+      "href": "example"
+    },
+    "model": {
+      "group": "core",
+      "version": "v1",
+      "kind": "Pod"
+    },
+    "component": { "$codeRef": "ExampleTab" }
+  }
+}
+----
+
+. 编辑 `package.json` 文件以包括以下更改：
++
+[source,json]
+
+----
+        "exposedModules": {
+            "ExamplePage": "./components/ExamplePage",
+            "ExampleTab": "./components/ExampleTab"
+        }
+----
+
+. 通过创建新文件 `src/components/ExampleTab.tsx` 并添加以下脚本，在 *Pod* 页面上的一个新自定义标签页中写入信息：
++
+[source,tsx]
+
+----
+import * as React from 'react';
+
+export default function ExampleTab() {
+    return (
+        <p>This is a custom tab added to a resource using a dynamic plugin.</p>
+    );
+}
+----
+
+.验证
+* 访问 *Pod* 页面查看添加的选项卡。

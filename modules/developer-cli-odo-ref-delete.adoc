@@ -1,0 +1,51 @@
+:_content-type: REFERENCE
+[id="odo-delete_{context}"]
+= odo delete
+
+
+`odo delete` 命令对删除由 `odo` 管理的资源很有用。
+
+== 删除组件
+
+要删除 _devfile_ 组件，请运行 `odo delete` 命令：
+
+[source,terminal]
+----
+$ odo delete
+----
+
+如果组件已推送到集群，则组件将从集群中删除，以及其依赖存储、URL、secret 和其他资源。如果组件还没有推送，则命令退出并显示一个错误，表示它无法找到集群中的资源。
+
+使用 `-f` 或 `--force` 标志以避免出现确认问题。
+
+== 取消部署 devfile Kubernetes 组件
+
+要取消部署 devfile Kubernetes 组件（已使用 `odo deploy` 部署 ）,请使用 `--deploy` 标志执行 `odo delete` 命令：
+
+[source,terminal]
+----
+$ odo delete --deploy
+----
+
+使用 `-f` 或 `--force` 标志以避免出现确认问题。
+
+== 全部删除
+
+要删除包括以下项目的所有工件，请运行带有 `--all` 标记的 `odo delete` 命令：
+
+* _devfile_ 组件
+* 使用 `odo deploy` 命令部署的 devfile Kubernetes 组件
+* Devfile
+* 本地配置
+
+[source,terminal]
+----
+$ odo delete --all
+----
+
+== Available flags
+
+`-f`, `--force`:: 使用此标志以避免出现确认问题。
+`-w`, `--wait`:: 使用此标志等待组件删除和任何依赖项。取消部署时，此标志不起作用。
+
+关于 _Common Flags_ 的文档提供有关可用于命令的标记的更多信息。

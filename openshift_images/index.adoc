@@ -1,0 +1,65 @@
+:_content-type: ASSEMBLY
+[id="overview-of-images"]
+= 镜像概述
+include::_attributes/common-attributes.adoc[]
+:context: overview-of-images
+
+toc::[]
+
+[id="about-containers-images-and-image-streams"]
+== 了解容器、镜像和镜像流
+当您设置为创建和管理容器化软件时，务必要理解容器、镜像和镜像流等重要概念。镜像包含一组准备就绪可运行的软件，容器是容器镜像的一个运行实例。镜像流提供了一种方法来存储相同基本镜像的不同版本。这些不同版本通过相同镜像名称的不同标签（tag）来表示。
+
+include::modules/images-about.adoc[leveloffset=+1]
+你可以 xref:../openshift_images/create-images.adoc#creating-images[创建], xref:../openshift_images/managing_images/managing-images-overview.adoc#managing-images-overview[管理], and xref:../openshift_images/using_images/using-images-overview.adoc#using-images-overview[使用] container images.
+
+include::modules/images-image-registry-about.adoc[leveloffset=+1]
+
+include::modules/images-container-repository-about.adoc[leveloffset=+1]
+
+include::modules/images-tag.adoc[leveloffset=+1]
+
+include::modules/images-id.adoc[leveloffset=+1]
+
+include::modules/containers-about.adoc[leveloffset=+1]
+
+include::modules/images-imagestream-use.adoc[leveloffset=+1]
+
+你可以 xref:../openshift_images/image-streams-manage.adoc#managing-image-streams[管理] 镜像流, xref:../openshift_images/using-imagestreams-with-kube-resources.adoc#using-imagestreams-with-kube-resources[将镜像流 与 Kubernetes 资源] 一起使用 并触发 xref:../openshift_images/triggering-updates-on-imagestream-changes.adoc#triggering-updates-on-imagestream-changes[镜像流更新].
+
+include::modules/images-imagestream-tag.adoc[leveloffset=+1]
+
+include::modules/images-imagestream-image.adoc[leveloffset=+1]
+
+include::modules/images-imagestream-trigger.adoc[leveloffset=+1]
+
+[id="how-you-can-use-the-cluster-samples-operator"]
+== 如何使用 Cluster Samples Operator
+
+在初始启动时，Operator 会创建默认样本资源来初始化镜像流和模板的创建过程。您可以使用 Cluster Samples Operator 管理存储在 Uccps 命名空间中的示例镜像流和模板。
+
+作为集群管理员，您可以使用 Cluster Samples Operator：
+
+** xref:../openshift_images/configuring-samples-operator.adoc#configuring-samples-operator[配置 Operator].
+** xref:../openshift_images/samples-operator-alt-registry.adoc#samples-operator-alt-registry[使用带有备用 registry 的 Operator].
+
+
+[id="about-templates"]
+== 关于模板
+
+模板是要复制的对象的定义。您可以使用 xref:../openshift_images/using-templates.adoc#using-templates[模板] 来构建和部署配置。
+
+[id="how-you-can-use-ruby-on-rails"]
+== 如何使用 Ruby on Rails
+
+作为开发人员，您可以使用 xref:../openshift_images/templates-using-ruby-on-rails.adoc#templates-using-ruby-on-rails[Ruby on Rails] 进行：
+
+** 编写应用程序:
+*** 设置数据库。
+*** 创建欢迎页面。
+*** 为 统信容器云管理平台 配置应用程序。
+*** 将您的应用存储在 Git 中。
+** 在 统信容器云管理平台 中部署应用程序：
+*** 创建数据库服务。
+*** 创建 frontend 服务。
+*** 为应用程序创建路由。

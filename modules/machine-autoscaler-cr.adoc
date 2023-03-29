@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * machine_management/applying-autoscaling.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: REFERENCE
+[id="machine-autoscaler-cr_{context}"]
+= MachineAutoscaler 资源定义
+
+此 `MachineAutoscaler` 资源定义显示了机器自动扩展器的参数和示例值。
+
+
+[source,yaml]
+----
+apiVersion: "autoscaling.openshift.io/v1beta1"
+kind: "MachineAutoscaler"
+metadata:
+  name: "worker-us-east-1a" <1>
+  namespace: "openshift-machine-api"
+spec:
+  minReplicas: 1 <2>
+  maxReplicas: 12 <3>
+  scaleTargetRef: <4>
+    apiVersion: machine.openshift.io/v1beta1
+    kind: MachineSet <5>
+    name: worker-us-east-1a <6>
+----
+<1> 指定机器自动扩展名称。为了更容易识别此机器自动扩展会扩展哪些机器集，请指定或注明要扩展的机器集的名称。机器集名称采用以下形式： `<clusterid>-<machineset>-<aws-region-az>`。
+<2> 指定在机器自动扩展启动集群扩展后必须保留在指定区域中的指定类型的最小机器数量。如果在 AWS、GCP、Azure、RHOSP 或 vSphere 中运行，则此值可设为 0。对于其他供应商，请不要将此值设置为 0。
++
+对于用于特殊工作负载的高价或有限使用硬件，或者扩展具有额外大型机器的机器集，您可以将此值设置为 0 来节约成本。如果机器没有使用，集群自动扩展会将机器集缩减为零。
++
+[重要]
+====
+对于安装程序置备的基础架构，请不要将 统信容器云管理平台 安装过程中创建的三台 compute plane 机器集的 `spec.minReplicas` 值设置为 0。
+====
+<3> 指定集群自动扩展初始化集群扩展后可在指定 AWS 区域中部署的指定类型的最大机器数量。确保 `ClusterAutoscaler` 资源定义的 `maxNodesTotal` 值足够大，以便机器自动扩展器可以部署这个数量的机器。
+<4> 在本小节中，提供用于描述要扩展的现有机器集的值。
+<5> `kind` 参数值始终为 `MachineSet`。
+<6> `name` 值必须与现有机器集的名称匹配，如 `metadata.name` 参数值所示。

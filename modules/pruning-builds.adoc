@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-builds_{context}"]
+= 修剪构建
+
+要修剪系统因为年龄和状态而不再需要的构建，管理员可运行以下命令：
+
+[source,terminal]
+----
+$ oc adm prune builds [<options>]
+----
+
+.`oc adm prune builds` 标记
+[cols="4,8",options="header"]
+|===
+
+|选项 |描述
+
+.^|`--confirm`
+|指明应该执行修剪，而不是空运行。
+
+.^|`--orphans`
+|修剪不再有构建配置且状态为 Complete、Failed、Error 或 Canceled 的构建。
+
+.^|`--keep-complete=<N>`
+|对于每个构建配置，保留状态为 Complete 的最后 N 个构建。默认值为 `5`。
+
+.^|`--keep-failed=<N>`
+|对于每个构建配置，保留状态为 failed、error 或 Canceled 的最后 `N` 个构建。默认值为 `1`。
+
+.^|`--keep-younger-than=<duration>`
+|不修剪存在时间没有超过 `<duration>`（相对于当前时间）的对象。默认值为 `60m`。
+|===
+
+.流程
+
+. 要查看修剪操作要删除的内容，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm prune builds --orphans --keep-complete=5 --keep-failed=1 \
+    --keep-younger-than=60m
+----
+
+. 要实际执行修剪操作，请添加 `--confirm` 标志：
++
+[source,terminal]
+----
+$ oc adm prune builds --orphans --keep-complete=5 --keep-failed=1 \
+    --keep-younger-than=60m --confirm
+----
+
+[注意]
+====
+开发人员可以通过修改其构建配置来启用自动修剪构建。
+====

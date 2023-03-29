@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+:_content-type: PROCEDURE
+[id="quota-viewing-quotas_{context}"]
+= 查看配额
+
+您可以在 Web 控制台导航到项目的 *Quota* 页面，查看与项目配额中定义的硬限值相关的使用量统计。
+
+您还可以使用命令行来查看配额详情。
+
+.流程
+
+. 获取项目中定义的配额列表。例如，对于名为 `demoproject` 的项目：
++
+[source,terminal]
+----
+$ oc get quota -n demoproject
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                AGE
+besteffort          11m
+compute-resources   2m
+core-object-counts  29m
+----
+
+. 描述您关注的配额，如 `core-object-counts` 配额
++
+[source,terminal]
+----
+$ oc describe quota core-object-counts -n demoproject
+----
++
+.输出示例
+[source,terminal]
+----
+Name:			core-object-counts
+Namespace:		demoproject
+Resource		Used	Hard
+--------		----	----
+configmaps		3	10
+persistentvolumeclaims	0	4
+replicationcontrollers	3	20
+secrets			9	10
+services		2	10
+----

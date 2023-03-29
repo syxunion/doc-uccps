@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// storage/understanding-persistent-storage.adoc[leveloffset=+1]
+
+:_content-type: CONCEPT
+[id=storage-ephemeral-storage-overview_{context}]
+= 概述
+
+除了持久性存储外，Pod 和容器还需要临时或短暂的本地存储才能进行操作。此临时存储的生命周期不会超过每个 pod 的生命周期，且此临时存储无法在 pod 间共享。
+
+Pod 使用临时本地存储进行涂销空间、缓存和日志。与缺少本地存储相关的问题包括：
+
+* Pods 不知道有多少可用的本地存储。
+* Pods 无法请求保证的本地存储。
+* 本地存储无法保证可以满足需求。
+* Pods 可能会因为其他 pod 已使用完本地存储而被驱除。只有在足够的存储重新可用后，新的 pod 才可以使用。
+
+与持久性卷不同，临时存储没有特定结构，它会被节点上运行的所有 pod 共享，并同时会被系统、容器运行时和统信容器云管理平台使用。临时存储框架允许 Pod 指定其临时本地存储需求。它还允许统信容器云管理平台在适当的时候调度 pod，并保护节点不受过度使用本地存储的影响。
+
+虽然临时存储框架允许管理员和开发人员更好地管理这个本地存储，但它不提供任何与 I/O 吞吐量和延迟有关的内容。

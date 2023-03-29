@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+[id="support-considerations_{context}"]
+= 对监控的支持注意事项
+
+明确不支持以下修改：
+
+* 在 *openshift-* 和 *kube-* 项目中创建额外的 *ServiceMonitor*、*PodMonitor* 和 *PrometheusRule* 对象。
+* 修改 *openshift-monitoring* 或 *openshift-user-workload-monitoring* 项目中部署的任何资源或对象。统信容器云管理平台 监控堆栈所创建的资源并不是为了供任何其他资源使用，因为不能保证向后兼容性。
++
+[注意]
+====
+Alertmanager 配置作为 secret 资源部署在 `openshift-monitoring` 项目中。要为 Alertmanager 配置额外的路由，您需要对该 secret 进行解码、修改，然后再进行编码。该程序是对前述声明的一个受支持例外。
+====
++
+* *修改堆栈的资源.* 统信容器云管理平台 监控堆栈确保其资源始终处于期望的状态。如果修改了资源，堆栈会重置它们。
+* *将用户定义的工作负载部署到 `openshift- 和 kube- 项目* 。这些项目是为统信提供的组件保留的，不应该用于用户定义的工作负载。
+* *修改监控堆栈 Grafana 实例。*
+* *在 统信容器云管理平台 上安装自定义 Prometheus 实例。* 自定义实例是由Prometheus Operator管理的Prometheus自定义资源(CR)。
+* *使用 Prometheus Operator 中的 Probe 自定义资源定义（CRD）启用基于症状的监控。*
+* *使用 Prometheus Operator 中的 AlertmanagerConfig CRD 修改 Alertmanager 配置。*
+
+[注意]
+====
+指标、记录规则或警报规则的向后兼容性无法被保证。
+====

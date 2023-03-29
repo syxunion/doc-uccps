@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+// * applications/projects/creating-project-other-user.adoc
+// * users_and_roles/impersonating-system-admin.adoc
+
+[id="authentication-api-impersonation_{context}"]
+= API 身份模拟（impersonation）
+
+您可以配置对 统信容器云管理平台 API 的请求，使其表现为像是源自于另一用户。

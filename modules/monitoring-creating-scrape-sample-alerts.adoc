@@ -1,0 +1,74 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="creating-scrape-sample-alerts_{context}"]
+= 创建提取示例警报
+
+您可以创建在以下情况下通知您的警报：
+
+* 在指定的 `for` 持续时间内无法提取对象或对象不可用
+* 在指定的 `for` 持续时间内达到或超过提取示例阈值
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring`  项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+* 您已为用户定义的项目启用了监控。
+* 您已创建了 `user-workload-monitoring-config` `ConfigMap`  对象。
+* 您已经使用 `enforcedSampleLimit` 限制了用户定义的项目中每个目标提取可接受的示例数量。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建一个包含警报的 YAML 文件，用于在目标停机以及即将达到强制的示例限制时通知您。本例中的文件名为 `monitoring-stack-alerts.yaml`：
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: monitoring-stack-alerts <1>
+  namespace: ns1 <2>
+spec:
+  groups:
+  - name: general.rules
+    rules:
+    - alert: TargetDown <3>
+      annotations:
+        message: '{{ printf "%.4g" $value }}% of the {{ $labels.job }}/{{ $labels.service
+          }} targets in {{ $labels.namespace }} namespace are down.' <4>
+      expr: 100 * (count(up == 0) BY (job, namespace, service) / count(up) BY (job,
+        namespace, service)) > 10
+      for: 10m <5>
+      labels:
+        severity: warning <6>
+    - alert: ApproachingEnforcedSamplesLimit <7>
+      annotations:
+        message: '{{ $labels.container }} container of the {{ $labels.pod }} pod in the {{ $labels.namespace }} namespace consumes {{ $value | humanizePercentage }} of the samples limit budget.' <8>
+      expr: scrape_samples_scraped/50000 > 0.8 <9>
+      for: 10m <10>
+      labels:
+        severity: warning <11>
+----
+<1> 定义警报规则的名称。
+<2> 指定要部署警报规则的用户定义的项目。
+<3> 如果在 `for` 持续时间内无法提取目标或者目标不可用，则`TargetDown` 警报将触发。
+<4> `TargetDown` 警报触发时输出的消息。
+<5> 在这个持续时间内必须满足 `TargetDown` 警报的条件才会触发该警报。
+<6> 定义 `TargetDown` 警报的严重性。
+<7> 当在指定的 `for` 持续时间内达到或超过定义的提取示例阈值时， `ApproachingEnforcedSamplesLimit` 警报将触发。
+<8> 当 `ApproachingEnforcedSamplesLimit` 警报触发时输出的消息。
+<9> `ApproachingEnforcedSamplesLimit` 警报的阈值。在本例中，当每个目标提取的示例数量超过强制示例限制 50000 的 80% 时，警报将触发。在警报触发前，还必须已经过了 `for` 持续时间。表达式   `scrape_samples_scraped/<number> > <threshold>` 中的 `<number>` 必须与 `user-workload-monitoring-config` `ConfigMap` 对象中定义的  `enforcedSampleLimit` 值匹配。
+<10> 在这个持续时间内必须满足 `ApproachingEnforcedSamplesLimit` 警报的条件才会触发该警报。
+<11> 定义 `ApproachingEnforcedSamplesLimit` 警报的严重性。
+
+. 将配置应用到用户定义的项目中：
++
+[source,terminal]
+----
+$ oc apply -f monitoring-stack-alerts.yaml
+----

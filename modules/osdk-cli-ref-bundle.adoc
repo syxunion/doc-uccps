@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-bundle_{context}"]
+= bundle
+
+`operator-sdk bundle` 命令管理 Operator 捆绑包元数据。
+
+[id="osdk-cli-ref-bundle-validate_{context}"]
+== validate
+
+`bundle validate` 子命令会验证 Operator 捆绑包。
+
+.`bundle validate` flags
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-h`, `--help`
+|bundle validate 子命令的帮助输出。
+
+|`--index-builder` (string)
+|拉取和解包捆绑包镜像的工具。仅在验证捆绑包镜像时使用。可用选项是 `docker`（默认值）、`podman` 或 `none`。
+
+|`--list-optional`
+|列出所有可用的可选验证器。设置后，不会运行验证器。
+
+|`--select-optional` (string)
+|选择要运行的可选验证器的标签选择器。当使用 `--list-optional` 标志运行时，会列出可用的可选验证器。
+
+|===

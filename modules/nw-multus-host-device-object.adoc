@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-additional-network.adoc
+
+[id="nw-multus-host-device-object_{context}"]
+= 主机设备额外网络配置
+
+[注意]
+====
+仅设置以下参数之一来指定您的网络设备：`device`、`HWaddr`、`kernelpath` 或 `pciBusID`。
+====
+
+以下对象描述了 host-device CNI 插件的配置参数：
+
+// containernetworking/plugins/.../host-device.go#L50
+.主机 device CNI 插件 JSON 配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`cniVersion`
+|`字符串`
+|CNI 规格版本。需要 `0.3.1` 值。
+
+|`name`
+|`字符串`
+|您之前为 CNO 配置提供的 name 参数的值。
+
+|`type`
+|`字符串`
+|用于配置的 CNI 插件的名称： `host-device`。
+
+|`device`
+|`字符串`
+|可选：设备的名称，如 `eth0`。
+
+|`hwaddr`
+|`字符串`
+|可选：设备硬件 MAC 地址。
+
+|`kernelpath`
+|`字符串`
+|可选：Linux 内核设备路径，如 `/sys/devices/pci0000:00/0000:00:1f.6`。
+
+|`pciBusID`
+|`字符串`
+|可选：网络设备的 PCI 地址，如 `0000:00:1f.6`。
+|====
+
+[id="nw-multus-hostdev-config-example_{context}"]
+== host-device 配置示例
+
+以下示例配置了名为 `hostdev-net` 的额外网络：
+
+[source,json]
+----
+{
+  "cniVersion": "0.3.1",
+  "name": "work-network",
+  "type": "host-device",
+  "device": "eth1"
+}
+----

@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="disabling-web-console"]
+= 在统信容器云管理平台中禁用Web控制台
+include::_attributes/common-attributes.adoc[]
+:context: disabling-web-console
+
+toc::[]
+
+您可以禁用统信容器云管理平台 Web控制台。
+
+== 先决条件
+
+* 部署一个统信容器云管理平台集群。
+
+include::modules/web-console-disable.adoc[leveloffset=+1]

@@ -1,0 +1,134 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_bare_metal_ipi/ipi-install-installation-workflow.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-the-install-config-file_{context}"]
+= Configuring the `install-config.yaml` file
+
+The `install-config.yaml` file requires some additional details.
+Most of the information teaches the installation program and the resulting cluster enough about the available hardware that it is able to fully manage it.
+
+[NOTE]
+====
+The installation program no longer needs the `clusterOSImage` {op-system} image because the correct image is in the release payload.
+====
+
+. Configure `install-config.yaml`. Change the appropriate variables to match the environment, including `pullSecret` and `sshKey`.
++
+[source,yaml]
+----
+apiVersion: v1
+baseDomain: <domain>
+metadata:
+  name: <cluster-name>
+networking:
+  machineNetwork:
+  - cidr: <public-cidr>
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: 2 <1>
+controlPlane:
+  name: master
+  replicas: 3
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: <api-ip>
+    ingressVIP: <wildcard-ip>
+    provisioningNetworkCIDR: <CIDR>
+    hosts:
+      - name: openshift-master-0
+        role: master
+        bmc:
+          address: ipmi://<out-of-band-ip> <2>
+          username: <user>
+          password: <password>
+        bootMACAddress: <NIC1-mac-address>
+        rootDeviceHints:
+         deviceName: "/dev/disk/by-id/<disk_id>" <3>
+      - name: <openshift-master-1>
+        role: master
+        bmc:
+          address: ipmi://<out-of-band-ip> <2>
+          username: <user>
+          password: <password>
+        bootMACAddress: <NIC1-mac-address>
+        rootDeviceHints:
+         deviceName: "/dev/disk/by-id/<disk_id>" <3>
+      - name: <openshift-master-2>
+        role: master
+        bmc:
+          address: ipmi://<out-of-band-ip> <2>
+          username: <user>
+          password: <password>
+        bootMACAddress: <NIC1-mac-address>
+        rootDeviceHints:
+         deviceName: "/dev/disk/by-id/<disk_id>" <3>
+      - name: <openshift-worker-0>
+        role: worker
+        bmc:
+          address: ipmi://<out-of-band-ip> <2>
+          username: <user>
+          password: <password>
+        bootMACAddress: <NIC1-mac-address>
+      - name: <openshift-worker-1>
+        role: worker
+        bmc:
+          address: ipmi://<out-of-band-ip>
+          username: <user>
+          password: <password>
+        bootMACAddress: <NIC1-mac-address>
+        rootDeviceHints:
+         deviceName: "/dev/disk/by-id/<disk_id>" <3>
+pullSecret: '<pull_secret>'
+sshKey: '<ssh_pub_key>'
+----
++
+<1> Scale the worker machines based on the number of worker nodes that are part of the {product-title} cluster. Valid options for the `replicas` value are `0` and integers greater than or equal to `2`. Set the number of replicas to `0` to deploy a three-node cluster, which contains only three control plane machines. A three-node cluster is a smaller, more resource-efficient cluster that can be used for testing, development, and production. You cannot install the cluster with only one worker.
+ifdef::upstream[]
+<2> See the xref:bmc-addressing_{context}[BMC addressing] sections for more options.
+endif::[]
+ifndef::upstream[]
+<2> See the BMC addressing sections for more options.
+endif::[]
+<3> Set the path to the installation disk drive, for example, `/dev/disk/by-id/wwn-0x64cd98f04fde100024684cf3034da5c2`.
+
+
+. Create a directory to store cluster configs:
++
+[source,terminal]
+----
+$ mkdir ~/clusterconfigs
+----
+
+. Copy the `install-config.yaml` file to the new directory:
++
+[source,terminal]
+----
+$ cp install-config.yaml ~/clusterconfigs
+----
+
+. Ensure all bare metal nodes are powered off prior to installing the {product-title} cluster:
++
+[source,terminal]
+----
+$ ipmitool -I lanplus -U <user> -P <password> -H <management-server-ip> power off
+----
+
+. Remove old bootstrap resources if any are left over from a previous deployment attempt:
++
+[source,bash]
+----
+for i in $(sudo virsh list | tail -n +3 | grep bootstrap | awk {'print $2'});
+do
+  sudo virsh destroy $i;
+  sudo virsh undefine $i;
+  sudo virsh vol-delete $i --pool $i;
+  sudo virsh vol-delete $i.ign --pool $i;
+  sudo virsh pool-destroy $i;
+  sudo virsh pool-undefine $i;
+done
+----

@@ -1,0 +1,70 @@
+// Module filename: nw-scaling-ingress-controller.adoc
+// Module included in the following assemblies:
+// * networking/ingress-controller-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-controller-configuration_{context}"]
+= nw-scaling-ingress-controller.adoc
+
+手动扩展 `Ingress Controller` 以满足路由性能或可用性要求，如提高吞吐量的要求。oc 命令用于扩展 IngressController 资源。以下流程提供了扩展默认 IngressController 的示例。
+
+[注意]
+====
+扩展不是立刻就可以完成的操作，因为它需要时间来创建所需的副本数。
+====
+
+.流程
+. 查看默认 `IngressController` 的当前可用副本数：
++
+[source,terminal]
+----
+$ oc get -n openshift-ingress-operator ingresscontrollers/default -o jsonpath='{$.status.availableReplicas}'
+----
++
+.输出示例
+[source,terminal]
+----
+2
+----
+
+. 使用 `oc patch` 命令，将默认 `IngressController` 扩展至所需的副本数。以下示例将默认 `IngressController` 扩展至 `3` 个副本：
++
+[source,terminal]
+----
+$ oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge
+----
++
+.输出示例
+[source,terminal]
+----
+ingresscontroller.operator.openshift.io/default patched
+----
+
+. 验证默认 `IngressController` 是否已扩展至您指定的副本数：
++
+[source,terminal]
+----
+$ oc get -n openshift-ingress-operator ingresscontrollers/default -o jsonpath='{$.status.availableReplicas}'
+----
++
+.输出示例.
+[source,terminal]
+----
+3
+----
++
+[提示]
+====
+您还可以应用以下 YAML 将 Ingress Controller 扩展为三个副本：
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 3               <1>
+----
+====
+<1> 如果需要不同数量的副本，请更改 `replicas` 值。

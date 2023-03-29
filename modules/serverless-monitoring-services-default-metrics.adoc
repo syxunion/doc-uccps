@@ -1,0 +1,194 @@
+// Module is included in the following assemblies:
+//
+// * /serverless/monitor/serverless-developer-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-monitoring-services-default-metrics_{context}"]
+= Knative 服务指标默认公开
+
+. 在端口 9090 上为每个 Knative 服务公开的指标
+[options=header]
+|===
+
+|指标名称、单元和类型 |描述 |指标标签
+
+// New row
+|`queue_requests_per_second`
+
+指标单元：无维度
+
+指标类型：量表
+|每秒到达队列代理的请求数。
+
+公式 `stats.RequestCount / r.reportingPeriodSeconds`
+
+`stats.RequestCount` 直接从给定报告持续时间的网络 pkg stats 中计算。
+|destination_configuration="event-display",
+destination_namespace="pingsource1",
+destination_pod="event-display-00001-deployment-6b455479cb-75p6w",
+destination_revision="event-display-00001"
+
+// New row
+|`queue_proxied_operations_per_second`
+
+指标单元：无维度
+
+指标类型：量表
+|每秒代理请求数.
+
+公式： `stats.ProxiedRequestCount / r.reportingPeriodSeconds`
+
+`stats.ProxiedRequestCount` 直接从给定报告持续时间的网络 pkg stats 中计算。
+|
+
+// New row
+|`queue_average_concurrent_requests`
+
+指标单元：无维度
+
+指标类型：量表
+a|此 pod 当前处理的请求数。
+
+在网络 `pkg` 侧计算平均并发，如下所示：
+
+* 当发生 `req` 更改时，将计算更改之间的时间传送时间。根据结果，计算超过 delta 的当前并发数，并添加到当前计算的并发数。此外，还保留了 deltas 的总和。
++
+增量型的当前并发性计算如下：
++
+`global_concurrency` × delta
+
+* 每次完成报告时，都会重置总和和当前计算的并发性。
+
+* 在报告平均并发时，当前计算的并发性被除以 deltas 的总和。
+
+* 当一个新请求进入时，全局并发计数器会增加。当请求完成后，计数器会减少。
+|destination_configuration="event-display",
+destination_namespace="pingsource1",
+destination_pod="event-display-00001-deployment-6b455479cb-75p6w",
+destination_revision="event-display-00001"
+
+// New row
+|`queue_average_proxied_concurrent_requests`
+
+指标单元：无维度
+
+指标类型：量表
+|当前由此 pod 处理的代理请求数：
+
+`stats.AverageProxiedConcurrency`
+|destination_configuration="event-display",
+destination_namespace="pingsource1",
+destination_pod="event-display-00001-deployment-6b455479cb-75p6w",
+destination_revision="event-display-00001"
+
+// New row
+|`process_uptime`
+
+指标单元: seconds
+
+指标类型：量表
+|进程启动的秒数。
+|destination_configuration="event-display",
+destination_namespace="pingsource1",
+destination_pod="event-display-00001-deployment-6b455479cb-75p6w",
+destination_revision="event-display-00001"
+
+|===
+
+.在端口 9091 上为每个 Knative 服务公开的指标
+[options=header]
+|===
+
+|指标名称、单元和类型 |描述 |指标标签
+
+// New row
+|`request_count`
+
+指标单元：无维度
+
+指标类型：计数器
+
+|路由到 `queue-proxy` 的请求数。
+
+|configuration_name="event-display",
+container_name="queue-proxy",
+namespace_name="apiserversource1",
+pod_name="event-display-00001-deployment-658fd4f9cf-qcnr5",
+response_code="200",
+response_code_class="2xx",
+revision_name="event-display-00001",
+service_name="event-display"
+
+// New row
+|`request_latencies`
+
+指标单元: 毫秒
+
+指标类型: histogram
+
+|以毫秒为单位的响应时间。
+
+|configuration_name="event-display",
+container_name="queue-proxy",
+namespace_name="apiserversource1",
+pod_name="event-display-00001-deployment-658fd4f9cf-qcnr5",
+response_code="200",
+response_code_class="2xx",
+revision_name="event-display-00001",
+service_name="event-display"
+
+// New row
+|`app_request_count`
+
+指标单元：无维度
+
+指标类型：计数器
+
+|路由到  `user-container` 的请求数。
+
+|configuration_name="event-display",
+container_name="queue-proxy",
+namespace_name="apiserversource1",
+pod_name="event-display-00001-deployment-658fd4f9cf-qcnr5",
+response_code="200",
+response_code_class="2xx",
+revision_name="event-display-00001",
+service_name="event-display"
+
+// New row
+|`app_request_latencies`
+
+指标单元: 毫秒
+
+指标类型: histogram
+
+|以毫秒为单位的响应时间。
+
+|configuration_name="event-display",
+container_name="queue-proxy",
+namespace_name="apiserversource1",
+pod_name="event-display-00001-deployment-658fd4f9cf-qcnr5",
+response_code="200",
+response_code_class="2xx",
+revision_name="event-display-00001",
+service_name="event-display"
+
+// New row
+|`queue_depth`
+
+指标单元：无维度
+
+指标类型：量表
+
+|服务和等待队列中的当前项目数，或者如果无限并发，则不报告。使用 `breaker.inFlight` 。
+
+|configuration_name="event-display",
+container_name="queue-proxy",
+namespace_name="apiserversource1",
+pod_name="event-display-00001-deployment-658fd4f9cf-qcnr5",
+response_code="200",
+response_code_class="2xx",
+revision_name="event-display-00001",
+service_name="event-display"
+
+|===

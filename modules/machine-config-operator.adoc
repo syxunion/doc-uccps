@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * operators/operator-reference.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+[id="machine-config-operator_{context}"]
+= Machine Config Operator
+
+[discrete]
+== 用途
+
+Machine Congig Operator 管理并应用基本操作系统和容器运行时的配置和更新，包括内核和 kubelet 之间的所有配置和更新。
+
+有四个组件：
+
+* `machine-config-server`: 为加入集群的新机器提供 Ignition 配置。
+* `machine-config-controller`: 协调机器升级到 `MachineConfig` 对象定义的配置。提供用来控制单独一组机器升级的选项。
+* `machine-config-daemon`: 在更新过程中应用新机器配置。验证并验证机器的状态到请求的机器配置。
+* `machine-config`: 提供安装、首次启动和更新一个机器的完整机器配置源。
+

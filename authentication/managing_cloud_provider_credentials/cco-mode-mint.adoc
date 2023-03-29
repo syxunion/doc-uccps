@@ -1,0 +1,61 @@
+:_content-type: ASSEMBLY
+[id="cco-mode-mint"]
+= 使用 mint 模式
+include::_attributes/common-attributes.adoc[]
+:context: cco-mode-mint
+
+toc::[]
+
+Amazon Web Services(AWS)和 Google Cloud Platform(GCP)支持 Mint 模式。
+
+Mint 模式是支持它的平台的默认模式。在这个模式下，Cloud Credential Operator（CCO） 使用提供的管理员级云凭证为集群中组件创建新凭证，且只具有所需的特定权限。
+
+如果在安装后没有删除凭证，则会存储并供 CCO 使用来处理集群中组件的 `CredentialsRequest` CR，并为每个组件创建新凭证，每个凭证只具有所需的特定权限。以 mint 模式持续协调云凭证可进行需要额外凭证或权限（如升级）的操作。
+
+Mint 模式将管理员级别的凭证存储在集群 `kube-system` 命名空间中。如果此方法不符合您的机构的安全要求，请参阅 AWS 或 GCP 的将管理员级别的 secret 存储在 kube-system 项目中的替代方法。
+
+[id="mint-mode-permissions"]
+== Mint 模式权限要求
+以 mint 模式使用 CCO 时，请确保您提供的凭证满足运行或安装统信容器云管理平台的云要求。如果提供的凭证不足以满足 mint 模式，则 CCO 无法创建 IAM 用户。
+
+[id="mint-mode-permissions-aws"]
+=== Amazon Web Services（AWS）权限
+您在 AWS 中为 mint 模式提供的凭证必须具有以下权限：
+
+* `iam:CreateAccessKey`
+* `iam:CreateUser`
+* `iam:DeleteAccessKey`
+* `iam:DeleteUser`
+* `iam:DeleteUserPolicy`
+* `iam:GetUser`
+* `iam:GetUserPolicy`
+* `iam:ListAccessKeys`
+* `iam:PutUserPolicy`
+* `iam:TagUser`
+* `iam:SimulatePrincipalPolicy`
+
+[id="mint-mode-permissions-gcp"]
+=== Google Cloud Platform（GCP）权限
+您在 GCP 中为 mint 模式提供的凭证必须具有以下权限：
+
+* `resourcemanager.projects.get`
+* `serviceusage.services.list`
+* `iam.serviceAccountKeys.create`
+* `iam.serviceAccountKeys.delete`
+* `iam.serviceAccounts.create`
+* `iam.serviceAccounts.delete`
+* `iam.serviceAccounts.get`
+* `iam.roles.get`
+* `resourcemanager.projects.getIamPolicy`
+* `resourcemanager.projects.setIamPolicy`
+
+//Admin credentials root secret format
+
+//Mint Mode with removal or rotation of the admin credential
+include::modules/mint-mode-with-removal-of-admin-credential.adoc[leveloffset=+1]
+
+//Rotating cloud provider credentials manually
+include::modules/manually-rotating-cloud-creds.adoc[leveloffset=+2]
+
+//Removing cloud provider credentials
+include::modules/manually-removing-cloud-creds.adoc[leveloffset=+2]

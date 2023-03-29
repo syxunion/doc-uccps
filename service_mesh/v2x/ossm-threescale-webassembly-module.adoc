@@ -1,0 +1,67 @@
+:_content-type: ASSEMBLY
+[id="ossm-threescale-webassembly-module"]
+= Using the 3scale WebAssembly module
+include::_attributes/common-attributes.adoc[]
+:context: ossm-threescale-webassembly-module
+
+toc::[]
+
+
+`threescale-wasm-auth` 模块是一个 WebAssembly 模块，它使用一组接口，称为应用二进制接口(ABI)。这由 Proxy-WASM 规范定义，驱动实施 ABI 的任何软件，以便它能够授权 HTTP 请求针对 3scale。
+
+作为 ABI 规范，Proxy-WASM 定义名为 host 的软件与另一个命名 模块、程序或扩展 名之间的交互。主机公开一组供模块用于执行任务的服务，本例中用于处理代理请求。
+
+主机环境由 WebAsembly 虚拟机组成，与软件进行交互，本例中为 HTTP 代理。
+
+模块本身与外部世界隔离运行，除了它在虚拟机上运行的指令和 Proxy-WASM 指定的 ABI 除外。这是为软件提供扩展点的安全方法：扩展只能以明确定义的方式与虚拟机和主机进行交互。该交互提供了一种计算模型和与代理旨在具有的外部的连接。
+
+[id="compatibility_ossm-threescale-webassembly-module"]
+== Compatibility
+
+`threescale-wasm-auth` 模块设计为与 _Proxy-WASM ABI_  规范的所有实施完全兼容。然而，此时只经过了全面测试才能与 Envoy 反向代理配合使用。
+
+[id="usage-as-a-stand-alone-module_ossm-threescale-webassembly-module"]
+== Usage as a stand-alone module
+
+由于其自包含的设计，可以将此模块配置为与独立于 Service Mesh 的 Proxy-WASM 代理以及 3scale Istio 适配器部署配合使用。
+
+ifdef::openshift-enterprise[]
+[id="prerequisites_ossm-threescale-webassembly-module"]
+== 先决条件
+
+* 模块适用于所有支持的 3scale 版本，但在将服务配置为使用 OpenID 连接(OIDC) 时（需要 3scale 2.11 或更高版本）。
+endif::[]
+
+include::modules/ossm-configuring-the-threescale-wasm-auth-module.adoc[leveloffset=+1]
+
+include::modules/ossm-threescale-applying-external-service-entry-objects.adoc[leveloffset=+1]
+
+include::modules/ossm-threescale-webassembly-module-configuration.adoc[leveloffset=+1]
+
+include::modules/ossm-threescale-configuring-the-threescale-webassembly-module.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-api-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-system-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-upstream-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-backend-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-services-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-credentials-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-lookup-queries.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-source-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-operations-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-mapping-rules-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-mapping-rule-object.adoc[leveloffset=+2]
+
+include::modules/ossm-threescale-webassembly-module-examples-for-credentials-use-cases.adoc[leveloffset=+1]
+
+include::modules/ossm-threescale-webassembly-module-minimal-working-configuration.adoc[leveloffset=+1]

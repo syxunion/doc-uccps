@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/limit-ranges.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-limit-ranges-about_{context}"]
+= 关于限制范围
+
+`LimitRange` 对象定义的限值范围限制项目中的资源消耗。在项目中，您可以为 pod、容器、镜像、镜像流或持久性卷声明（PVC）设置特定资源限值。
+
+要创建和修改资源的所有请求都会针对项目中的每个 `LimitRange` 对象进行评估。如果资源违反了任何限制，则会拒绝该资源。
+
+
+以下显示了所有组件的限制范围对象： pod、容器、镜像、镜像流或 PVC。您可以在同一对象中为这些组件的一个或多个组件配置限值。您可以为每个要控制资源的项目创建不同的限制范围对象。
+
+.容器的限制范围对象示例
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange"
+metadata:
+  name: "resource-limits"
+spec:
+  limits:
+    - type: "Container"
+      max:
+        cpu: "2"
+        memory: "1Gi"
+      min:
+        cpu: "100m"
+        memory: "4Mi"
+      default:
+        cpu: "300m"
+        memory: "200Mi"
+      defaultRequest:
+        cpu: "200m"
+        memory: "100Mi"
+      maxLimitRequestRatio:
+        cpu: "10"
+----

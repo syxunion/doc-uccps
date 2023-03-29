@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+
+[id="identity-provider-request-header-CR_{context}"]
+= identity-provider-request-header-CR.adoc
+
+以下自定义资源 (CR) 显示请求标头身份提供程序的参数和可接受值。
+
+.请求标题 CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: requestheaderidp 
+    mappingMethod: claim 
+    type: RequestHeader
+    requestHeader:
+      challengeURL: "https://www.example.com/challenging-proxy/oauth/authorize?${query}" 
+      loginURL: "https://www.example.com/login-proxy/oauth/authorize?${query}" 
+      ca: 
+        name: ca-config-map
+      clientCommonNames: 
+      - my-auth-proxy
+      headers: 
+      - X-Remote-User
+      - SSO-User
+      emailHeaders: 
+      - X-Remote-User-Email
+      nameHeaders: 
+      - X-Remote-User-Display-Name
+      preferredUsernameHeaders:
+      - X-Remote-User-Login
+----
+name： 此提供程序名称作为前缀放在请求标头中的用户名前，以此组成身份名称。
+mappingMethod： 控制如何在此提供程序的身份和 User 对象之间建立映射。
+challengeURL： 可选：将未经身份验证的 /oauth/authorize 请求重定向到的 URL，它将身份验证基于浏览器的客户端并将其请求代理到 https://<namespace_route>/oauth/authorize。代理到 https://<namespace_route>/oauth/authorize 的 URL 必须以 /authorize 结尾（不含尾部斜杠）,以及代理子路径，以便 OAuth 批准流可以正常工作。${url} 替换为当前的 URL，进行转义以在查询参数中安全使用。把 ${query} 替换为当前的查询字符串。如果未定义此属性，则必须使用 loginURL。
+loginURL：可选：将未经身份验证的 /oauth/authorize 请求重定向到的 URL，它将身份验证期望 WWW-Authenticate challenges 的客户端，然后将它们代理到 https://<namespace_route>/oauth/authorize。${url} 替换为当前的 URL，进行转义以在查询参数中安全使用。把 ${query} 替换为当前的查询字符串。如果未定义此属性，则必须使用 challengeURL。
+ca： 对包含 PEM 编码证书捆绑包的统信容器云管理平台ConfigMap 的引用。用作信任定位符，以验证远程服务器出示的 TLS 证书。
++
+[重要]
+====
+统信容器云管理平台中，此身份提供程序需要 ca 字段。这意味着您的代理必须支持 mutual TLS。
+====
+clientCommonNames：Optional: 可选：通用名称 (cn) 的列表。如果设定，则必须出示带有指定列表中通用名称 (cn) 的有效客户端证书，然后才能检查请求标头中的用户名。如果为空，则允许任何通用名称。只能与 ca 结合使用。
+headers：按顺序查找用户身份的标头名称。第一个包含值的标头被用作身份。必需，不区分大小写。
+emailHeaders： 按顺序查找电子邮件地址的标头名称。第一个包含值的标头被用作电子邮件地址。可选，不区分大小写。
+nameHeaders： 按顺序查找显示名称的标头名称。第一个包含值的标头被用作显示名称。可选，不区分大小写。
+preferredUsernameHeaders： 按顺序查找首选用户名的标头名称（如果与通过 headers 中指定的标头确定的不可变身份不同）。在置备时，第一个包含值的标头用作首选用户名。可选，不区分大小写。

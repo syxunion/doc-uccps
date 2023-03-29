@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-node-affinity
+[id="nodes-scheduler-node-affinity"]
+= 使用节点关联性规则控制节点上的 pod 放置
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+关联性是 pod 的一个属性，用于控制它们希望调度到的节点。
+
+在 统信容器云管理平台 中，节点关联性是由调度程序用来确定 pod 的可放置位置的一组规则。规则是使用节点中的自定义标签和 pod 中指定的选择器进行定义的。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-scheduler-node-affinity-about.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-affinity-configuring-required.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-affinity-configuring-preferred.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-node-affinity-example.adoc[leveloffset=+1]
+
+[id="nodes-scheduler-node-affinity-addtl-resources_{context}"]
+[role="_additional-resources"]
+== 其他资源
+
+* 有关更改节点标签的详情，请参阅 xref:../../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-updating_nodes-nodes-working[了解如何更新节点上的标签].

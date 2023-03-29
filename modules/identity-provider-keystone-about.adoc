@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-keystone-identity-provider.adoc
+
+[id="identity-provider-keystone-about_{context}"]
+= About Keystone authentication
+
+Keystone 是一个提供身份、令牌、目录和策略服务的 OpenStack 项目。
+
+您可以配置与 Keystone 的集成，以便统信容器云管理平台的新用户基于 Keystone 用户名或者唯一 Keystone ID。使用这两种方法时，用户可以输入其 Keystone 用户名和密码进行登录。使统信容器云管理平台用户基于 Keystone ID 更为安全。如果删除了某一 Keystone 用户并使用其用户名创建了新的 Keystone 用户，新用户或许能够访问旧用户的资源。

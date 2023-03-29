@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="secondary-scheduler-uninstalling"]
+= 卸载 Secondary Scheduler Operator
+include::_attributes/common-attributes.adoc[]
+:context: secondary-scheduler-uninstalling
+
+toc::[]
+
+您可以通过卸载 Operator 并删除其相关资源，从 统信容器云管理平台 中删除 UnionTech Uccps 的 Secondary Scheduler Operator。
+
+// Uninstalling the {secondary-scheduler-operator}
+include::modules/nodes-secondary-scheduler-uninstall-console.adoc[leveloffset=+1]
+
+// Removing {secondary-scheduler-operator} resources
+include::modules/nodes-secondary-scheduler-remove-resources-console.adoc[leveloffset=+1]

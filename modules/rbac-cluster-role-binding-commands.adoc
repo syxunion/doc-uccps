@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+
+[id="cluster-role-binding-commands_{context}"]
+= 集群角色绑定命令
+
+您也可以使用以下操作管理集群角色绑定。因为集群角色绑定使用没有命名空间的资源，所以这些操作不使用 -n 标志。
+
+.集群角色绑定操作
+[options="header"]
+|===
+
+|命令 |描述
+
+|`$ oc adm policy add-cluster-role-to-user _<role>_ _<username>_`
+|将给定角色绑定到集群中所有项目的指定用户。
+
+|`$ oc adm policy remove-cluster-role-from-user _<role>_ _<username>_`
+|从集群中所有项目的指定用户移除给定角色。
+
+|`$ oc adm policy add-cluster-role-to-group _<role>_ _<groupname>_`
+|将给定角色绑定到集群中所有项目的指定组。
+
+|`$ oc adm policy remove-cluster-role-from-group _<role>_ _<groupname>_`
+|从集群中所有项目的指定组移除给定角色。
+
+|===

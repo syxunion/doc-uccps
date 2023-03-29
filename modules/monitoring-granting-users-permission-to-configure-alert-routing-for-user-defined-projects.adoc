@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-alert-routing-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="granting-users-permission-to-configure-alert-routing-for-user-defined-projects_{context}"]
+= 授予用户权限来为用户定义的项目配置警报路由
+
+[role="_abstract"]
+您可以授予用户权限来为用户定义的项目配置警报路由。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 要将角色分配到的用户帐户已存在。
+* 已安装 Uccps  CLI (`oc`).
+* 您已为用户定义的项目启用了监控。
+
+.流程
+
+* 将 `alert-routing-edit` 角色分配给用户定义的项目中的用户：
++
+[source,terminal]
+----
+$ oc -n <namespace> adm policy add-role-to-user alert-routing-edit <user> <1>
+----
+<1> 对于 `<namespace>`，替换用户定义的项目的命名空间，如`ns1` 。对于 `<user>`, 替换您要为其分配该角色的帐户的用户名。

@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/customizing-installation-ossm.adoc
+
+
+[id="ossm-enabling-tracing_{context}"]
+= Enabling and disabling tracing
+
+您可以通过在 `ServiceMeshControlPlane` 资源中指定追踪类型和抽样率来启用分布式追踪。
+
+.默认的 `all-in-one` Jaeger 参数
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 100
+    type: Jaeger
+----
+
+目前，Jaeger  `是唯一支持的追踪类型`。
+
+J默认启用 Jaeger。要禁用追踪，将  `type` 设置为 `None`。
+
+抽样率决定了 Envoy 代理生成 trace 的频率。您可以使用抽样率选项来控制向追踪系统报告的请求百分比。您可以根据网格中的流量以及您要收集的追踪数据量来配置此设置。您可以将 `sampling` 配置为一个缩放整数，代表 0.01% 增长。例如，将值设置为 `10` 会抽样 0.1% trace，将值设置为 `500` 代表抽样 5% trace，设置为 `10000` 代表抽样 100% trace。
+

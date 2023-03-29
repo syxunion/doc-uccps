@@ -1,0 +1,111 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-routing-ingress-gateway_{context}"]
+= Configuring an ingress gateway
+
+入口网关是在网格边缘运行的负载均衡器，接收传入的 HTTP/TCP 连接。它配置公开的端口和协议，但不包括任何流量路由配置。入口流量的流量路由改为使用路由规则配置，这与内部服务请求相同。
+
+以下步骤演示了如何创建网关并配置 `VirtualService` ，以在 Bookinfo 示例应用程序中将服务公开给路径 `/productpage` 和 `/login` 的外部流量。
+
+.流程
+
+. 创建网关以接受流量。
++
+.. 创建 YAML 文件，并将以下 YAML 复制到其中：
++
+.网关  gateway.yaml 示例
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bookinfo-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+----
++
+.. 应用 YAML 文件。
++
+[source,terminal]
+----
+$ oc apply -f gateway.yaml
+----
+
+. 创建 `VirtualService` 对象来重写主机标头。
++
+.. 创建 YAML 文件，并将以下 YAML 复制到其中：
++
+.虚拟服务示例
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage
+        port:
+          number: 9080
+----
++
+.. 应用 YAML 文件。
++
+[source,terminal]
+----
+$ oc apply -f vs.yaml
+----
+
+. 测试网关和 VirtualService 已正确设置。
++
+.. 设置网关 URL。
++
+[source,terminal]
+----
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+----
++
+.. 设置端口号。在本例中， `istio-system` 是 Service Mesh control plane 项目的名称。
++
+[source,terminal]
+----
+export TARGET_PORT=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.port.targetPort}')
+----
++
+.. 测试已明确公开的页面。
++
+[source,terminal]
+----
+curl -s -I "$GATEWAY_URL/productpage"
+----
++
+预期的结果为 200。  

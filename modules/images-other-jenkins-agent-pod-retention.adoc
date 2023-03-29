@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins-agent.adoc
+
+[id="images-other-jenkins-agent-pod-retention_{context}"]
+= Jenkins 代理 pod 保留
+
+构建完成后或停止后会默认删除 Jenkins 代理 pod。此行为可通过 Kubernetes 插件的 pod 保留设置来更改。Pod 保留可针对所有 Jenkins 构建设置，并覆盖每个 pod 模板。支持以下行为：
+
+* `Always` 保留构建 pod，不受构建结果的限制。
+* `Default` 使用插件值，即仅限 pod 模板。
+* `Never`  始终删除 pod。
+* `On Failure` 如果构建过程中失败，则保留 pod。
+
+您可覆盖管道 Jenkinsfile 中的 pod 保留：
+
+[source,groovy]
+----
+podTemplate(label: "mypod",
+  cloud: "openshift",
+  inheritFrom: "maven",
+  podRetention: onFailure(), <1>
+  containers: [
+    ...
+  ]) {
+  node("mypod") {
+    ...
+  }
+}
+----
+<1> `podRetention` 允许的值为 `never()`、`onFailure()`、`always()` 和 `default()`。
+
+[警告]
+====
+保留的 Pod 可能会根据资源配额继续运行和计数。
+====

@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+[id="manually-scaling-machineset"]
+= 手动扩展机器集
+include::_attributes/common-attributes.adoc[]
+:context: manually-scaling-machineset
+
+toc::[]
+
+您可以在机器集中添加或删除机器的实例。
+
+[注意]
+====
+如果您需要在扩展之外修改机器集的各个方面，请参阅修改机器集。
+====
+
+== 先决条件
+
+* 如果启用了集群范围代理并要扩展未包含在安装配置的 `networking.machineNetwork[].cidr` 中的 worker，您必须将 worker 添加到 Proxy 对象的 noProxy 字段，以防发生连接问题。
+
+include::modules/machine-user-provisioned-limitations.adoc[leveloffset=+1]
+
+include::modules/machineset-manually-scaling.adoc[leveloffset=+1]
+
+include::modules/machineset-delete-policy.adoc[leveloffset=+1]

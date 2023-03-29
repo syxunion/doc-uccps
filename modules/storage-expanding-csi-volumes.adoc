@@ -1,0 +1,12 @@
+// Module included in the following assemblies
+//
+// * storage/expanding-persistent-volumes.adoc
+
+[id="expanding-csi-volumes_{context}"]
+= 扩展 CSI 卷
+
+您可以在存储卷被创建后，使用 Container Storage Interface (CSI) 来扩展它们。
+
+统信容器云管理平台默认支持 CSI 卷扩展。但是，需要一个特定的 CSI 驱动程序。
+
+统信容器云管理平台1.2 支持 CSI 规范 版本 1.1.0。

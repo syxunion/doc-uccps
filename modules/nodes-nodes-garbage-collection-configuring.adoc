@@ -1,0 +1,153 @@
+
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-garbage-collection.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-garbage-collection-configuring_{context}"]
+= 为容器和镜像配置垃圾回收
+
+作为管理员，您可以通过为各个机器配置池创建 `kubeletConfig` 对象来配置 统信容器云管理平台 执行垃圾回收的方式。
+
+[注意]
+====
+统信容器云管理平台 只支持每个机器配置池的一个 `kubeletConfig` 对象。
+====
+
+您可以配置以下几项的任意组合：
+
+* 容器软驱除
+* 容器硬驱除
+* 镜像驱除
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` CRD 关联的标签：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: "2022-11-16T15:34:25Z"
+  generation: 4
+  labels:
+    pools.operator.machineconfiguration.openshift.io/worker: "" <1>
+  name: worker
+----
+<1> 标签会出现在 Labels 下。
++
+[提示]
+====
+如果标签不存在，请添加键/值对，例如：
+
+----
+$ oc label machineconfigpool worker custom-kubelet=small-pods
+----
+====
+
+.流程
+
+. 为配置更改创建自定义资源 (CR)。
++
+[重要]
+====
+如果只有一个文件系统，或者 `/var/lib/kubelet` 和 `/var/lib/containers/` 位于同一文件系统中，则具有最高值的设置会触发驱除操作，因为它们被首先满足。文件系统会触发驱除。
+====
++
+.容器垃圾回收 CR 的配置示例：
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: worker-kubeconfig <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/worker: "" <2>
+  kubeletConfig:
+    evictionSoft: <3>
+      memory.available: "500Mi" <4>
+      nodefs.available: "10%"
+      nodefs.inodesFree: "5%"
+      imagefs.available: "15%"
+      imagefs.inodesFree: "10%"
+    evictionSoftGracePeriod:  <5>
+      memory.available: "1m30s"
+      nodefs.available: "1m30s"
+      nodefs.inodesFree: "1m30s"
+      imagefs.available: "1m30s"
+      imagefs.inodesFree: "1m30s"
+    evictionHard: <6>
+      memory.available: "200Mi"
+      nodefs.available: "5%"
+      nodefs.inodesFree: "4%"
+      imagefs.available: "10%"
+      imagefs.inodesFree: "5%"
+    evictionPressureTransitionPeriod: 0s <7>
+    imageMinimumGCAge: 5m <8>
+    imageGCHighThresholdPercent: 80 <9>
+    imageGCLowThresholdPercent: 75 <10>
+----
+<1> 对象的名称。
+<2> 指定机器配置池中的标签。
+<3> 驱除类型： `evictionSoft` 或 `evictionHard`.
+<4> 基于特定驱除触发信号的驱除阈值。
+<5> 软驱除宽限期。此参数不适用于 `eviction-hard`.
+<6> 基于特定驱除触发信号的驱除阈值。对于 `evictionHard` ，您必须指定所有这些参数。如果没有指定所有参数，则只应用指定的参数，垃圾回收将无法正常工作。
+<7> 摆脱驱除压力状况前等待的时间。
+<8> 在通过垃圾收集移除镜像前，未用镜像的最小年龄。
+<9> 触发镜像垃圾回收的磁盘用量百分比（以整数表示）。
+<10> 镜像垃圾回收试尝试释放的磁盘用量百分比（以整数表示）。
+
+. 运行以下命令来创建 CR：
++
+[source,terminal]
+----
+$ oc create -f <file_name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f gc-container.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+kubeletconfig.machineconfiguration.openshift.io/gc-container created
+----
+
+.验证
+
+. 输入以下命令验证垃圾回收是否活跃。您在自定义资源中指定的 Machine Config Pool 会将 `UPDATING` 显示为“true”，直到更改完全实施为止：
++
+[source,terminal]
+----
+$ oc get machineconfigpool
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     CONFIG                                   UPDATED   UPDATING
+master   rendered-master-546383f80705bd5aeaba93   True      False
+worker   rendered-worker-b4c51bb33ccaae6fc4a6a5   False     True
+----

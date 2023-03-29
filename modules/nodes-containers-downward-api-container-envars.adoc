@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-downward-api-container-envars_{context}"]
+= 引用环境变量
+
+在创建 pod 时，您可以使用 $() 语法引用之前定义的环境变量的值。如果无法解析环境变量引用，则该值将保留为提供的字符串。
+
+.流程
+
+. 创建 `pod.yaml` 文件来引用现有的环境变量：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-env-test-pod
+spec:
+  containers:
+    - name: env-test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: MY_EXISTING_ENV
+          value: my_value
+        - name: MY_ENV_VAR_REF_ENV
+          value: $(MY_EXISTING_ENV)
+  restartPolicy: Never
+----
+
+. 从 `pod.yaml` 文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f pod.yaml
+----
+
+. 检查容器日志中的 `MY_ENV_VAR_REF_ENV 值`：
++
+[source,terminal]
+----
+$ oc logs -p dapi-env-test-pod
+----

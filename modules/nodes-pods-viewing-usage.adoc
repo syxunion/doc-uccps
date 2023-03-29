@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-viewing.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-viewing-usage_{context}"]
+= 查看 Pod 统计用量
+
+您可以显示 pod 的用量统计，这些统计信息为容器提供了运行时环境。这些用量统计包括 CPU、内存和存储的消耗。
+
+.先决条件
+
+* 您必须有 `cluster-reader` 权限才能查看用量统计。
+
+* 必须安装 Metrics 才能查看用量统计。
+
+.流程
+
+查看用量统计：
+
+. 运行以下命令：
++
+[source,terminal]
+----
+$ oc adm top pods
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc adm top pods -n openshift-console
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                         CPU(cores)   MEMORY(bytes)   
+console-7f58c69899-q8c8k     0m           22Mi            
+console-7f58c69899-xhbgg     0m           25Mi            
+downloads-594fcccf94-bcxk8   3m           18Mi            
+downloads-594fcccf94-kv4p6   2m           15Mi            
+----
+
+. 运行以下命令，以查看带有标签的 pod 用量统计：
++
+[source,terminal]
+----
+$ oc adm top pod --selector=''
+----
++
+您必须选择过滤所基于的选择器（标签查询）。支持 `=`, `==` 和 `!=`。

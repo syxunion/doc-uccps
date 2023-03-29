@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+// * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-setting-up-database_{context}"]
+= 设置数据库
+
+Rails 应用程序几乎总是与数据库一同使用。对于本地开发，请使用 PostgreSQL 数据库。
+
+.流程
+
+. 安装数据库：
++
+[source,terminal]
+----
+$ sudo yum install -y postgresql postgresql-server postgresql-devel
+----
+
+. 初始化数据库：
++
+[source,terminal]
+----
+$ sudo postgresql-setup initdb
+----
++
+这个命令会创建 `/var/lib/pgsql/data` 目录，数据存储在其中。
+
+. 启动数据库：
++
+[source,terminal]
+----
+$ sudo systemctl start postgresql.service
+----
+
+. 数据库运行时，创建 `rails` 用户：
++
+[source,terminal]
+----
+$ sudo -u postgres createuser -s rails
+----
++
+注意，所创建的用户无密码。

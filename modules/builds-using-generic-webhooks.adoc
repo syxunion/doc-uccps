@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-using-generic-webhooks_{context}"]
+= 使用通用 Webhook
+
+通用 Webhook 可从能够发出 Web 请求的任何系统调用。与其他 Webhook一样，您必须指定一个 secret，该 secret 将成为调用者必须用于触发构建的 URL 的一部分。secret可确保 URL 的唯一性，防止他人触发构建。如下是 `BuildConfig` 中的示例触发器定义 YAML：
+
+[source,yaml]
+----
+type: "Generic"
+generic:
+  secretReference:
+    name: "mysecret"
+  allowEnv: true <1>
+----
+<1> 设置为 `true`，以允许通用 Webhook 传入环境变量。
+
+.流程
+
+. 要设置调用者，请为调用系统提供构建的通用 Webhook 端点的 URL：
++
+.输出示例
+[source,terminal]
+----
+https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/generic
+----
++
+调用者必须以 `POST` 操作形式调用 Webhook。
+
+. 要手动调用 Webhook，您可以使用 `curl`：
++
+[source,terminal]
+----
+$ curl -X POST -k https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/generic
+----
++
+HTTP 操作动词必须设置为 `POST`。指定了不安全 `-k` 标志以忽略证书验证。如果集群拥有正确签名的证书，则不需要此第二个标志。
++
+端点可以接受具有以下格式的可选有效负载：
++
+[source,yaml]
+----
+git:
+  uri: "<url to git repository>"
+  ref: "<optional git reference>"
+  commit: "<commit hash identifying a specific git commit>"
+  author:
+    name: "<author name>"
+    email: "<author e-mail>"
+  committer:
+    name: "<committer name>"
+    email: "<committer e-mail>"
+  message: "<commit message>"
+env: <1>
+   - name: "<variable name>"
+     value: "<variable value>"
+----
+<1> 与 `BuildConfig` 环境变量类似，此处定义的环境变量也可供您的构建使用。如果这些变量与 BuildConfig 环境变量发生冲突，则以这些变量为准。默认情况下，Webhook 传递的环境变量将被忽略。在 Webhook 定义上将 `allowEnv` 字段设为 `true` 即可启用此行为。
+
+. 要使用 `curl` 传递此有效负载，请在名为 `payload_file.yaml` 的文件中进行定义，再运行以下命令：
++
+[source,terminal]
+----
+$ curl -H "Content-Type: application/yaml" --data-binary @payload_file.yaml -X POST -k https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/generic
+----
++
+参数与前一个示例相同，但添加了标头和 payload。`-H` 参数将 `Content-Type` 标头设置为 `application/yaml` 或 `application/json`，具体取决于您的 payload 格式。`--data-binary` 参数用于通过 `POST` 请求发送带有换行符的二进制 payload。
+
+[注意]
+====
+即使出示了无效的请求 payload（例如，无效的内容类型，或者无法解析或无效的内容等），统信容器云管理平台 也允许通用 Webhook 触发构建。保留此行为是为了向后兼容。如果出示无效的请求 payload，统信容器云管理平台 将以 JSON 格式返回警告，作为其 `HTTP 200 OK` 响应的一部分。
+====

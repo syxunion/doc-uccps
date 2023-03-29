@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * machine_management/applying-autoscaling.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: CONCEPT
+[id="machine-autoscaler-about_{context}"]
+= 关于机器自动扩展
+
+机器自动扩展会调整您在 统信容器云管理平台 集群中部署的机器集中的 Machine 数量。您可以扩展默认 worker 机器集，以及您创建的其他机器集。当集群没有足够资源来支持更多部署时，机器自动扩展会增加 Machine。对 MachineAutoscaler 资源中的值（如最小或最大实例数量）的任何更改都会立即应用到目标机器设置中。
+
+[重要]
+====
+您必须部署机器自动扩展才能使用集群自动扩展功能来扩展机器。集群自动扩展使用机器自动扩展集上的注解来确定可扩展的资源。如果您在没有定义机器自动扩展的情况下定义集群自动扩展，集群自动扩展永远不会扩展集群。
+====

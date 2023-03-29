@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="serverless-configuring-routes"]
+= 路由
+:context: serverless-configuring-routes
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+Knative 利用 {product-title} 终止来为 Knative 服务提供路由。创建 Knative 服务时，会自动为该服务创建一个 {product-title} 路由。此路由由 {ServerlessOperatorName} 管理 {product-title} 路由通过与 {product-title} 集群相同的域公开 Knative 服务。
+
+您可以禁用 {product-title} 路由的 Operator 控制，以便您可以配置 Knative 路由来直接使用 TLS 证书。
+
+Knative 路由也可以与  {product-title} 路由一起使用，以提供额外的精细路由功能，如流量分割。
+
+include::modules/serverless-customize-labels-annotations-routes.adoc[leveloffset=+1]
+include::modules/serverless-openshift-routes.adoc[leveloffset=+1]
+include::modules/knative-service-cluster-local.adoc[leveloffset=+1]

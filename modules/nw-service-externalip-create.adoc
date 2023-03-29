@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-service-external-ip.adoc
+
+:_content-type: PROCEDURE
+[id="nw-service-externalip-create_{context}"]
+= 将 ExternalIP 附加到服务
+
+您可以将 ExternalIP 附加到服务。如果您的集群被配置为自动分配 ExternalIP，您可能不需要手动将 ExternalIP 附加到该服务。
+
+.流程
+
+. 可选： 要确认为 ExternalIP 配置了哪些 IP 地址范围，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get networks.config cluster -o jsonpath='{.spec.externalIP}{"\n"}'
+----
++
+如果设置了 `autoAssignCIDRs`，在没有指定 `spec.externalIPs` 字段的情况下，统信容器云管理平台 会自动为新的 Service 对象分配一个 ExternalIP。
+
+. 为服务附加一个 ExternalIP。
+
+.. 如果要创建新服务，请指定 `spec.externalIPs` 字段，并提供包括一个或多个有效 IP 地址的数组。例如：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-with-externalip
+spec:
+  ...
+  externalIPs:
+  - 192.174.120.10
+----
+
+.. 如果您要将 ExternalIP 附加到现有服务中，请输入以下命令。将 `<name>` 替换为服务名称。将 `<ip_address>` 替换为有效的 ExternalIP 地址。您可以提供多个以逗号分开的 IP 地址。
++
+[source,terminal]
+----
+$ oc patch svc <name> -p \
+  '{
+    "spec": {
+      "externalIPs": [ "<ip_address>" ]
+    }
+  }'
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc patch svc mysql-55-rhel7 -p '{"spec":{"externalIPs":["192.174.120.10"]}}'
+----
++
+.输出示例
+[source,terminal]
+----
+"mysql-55-rhel7" patched
+----
+
+. 要确认一个 ExternalIP 地址已附加到该服务，请输入以下命令。如果为新服务指定 ExternalIP，您必须首先创建该服务。
++
+[source,terminal]
+----
+$ oc get svc
+----
++
+.输出示例
+[source,terminal]
+----
+NAME               CLUSTER-IP      EXTERNAL-IP     PORT(S)    AGE
+mysql-55-rhel7     172.30.131.89   192.174.120.10  3306/TCP   13m
+----

@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+// * service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-update-app-sidecar_{context}"]
+= Updating sidecar proxies
+
+要更新 sidecar 代理的配置，应用程序管理员必须重启应用程序 pod。
+
+如果您的部署使用了自动 sidecar 注入功能，则可以通过添加或修改注解来更新部署中的 pod 模板。运行以下命令来重新部署 pod：
+
+[source,terminal]
+----
+$ oc patch deployment/<deployment> -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}'
+----
+
+如果您的部署没有使用自动 sidecar 注入功能，则必须通过修改部署或 pod 中指定的 sidecar 容器镜像来手动更新 sidecar，然后重启 pod。

@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-downward-api-container-values-plugin_{context}"]
+= 使用卷插件消耗容器值
+
+容器可以使用卷插件来消耗 API 值。
+
+容器可以消耗：
+
+* Pod 名称
+
+* Pod 项目/命名空间
+
+* Pod 注解
+
+* Pod 标签
+
+.流程
+
+使用卷插件：
+
+. 创建 `volume-pod.yaml` 文件：
++
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  labels:
+    zone: us-east-coast
+    cluster: downward-api-test-cluster1
+    rack: rack-123
+  name: dapi-volume-test-pod
+  annotations:
+    annotation1: "345"
+    annotation2: "456"
+spec:
+  containers:
+    - name: volume-test-container
+      image: gcr.io/google_containers/busybox
+      command: ["sh", "-c", "cat /tmp/etc/pod_labels /tmp/etc/pod_annotations"]
+      volumeMounts:
+        - name: podinfo
+          mountPath: /tmp/etc
+          readOnly: false
+  volumes:
+  - name: podinfo
+    downwardAPI:
+      defaultMode: 420
+      items:
+      - fieldRef:
+          fieldPath: metadata.name
+        path: pod_name
+      - fieldRef:
+          fieldPath: metadata.namespace
+        path: pod_namespace
+      - fieldRef:
+          fieldPath: metadata.labels
+        path: pod_labels
+      - fieldRef:
+          fieldPath: metadata.annotations
+        path: pod_annotations
+  restartPolicy: Never
+----
+
+. 从 `volume-pod.yaml` 文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f volume-pod.yaml
+----
+
+. 检查容器的日志，并验证配置的字段是否存在：
++
+[source,terminal]
+----
+$ oc logs -p dapi-volume-test-pod
+----
++
+.输出示例
+[source,terminal]
+----
+cluster=downward-api-test-cluster1
+rack=rack-123
+zone=us-east-coast
+annotation1=345
+annotation2=456
+kubernetes.io/config.source=api
+----

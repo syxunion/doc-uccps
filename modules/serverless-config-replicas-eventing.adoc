@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-ha.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-config-replicas-eventing_{context}"]
+= 为 Knative Eventing 配置高可用性副本
+
+默认情况下，Knative Eventing `eventing-controller`, `eventing-webhook`, `imc-controller`, `imc-dispatcher`,  和 `mt-broker-controller` 组件都会具有高可用性 (HA) 。您可以通过修改 KnativeEventing` 自定义资源 (CR) 中的 `spec.high-availability.replicas` 值来更改这些组件的副本数。
+
+[注意]
+====
+对于 Knative Eventing，HA 不会扩展 mt-broker-filter 和 mt-broker-ingress 部署。如果需要多个部署，请手动扩展这些组件。
+====
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+
+* 在集群中安装了 统信容器云管理平台无服务扩展组件 和 Knative Eventing。
+
+.流程
+
+. 在 {product-title}  web 控制台的 *管理员* 视角中，进入 *OperatorHub* -> *安装的 Operators*.
+
+. 选择 `knative-eventing` 命名空间
+
+. 点  统信容器云管理平台无服务扩展组件 的 *提供的 APIs* 列表中的 *Knative Eventing* 来进入 *Knative Eventing* 选项卡。
+
+. 点 *knative-eventing*，然后进入 *knative-eventing* 页面中的 YAML 选项卡。
++
+image::eventing-YAML-HA.png[Knative Eventing YAML]
+
+. 修改 `KnativeEventing` CR 中的副本数量：
++
+.YAML 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  high-availability:
+    replicas: 3
+----

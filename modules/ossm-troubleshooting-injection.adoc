@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+[id="ossm-troubleshooting-injection_{context}"]
+= sidecar 注入故障排除
+
+{SMProductName} 不会自动将代理 sidecar 注入 pod。您必须选择 sidecar 注入。
+
+== Istio sidecar 注入故障排除
+
+检查您的应用程序的部署中是否启用了自动注入。如果为 Envoy 代理启用了自动注入，则 `spec.template.metadata.annotations`  的 `Deployment` 资源中应该有一个 `sidecar.istio.io/inject:"true"` 注解。
+
+== Jaeger 代理 sidecar 注入故障排除
+
+检查您的应用程序的部署中是否启用了自动注入。如果启用了 Jaeger 代理的自动注入，`Deployment` 资源中应该有一个  `sidecar.jaegertracing.io/inject:"true"` 注解。

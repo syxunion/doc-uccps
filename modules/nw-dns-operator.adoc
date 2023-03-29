@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+// * networking/dns/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-operator_{context}"]
+= DNS Operator
+
+DNS Operator 从 `operator.openshift.io` API 组实现 `dns` API。Operator 使用守护进程集部署 CoreDNS，为守护进程集创建一个服务，并将 kubelet 配置为指示 pod 使用 CoreDNS 服务 IP 地址进行名称解析。
+
+.流程
+
+在安装过程中使用 `Deployment` 对象部署 DNS Operator。
+
+. 使用 `oc get` 命令查看部署状态：
++
+[source,terminal]
+----
+$ oc get -n openshift-dns-operator deployment/dns-operator
+----
++
+.输出示例
+[source,terminal]
+----
+NAME           READY     UP-TO-DATE   AVAILABLE   AGE
+dns-operator   1/1       1            1           23h
+----
+
+. 使用 `oc get` 命令来查看 DNS Operator 的状态：
++
+[source,terminal]
+----
+$ oc get clusteroperator/dns
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      VERSION     AVAILABLE   PROGRESSING   DEGRADED   SINCE
+dns       4.1.0-0.11  True        False         False      92m
+----
++
+`AVAILABLE`、`PROGRESSING` 和 `DEGRADED` 提供了有关 Operator 状态的信息。当 CoreDNS 守护进程中至少有 1 个 pod 被设置为 `Available` 状态时，`AVAILABLE` 为 True。

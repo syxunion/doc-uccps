@@ -1,0 +1,14 @@
+:_content-type: PROCEDURE
+[id="odc-removing-services-from-your-application_{context}"]
+= 从应用程序中删除服务
+
+在拓扑 *图形视图* 中，使用上下文菜单从应用程序中删除服务。
+
+.流程
+
+1. 在拓扑 *图形视图* 中的应用程序组中右键单击应用程序组中的服务，以显示上下文菜单。
+
+2. 选择 *删除部署* 以删除服务。
++
+.删除部署选项
+image::odc_deleting_deployment.png[]

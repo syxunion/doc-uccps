@@ -1,0 +1,88 @@
+// Module included in the following assemblies:
+//
+// * /serverless/security/serverless-custom-domains.adoc
+// * /serverless/security/serverless-config-tls.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-domain-mapping-custom-tls-cert_{context}"]
+= 使用 TLS 证书保护带有自定义域的服务
+
+为 Knative 服务配置了自定义域后，您可以使用 TLS 证书来保护映射的服务。要做到这一点，您必须创建一个 Kubernetes TLS secret，然后更新 `DomainMapping` CR 以使用您创建的 TLS secret。
+
+
+.先决条件
+
+* 为 Knative 服务配置了自定义域，并有一个正常工作 `DomainMapping` CR.
+
+* 您有来自证书授权机构供应商或自签名证书的 TLS 证书。
+
+* 您已从证书授权中心（CA）提供商或自签名证书获取 cert 和 key 文件。
+
+* 安装 Uccps CLI (`oc`).
+
+.Procedure
+
+. Create a Kubernetes TLS secret:
++
+[source,terminal]
+----
+$ oc create secret tls <tls_secret_name> --cert=<path_to_certificate_file> --key=<path_to_key_file>
+----
+
+. If you are using {SMProductName} as the ingress for your {ServerlessProductName} installation, label the Kubernetes TLS secret with the following:
++
+[source,yaml]
+----
+“networking.internal.knative.dev/certificate-uid": “<value>”
+----
++
+If you are using a third-party secret provider such as cert-manager, you can configure your secret manager to label the Kubernetes TLS secret automatically. Cert-manager users can use the secret template offered to automatically generate secrets with the correct label. In this case, secret filtering is done based on the key only, but this value can carry useful information such as the certificate ID that the secret contains.
++
+[NOTE]
+====
+The {cert-manager-operator} is a Technology Preview feature. For more information, see the *Installing the {cert-manager-operator}* documentation.
+====
+
+. Update the `DomainMapping` CR to use the TLS secret that you have created:
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+  name: <domain_name>
+  namespace: <namespace>
+spec:
+  ref:
+    name: <service_name>
+    kind: Service
+    apiVersion: serving.knative.dev/v1
+# TLS block specifies the secret to be used
+  tls:
+    secretName: <tls_secret_name>
+----
+
+.Verification
+
+. Verify that the `DomainMapping` CR status is `True`, and that the `URL` column of the output shows the mapped domain with the scheme `https`:
++
+[source,terminal]
+----
+$ oc get domainmapping <domain_name>
+----
++
+.Example output
+[source,terminal]
+----
+NAME                      URL                               READY   REASON
+example.com               https://example.com               True
+----
+
+. Optional: If the service is exposed publicly, verify that it is available by running the following command:
++
+[source,terminal]
+----
+$ curl https://<domain_name>
+----
++
+If the certificate is self-signed, skip verification by adding the `-k` flag to the `curl` command.

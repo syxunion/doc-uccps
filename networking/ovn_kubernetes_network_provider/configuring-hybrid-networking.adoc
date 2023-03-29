@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="configuring-hybrid-networking"]
+= 配置混合联网
+include::_attributes/common-attributes.adoc[]
+:context: configuring-hybrid-networking
+
+toc::[]
+
+作为集群管理员，您可以配置 OVN-Kubernetes Container Network Interface(CNI)集群网络供应商，允许 Linux 和 Windows 节点分别托管 Linux 和 Windows 工作负载。
+
+include::modules/configuring-hybrid-ovnkubernetes.adoc[leveloffset=+1]
+
+完成所有进一步的安装配置，然后创建集群。安装过程完成后会启用 Hybrid 网络。

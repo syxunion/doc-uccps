@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+
+:_content-type: CONCEPT
+[id="identity-provider-about-request-header_{context}"]
+= 关于请求标头身份验证
+
+请求标头身份提供程序从请求标头值标识用户，例如 `X-Remote-User`。它通常与设定请求标头值的身份验证代理一起使用。请求标头身份提供程序无法与其他使用直接密码登录的身份提供商结合使用 `HTPasswd`、`Keystone`、`LDAP` 或基本身份验证。
+
+[注意]
+====
+您还可以将请求标头身份提供程序用于高级配置，如由社区支持的 SAML 身份验证。请注意，红帽不支持这个解决方案。
+====
+
+用户使用此身份提供程序进行身份验证时，必须通过身份验证代理访问 https://<namespace_route>/oauth/authorize（及子路径）。要实现此目标，请将 OAuth 服务器配置为把 OAuth 令牌的未经身份验证的请求重定向到代理到 https://<namespace_route>/oauth/authorize 的代理端点。
+
+重定向来自希望基于浏览器型登录流的客户端的未经身份验证请求：
+
+* 将 `provider.loginURL` 参数设为身份验证代理 URL，该代理将验证交互式客户端并将其请求代理到 `https://<namespace_route>/oauth/authorize`。
+
+重定向来自希望 `WWW-Authenticate` 质询的客户端的未经身份验证请求：
+
+* 将 `provider.challengeURL` 参数设置为身份验证代理 URL，该代理将验证希望 `WWW-Authenticate` 质询的客户端并将其请求代理到 `https://<namespace_route>/oauth/authorize`。
+
+`provider.challengeURL` 和 `provider.loginURL` 参数可以在 URL 的查询部分中包含以下令牌：
+
+* `${url}` 替换为当前的 URL，进行转义以在查询参数中安全使用。
++
+例如： [x-]`https://www.example.com/sso-login?then=${url}`
+
+* ${query} 替换为当前的查询字符串，不进行转义。
++
+例如： [x-]`https://www.example.com/auth-proxy/oauth/authorize?${query}`
+
+[重要]
+====
+统信容器云管理平台中，代理必须支持 mutual TLS。
+====
+
+[id="sspi-windows_{context}"]
+== Microsoft Windows 上的 SSPI 连接支持
+
+
+[IMPORTANT]
+====
+使用 Microsoft Windows 上的 SSPI 连接支持是技术预览功能。技术预览功能不包括在红帽生产服务级别协议（SLA）中，且其功能可能并不完善。因此，红帽不建议在生产环境中使用它们。这些技术预览功能可以使用户提早试用新的功能，并有机会在开发阶段提供反馈意见。
+====
+
+
+Uccp CLI （oc）支持安全支持提供程序接口（SSPI），以允许 Microsft Windows 上的 SSO 流。如果您使用请求标头身份提供程序与支持 GSSAPI 的代理将 Active Directory 服务器连接到 统信容器云管理平台，用户可以通过加入了域的 Microsoft Windows 计算机使用 oc 命令行界面来自动进行统信容器云管理平台身份验证。

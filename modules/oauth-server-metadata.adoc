@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-internal-oauth.adoc
+
+[id="oauth-server-metadata_{context}"]
+= OAuth 服务器元数据
+
+在统信容器云管理平台中运行的应用程序可能需要发现有关内置 OAuth 服务器的信息。例如，它们可能需要发现 `<namespace_route>` 的哪个地址没有手动配置。为此，统信容器云管理平台 实施了 IETF OAuth 2.0 授权服务器元数据草案规范。
+
+因此，集群中运行的任何应用程序都可以向  *_\https://openshift.default.svc/.well-known/oauth-authorization-server_* 发出 GET 请求来获取以下信息：
+
+----
+{
+  "issuer": "https://<namespace_route>", 
+  "authorization_endpoint": "https://<namespace_route>/oauth/authorize", 
+  "token_endpoint": "https://<namespace_route>/oauth/token", 
+  "scopes_supported": [ 
+    "user:full",
+    "user:info",
+    "user:check-access",
+    "user:list-scoped-projects",
+    "user:list-projects"
+  ],
+  "response_types_supported": [ 
+    "code",
+    "token"
+  ],
+  "grant_types_supported": [ 
+    "authorization_code",
+    "implicit"
+  ],
+  "code_challenge_methods_supported": [ 
+    "plain",
+    "S256"
+  ]
+}
+----

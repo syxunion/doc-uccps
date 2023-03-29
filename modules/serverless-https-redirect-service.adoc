@@ -1,0 +1,23 @@
+// Module is included in the following assemblies:
+//
+// * serverless/develop/serverless-applications.adoc
+
+:_content-type: REFERENCE
+[id="serverless-https-redirect-service_{context}"]
+= 每个服务的 HTTPS 重定向
+
+// need better details from eng team about use case to update this topic
+您可以通过配置 `networking.knative.dev/http-option` 注解来为服务启用或禁用 HTTPS 重定向。以下示例演示了如何在 Knative `Service` YAML 对象中使用此注解：
+
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example
+  namespace: default
+  annotations:
+    networking.knative.dev/http-option: "redirected"
+spec:
+  ...
+----

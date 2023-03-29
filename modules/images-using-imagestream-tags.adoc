@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+[id="images-using-imagestream-tags_{context}"]
+= 镜像流标签
+
+镜像流标签是指向镜像流中镜像的命名指针。缩写为 istag。镜像流标签用于引用或检索给定镜像流和标签的镜像。
+
+镜像流标签可引用任何本地管理或外部管理的镜像。它包含镜像历史记录，表示为标签曾指向的所有镜像的堆栈。每当特定镜像流标签下标记了新的或现有镜像时，该镜像将置于历史记录堆栈的第一位置。以前，顶层位置位于第二个位置。这样便于回滚，从而让标签再次指向历史镜像。
+
+以下镜像流标签来自 `ImageStream` 对象：
+
+.历史记录中有两个镜像的镜像流标签
+
+[source,yaml]
+----
+  tags:
+  - items:
+    - created: 2017-09-02T10:15:09Z
+      dockerImageReference: 172.30.56.218:5000/test/origin-ruby-sample@sha256:47463d94eb5c049b2d23b03a9530bf944f8f967a0fe79147dd6b9135bf7dd13d
+      generation: 2
+      image: sha256:909de62d1f609a717ec433cc25ca5cf00941545c83a01fb31527771e1fab3fc5
+    - created: 2017-09-01T13:40:11Z
+      dockerImageReference: 172.30.56.218:5000/test/origin-ruby-sample@sha256:909de62d1f609a717ec433cc25ca5cf00941545c83a01fb31527771e1fab3fc5
+      generation: 1
+      image: sha256:47463d94eb5c049b2d23b03a9530bf944f8f967a0fe79147dd6b9135bf7dd13d
+    tag: latest
+----
+
+镜像流标签可以是持久性标签，也可以是跟踪标签。
+
+* 本文标签是特定于版本的标签，指向镜像的特定版本，如 Python 3.5。
+
+* 跟踪标签是引用标签，跟随另一个镜像流标签，并可更新以更改它们跟随的镜像，如符号链接。这些新等级无法保证向后兼容。
++
+例如，统信容器云管理平台 附带的 `latest` 镜像流标签是跟踪标签。这意味着，当有新级别可用时，使用 `latest` 镜像流标签的用户会更新为镜像提供的框架的最新级别。指向 `v3.10` 的 `latest` 镜像流标签可以随时更改为 `v3.11`。请务必注意，这些 `latest` 镜像流标签的行为与 Docker latest 标签不同。在本例中，`latest` 镜像流标签不指向 Docker 存储库中的最新镜像。它指向另一个镜像流标签，可能并非镜像的最新版本。例如，如果 `latest` 镜像流标签指向 `v3.10` 镜像，则当发布了 `3.11` 版时，`latest` 标签不会自动更新至 `v3.11`，并保持 `v3.10`，直到手动更新为指向 `v3.11` 镜像流标签。
++
+[注意]
+====
+跟踪标签仅限于单个镜像流，无法引用其他镜像流。
+====
+
+您可以根据自己的需要创建自己的镜像流标签。
+
+镜像流标签由镜像流名称和一个标签组成，用冒号隔开：
+
+----
+<imagestream name>:<tag>
+----
+
+例如：为引用前面 ImageStream 对象示例中的 
+`sha256:47463d94eb5c049b2d23b03a9530bf944f8f967a0fe79147dd6b9135bf7dd13d`镜像，镜像流标签将是：
+
+----
+origin-ruby-sample:latest
+----

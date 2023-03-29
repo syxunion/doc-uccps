@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="deploying-egress-router-ovn-redirection"]
+= 以重定向模式部署出口路由器 pod
+include::_attributes/common-attributes.adoc[]
+:context: deploying-egress-router-ovn-redirection
+
+toc::[]
+
+作为集群管理员，您可以部署出口路由器 Pod，将流量重新指向来自保留源 IP 地址的指定目标 IP 地址。
+
+出口路由器实施使用出口路由器 Container Network Interface（CNI）插件。
+
+// Describe the CR and provide an example.
+include::modules/nw-egress-router-cr.adoc[leveloffset=+1]
+
+// Deploying an egress router pod in {router-type} mode
+include::modules/nw-egress-router-redirect-mode-ovn.adoc[leveloffset=+1]

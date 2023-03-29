@@ -1,0 +1,36 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-lookup-queries_{context}"]
+= The 3scale WebAssembly module lookup queries
+
+`lookup query` 对象是 `credentials` 对象中任何字段的一部分。它指定如何查找和处理给定凭证字段。评估之后，成功解析意味着找到一个或多个值。失败的解决方案意味着没有找到任何值。
+
+`lookup queries` 的数组描述了一个短电路或关系：成功解析其中一个查询会停止评估任何剩余查询，并将值或值分配到指定的凭证类型。数组中的每个查询相互独立。
+
+`lookup query` 由单个字段（一个源对象）组成，它可以是多个源类型之一。请参见以下示例：
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: threescale-wasm-auth
+spec:
+  config:
+    ...
+    services:
+    - credentials:
+        user_key:
+          - <source_type>: <object>
+          - <source_type>: <object>
+          ...
+        app_id:
+          - <source_type>: <object>
+          ...
+        app_key:
+          - <source_type>: <object>
+          ...
+    ...
+----

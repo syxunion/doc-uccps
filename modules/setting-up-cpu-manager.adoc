@@ -1,0 +1,252 @@
+// Module included in the following assemblies:
+//
+// * scaling_and_performance/using-cpu-manager.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="seting_up_cpu_manager_{context}"]
+= 设置 CPU Manager
+
+.流程
+
+. 可选：标记节点：
++
+[source,terminal]
+----
+# oc label node perf-node.example.com cpumanager=true
+----
+
+. 编辑启用 CPU Manager 的节点的 `MachineConfigPool` 。在这个示例中，所有 worker 都启用了 CPU Manager：
++
+[source,terminal]
+----
+# oc edit machineconfigpool worker
+----
+
+. 为 worker 机器配置池添加标签：
++
+[source,yaml]
+----
+metadata:
+  creationTimestamp: 2020-xx-xxx
+  generation: 3
+  labels:
+    custom-kubelet: cpumanager-enabled
+----
+
+. 创建 `KubeletConfig`，`cpumanager-kubeletconfig.yaml`，自定义资源 (CR) 。请参阅上一步中创建的标签，以便使用新的 kubelet 配置更新正确的节点。请参见 `MachineConfigPoolSelector` 部分：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: cpumanager-enabled
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: cpumanager-enabled
+  kubeletConfig:
+     cpuManagerPolicy: static <1>
+     cpuManagerReconcilePeriod: 5s <2>
+----
+<1> 指定一个策略：
+* `none`.这个策略明确启用了现有的默认 CPU 关联性方案，从而不会出现超越调度程序自动进行的关联性。
+* `static`。此策略允许具有某些资源特征的 pod 获得提高 CPU 关联性和节点上专用的 pod。
+<2> 可选。指定 CPU Manager 协调频率。默认值为 `5s`。
+ 
+. 创建动态 kubelet 配置：
++
+[source,terminal]
+----
+# oc create -f cpumanager-kubeletconfig.yaml
+----
++
+这会在 kubelet 配置中添加 CPU Manager 功能，如果需要，Machine Config Operator（MCO）将重启节点。要启用 CPU Manager，则不需要重启。
+
+. 检查合并的 kubelet 配置：
++
+[source,terminal]
+----
+# oc get machineconfig 99-worker-XXXXXX-XXXXX-XXXX-XXXXX-kubelet -o json | grep ownerReference -A7
+----
++
+.输出示例
+[source,json]
+----
+       "ownerReferences": [
+            {
+                "apiVersion": "machineconfiguration.openshift.io/v1",
+                "kind": "KubeletConfig",
+                "name": "cpumanager-enabled",
+                "uid": "7ed5616d-6b72-11e9-aae1-021e1ce18878"
+            }
+        ]
+----
+
+. 检查 worker 是否有更新的 `kubelet.conf`：
++
+[source,terminal]
+----
+# oc debug node/perf-node.example.com
+sh-4.2# cat /host/etc/kubernetes/kubelet.conf | grep cpuManager
+----
++
+.输出示例
+[source,terminal]
+----
+cpuManagerPolicy: static        <1>
+cpuManagerReconcilePeriod: 5s   <1>
+----
+<1> 当创建 `KubeletConfig` CR 时会定义这些设置。
+
+. 创建请求一个或多个内核的 pod。限制和请求都必须将其 CPU 值设置为一个整数。这是专用于此 pod 的内核数：
++
+[source,terminal]
+----
+# cat cpumanager-pod.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: cpumanager-
+spec:
+  containers:
+  - name: cpumanager
+    image: gcr.io/google_containers/pause-amd64:3.0
+    resources:
+      requests:
+        cpu: 1
+        memory: "1G"
+      limits:
+        cpu: 1
+        memory: "1G"
+  nodeSelector:
+    cpumanager: "true"
+----
+
+. 创建 pod：
++
+[source,terminal]
+----
+# oc create -f cpumanager-pod.yaml
+----
+
+. 确定为您标记的节点调度了 pod：
++
+[source,terminal]
+----
+# oc describe pod cpumanager
+----
++
+.输出示例
+[source,terminal]
+----
+Name:               cpumanager-6cqz7
+Namespace:          default
+Priority:           0
+PriorityClassName:  <none>
+Node:  perf-node.example.com/xxx.xx.xx.xxx
+...
+ Limits:
+      cpu:     1
+      memory:  1G
+    Requests:
+      cpu:        1
+      memory:     1G
+...
+QoS Class:       Guaranteed
+Node-Selectors:  cpumanager=true
+----
+
+. 确认正确配置了 `cgroups`。获取 `pause` 进程的进程 ID（PID）：
++
+[source,terminal]
+----
+# ├─init.scope
+│ └─1 /usr/lib/systemd/systemd --switched-root --system --deserialize 17
+└─kubepods.slice
+  ├─kubepods-pod69c01f8e_6b74_11e9_ac0f_0a2b62178a22.slice
+  │ ├─crio-b5437308f1a574c542bdf08563b865c0345c8f8c0b0a655612c.scope
+  │ └─32706 /pause
+----
++
+服务质量（QoS）等级为 `Guaranteed` 的 pod 被放置到 `kubepods.slice` 中。其它 QoS 等级的 pod 会位于 `kubepods` 的子 `cgroups` 中：
++
+[source,terminal]
+----
+# cd /sys/fs/cgroup/cpuset/kubepods.slice/kubepods-pod69c01f8e_6b74_11e9_ac0f_0a2b62178a22.slice/crio-b5437308f1ad1a7db0574c542bdf08563b865c0345c86e9585f8c0b0a655612c.scope
+# for i in `ls cpuset.cpus tasks` ; do echo -n "$i "; cat $i ; done
+----
++
+.输出示例
+[source,terminal]
+----
+cpuset.cpus 1
+tasks 32706
+----
+
+. 检查任务允许的 CPU 列表：
++
+[source,terminal]
+----
+# grep ^Cpus_allowed_list /proc/32706/status
+----
++
+.输出示例
+[source,terminal]
+----
+ Cpus_allowed_list:    1
+----
+
+. 确认系统中的另一个 pod（在这个示例中，QoS 等级为 `burstable` 的 pod）不能在为等级为`Guaranteed` 的 pod 分配的内核中运行：
++
+[source,terminal]
+----
+# cat /sys/fs/cgroup/cpuset/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-podc494a073_6b77_11e9_98c0_06bba5c387ea.slice/crio-c56982f57b75a2420947f0afc6cafe7534c5734efc34157525fa9abbf99e3849.scope/cpuset.cpus
+0
+# oc describe node perf-node.example.com
+----
++
+.输出示例
+[source, terminal]
+----
+...
+Capacity:
+ attachable-volumes-aws-ebs:  39
+ cpu:                         2
+ ephemeral-storage:           124768236Ki
+ hugepages-1Gi:               0
+ hugepages-2Mi:               0
+ memory:                      8162900Ki
+ pods:                        250
+Allocatable:
+ attachable-volumes-aws-ebs:  39
+ cpu:                         1500m
+ ephemeral-storage:           124768236Ki
+ hugepages-1Gi:               0
+ hugepages-2Mi:               0
+ memory:                      7548500Ki
+ pods:                        250
+-------                               ----                           ------------  ----------  ---------------  -------------  ---
+  default                                 cpumanager-6cqz7               1 (66%)       1 (66%)     1G (12%)         1G (12%)       29m
+
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource                    Requests          Limits
+  --------                    --------          ------
+  cpu                         1440m (96%)       1 (66%)
+----
++
+这个 VM 有两个 CPU 内核。`system-reserved` 设置保留 500 millicores，这代表一个内核中的一半被从节点的总容量中减小，以达到 `Node Allocatable` 的数量。您可以看到 `Allocatable CPU` 是 1500 毫秒。这意味着您可以运行一个 CPU Manager pod，因为每个 pod 需要一个完整的内核。一个完整的内核等于 1000 毫秒。如果您尝试调度第二个 pod，系统将接受该 pod，但不会调度它：
++
+[source, terminal]
+----
+NAME                    READY   STATUS    RESTARTS   AGE
+cpumanager-6cqz7        1/1     Running   0          33m
+cpumanager-7qc2t        0/1     Pending   0          11s
+----

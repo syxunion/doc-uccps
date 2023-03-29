@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+[id="unmanaged-monitoring-operators_{context}"]
+= 监控 Operator 的支持策略
+
+监控 Operator 确保 统信容器云管理平台 监控资源按设计和测试的方式正常工作。如果某个 Operator 的 Cluster Version Operator (CVO) 控制被覆盖，该 Operator 不会响应配置更改，协调集群对象的预期状态或接收更新。
+
+虽然在调试过程中覆盖 Operator 的 CVO 可能有所帮助，但该操作不受支持，集群管理员需要完全掌控各个组件的配置和升级。
+
+.覆盖 Cluster Version Operator
+
+可将 `spec.overrides` 参数添加到 CVO 的配置中，以便管理员提供对组件的 CVO 行为覆盖的列表。将一个组件的 spec.overrides[].unmanaged 参数设置为 true 会阻止集群升级并在设置 CVO 覆盖后提醒管理员：
+
+[source,terminal]
+----
+Disabling ownership via cluster version overrides prevents upgrades. Please remove overrides before continuing.
+----
+
+[警告]
+====
+设置 CVO 覆盖会使整个集群处于不受支持的状态，并导致监控堆栈无法被协调到其预期状态。这会影响 Operator 内置的可靠性功能，并妨碍接收更新。在删除所有覆盖后，必须可以重现报告的问题方可获得支持。
+====

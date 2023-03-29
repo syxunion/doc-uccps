@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="modifying-machineset"]
+= 修改机器集
+include::_attributes/common-attributes.adoc[]
+:context: modifying-machineset
+
+toc::[]
+
+您可以对机器集进行更改，例如添加标签、更改实例类型或更改块存储。
+
+在 UnionTech Virtualization(RHV) 中，您还可以更改机器集，以便在不同的存储域中置备新节点。
+
+[注意]
+====
+如果您需要在不进行其他更改的情况下扩展机器集，请参阅 xref:../machine_management/manually-scaling-machineset.adoc#manually-scaling-machineset[手动扩展机器集]。
+====
+
+include::modules/machineset-modifying.adoc[leveloffset=+1]

@@ -1,0 +1,12 @@
+:_content-type: REFERENCE
+
+[id="ephemeral-storage-additional-support-limitations-for-shared-resource-csi-driver_{context}"]
+= 共享资源 CSI 驱动程序的额外支持限制
+
+[role="_abstract"]
+共享资源 CSI 驱动程序有以下值得注意的限制：
+
+* 驱动程序会受 Container Storage Interface(CSI)内联临时卷的限制。
+* readOnly 字段的值必须是 `true`。否则，在 pod 启动过程中卷置备，驱动会返回 kubelet 错误。这个限制是保持上游 Kubernetes CSI Driver 推荐的最佳实践，以将 SELinux 标签应用到关联的卷。
+* 驱动程序忽略 `FSType` 字段，因为它仅支持 tmpfs 卷。
+* 驱动程序忽略 `NodePublishSecretRef` 字段。相反，它使用 `SubjectAccessReviews` 和 `use` 动词来评估 pod 是否可以获取包含 `SharedSecre`t 或 `SharedConfigMap` 自定义资源(CR)实例的卷。

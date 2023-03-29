@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+[id="securing-builds-by-strategy"]
+= 通过策略保护构建
+include::_attributes/common-attributes.adoc[]
+:context: securing-builds-by-strategy
+
+toc::[]
+
+统信容器云管理平台 中的构建在特权容器中运行。根据所用的构建策略，如果您有权限，可以运行构建来升级其在集群和主机节点上的权限。为安全起见，请限制可以运行构建的人员以及用于这些构建的策略。Custom 构建本质上不如 Source 构建安全，因为它们可以在特权容器内执行任何代码，这在默认情况下是禁用的。请谨慎授予 docker 构建权限，因为 Dockerfile 处理逻辑中的漏洞可能会导致在主机节点上授予特权。
+
+默认情况下，所有能够创建构建的用户都被授予相应的权限，可以使用 docker 和 Source-to-Image (S2I) 构建策略。具有集群管理员特权的用户可启用自定义构建策略,如在全局范围内限制用户使用构建策略部分中所述。
+
+您可以使用授权策略来控制谁能够构建以及他们可以使用哪些构建策略。每个构建策略都有一个对应的构建子资源。用户必须有权创建构建，并在构建策略子资源上创建构建的权限，才能使用该策略创建构建。提供的默认角色用于授予构建策略子资源的 create 权限。
+
+.构建策略子资源和角色
+[options="header"]
+|===
+
+|策略 |子资源
+
+|Docker
+|builds/docker
+
+|Source-to-Image
+|builds/source
+
+|Custom
+|builds/custom
+
+|JenkinsPipeline
+|builds/jenkinspipeline
+
+|===
+
+include::modules/builds-disabling-build-strategy-globally.adoc[leveloffset=+1]
+include::modules/builds-restricting-build-strategy-globally.adoc[leveloffset=+1]
+include::modules/builds-restricting-build-strategy-to-user.adoc[leveloffset=+1]

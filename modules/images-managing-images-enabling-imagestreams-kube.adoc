@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/managing-images/using-imagestreams-with-kube-resources.adoc
+
+
+:_content-type: PROCEDURE
+[id="images-managing-images-enabling-imagestreams-kube_{context}"]
+= 使用 Kubernetes 资源启用镜像流
+
+在 Kubernetes 资源中使用镜像流时，您只能引用位于与资源相同的项目中的镜像流。镜像流引用必须包含单个片段值，如 `ruby:2.5`，其中 ruby 是镜像流的名称，它具有名为 `2.5` 的标签，并位于与进行引用的资源相同的项目中。
+
+[注意]
+====
+此功能不能在 `default` 命名空间或任何 `Uccps-` 或 `kube-` 命名空间中使用。
+====
+
+使用 Kubernetes 资源启用镜像流的方法有两种：
+
+* 启用针对特定资源的镜像流解析。这只允许此资源使用 image 字段中的镜像流名称。
+* 在镜像流上启用镜像流解析。这允许指向此镜像流的所有资源在 image 字段中使用它。
+
+.流程
+
+您可以使用 `oc set image-lookup` 对镜像流上的特定资源或镜像流解析启用镜像流解析功能。
+
+. 要允许所有资源引用名为 `mysql` 的镜像流，请输入以下命令：
++
+[source,terminal]
+----
+$ oc set image-lookup mysql
+----
++
+这会将 `Imagestream.spec.lookupPolicy.local` 字段设置为 `true`。
++
+.启用镜像查询的镜像流
+[source,yaml]
+----
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/display-name: mysql
+  name: mysql
+  namespace: myproject
+spec:
+  lookupPolicy:
+    local: true
+----
++
+启用后，会为镜像流中的所有标签启用此行为。
++
+. 然后，您可以查询镜像流并查看是否设置了选项：
++
+[source,terminal]
+----
+$ oc set image-lookup imagestream --list
+----
+
+您可以在特定资源上启用镜像查找。
+
+* 要允许名为 `mysql` 的 `Kubernetes` 部署使用镜像流，请运行以下命令：
++
+[source,terminal]
+----
+$ oc set image-lookup deploy/mysql
+----
++
+这会在部署上设置 `alpha.image.policy.Uccps.io/resolve-names` 注解。
++
+.启用镜像查询部署
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: myproject
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: '*'
+    spec:
+      containers:
+      - image: mysql:latest
+        imagePullPolicy: Always
+        name: mysql
+----
+
+您可以禁用镜像查找。
+
+* 要禁用镜像查找，使用 `--enabled=false``:
++
+[source,terminal]
+----
+$ oc set image-lookup deploy/mysql --enabled=false
+----

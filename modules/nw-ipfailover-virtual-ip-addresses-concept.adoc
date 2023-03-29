@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: CONCEPT
+[id="nw-ipfailover-virtual-ip-addresses-concept_{context}"]
+= 关于虚拟 IP 地址
+
+keepalived 管理一组虚拟 IP 地址（VIP）。管理员必须确保所有这些地址：
+
+* 可在集群外部配置的主机上访问。
+* 不可用于集群中的任何其他目的。
+
+每个节点上的 keepalived 确定所需服务是否在运行。如果是，则支持 VIP，Keepalived 参与协商来确定哪个节点服务 VIP。对于要参与的节点，服务必须侦听 VIP 上的观察端口，或者必须禁用检查。
+
+[注意]
+====
+集合中的每个 VIP 最终都可能由不同的节点提供。
+====

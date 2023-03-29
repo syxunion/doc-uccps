@@ -1,0 +1,56 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-configuring-the-threescale-wasm-auth-module_{context}"]
+= Configuring the threescale-wasm-auth module
+
+{product-title} 上的集群管理员可以配置 `threescale-wasm-auth` 模块，通过应用程序二进制接口(ABI)授权 HTTP 请求进行 3scale API 管理。ABI 定义主机和模块之间的交互，公开主机服务，并允许您使用模块来处理代理请求。
+
+[id="the-service-mesh-extension_{context}"]
+== The Service Mesh extension
+
+
+{SMProductShortName} 提供了一个自定义资源定义，用来指定并应用 Proxy-WASM 扩展到 sidecar 代理，称为 [`ServiceMeshExtension`]。 {SMProductShortName} 将此自定义资源应用到需要使用 3scale 管理 HTTP API 的工作负载集合。
+
+
+.先决条件
+
+* 识别要应用此模块的 Service Mesh 部署上的 Kubernetes 工作负载和命名空间。
+* 您必须有一个 3scale 租户帐户。请参阅 link:https://www.3scale.net/signup[SaaS] 或 link:https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management/2.11/html-single/installing_3scale/index#install-threescale-on-openshift-guide[3scale 2.11 On-Premises] 其中定义了匹配的服务和相关应用程序和指标。
+* 如果您在 bookinfo 命名空间中将模块应用到 productpage 微服务，请参阅  xref:../../service_mesh/v1x/prepare-to-deploy-applications-ossm.
+html#ossm-tutorial-bookinfo-overview_deploying-applications-ossm-v1x[Bookinfo 示例应用程序]。
+** 以下示例是 `threescale-wasm-auth`模块的自定义资源的 YAML 格式。这个示例指的是 Service Mesh 的上游 Maistra 版本 ServiceMeshExtension API。您必须声明部署 `threescale-wasm-auth` 模块的命名空间，以及一个 `WorkloadSelector` ，以标识该模块将应用到的应用程序集：
++
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: threescale-wasm-auth
+  namespace: bookinfo <1>
+spec:
+  workloadSelector: <2>
+    labels:
+      app: productpage
+  config: <yaml_configuration>
+  image: registry.redhat.io/openshift-service-mesh/3scale-auth-wasm-rhel8:0.0.1
+  phase: PostAuthZ
+  priority: 100
+----
+<1> `命名空间`.
+<2> The `WorkloadSelector`.
+* `spec.config` 字段取决于模块配置，并且没有填充到上例中。这个示例使用 `<yaml_configuration>` 占位符值。您可以使用此自定义资源示例的格式。
+** `spec.config` 字段因应用程序而异。所有其他字段在该自定义资源的多个实例之间都存在。例如：
++
+--
+*** `image`:  仅在部署较新版本的模块时更改。
+*** `phase`:  保留相同的模块，因为此模块需要在代理完成任何本地授权后调用，如验证 OpenID Connect(OIDC)令牌。
+--
+* 在 `spec.config` 和其余自定义资源中配置了模块后，使用 `oc apply` 命令应用它：
++
+[source,terminal]
+----
+$ oc apply -f threescale-wasm-auth-bookinfo.yaml
+----
+

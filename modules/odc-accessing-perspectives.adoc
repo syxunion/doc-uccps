@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// web_console/web-console-overview.adoc
+
+:_content-type: PROCEDURE
+[id="accessing-perspectives_{context}"]
+= 访问 Developer 视角
+
+
+统信容器云管理平台 web 控制台中的 Developer 视角提供了针对于开发人员用例的工作流。
+
+您可以使用以下方法来访问 Developer 视角：
+
+
+.流程
+
+. 使用您的登录凭证登录到 统信容器云管理平台 web 控制台。统信容器云管理平台 Web 控制台的默认视图是 Administrator 视角。
+
+. 使用视角切换功能把它切换到 Developer 视角。此时会显示包含集群中所有项目的列表的 Topology 视图。
+
+. 从列表中选择现有项目，或使用 Project 下拉列表创建新项目。
+
+如果您项目中没有工作负载或应用程序，则 Topology 视图会显示可用来创建应用程序的选项。如果已有工作负载，则 Topology 视图会以图形的形式显示工作负载节点。

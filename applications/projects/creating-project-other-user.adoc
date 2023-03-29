@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="creating-project-other-user"]
+= 以其他用户身份创建项目
+include::_attributes/common-attributes.adoc[]
+:context: creating-project-other-user
+
+toc::[]
+
+通过身份模拟功能，您可以其他用户的身份创建项目。
+
+include::modules/authentication-api-impersonation.adoc[leveloffset=+1]
+
+include::modules/impersonation-project-creation.adoc[leveloffset=+1]

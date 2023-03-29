@@ -1,0 +1,72 @@
+// Module included in the following assemblies:
+//
+// * /serverless/install/install-serverless-operator.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-install-cli_{context}"]
+=  通过 CLI 安装　{ServerlessOperatorName} 
+
+您可以使用 CLI 从 OperatorHub 安装 Uccps Serverless Operator。安装此 Operator 可让您安装和使用 Knative 组件。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 您的集群启用了 Marketplace 功能，或者手动配置 Red Hat Operator 目录源。
+* 已登陆到 {product-title} 集群。
+
+.流程
+. 创建包含 `Namespace`, `OperatorGroup`, 和 `Subscription` 对象的 YAML 文件，以便为 {ServerlessOperatorName} 订阅命名空间。例如，使用以下内容创建文件 `serverless-subscription.yaml` ：
++
+.订阅示例
+[source,yaml]
+----
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-serverless
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: serverless-operators
+  namespace: openshift-serverless
+spec: {}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: serverless-operator
+  namespace: openshift-serverless
+spec:
+  channel: stable <1>
+  name: serverless-operator <2>
+  source: redhat-operators <3>
+  sourceNamespace: openshift-marketplace <4>
+----
+<1> Operator 的频道名称。 `stable` 频道启用 {ServerlessOperatorName} 最新稳定版本的安装。
+<2> 要订阅的 Operator 的名称。对于 {ServerlessOperatorName} ，这始终为 `serverless-operator`。
+<3> 提供 Operator 的 CatalogSource 的名称。将 `redhat-operators` 用于默认的 OperatorHub 目录源。
+<4> CatalogSource 的命名空间。将 `openshift-marketplace` 用于默认的 OperatorHub 目录源。
+
+. 创建 `Subscription` 对象：
++
+----
+$ oc apply -f serverless-subscription.yaml
+----
+
+.验证
+检查集群服务版本(CSV)是否已进入 (CSV) `Succeeded` 阶段：
+
+.示例命令
+[source,yaml]
+----
+$ oc get csv
+----
+
+.输出示例
+[source,yaml]
+----
+NAME                          DISPLAY                        VERSION   REPLACES                      PHASE
+serverless-operator.v1.25.0   Red Hat OpenShift Serverless   1.25.0    serverless-operator.v1.24.0   Succeeded
+----

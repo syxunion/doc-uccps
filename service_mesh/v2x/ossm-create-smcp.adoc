@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="ossm-create-smcp"]
+= Creating the ServiceMeshControlPlane
+include::_attributes/common-attributes.adoc[]
+:context: ossm-create-smcp
+
+toc::[]
+
+您可以使用 {product-title} 控制台或使用 `oc` 客户端工具从命令行部署 `ServiceMeshControlPlane`(SMCP) 的基本安装。
+
+[NOTE]
+====
+这一基本安装根据默认的 OpenShift 设置进行配置，不并是针对生产环境用途而设计的。使用这个默认安装来验证安装，然后为您的环境配置 `ServiceMeshControlPlane`.
+====
+
+
+include::modules/ossm-control-plane-web.adoc[leveloffset=+1]
+
+include::modules/ossm-control-plane-cli.adoc[leveloffset=+1]
+
+include::modules/ossm-validate-smcp-cli.adoc[leveloffset=+1]
+
+include::modules/ossm-validate-smcp-kiali.adoc[leveloffset=+1]
+
+

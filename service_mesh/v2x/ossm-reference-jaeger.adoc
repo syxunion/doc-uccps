@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+[id="jaeger-config-ref"]
+= Jaeger 配置参考
+include::_attributes/common-attributes.adoc[]
+:context: jaeger-config-reference
+
+toc::[]
+
+当 Service Mesh Operator 部署  `ServiceMeshControlPlane` 资源时，它还可以为分布式追踪创建资源。Service Mesh 使用 Jaeger 进行分布式追踪。
+
+include::modules/ossm-enabling-jaeger.adoc[leveloffset=+1]
+
+include::modules/ossm-config-smcp-jaeger.adoc[leveloffset=+1]
+
+include::modules/ossm-deploying-jaeger.adoc[leveloffset=+1]
+
+include::modules/ossm-configuring-external-jaeger.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-deployment-best-practices.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-security-ossm.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-security-ossm-web.adoc[leveloffset=+3]
+
+include::modules/distr-tracing-config-security-ossm-cli.adoc[leveloffset=+3]
+
+include::modules/distr-tracing-config-default.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-jaeger-collector.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-sampling.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-storage.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-query.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-ingester.adoc[leveloffset=+2]

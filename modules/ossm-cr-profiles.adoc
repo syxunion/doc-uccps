@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-reference-smcp.adoc
+
+[id="ossm-cr-profiles_{context}"]
+= 配置集参数
+
+您可以使用 `ServiceMeshControlPlane` 对象配置集创建可重复使用的配置。如果没有配置 `profile` 设置， {SMProductName} 将使用默认配置集。
+
+下面是一个示例，它演示了 `spec.profiles` 对象的 `ServiceMeshControlPlane` 参数：
+
+.配置集参数示例
+[source,yaml]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  profiles:
+  - YourProfileName
+----

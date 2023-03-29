@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="getting-information-about-alerts-silences-and-alerting-rules_{context}"]
+= 获取关于警报、静默和警报规则的信息
+
+Alerting UI 提供有关警报及其相关警报规则和静默的详细信息。
+
+.先决条件
+
+* 对于您要查看指标的项目，您可以作为开发者或具有查看权限的用户访问集群。
+
+.流程
+
+*要在 管理员 视角中获取有关警报的信息*：
+
+. 打开 统信容器云管理平台 Web 控制台，并导航至  *Observe* -> *Alerting* -> *Alerts* 页面
+
+. 2.可选：使用搜索列表中的 *Name* 字段按名称搜索警报。
+
+. 可选：通过选择 *Filter* 列表中的过滤器来按状态、严重性和来源过滤警报。
+
+. 可选：点击 *Name*, *Severity*, *State*, 和 *Source*  列标题中的一个或多个标题对警报进行排序。
+
+. 选择警报的名称以导航到其 *Alert Details* 页面。该页面包含一个说明警报时间序列数据的图形。它还提供与此警报相关的信息，包括：
++
+--
+** 警报的描述
+** 与警报关联的消息
+** 附加到警报的标签
+** 其相关警报规则的链接
+** 警报的静默（如果存在）
+--
+
+*要在 管理员 视角中获取有关静默的信息*：
+
+. 导航到 *Observe* -> *Alerting* -> *Silences* 字段按名称过滤静默。
+
+. 可选：使用 *Search by name* field.
+
+. 可选：通过选择 *Filter* 列表中的过滤器来按状态过滤静默。默认情况下会应用 *Active* 和 *Pending* 过滤器。
+
+. 可选：点击 *Name*, *Firing Alerts*, 和 *State* 列标题中的一个或多个标题对静默进行排序。
+
+. 选择静默的名称以导航到其 *Silence Details* 页面。该页面包括以下详情：
++
+--
+* 警报指定条件
+* 开始时间
+* 结束时间
+* 静默状态
+* 触发警报的数目和列表
+--
+
+*要在 管理员 视角中获取有关警报规则的信息：*:
+
+. 导航到 *Observe* -> *Alerting* -> *Alerting Rules* 页面。
+
+. 可选：通过选择 *Filter* 列表中的过滤器来按状态、严重性和来源过滤警报规则。
+
+. 可选：点击 *Name*, *Severity*, *Alert State*, 和 *Source* 列标题中的一个或多个标题对警报规则进行排序。
+
+. 选择警报规则的名称以导航到其 *Alerting Rule Details* 页面。该页面提供有关警报规则的以下详情：
++
+--
+** 警报规则名称、严重性和描述
+** 定义触发此警报的条件的表达式
+** 触发警报的条件得到满足的时间
+** 受警报规则约束的各个警报的图形，其中显示了触发该警报的值
+** 受警报规则约束的所有警报的列表
+--
+
+*要在 开发者 视角中获取有关警报、静默和警报规则的信息*：
+
+. 导航到 *Observe* -> *<project_name>* -> *Alerts* 页面。
+
+. 2.查看警报、静默或警报规则的详情：
+
+* 要查看 *Alert Details* ，可选择警报名称左侧的 *>* 然后在列表中选择警报。
+
+* 要查看 *Silence Details* ，可在 *Alert Details* 页面的 *Silenced By* 部分中选择静默。Silence Details 页面包括以下信息：
++
+--
+* 警报指定条件
+* 开始时间
+* 结束时间
+* 静默状态
+* 触发警报的数目和列表
+--
+
+* 要查看 *Alerting Rule Details* ，可在 *Alerts* 页面中警告右侧的 {kebab} 菜单中选择 *View Alerting Rule*。
+
+[注意]
+====
+*开发者* 视角中仅显示与所选项目相关的警报、静默和警报规则。
+====

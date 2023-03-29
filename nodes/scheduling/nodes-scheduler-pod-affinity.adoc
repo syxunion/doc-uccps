@@ -1,0 +1,28 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-pod-affinity
+[id="nodes-scheduler-pod-affinity"]
+= 使用关联性和反关联性规则相对于其他 pod 放置 pod
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+关联性是 pod 的一个属性，用于控制它们希望调度到的节点。反关联性是 pod 的一个属性，用于阻止 pod 调度到某个节点上。
+
+在 统信容器云管理平台 中，可以借助 pod 关联性和 pod 反关联性来根据其他 pod 上的键/值标签限制 pod 有资格调度到哪些节点。
+
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-scheduler-pod-affinity-about.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-pod-affinity-configuring.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-pod-anti-affinity-configuring.adoc[leveloffset=+1]
+
+include::modules/nodes-scheduler-pod-affinity-example.adoc[leveloffset=+1]

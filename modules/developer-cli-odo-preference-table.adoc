@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/configuring-the-odo-cli.adoc
+
+:_content-type: REFERENCE
+[id="developer-cli-odo-preference-table_{context}"]
+= 首选键盘表
+
+下表显示了为 `odo`  CLI 设置首选项键的可用选项：
+
+[cols="1,3,1"]
+|===
+|首选键盘 |描述 |默认值
+
+|`UpdateNotification`
+|控制是否显示更新 `odo` 的通知。
+|True
+
+|`NamePrefix`
+|为  `odo`  资源设置默认名称前缀。例如，`组件` 或 `存储`。
+|当前目录名称
+
+|`Timeout`
+|Kubernetes 服务器连接检查的超时。
+|1 秒
+
+|`BuildTimeout`
+|等待 git 组件的构建完成超时。
+|300 秒
+
+|`PushTimeout`
+|等待组件启动超时。
+|240 秒
+
+|`Ephemeral`
+|控制 odo 是否应该创建一个 `emptyDir` 卷来存储源代码。
+|True
+
+|`ConsentTelemetry`
+|控制 `odo` 是否可以为用户的 `odo` 使用收集遥测功能。
+|False
+
+|===

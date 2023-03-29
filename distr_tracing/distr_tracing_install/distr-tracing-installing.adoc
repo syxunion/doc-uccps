@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="installing-distributed-tracing"]
+= 安装分布式追踪
+include::_attributes/common-attributes.adoc[]
+:context: install-distributed-tracing
+
+toc::[]
+
+您可以通过以下两种方式之一在统信容器云管理平台上安装 统信容器云管理平台分布式追踪：
+
+* 作为 xref:../../service_mesh/v2x/preparing-ossm-installation.adoc#preparing-ossm-installation[统信容器云管理平台服务网格] 的一部分安装 统信容器云管理平台分布式追踪。Service Mesh 安装中默认包含了分布式追踪。要将 统信容器云管理平台分布式追踪作为服务网格的一部分安装，请按照 统信容器云管理平台服务网格安装说明进行。您必须在与服务网格相同的命名空间中安装 统信容器云管理平台分布式追踪，即 `ServiceMeshControlPlane` 和 统信容器云管理平台分布式追踪资源必须位于同一命名空间中。
+
+* 如果您不想安装服务网格，您可以使用 统信容器云管理平台分布式追踪Operator 来自行安装分布式追踪。要在没有服务网格的情况下安装统信容器云管理平台分布式追踪，请使用以下说明。
+
+== 先决条件
+
+在安装 统信容器云管理平台分布式追踪前，请查看安装活动，并确保满足先决条件：
+
+* 安装与统信容器云管理平台版本匹配的Uccp CLI (oc) 版本，并将其添加到您的路径中。
+
+* 具有 `cluster-admin` 角色的帐户。
+
+include::modules/distr-tracing-install-overview.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-install-elasticsearch.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-install-jaeger-operator.adoc[leveloffset=+1]
+
+
+////
+== Next steps
+* xref:../../distr_tracing/distr_tracing_install/distr-tracing-deploying.adoc#deploying-distributed-tracing[Deploy {DTProductName}].
+////

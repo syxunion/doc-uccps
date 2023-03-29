@@ -1,0 +1,32 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: CONCEPT
+[id="serverless-quarkus-function-return-values_{context}"]
+= Quarkus 功能返回值
+
+功能可以从允许类型列表中返回任何类型的实例。另外，他们可以返回 `Uni<T>` 类型，其中 `<T>` 类型参数可以是允许的类型的任何类型。
+
+如果函数调用异步 API，因为返回的对象以与接收对象相同的格式序列化， `Uni<T>`  类型很有用。例如：
+
+* 如果函数收到 HTTP 请求，则返回的对象将在 HTTP 响应的正文中发送。
+
+* 如果函数通过二进制编码收到 `CloudEvent` 对象，则返回的对象将在二进制编码的 `CloudEvent` 对象的 data 属性中发送。
+
+以下示例显示了获取购买列表的功能：
+
+.示例命令
+[source,java]
+----
+public class Functions {
+    @Funq
+    public List<Purchase> getPurchasesByName(String name) {
+      // logic to retrieve purchases
+    }
+}
+----
+
+* 通过 HTTP 请求调用此功能将生成 HTTP 响应，其中包含响应正文中的订购列表。
+
+* 通过传入的  `CloudEvent` 对象调用此功能可生成 `CloudEvent` 响应，并在 `data` 属性中包括一个订购列表。

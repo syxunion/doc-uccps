@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-permissions_{context}"]
+= Jenkins 权限
+
+在 ConfigMap 中，如果 Pod 模板 XML 的 `<serviceAccount>` 元素是用于生成的 pod 的 统信容器云管理平台 服务帐户，则服务帐户凭证将挂载到 pod 中。权限与服务帐户关联，并控制允许从 pod 对 统信容器云管理平台 master 执行的操作。
+
+考虑以下场景，服务帐户用于 统信容器云管理平台 Jenkins 镜像中运行的 Kubernetes 插件启动的 pod：
+
+如果您使用 统信容器云管理平台 提供的 `Jenkins` 示例模板，则 `jenkins` 服务帐户将由运行 Jenkins 的项目的 `edit` 角色定义，且 master Jenkins Pod 已挂载了该服务帐户。
+
+T注入 Jenkins 配置的两个默认 Maven 和 NodeJS Pod 模板也将设置为使用与 Jenkins master 相同的服务帐户。
+
+* 由于镜像流或 imagestreamtag 具有所需的标签或注解而被 统信容器云管理平台 Sync 插件自动发现的任何 Pod 模板均会被配置为使用 Jenkins master 的服务帐户作为其服务帐户。
+* 对于其他方法，您可在 Jenkins 和 Kubernetes 插件中提供 Pod 模板定义，但必须明确指定要使用的服务帐户。其它方法包括 Jenkins 控制台、由 Kubernetes 插件提供的 `podTemplate` 管道 DSL，或标记其数据为 Pod 模板的 XML 配置的 ConfigMap。
+* 如果没有为服务帐户指定值，则将使用 `default` 服务帐户。
+* 确保所使用的任何服务帐户均具有 统信容器云管理平台 中定义的必要权限、角色等，以操作您选择从 pod 中操作的任何项目。

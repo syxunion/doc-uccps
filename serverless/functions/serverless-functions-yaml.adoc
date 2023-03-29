@@ -1,0 +1,12 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-project-configuration"]
+= func.yaml 中的功能项目配置
+include::_attributes/common-attributes.adoc[]
+:context: serverless-functions-yaml
+
+toc::[]
+
+`func.yaml` 文件包含功能项目的配置。执行  `func.yaml` 命令时使用 `kn func` 中指定的值。例如，当运行 `kn func build` 命令时，会使用 `build` 字段中的值。在某些情况下，您可以使用命令行标志或环境变量覆盖这些值。
+
+include::modules/serverless-functions-func-yaml-fields.adoc[leveloffset=+1]
+include::modules/serverless-functions-func-yaml-environment-variables.adoc[leveloffset=+1]

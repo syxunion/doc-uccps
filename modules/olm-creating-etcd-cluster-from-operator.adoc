@@ -1,0 +1,49 @@
+:_content-type: PROCEDURE
+[id="olm-creating-etcd-cluster-from-operator_{context}"]
+= 使用 Operator 创建 etcd 集群
+
+本流程介绍了如何通过由 Operator Lifecycle Manager (OLM) 管理的 etcd Operator 来新建一个 etcd 集群。
+
+.先决条件
+
+* 访问 统信容器云管理平台 1.2 集群
+* 管理员已在集群范围内安装了 etcd Operator。
+
+.流程
+
+. 针对此流程在 统信容器云管理平台 Web 控制台中新建一个项目。这个示例使用名为 `my-etcd` 的项目。
+
+. 导航至 *Operators -> 安装的 Operators* 页面。由集群管理员安装到集群且可供使用的 Operator 将以集群服务版本（CSV）列表形式显示在此处。CSV 用于启动和管理由 Operator 提供的软件。
++
+[提示]
+====
+使用以下命令从 CLI 获得该列表：
+
+[source,terminal]
+----
+$ oc get csv
+----
+====
+
+. 在 *安装 Operators* 页面中，点 etcd Operator 查看更多详情和可用操作。
++
+正如 *Provided API* 下所示，该 Operator 提供了三类新资源，包括一种用于 *etcd Cluster* 的资源（EtcdCluster 资源）。这些对象的工作方式与内置的原生 Kubernetes 对象（如 Deployment 或 ReplicaSet ）相似，但包含特定于管理 etcd 的逻辑。
+
+. 新建 etcd 集群：
+
+.. 在 *etcd Cluster* API 框中，点 *创建实例*。
+
+.. 在下一页上，您可对 `EtcdCluster` 对象的最小起始模板进行任何修改，比如集群大小。现在，点击 *Create* 即可完成。点击后即可触发 Operator 启动 pod、服务和新 etcd 集群的其他组件。
+
+. 点 *example* etcd 集群，然后点 *资源* 选项卡，您可以看到项目现在包含很多由 Operator 自动创建和配置的资源。
++
+验证已创建了支持您从项目中的其他 pod 访问数据库的 Kubernetes 服务。
+
+. 给定项目中具有 *edit* 角色的所有用户均可创建、管理和删除应用程序实例（本例中为 etcd 集群），这些实例由已在项目中创建的 Operator 以自助方式管理，就像云服务一样。如果要赋予其他用户这一权利，项目管理员可使用以下命令添加角色：
++
+[source,terminal]
+----
+$ oc policy add-role-to-user edit <user> -n <target_project>
+----
+
+现在您有了一个 etcd 集群，当 pod 运行不畅，或在集群中的节点之间迁移时，该集群将对故障做出反应并重新平衡数据。最重要的是，具有适当访问权限的集群管理员或开发人员现在可轻松将该数据库用于其应用程序。

@@ -1,0 +1,46 @@
+:_content-type: ASSEMBLY
+[id="deployment-strategies"]
+= 使用部署策略
+include::_attributes/common-attributes.adoc[]
+:context: deployment-strategies
+
+toc::[]
+
+_部署策略_ 是更改或升级应用程序的一种方法。其目的是在无需停机的前提下进行修改，从而使用户几乎不会注意到这些变化。
+
+因为最终用户通常通过由路由器控制的路由访问应用程序，所以部署策略侧重于 部署配置功能或路由功能。注重部署的策略会影响所有使用该应用程序的路由。侧重于路由功能的策略则会影响到单个的路由。
+
+许多部署策略通过 `部署配置` 支持，一些额外的策略则通过路由器功能支持。本节将讨论部署策略。
+
+
+////
+This link keeps breaking Travis for some reason.
+
+[NOTE]
+====
+See
+xref:../../applications/deployments/route-based-deployment-strategies.adoc#route-based-deployment-strategies[Using route-based deployment strategies] for more on these additional strategies.
+====
+////
+
+*选择部署策略*
+
+选择部署策略时请考虑以下几点：
+
+- 长时间运行的连接必须被恰当处理。
+- 数据库转换可能比较复杂，且必须和应用程序一同执行并回滚。
+- 如果应用程序由微服务和传统组件构成，则可能需要停机才能完成转换。
+- 您必须拥有进行此操作的基础架构。
+- 如果您的测试环境没有被隔离，则可能会破坏到新版本和旧版本。
+
+`部署策略 使用就绪度检查来确定新 pod 是否准备就绪。如果就绪度检查失败，部署配置会重新尝试运行 pod，直到超时为止。默认超时为 `10m`，其值在 `dc.spec.strategy.*params` 的 `TimeoutSeconds` 中设置。
+
+include::modules/deployments-rolling-strategy.adoc[leveloffset=+1]
+include::modules/deployments-canary-deployments.adoc[leveloffset=+2]
+include::modules/deployments-creating-rolling-deployment.adoc[leveloffset=+2]
+include::modules/odc-starting-rolling-deployment.adoc[leveloffset=+2]
+include::modules/deployments-recreate-strategy.adoc[leveloffset=+1]
+include::modules/odc-starting-recreate-deployment.adoc[leveloffset=+1]
+
+include::modules/deployments-custom-strategy.adoc[leveloffset=+1]
+include::modules/deployments-lifecycle-hooks.adoc[leveloffset=+1]

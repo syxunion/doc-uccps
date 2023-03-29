@@ -1,0 +1,8 @@
+// Text snippet included in the following files
+//
+// * serverless/security/serverless-custom-domains.adoc
+// * modules/serverless-domain-mapping-odc-admin.adoc
+
+Knative 服务会自动根据集群配置分配默认域名。例如， `<service_name>-<namespace>.example.com`。您可以通过将您自己的自定义域名映射到 Knative 服务来自定义 Knative 服务域。
+
+您可以通过为服务创建  `DomainMapping` 资源来完成此操作。您还可以创建多个 `DomainMapping` 资源，将多个域和子域映射到单个服务。

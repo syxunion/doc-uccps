@@ -1,0 +1,116 @@
+// Module filename: nw-customize-ingress-error-pages.adoc
+// Module included in the following assemblies:
+// * networking/ingress-controller-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-customize-ingress-error-pages_{context}"]
+= 自定义 HAProxy 错误代码响应页面
+
+作为集群管理员，您可以为 503、404 或两个错误页面指定自定义错误代码响应页面。当应用 Pod 没有运行时，HAProxy 路由器会提供一个 503 错误页面，如果请求的 URL 不存在，则 HAProxy 路由器会提供 404 错误页面。例如，如果您自定义 503 错误代码响应页面，则应用 Pod 未运行时会提供页面，并且 HAProxy 路由器为不正确的路由或不存在的路由提供默认的 404 错误代码 HTTP 响应页面。
+
+自定义错误代码响应页面在配置映射中指定，然后修补至 Ingress Controller。配置映射键有两个可用的文件名，如下所示：`error-page-503.http` 和 `error-page-404.http`。
+
+自定义 HTTP 错误代码响应页面必须遵循 HAProxy HTTP 错误页面配置指南。以下是默认 统信容器云管理平台 HAProxy 路由器 http 503 错误代码响应页面的示例。您可以使用默认内容作为模板来创建自己的自定义页面。
+
+默认情况下，当应用没有运行或者路由不正确或不存在时，HAProxy 路由器仅提供一个 503 错误页面。此默认行为与 统信容器云管理平台 1.1 及更早版本中的行为相同。如果没有提供用于自定义 HTTP 错误代码响应的配置映射，且您使用的是自定义 HTTP 错误代码响应页面，路由器会提供默认的 404 或 503 错误代码响应页面。
+
+[注意]
+====
+如果您使用 统信容器云管理平台 默认 503 错误代码页面作为自定义的模板，文件中的标头需要编辑器而不是使用 CRLF 行结尾。
+====
+
+.流程
+
+. 在 `openshift-config` 命名空间中创建一个名为 `my-custom-error-code-pages` 的配置映射：
++
+[source,terminal]
+----
+$ oc -n openshift-config create configmap my-custom-error-code-pages \
+--from-file=error-page-503.http \
+--from-file=error-page-404.http
+----
++
+[重要]
+====
+如果没有为自定义错误代码响应页面指定正确的格式，则会出现路由器 pod 中断。要解决此中断，您必须删除或更正配置映射并删除受影响的路由器 pod，以便使用正确的信息重新创建它们。
+====
+
+. 对 Ingress Controller 进行补丁以根据名称引用 `my-custom-error-code-pages` 配置映射：
++
+[source,terminal]
+----
+$ oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"httpErrorCodePages":{"name":"my-custom-error-code-pages"}}}' --type=merge
+----
++
+Ingress Operator 将 `my-custom-error-code-pages` 配置映射从 `openshift-config` 命名空间复制到 openshift-ingress 命名空间。Operator 根据 `openshift-ingress` 命名空间中的模式 `<your_ingresscontroller_name>-errorpages` 命名配置映射。
+
+. 显示副本：
++
+[source,terminal]
+----
+$ oc get cm default-errorpages -n openshift-ingress
+----
++
+.输出示例
+----
+NAME                       DATA   AGE
+default-errorpages         2      25s  <1>
+----
+<1> 配置映射名称示例为 `default-errorpages`，因为 `default` Ingress Controller 自定义资源 (CR) 已被修补。
++
+
+. 确认包含自定义错误响应页面的配置映射挂载到路由器卷中，其中配置映射键是具有自定义 HTTP 错误代码响应的文件名：
++
+* 对于 503 自定义 HTTP 自定义错误代码响应：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress rsh <router_pod> cat /var/lib/haproxy/conf/error_code_pages/error-page-503.http
+----
++
+* 对于 404 自定义 HTTP 自定义错误代码响应：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress rsh <router_pod> cat /var/lib/haproxy/conf/error_code_pages/error-page-404.http
+----
+
+.验证
+
+验证自定义错误代码 HTTP 响应：
+
+. 验证自定义错误代码 HTTP 响应：
++
+[source,terminal]
+----
+ $ oc new-project test-ingress
+----
++
+[source,terminal]
+----
+$ oc new-app django-psql-example
+----
+
+. 验证自定义错误代码 HTTP 响应：
+.. 停止应用的所有容器集。
+.. 运行以下 curl 命令或在浏览器中访问路由主机名：
++
+[source,terminal]
+----
+$ curl -vk <route_hostname>
+----
+. 对于 404 自定义 http 错误代码响应：
+.. 访问不存在的路由或路由不正确。
+.. 运行以下 curl 命令或在浏览器中访问路由主机名：
++
+[source,terminal]
+----
+$ curl -vk <route_hostname>
+----
+
+. 检查 `haproxy.config` 文件中的 `errorfile` 属性是否正确：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress rsh <router> cat /var/lib/haproxy/conf/haproxy.config | grep errorfile
+----

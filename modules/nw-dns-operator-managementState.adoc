@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * networking/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-operator-managementState_{context}"]
+= 更改 DNS Operator managementState
+
+DNS 管理 CoreDNS 组件，为集群中的 pod 和服务提供名称解析服务。默认情况下，DNS Operator 的 `managementState` 设置为 `Managed`，这意味着 DNS Operator 会主动管理其资源。您可以将其更改为 `Unmanaged`，这意味着 DNS Operator 不管理其资源。
+
+以下是更改 DNS Operator `managementState` 的用例：
+
+* 以下是更改 DNS Operator `managementState` 的用例：
+
+* 您是一个集群管理员，报告了 CoreDNS 的问题，但在解决这个问题前需要应用一个临时解决方案。您可以将 DNS Operator 的 `managementState` 字段设置为 `Unmanaged` 以应用临时解决方案。
+
+.流程
+
+* 修改 `managementState` DNS Operator：
++
+[source,terminal]
+----
+oc patch dns.operator.openshift.io default --type merge --patch '{"spec":{"managementState":"Unmanaged"}}'
+----

@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-uploading_{context}"]
+= 上传模板
+
+如果您有可定义模板的 JSON 或 YAML 文件，如本例中所示，则可以使用 CLI 将模板上传到项目。此操作将模板保存到项目，供任何有适当权限访问该项目的用户重复使用。本主题后面会介绍如何编写自己的模板。
+
+.流程
+
+* 将模板上传到当前项目的模板库，并使用以下命令传递 JSON 或 YAML 文件：
++
+[source,terminal]
+----
+$ oc create -f <filename>
+----
+
+* 使用 `-n` 选项与项目名称将模板上传到不同项目：
++
+[source,terminal]
+----
+$ oc create -f <filename> -n <project>
+----
+
+现在可使用 web 控制台或 CLI 选择该模板。

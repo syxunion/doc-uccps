@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-autoscaling-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-concurrency-limits-configure-soft_{context}"]
+= 配置软并发目标
+
+软限制是目标请求限制，而不是严格实施的绑定。例如，如果流量突发，可以超过软限制目标。您可以通过在 spec 中设置  `autoscaling.knative.dev/target`  注解，或者使用带有正确标记的 `kn service`  命令为 Knative 服务指定软并发目标。 
+
+.流程
+
+*可选：在 `Service` 自定义资源的 spec 中为您的 Knative 服务设置 `autoscaling.knative.dev/target` 注解：
++
+.服务规格示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target: "200"
+----
+
+* 可选： 使用 `kn service` 命令指定 `--concurrency-target` 标志：
++
+[source,terminal]
+----
+$ kn service create <service_name> --image <image_uri> --concurrency-target <integer>
+----
++
+.创建服务的示例，并发目标为 50 请求
+[source,terminal]
+----
+$ kn service create example-service --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest --concurrency-target 50
+----

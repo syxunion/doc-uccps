@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: REFERENCE
+[id="serverless-kn-container_{context}"]
+= Knative 客户端多容器支持
+
+您可以使用 `kn container add` 命令将 YAML 容器 spec 打印到标准输出。此命令对多容器用例很有用，因为它可以与其他标准 kn 标志一起使用来创建定义。
+
+The `kn container add` 命令接受与容器相关的所有标志，它们都支持与 `kn service create`  命令搭配使用。 `kn container add` 命令也可以使用 UNIX 管道 (|) 一次创建多个容器定义来串联。
+
+[discrete]
+[id="serverless-kn-container-examples_{context}"]
+== 示例命令
+
+* 从镜像添加容器并将其打印到标准输出中：
++
+[source,terminal]
+----
+$ kn container add <container_name> --image <image_uri>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn container add sidecar --image docker.io/example/sidecar
+----
++
+.输出示例
+[source,terminal]
+----
+containers:
+- image: docker.io/example/sidecar
+  name: sidecar
+  resources: {}
+----
+
+* 将两个 `kn container add`  命令链接在一起，然后将它们传递给 `kn service create` 命令创建带有两个容器的 Knative 服务：
++
+[source,terminal]
+----
+$ kn container add <first_container_name> --image <image_uri> | \
+kn container add <second_container_name> --image <image_uri> | \
+kn service create <service_name> --image <image_uri> --extra-containers -
+----
++
+`--extra-containers -` 指定一个特殊情况，kn 读取管道输入，而不是 YAML 文件。
++
+.示例命令
+[source,terminal]
+----
+$ kn container add sidecar --image docker.io/example/sidecar:first | \
+kn container add second --image docker.io/example/sidecar:second | \
+kn service create my-service --image docker.io/example/my-app:latest --extra-containers -
+----
++
+`--extra-containers` 标志也可以接受到 YAML 文件的路径：
++
+[source,terminal]
+----
+$ kn service create <service_name> --image <image_uri> --extra-containers <filename>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn service create my-service --image docker.io/example/my-app:latest --extra-containers my-extra-containers.yaml
+----

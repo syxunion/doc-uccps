@@ -1,0 +1,161 @@
+// Module included in the following assemblies:
+//
+// * serverless/security/serverless-ossm-with-kourier-jwt.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-ossm-v2x-jwt_{context}"]
+= 在 Service Mesh 2.x 和 Uccps Serverless 中使用 JSON Web 令牌身份验证
+
+可以使用 Service Mesh 2.x 和 Uccps Serverless 在 Knative 服务中使用 JSON Web Token (JWT) 身份验证。要做到这一点，您必须在作为 ServiceMeshMemberRoll 对象成员的应用程序命名空间中创建身份验证请求和策略。您还必须为该服务启用 sidecar 注入。
+
+[IMPORTANT]
+====
+在启用了 Kourier 时，不支持在系统命名空间中向 pod 添加 sidecar 注入，如 `knative-serving` 和 `knative-serving-ingress`。
+====
+
+.先决条件
+
+* 您已在集群中安装了统信容器云管理平台无服务器、Knative Serving 和 Uccps 统信容器云管理平台服务网格。
+* 安装 Uccps CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在统信容器云管理平台中创建应用程序和其他工作负载。
+
+. 在您的服务中添加 `sidecar.istio.io/inject="true"` 注解：
++
+.服务示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: <service_name>
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true" <1>
+        sidecar.istio.io/rewriteAppHTTPProbers: "true" <2>
+...
+----
+<1> 添加 `sidecar.istio.io/inject="true"` 注解。
+<2> 您必须在 Knative 服务中将注解 `sidecar.istio.io/rewriteAppHTTPProbers: "true"` 然后使用 HTTP 探测作为 Knative 服务的就绪度探测。
+
+. 应用 `Service` 资源
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 在 `RequestAuthentication` 对象的每个无服务器应用程序命名空间中创建一个 `ServiceMeshMemberRoll` 资源：
++
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-example
+  namespace: <namespace>
+spec:
+  jwtRules:
+  - issuer: testing@secure.istio.io
+    jwksUri: https://raw.githubusercontent.com/istio/istio/release-1.8/security/tools/jwt/samples/jwks.json
+----
+
+. 应用 `RequestAuthentication` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 通过创建以下 `RequestAuthenticaton` 资源，允许从 `ServiceMeshMemberRoll` 对象中的每个无服务器应用程序命名空间的系统 pod 访问 `AuthorizationPolicy` 资源：
+
+
++
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allowlist-by-paths
+  namespace: <namespace>
+spec:
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths:
+        - /metrics <1>
+        - /healthz <2>
+----
+<1> 由系统 pod 收集指标的应用程序上的路径。
+<2> 系统 pod 探测到应用程序的路径。
+
+. 应用 `AuthorizationPolicy` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 对于作为 `ServiceMeshMemberRoll` 对象中成员的每个无服务器应用程序命名空间，请创建以下 `AuthorizationPolicy` 资源：
++
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: require-jwt
+  namespace: <namespace>
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+       requestPrincipals: ["testing@secure.istio.io/testing@secure.istio.io"]
+----
+
+. 应用 `AuthorizationPolicy` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+.验证
+
+. 如果您尝试使用 `curl` 请求来获取 Knative 服务 URL，则会被拒绝：
++
+.示例命令
+[source,terminal]
+----
+$ curl http://hello-example-1-default.apps.mycluster.example.com/
+----
++
+.输出示例
+[source,terminal]
+----
+RBAC: access denied
+----
+
+. 使用有效 JWT 验证请求。
+.. 获取有效的 JWT 令牌：
++
+[source,terminal]
+----
+$ TOKEN=$(curl https://raw.githubusercontent.com/istio/istio/release-1.8/security/tools/jwt/samples/demo.jwt -s) && echo "$TOKEN" | cut -d '.' -f2 - | base64 --decode -
+----
+.. 使用 curl 请求标头中的有效令牌访问该服务：
++
+[source,terminal]
+----
+$ curl -H "Authorization: Bearer $TOKEN"  http://hello-example-1-default.apps.example.com
+----
++
+现在允许请求：
++
+.输出示例
+[source,terminal]
+----
+Hello OpenShift!
+----

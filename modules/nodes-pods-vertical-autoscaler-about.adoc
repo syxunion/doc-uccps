@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-vertical-autoscaler.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-vertical-autoscaler-about_{context}"]
+= 关于 Vertical Pod Autoscaler Operator
+
+Vertical Pod Autoscaler Operator（VPA）作为 API 资源和自定义资源（CR）实现。CR 决定 Vertical Pod Autoscaler Operator 对与特定工作负载对象（如守护进程集、复制控制器等）关联的 pod 执行的操作。
+
+VPA 自动计算这些 pod 中容器的流程以及当前的 CPU 和内存使用情况，并使用这些数据来决定优化的资源限制和请求，以确保这些 pod 始终高效操作。例如，VPA 会减少请求资源超过使用资源的 pod 的资源，并为没有请求充足资源的 pod 增加资源。
+
+VPA 每次自动删除任何与建议不兼容的 pod，以便您的应用程序可以在不需要停机的情况下继续满足请求。然后，工作负载对象使用原始资源限制和请求重新部署 pod。VPA 使用一个变异准入 webhook 来更新 pod，在 pod 被允许到节点前，具有优化的资源限制和请求。如果您不希望 VPA 删除 pod，可以查看 VPA 资源限制和请求，并根据需要手动更新 pod。
+
+[注意]
+====
+默认情况下，工作负载对象必须至少指定两个副本，以便 VPA 自动删除其 pod。指定了比这个最小值更少的副本数的工作负载对象不会被删除。如果您手动删除这些 pod，当工作负载对象重新部署 pod 时，VPA 会使用其建议更新新的 pod。您可以通过修改 `VerticalPodAutoscalerController` 对象来更改这个最小值，如更改 VPA 最小值所示。
+====
+
+例如，您有一个 pod 使用了 CPU 的 50%，但只请求 10%。VPA 会认定该 pod 消耗的 CPU 多于请求的 CPU，并删除 pod。工作负载对象（如副本集）会重启 pod，VPA 使用推荐的资源更新新 pod。
+
+对于开发人员，您可以使用 VPA 来帮助确保 pod 在高负载时可以继续工作，具体方法是将 pod 调度到每个 pod 具有适当资源的节点上。
+
+管理员可以使用 VPA 来更好地利用集群资源，例如防止 pod 保留比所需的 CPU 资源更多的资源。VPA 监控实际使用的工作负载，并对资源进行调整，以确保可以满足其他工作负载的需要。VPA 还维护初始容器配置中指定的限值和请求之间的比例。
+
+[注意]
+====
+如果您停止在集群中运行 VPA，或删除特定的 VPA CR，则已由 VPA 修改的 pod 的资源请求不会改变。任何新 pod 都会根据工作负载对象中的定义获得资源，而不是之前由 VPA 提供的的建议。
+====

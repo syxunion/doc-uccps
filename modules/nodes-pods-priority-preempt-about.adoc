@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-priority.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-priority-preempt-about_{context}"]
+= 了解 pod 抢占
+
+当开发人员创建 pod 时，pod 会排入某一队列。如果开发人员为 pod 配置了 pod 优先级或抢占，调度程序会从队列中选取 pod，并尝试将 pod 调度到某个节点上。如果调度程序无法在满足 pod 的所有指定要求的适当节点上找到空间，则会为待处理 pod 触发抢占逻辑。
+
+当调度程序在节点上抢占一个或多个 pod 时，较高优先级 Pod spec 的 nominatedNodeName 字段 将设为该节点的名称，nodename 字段也是如此。调度程序使用 nominatedNodeName 字段来跟踪为 pod 保留的资源，同时也向用户提供与集群中抢占相关的信息。
+
+在调度程序抢占了某一较低优先级 pod 后，调度程序会尊重该 pod 的安全终止期限。如果在调度程序等待较低优先级 pod 终止过程中另一节点变为可用，调度程序会将较高优先级 pod 调度到该节点上。因此，Pod spec 的 nominatedNodeName 字段和 nodeName 字段可能会有所不同。
+
+另外，如果调度程序在某一节点上抢占 pod 并正在等待终止，这时又有优先级比待处理 pod 高的 pod 需要调度，那么调度程序可以改为调度这个优先级更高的 pod。在这种情况下，调度程序会清除待处理 pod 的 nominatedNodeName，使该 pod 有资格调度到其他节点上。
+
+抢占不一定从节点中移除所有较低优先级 pod。调度程序可以通过移除一部分较低优先级 pod 调度待处理 pod。
+
+只有待处理 pod 能够调度到节点时，调度程序才会对这个节点考虑 pod 抢占。
+
+[id="non-preempting-priority-class_{context}"]
+== 非抢占优先级类（技术预览）
+
+抢占策略设置为 Never 的 Pod 会放置在较低优先级 pod 的调度队列中，但无法抢占其他 pod。等待调度的非抢占 pod 会保留在调度队列中，直到资源可用且可以调度。非抢占 pod 与其他 pod 一样，受调度程序后退避的影响。这意味着，如果调度程序尝试调度这些 pod，它们会以较低频率重试，允许在调度前调度其他优先级较低的 pod。
+
+非抢占 pod 仍可被其他高优先级 pod 抢占。
+
+[id="priority-preemption-other_{context}"]
+== Pod 抢占和其他调度程序设置
+
+如果启用 pod 优先级与抢占功能，请考虑其他的调度程序设置：
+
+pod 优先级和 pod 中断预算::
+pod 中断预算指定某一时间必须保持在线的副本的最小数量或百分比。如果您指定了 pod 中断预算，统信容器云管理平台 会在抢占 pod 时尽力尊重这些预算。调度程序会尝试在不违反 pod 中断预算的前提下抢占 pod。如果找不到这样的 pod，则可能会无视 pod 中断预算要求而抢占较低优先级 pod。
+
+pod 优先级和 pod 关联性::
+pod 关联性要求将新 pod 调度到与具有同样标签的其他 pod 相同的节点上。
+
+如果待处理 pod 与节点上的一个或多个低优先级 pod 具有 pod 间关联性，调度程序就不能在不违反关联要求的前提下抢占较低优先级 pod。这时，调度程序会寻找其他节点来调度待处理 pod。但是，不能保证调度程序能够找到合适的节点，因此可能无法调度待处理 pod。
+
+要防止这种情况，请仔细配置优先级相同的 pod 的 pod 关联性。
+
+////
+Under consideration for future release
+Pod priority and cross-node preemption::
+If the scheduler is considering preempting pods on a node so that a pending pod can be scheduled, the scheduler can preempt a pod on different node to schedule the pending pod.
+////
+
+[id="priority-preemption-graceful_{context}"]
+== 安全终止被抢占的 pod
+
+在抢占 pod 时，调度程序会等待 pod 安全终止期限到期，使 pod 能够完成工作并退出。如果 pod 在到期后没有退出，调度程序会终止该 pod。此安全终止期限会在调度程序抢占该 pod 的时间和待处理 pod 调度到节点的时间之间造成一个时间差。
+
+要尽量缩短这个时间差，可以为较低优先级 pod 配置较短的安全终止期限。

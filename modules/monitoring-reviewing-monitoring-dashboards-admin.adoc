@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * monitoring/reviewing-monitoring-dashboards.adoc
+
+:_content-type: PROCEDURE
+[id="reviewing-monitoring-dashboards-admin_{context}"]
+= 以集群管理员身份查看监控仪表板
+
+在 *管理员* 视角中，您可以查看与 统信容器云管理平台 集群核心组件相关的仪表板。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 在 统信容器云管理平台 web 控制台的  *管理员* 视角中，导航到 *Observe* -> *Dashboards*.
+
+. 在 *Dashboard* 列表中选择一个仪表板。有些仪表板（如 *etcd* 和 *Prometheus* 仪表板）在被选中时会生成额外的子菜单。
+
+. 可选：在 *Time Range* 列表中为图形选择一个时间范围。
++
+** 选择预定义的时间段。
++
+** 通过选择 *Time Range* 列表中的 *Custom* 时间范围 来设置自定义时间范围。
++
+.. 输入或选择 *From* 和 *To* date and time。
++
+..单击 *Save* 以保存自定义时间范围。
+
+. 可选：选择一个 *Refresh Interval*。
+
+. 将鼠标悬停在仪表板中的每个图形上，以显示具体项目的详细信息。

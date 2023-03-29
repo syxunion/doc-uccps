@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-plugin.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-plugins-about_{context}"]
+= 了解设备插件
+
+设备插件提供一致并可移植的解决方案，以便跨集群消耗硬件设备。设备插件通过一种扩展机制提供对这些设备的支持，从而将设备提供给容器，提供设备健康检查，并且安全地共享设备。
+
+[重要]
+====
+统信容器云管理平台 支持设备插件 API，但设备插件容器则由各家供应商提供支持。
+====
+
+设备插件是在节点（kubelet 的外部）上运行的 gRPC 服务，负责管理特定的硬件资源。任何设备插件都必须支持以下远程过程调用 (RPC)：
+
+[source,golang]
+----
+service DevicePlugin {
+      // GetDevicePluginOptions returns options to be communicated with Device
+      // Manager
+      rpc GetDevicePluginOptions(Empty) returns (DevicePluginOptions) {}
+
+      // ListAndWatch returns a stream of List of Devices
+      // Whenever a Device state change or a Device disappears, ListAndWatch
+      // returns the new list
+      rpc ListAndWatch(Empty) returns (stream ListAndWatchResponse) {}
+
+      // Allocate is called during container creation so that the Device
+      // Plug-in can run device specific operations and instruct Kubelet
+      // of the steps to make the Device available in the container
+      rpc Allocate(AllocateRequest) returns (AllocateResponse) {}
+
+      // PreStartcontainer is called, if indicated by Device Plug-in during
+      // registration phase, before each container start. Device plug-in
+      // can run device specific operations such as reseting the device
+      // before making devices available to the container
+      rpc PreStartcontainer(PreStartcontainerRequest) returns (PreStartcontainerResponse) {}
+}
+----
+
+[discrete]
+=== 设备插件示例
+* link:https://github.com/GoogleCloudPlatform/Container-engine-accelerators/tree/master/cmd/nvidia_gpu[适用于 COS 型操作系统的 Nvidia GPU 设备插件]
+* link:https://github.com/NVIDIA/k8s-device-plugin[Nvidia 官方 GPU 设备插件]
+* link:https://github.com/vikaschoudhary16/sfc-device-plugin[Solarflare 设备插件]
+* link:https://github.com/kubevirt/kubernetes-device-plugins[KubeVirt 设备插件：vfio 和 kvm]
+* link:https://github.com/ibm-s390-cloud/k8s-cex-dev-plugin[用于 IBM Crypto Express(CEX)卡的 Kubernetes 设备插件]
+
+
+[注意]
+====
+对于简单设备插件参考实现，设备管理器代码中提供了一个存根设备插件：
+*_vendor/k8s.io/kubernetes/pkg/kubelet/cm/deviceplugin/device_plugin_stub.go_*.
+====
+
+[id="methods-for-deploying-a-device-plugin_{context}"]
+== 设备插件部署方法
+
+* 守护进程集是设备插件部署的推荐方法。
+* 在启动时，设备插件会尝试在节点上的 *_/var/lib/kubelet/device-plugin/_* 创建一个 UNIX 域套接字，以服务来自于设备管理器的 RPC。
+* 由于设备插件必须管理硬件资源、主机文件系统的访问权以及套接字创建，它们必须在一个特权安全上下文中运行。
+* 各种设备插件实现中提供了有关部署步骤的更多细节。

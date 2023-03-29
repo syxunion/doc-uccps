@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-overcommit
+[id="nodes-scheduler-overcommit"]
+= 将 pod 放置到过量使用的节点
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+
+
+处于 _过量使用_（overcommited）状态时，容器计算资源请求和限制的总和超过系统中可用的资源。过量使用常用于开发环境，因为在这种环境中可以接受以牺牲保障性能来换取功能的情况。
+
+请求和限制可让管理员允许和管理节点上资源的过量使用。调度程序使用请求来调度容器，并提供最低服务保证。限制约束节点上可以消耗的计算资源数量。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-cluster-overcommit-about.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-overcommit-configure-nodes.adoc[leveloffset=+1]

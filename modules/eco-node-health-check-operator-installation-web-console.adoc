@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/node-health-check-operator-installation.adoc
+
+:_content-type: PROCEDURE
+[id="installing-node-health-check-operator-using-web-console_{context}"]
+= 使用 Web 控制台安装 Node Health Check Operator
+
+您可以使用 统信容器云管理平台 Web 控制台安装 Node Health Check Operator。
+
+.先决条件
+
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 在 统信容器云管理平台 Web 控制台中导航至  *Operators* -> *OperatorHub*.
+. 搜索 Node Health Check Operator，然后点 *Install*.
+. 保留 *安装模式* 和 *命名空间* 的默认选择，以确保将 Operator 安装到 `openshift-operators` 命名空间中。
+. 点 *Install*.
+
+.验证
+
+确认安装成功：
+
+. 导航到 *Operators* -> *Installed Operators* 页面。
+. 检查 Operator 是否安装在 `openshift-operators` 命名空间中，其状态是否为 `Succeeded`.
+
+如果 Operator 没有成功安装：
+
+. 导航到 *Operators* -> *Installed Operators* 页面，并检查 Status 列中是否有任何错误或故障。
+. 导航到 *Workloads* -> *Pods* 页面，并检查 `openshift-operators` 项目中报告问题的 pod 的日志。

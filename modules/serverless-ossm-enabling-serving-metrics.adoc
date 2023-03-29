@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-ossm-setup.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-ossm-enabling-serving-metrics_{context}"]
+= 在使用带有 mTLS 的 Service Mesh 时启用 Knative Serving 指标
+
+如果启用了 mTLS 的 Service Mesh，则默认禁用 Knative Serving 的指标，因为 Service Mesh 会防止 Prometheus 提取指标。本节介绍在使用 Service Mesh 和 mTLS 时如何启用 Knative Serving 指标。
+
+.先决条件
+
+* 您已在集群中安装了 统信容器云管理平台无服务扩展组件 和 Knative Serving。
+* 已安装了启用了 mTLS 功能的 统信容器云管理平台服务网格扩展组件
+* 您可以访问具有集群管理员权限的  {product-title} 帐户。
+* 安装 Uccps CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+. 在 Knative Serving 自定义资源 (CR) 的 `observability` spec 中将 `prometheus` 指定为 `metrics.backend-destination` ：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    observability:
+      metrics.backend-destination: "prometheus"
+...
+----
++
+此步骤可防止默认禁用指标。
+
+. 应用以下网络策略来允许来自 Prometheus 命名空间中的流量：
++
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openshift-monitoring-ns
+  namespace: knative-serving
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: "openshift-monitoring"
+  podSelector: {}
+...
+----
+
+. 修改并重新应用 `istio-system`  命名空间中的默认 Service Mesh control plane，使其包含以下 spec：
++
+[source,yaml]
+----
+...
+spec:
+  proxy:
+    networking:
+      trafficControl:
+        inbound:
+          excludedPorts:
+          - 8444
+...
+----

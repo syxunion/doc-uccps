@@ -1,0 +1,124 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/about-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: CONCEPT
+[id="nw-networkpolicy-about_{context}"]
+= 关于网络策略
+
+在使用支持 Kubernetes 网络策略的 Kubernetes Container Network Interface（CNI）插件的集群中，网络隔离完全由 `NetworkPolicy` 对象控制。在 统信容器云管理平台 1.2 中，OpenShift SDN 支持在默认的网络隔离模式中使用网络策略。
+
+[警告]
+====
+网络策略不适用于主机网络命名空间。启用主机网络的 Pod 不受网络策略规则的影响。
+====
+
+默认情况下，项目中的所有 pod 都可被其他 pod 和网络端点访问。要在一个项目中隔离一个或多个 Pod，您可以在该项目中创建 `NetworkPolicy` 对象来指示允许的入站连接。项目管理员可以在自己的项目中创建和删除 NetworkPolicy 对象。
+
+如果一个 pod 由一个或多个 `NetworkPolicy` 对象中的选择器匹配，那么该 pod 将只接受至少被其中一个 `NetworkPolicy` 对象所允许的连接。未被任何 `NetworkPolicy` 对象选择的 pod 可以完全访问。
+
+以下示例 `NetworkPolicy` 对象演示了支持不同的情景：
+
+* 拒绝所有流量：
++
+要使项目默认为拒绝流量，请添加一个匹配所有 pod 但不接受任何流量的 `NetworkPolicy` 对象：
++
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: deny-by-default
+spec:
+  podSelector: {}
+  ingress: []
+----
+
+* 只允许 统信容器云管理平台 Ingress Controller 的连接：
++
+要使项目只允许 统信容器云管理平台 Ingress Controller 的连接，请添加以下 `NetworkPolicy` 对象。
++
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openshift-ingress
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: ingress
+  podSelector: {}
+  policyTypes:
+  - Ingress
+----
+
+* 只接受项目中 pod 的连接：
++
+要使 pod 接受同一项目中其他 pod 的连接，但拒绝其他项目中所有 pod 的连接，请添加以下 NetworkPolicy 对象：
++
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-same-namespace
+spec:
+  podSelector: {}
+  ingress:
+  - from:
+    - podSelector: {}
+----
+
+* 仅允许基于 pod 标签的 HTTP 和 HTTPS 流量：
++
+要对带有特定标签（以下示例中的 `role=frontend`）的 pod 仅启用 HTTP 和 HTTPS 访问，请添加类似如下的 `NetworkPolicy` 对象：
++
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-http-and-https
+spec:
+  podSelector:
+    matchLabels:
+      role: frontend
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
+----
+
+* 使用命名空间和 pod 选择器接受连接：
++
+要通过组合使用命名空间和 pod 选择器来匹配网络流量,您可以使用类似如下的 `NetworkPolicy` 对象：
++
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-pod-and-namespace-both
+spec:
+  podSelector:
+    matchLabels:
+      name: test-pods
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            project: project_name
+        podSelector:
+          matchLabels:
+            name: test-pods
+----
+
+`NetworkPolicy` 对象是可添加的；也就是说，您可以组合多个 `NetworkPolicy` 对象来满足复杂的网络要求。
+
+例如，对于以上示例中定义的 `NetworkPolicy` 对象，您可以在同一个项目中定义 `allow-same-namespace` 和 `allow-http-and-https` 策略。因此，允许带有标签 `role=frontend` 的 pod 接受每一策略所允许的任何连接。即，任何端口上来自同一命名空间中的 pod 的连接，以及端口 `80` 和 `443` 上的来自任意命名空间中 pod 的连接。

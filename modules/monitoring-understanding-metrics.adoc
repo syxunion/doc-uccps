@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+
+:_content-type: CONCEPT
+[id="understanding-metrics_{context}"]
+= 了解指标
+
+[role="_abstract"]
+在 统信容器云管理平台 1.2 中，集群组件的监控方式是提取通过服务端点公开的指标。您还可以为用户定义的项目配置指标集合。
+
+您可以通过在应用程序级别使用 Prometheus 客户端库来定义您要为您自己的工作负载提供的指标。
+
+在 统信容器云管理平台 中，指标通过  `/metrics` 规范名称下的 HTTP 服务端点公开。您可以通过针对 `\http://<endpoint>/metrics` 运行  `curl` 查询来列出服务的所有可用指标。例如，您可以向  `prometheus-example-app` 示例服务公开路由，然后运行以下命令来查看其所有可用指标：
+
+[source,terminal]
+----
+$ curl http://<example_app_endpoint>/metrics
+----
+
+.输出示例
+[source,terminal]
+----
+# HELP http_requests_total Count of all HTTP requests
+# TYPE http_requests_total counter
+http_requests_total{code="200",method="get"} 4
+http_requests_total{code="404",method="get"} 2
+# HELP version Version information about this binary
+# TYPE version gauge
+version{version="v0.1.0"} 1
+----

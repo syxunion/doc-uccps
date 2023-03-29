@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins-agent.adoc
+
+[id="images-other-jenkins-agent-gradle_{context}"]
+= Jenkins 代理 Gradle 构建
+
+在 统信容器云管理平台 上的 Jenkins 代理中托管 Gradle 构建会出现其他复杂情况，因为除了 Jenkins JNLP 代理和 Gradle JVM 外，Gradle 还会生成第三个 JVM 来运行测试（若已指定）。
+
+
+建议将以下设置作为起始点，在 统信容器云管理平台 上内存受限的 Jenkins 代理中运行 Gradle 构建。您还可按需修改这些设置。
+
+* 通过将 `org.gradle.daemon=false` 添加到 `gradle.properties` 文件中来确保禁用长期 Gradle 守护进程。
+* 通过确保 `gradle.propertie`s 文件中未设置 `org.gradle.parallel=true` 且 --parallel 未设置为命令行参数来禁用并行构建执行。
+* 要防止 `Java` 编译超出进程范围，请在 `build.gradle` 文件中设置 java { options.fork = false }。
+* 通过确保在 `build.gradle` 文件中设置 `test` { maxParallelForks = 1 } 来禁用多个附加测试进程。
+* 使用 `GRADLE_OPTS`、`JAVA_OPTS` 或 `JAVA_TOOL_OPTIONS `环境变量覆盖 `Gradle JVM` 内存参数。
+* 通过在 `build.gradle` 中定义 `maxHeapSize` 和 `jvmArgs` 设置，或通过 `-Dorg.gradle.jvmargs` 命令行参数来为任何 Gradle 测试 JVM 设置最大堆大小和 JVM 参数。

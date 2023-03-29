@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-a-custom-pki.adoc
+
+[id="certificate-injection-using-operators_{context}"]
+= 使用 Operator 进行证书注入
+
+在您的自定义 CA 证书通过 ConfigMap 添加到集群中后，Cluster Network Operator 会将用户提供的证书和系统 CA 证书合并到单一捆绑包中，并将合并的捆绑包注入请求信任捆绑包注入的 Operator。
+
+Operator 通过创建一个带有以下标签的空 ConfigMap 来请求此注入：
+
+[source,yaml]
+----
+config.openshift.io/inject-trusted-cabundle="true"
+----
+
+Operator 将这个 ConfigMap 挂载到容器的本地信任存储中。
+
+[注意]
+====
+只有在UnionTech OS Cloud  20 (USwift) 信任捆绑包中没有包括证书时才需要添加可信的 CA 证书。
+====
+
+证书注入不仅限于 Operator。当使用 `config.openshift.io/inject-trusted-cabundle=true` 标记（label) 创建一个空的 ConfigMap 时，Cluster Network Operator会跨命名空间注入证书 。
+
+ConfigMap 可以驻留在任何命名空间中，但 ConfigMap 必须作为卷挂载到需要自定义 CA 的 Pod 中的每个容器。例如：
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-example-custom-ca-deployment
+  namespace: my-example-custom-ca-ns
+spec:
+  ...
+    spec:
+      ...
+      containers:
+        - name: my-container-that-needs-custom-ca
+          volumeMounts:
+          - name: trusted-ca
+            mountPath: /etc/pki/ca-trust/extracted/pem
+            readOnly: true
+      volumes:
+      - name: trusted-ca
+        configMap:
+          name: trusted-ca
+          items:
+            - key: ca-bundle.crt <1>
+              path: tls-ca-bundle.pem <2>
+----
+<1> `ca-bundle.crt` 需要作为 ConfigMap 密钥。
+<2> `tls-ca-bundle.pem` 需要作为 ConfigMap 的路径。

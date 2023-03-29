@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * installing/install_config/installing-restricted-networks-preparations.adoc
+// * openshift_images/samples-operator-alt-registry.adoc
+// * openshift_images/configuring-samples-operator.adoc
+
+[id="installation-images-samples-disconnected-mirroring-assist_{context}"]
+= 协助镜像的 Cluster Samples Operator
+
+在安装过程中，统信容器云管理平台 在 `Uccps-cluster-samples-operator` 命名空间中创建一个名为 `imagestreamtag-to-image` 的配置映射。`imagestreamtag-to-image` 配置映射包含每个镜像流标签的条目（填充镜像）。
+
+配置映射中 data 字段中每个条目的键格式为 `<image_stream_name>_<image_stream_tag_name>`。
+
+在断开连接的 统信容器云管理平台 安装过程中，Cluster Samples Operator 的状态被设置为 `Removed`。如果您将其改为 `Managed`，它会安装示例。
+[注意]
+====
+在网络受限或停用环境中使用示例可能需要访问您网络外部的服务。例如，Github、Maven Central、npm、RubyGems、PyPi 以及其他服务。可能需要执行其他步骤，以便集群样本操作器的对象访问所需的服务。
+====
+
+您可以使用此配置映射作为导入镜像流所需的镜像的引用。
+
+* 在 Cluster Samples Operator 被设置为 `Removed` 时，您可以创建镜像的 `registry`，或决定您要使用哪些现有镜像 registry。
+* 使用新的配置映射作为指南来镜像您要镜像的 `registry` 的示例。
+* 将没有镜像的任何镜像流添加到 Cluster Samples Operator 配置对象的 `skippedImagestreams` 列表中。
+* 将 Cluster Samples Operator 配置对象的 `samplesRegistry` 设置为已镜像的 registry。
+* 然后，将 Cluster Samples Operator 设置为 `Managed` 来安装您已镜像的镜像流。

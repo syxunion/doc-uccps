@@ -1,0 +1,74 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="supported-tags-for-quick-starts_{context}"]
+= 支持的标签快速启动
+
+使用这些标签在标记中写入快速开始内容。标记将转换为 HTML。
+
+[cols="2",options="header"]
+|===
+|Tag
+|描述
+
+|`'b',`
+|粗体文本。
+
+|`'img',`
+|嵌入图像。
+
+|`'i',`
+|斜体文本。
+
+|`'strike',`
+|带有横线贯穿的文本。
+
+|`'s',`
+|较小的文本
+
+|`'del',`
+|较小的文本。
+
+|`'em',`
+|加重文本。
+
+|`'strong',`
+|重要文本。
+
+|`'a',`
+|anchor 标签。
+
+|`'p',`
+|段落文本。
+
+|`'h1',`
+|1 级标题。
+
+|`'h2',`
+|2 级标题。
+
+|`'h3',`
+|3 级标题。
+
+|`'h4',`
+|4 级标题。
+
+|`'ul',`
+|一个没有顺序的列表。
+
+|`'ol',`
+|一个有顺序的列表。
+
+|`'li',`
+|一个列表项。
+
+|`'code',`
+|代码文本。
+
+|`'pre',`
+|预格式化的文本块。
+
+|`'button',`
+|文本中的一个按钮。
+|===

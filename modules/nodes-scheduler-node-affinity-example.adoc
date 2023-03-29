@@ -1,0 +1,152 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-affinity.adoc
+
+[id="nodes-scheduler-node-affinity-examples_{context}"]
+= 节点关联性规则示例
+
+以下示例演示了节点关联性。
+
+[id="admin-guide-sched-affinity-examples1_{context}"]
+== 具有匹配标签的节点关联性
+
+以下示例演示了具有匹配标签的节点与 pod 的节点关联性：
+
+* Node1 节点具有标签 `zone:us`:
++
+[source,terminal]
+----
+$ oc label node node1 zone=us
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    zone: us
+----
+====
+
+*  pod-s1 pod 在节点关联性必要规则下具有 `zone` 和 `us` 键/值对：
++
+[source,terminal]
+----
+$ cat pod-s1.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s1
+spec:
+  containers:
+    - image: "docker.io/ocpqe/hello-pod"
+      name: hello-pod
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: "zone"
+              operator: In
+              values:
+              - us
+----
+
+* pod-s1 pod 可以调度到 Node1 上：
++
+[source,terminal]
+----
+$ oc get pod -o wide
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     READY     STATUS       RESTARTS   AGE      IP      NODE
+pod-s1   1/1       Running      0          4m       IP1     node1
+----
+
+[id="admin-guide-sched-affinity-examples2_{context}"]
+== 没有匹配标签的节点关联性
+
+以下示例演示了无匹配标签的节点与 pod 的节点关联性：
+
+* Node1 节点具有标签 `zone:emea`:
++
+[source,terminal]
+----
+$ oc label node node1 zone=emea
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    zone: emea
+----
+====
+
+*  pod-s1 pod 在节点关联性必要规则下具有 zone 和 us 键/值对：
++
+[source,terminal]
+----
+$ cat pod-s1.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s1
+spec:
+  containers:
+    - image: "docker.io/ocpqe/hello-pod"
+      name: hello-pod
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: "zone"
+              operator: In
+              values:
+              - us
+----
+
+* pod-s1 pod 无法调度到 Node1 上：
++
+[source,terminal]
+----
+$ oc describe pod pod-s1
+----
++
+.输出示例
+[source,terminal]
+----
+...
+
+Events:
+ FirstSeen LastSeen Count From              SubObjectPath  Type                Reason
+ --------- -------- ----- ----              -------------  --------            ------
+ 1m        33s      8     default-scheduler Warning        FailedScheduling    No nodes are available that match all of the following predicates:: MatchNodeSelector (1).
+----

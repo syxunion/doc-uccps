@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+:_content-type: CONCEPT
+[id="nodes-descheduler-about_{context}"]
+= 关于 descheduler
+
+您可以使用 descheduler 根据特定策略驱除 pod，以便可将 pod 重新调度到更合适的节点上。
+
+descheduler 适合于在以下情况下 处理运行的 pod：
+
+* 节点使用不足或过度使用。
+* Pod 和节点关联性要求（如污点或标签）已更改，并且原始的调度不再适合于某些节点。
+* 节点失败需要移动 pod。
+* 集群中添加了新节点。
+* Pod 重启的次数太多。
+
+[重要]
+====
+descheduler 不调度被驱除的 pod。调度被驱除 pod 的任务由调度程序（scheduler）执行。
+====
+
+当 descheduler 决定从节点驱除 pod 时，它会使用以下机制：
+
+* `openshift-*` 和 `kube-system` 命名空间中的 Pod 不会被驱除。
+* `priorityClassName` 被设置为 `system-cluster-critical` 或 `system-node-critical` 的关键 pod 不会被驱除。
+* 不属于复制控制器、副本集、部署或作业一部分的静态、镜像或独立 pod 不会被驱除，因为这些 pod 不会被重新创建。
+* 与守护进程集关联的 pod 不会被驱除。
+* 具有本地存储的 Pod 不会被驱除。
+* BestEffort pod 会在 Burstable 和 Guaranteed pod 之前被驱除。
+* 具有 `descheduler.alpha.kubernetes.io/evict` 注解的所有 pod 类型都可以被驱除。此注解用于覆盖防止驱除的检查，用户可以选择驱除哪些 pod。用户应该知道如何创建 pod 以及是否重新创建 pod。
+* 对于受 Pod Disruption Budget (PDB) 限制的 pod，如果进行 deschedule 会违反 Pod disruption budget (PDB)，则 pod 不会被驱除。通过使用驱除子资源来处理 PDB 来驱除 pod 。

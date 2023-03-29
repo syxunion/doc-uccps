@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-docker-build-arguments_{context}"]
+= 添加 Docker 构建参数
+
+您可以使用 `buildArgs` 数组来设置 docker build 参数。构建参数将在构建启动时传递给 docker。
+
+[提示]
+====
+请参阅 Dockerfile 参考文档中的 ARG 和 FROM 如何交互。
+====
+
+.流程
+
+要设置 docker 构建参数，请在 `buildArgs` 中添加条目，它位于 `BuildConfig` 对象的 `dockerStrategy` 定义中。例如：
+
+[source,yaml]
+----
+dockerStrategy:
+...
+  buildArgs:
+    - name: "foo"
+      value: "bar"
+----
+
+[注意]
+====
+只支持 `name` 和 `value` 字段。`valueFrom` 字段上的任何设置都会被忽略。
+====

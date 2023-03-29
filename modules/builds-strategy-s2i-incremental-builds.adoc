@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//* builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-s2i-incremental-builds_{context}"]
+= 执行 source-to-image 增量构建
+
+Source-to-image (S2I) 可以执行增量构建，也就是能够重复利用过去构建的镜像中的工件。
+
+.流程
+
+* 要创建增量构建，请创建对策略定义进行以下修改：
++
+[source,yaml]
+----
+strategy:
+  sourceStrategy:
+    from:
+      kind: "ImageStreamTag"
+      name: "incremental-image:latest" <1>
+    incremental: true <2>
+----
+<1> 指定支持增量构建的镜像。请参考构建器镜像的文档，以确定它是否支持此行为。
+<2> 此标志（flag）控制是否尝试增量构建。如果构建器镜像不支持增量构建，则构建仍将成功，但您会收到一条日志消息，指出增量构建因为缺少 `save-artifacts` 脚本而未能成功。
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关如何创建支持增量构建的构建器镜像的信息，请参阅 S2I 要求。

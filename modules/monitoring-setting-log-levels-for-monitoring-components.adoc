@@ -1,0 +1,118 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="setting-log-levels-for-monitoring-components_{context}"]
+= 为监控组件设置日志级别
+
+您可以为 Alertmanager、Prometheus Operator、Prometheus、Thanos Querier 和 Thanos Ruler 配置日志级别。
+
+以下日志级别可应用到 `cluster-monitoring-config` 和 `user-workload-monitoring-config` `ConfigMap` 中的相关组件：
+
+* `debug`。 记录调试、信息、警告和错误消息。
+* `info`。记录信息、警告和错误消息。
+* `warn`。 仅记录警告和错误消息。
+* `error`。 仅记录错误消息。
+
+默认日志级别为 `info`.
+
+.先决条件
+
+* *如果要为 `openshift-monitoring` 项目中的 Alertmanager、Prometheus、Prometheus 或 Thanos Querier 设置日志级别*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果要为 `openshift-user-workload-monitoring` 项目中的 Prometheus Operator、Prometheus 或 Thanos Ruler 设置日志级别*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑 `ConfigMap` 对象：
+** *要为`openshift-monitoring` 项目中的组件设置日志级别*：
+.. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 在 `data/config.yaml`  下为组件添加 `logLevel: <log_level>`
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    <component>: <1>
+      logLevel: <log_level> <2>
+----
+<1> 您要为其设置日志级别的监控堆栈组件。对于默认平台监控，可用的组件值为 `prometheusK8s`, `alertmanagerMain`, `prometheusOperator`, 和 `thanosQuerier`.
+<2> 为组件设置的日志级别。可用的值 `error`, `warn`, `info`, 和 `debug`。默认值为 `info`.
+
+** *要为 `openshift-user-workload-monitoring` 项目中的组件设置日志级别*：
+.. 在 `openshift-user-workload-monitoring` 项目中编辑 `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 在 `data/config.yaml` 下为组件添加 `logLevel: <log_level>` 
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    <component>: <1>
+      logLevel: <log_level> <2>
+----
+<1> 您要为其设置日志级别的监控堆栈组件。对于默认平台监控，可用的组件值为 `prometheusK8s`, `alertmanagerMain`, `prometheusOperator`, 和 `thanosQuerier`.
+<2> 为组件设置的日志级别。可用的值 `error`, `warn`, `info`, 和 `debug`。默认值为 `info`.
+
+. 保存文件以使改变生效。应用日志级别更改时，组件的 Pod 会自动重启。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====
+
+. 通过查看相关项目中的部署或 Pod 配置来确认已应用了日志级别。以下示例检查 `openshift-user-workload-monitoring` 项目中的 `prometheus-operator` 部署中的日志级别：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get deploy prometheus-operator -o yaml |  grep "log-level"
+----
++
+.输出示例
+[source,terminal]
+----
+        - --log-level=debug
+----
+
+. 检查组件的 Pod 是否正在运行。以下示例列出了 `openshift-user-workload-monitoring` 项目中 Pod 的状态：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get pods
+----
++
+[注意]
+====
+如果 `ConfigMap` 中包含了一个未识别的 `loglevel` ，则组件的 Pod 可能无法成功重启。
+====

@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/limit-ranges.adoc
+
+[id="nodes-cluster-limit-ranges-deleting_{context}"]
+= 删除限制范围
+
+
+要删除任何活跃的 `LimitRange` 对象，使其不再在项目中强制实施限制：
+
+. 运行以下命令：
++
+----
+$ oc delete limits <limit_name>
+----

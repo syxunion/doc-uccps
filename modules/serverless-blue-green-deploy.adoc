@@ -1,0 +1,133 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-traffic-management.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-blue-green-deploy_{context}"]
+= 使用蓝绿部署策略路由和管理流量
+
+您可以使用蓝绿部署策略，安全地将流量从应用的生产版本重新路由到新版本。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建并部署应用程序作为 Knative 服务。
+
+. 通过查看以下命令的输出，查找部署服务时创建的第一个修订版本的名称：
++
+[source,terminal]
+----
+$ oc get ksvc <service_name> -o=jsonpath='{.status.latestCreatedRevisionName}'
+----
++
+.示例命令
+[source,terminal]
+----
+$ oc get ksvc example-service -o=jsonpath='{.status.latestCreatedRevisionName}'
+----
++
+.输出示例
+[source,terminal]
+----
+$ example-service-00001
+----
+
+. 在服务 `spec` 中添加以下 YAML 以将入站流量发送到修订版本：
++
+[source,yaml]
+----
+...
+spec:
+  traffic:
+    - revisionName: <first_revision_name>
+      percent: 100 # All traffic goes to this revision
+...
+----
+
+. 验证您可以在 URL 输出中运行以下命令来查看您的应用程序：
++
+[source,terminal]
+----
+$ oc get ksvc <service_name>
+----
+
+. 通过修改服务的 `template` 规格中至少有一个字段来部署应用程序的第二个修订版本。例如，您可以修改服务的 `image` 或 `env`  环境变量。您可以通过应用服务 YAML 文件重新部署服务，如果安装了 Knative (kn) CLI，也可以使用 `kn service update` 命令。
+
+. 运行以下命令，查找您在重新部署服务时创建的第二个最新的修订版本的名称：
++
+[source,terminal]
+----
+$ oc get ksvc <service_name> -o=jsonpath='{.status.latestCreatedRevisionName}'
+----
++
+此时，服务的第一个和第二个修订版本都已部署并运行。
+
+. 更新您的现有服务，以便为第二个修订版本创建新的测试端点，同时仍然将所有其他流量发送到第一个修订版本：
++
+.使用测试端点更新的服务 spec 示例
+[source,yaml]
+----
+...
+spec:
+  traffic:
+    - revisionName: <first_revision_name>
+      percent: 100 # All traffic is still being routed to the first revision
+    - revisionName: <second_revision_name>
+      percent: 0 # No traffic is routed to the second revision
+      tag: v2 # A named route
+...
+----
++
+在通过重新应用 YAML 资源重新部署此服务后，应用的第二个修订现已被暂存。没有流量路由到主 URL 的第二个修订版本，Knative 会创建一个名为 v2 的新服务来测试新部署的修订版本。
+
+. 运行以下命令，获取第二个修订版本的新服务的 URL：
++
+[source,terminal]
+----
+$ oc get ksvc <service_name> --output jsonpath="{.status.traffic[*].url}"
+----
++
+在将任何流量路由到之前，您可以使用此 URL 验证新版本的应用运行正常。
+
+. 再次更新您的现有服务，以便 50% 的流量发送到第一个修订版本，50% 发送到第二个修订版本：
++
+.更新的服务 spec 在修订版本间分割流量 50/50 的示例
+[source,yaml]
+----
+...
+spec:
+  traffic:
+    - revisionName: <first_revision_name>
+      percent: 50
+    - revisionName: <second_revision_name>
+      percent: 50
+      tag: v2
+...
+----
+
+. 当您准备好将所有流量路由到应用程序的新版本时，请再次更新该服务，将 100% 的流量发送到第二个修订版本：
++
+.更新的服务 spec 将所有流量发送到第二个修订版本的示例
+[source,yaml]
+----
+...
+spec:
+  traffic:
+    - revisionName: <first_revision_name>
+      percent: 0
+    - revisionName: <second_revision_name>
+      percent: 100
+      tag: v2
+...
+----
++
+[TIP]
+====
+如果您不计划回滚修订版本，您可以删除第一个修订版本，而不是将其设置为流量的 0%。然后，不可路由的修订版本对象会被垃圾回收.
+====
+
+. 访问第一个修订版本的 URL，以验证没有更多流量发送到应用程序的旧版本。

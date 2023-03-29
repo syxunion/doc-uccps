@@ -1,0 +1,89 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-autoscaling-status-viewing_{context}"]
+
+= 使用 CLI 查看 pod 横向自动扩展状态条件
+
+您可以查看 pod 横向自动扩展 (HPA) 对 pod 设置的状态条件。
+
+[注意]
+====
+pod 横向自动扩展状态条件可通过 `v2` 版本的自动扩展 API 使用。
+====
+
+.先决条件
+
+要使用 pod 横向自动扩展，您的集群管理员必须已经正确配置了集群指标。您可以使用 `oc describe PodMetrics <pod-name>` 命令来判断是否已配置了指标。如果配置了指标，输出类似于以下示例，其中 Usage 下列出了 Cpu 和 Memory。
+
+[source,terminal]
+----
+$ oc describe PodMetrics openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+----
+
+.输出示例
+[source,terminal]
+----
+Name:         openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+Namespace:    openshift-kube-scheduler
+Labels:       <none>
+Annotations:  <none>
+API Version:  metrics.k8s.io/v1beta1
+Containers:
+  Name:  wait-for-host-port
+  Usage:
+    Memory:  0
+  Name:      scheduler
+  Usage:
+    Cpu:     8m
+    Memory:  45440Ki
+Kind:        PodMetrics
+Metadata:
+  Creation Timestamp:  2019-05-23T18:47:56Z
+  Self Link:           /apis/metrics.k8s.io/v1beta1/namespaces/openshift-kube-scheduler/pods/openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+Timestamp:             2019-05-23T18:47:56Z
+Window:                1m0s
+Events:                <none>
+----
+
+.流程
+
+要查看 pod 上的状态条件，请使用以下命令并提供 pod 的名称：
+
+[source,terminal]
+----
+$ oc describe hpa <pod-name>
+----
+
+例如：
+
+[source,terminal]
+----
+$ oc describe hpa cm-test
+----
+
+这些条件会出现在输出中的 Conditions 字段里。
+
+.输出示例
+[source,terminal]
+----
+Name:                           cm-test
+Namespace:                      prom
+Labels:                         <none>
+Annotations:                    <none>
+CreationTimestamp:              Fri, 16 Jun 2017 18:09:22 +0000
+Reference:                      ReplicationController/cm-test
+Metrics:                        ( current / target )
+  "http_requests" on pods:      66m / 500m
+Min replicas:                   1
+Max replicas:                   4
+ReplicationController pods:     1 current / 1 desired
+Conditions: <1>
+  Type              Status    Reason              Message
+  ----              ------    ------              -------
+  AbleToScale       True      ReadyForNewScale    the last scale time was sufficiently old as to warrant a new scale
+  ScalingActive     True      ValidMetricFound    the HPA was able to successfully calculate a replica count from pods metric http_request
+  ScalingLimited    False     DesiredWithinRange  the desired replica count is within the acceptable range
+----

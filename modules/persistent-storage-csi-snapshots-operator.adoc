@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+:_content-type: CONCEPT
+[id="persistent-storage-csi-snapshots-operator_{context}"]
+= 关于 CSI Snapshot Controller Operator
+
+CSI Snapshot Controller Operator 在 `openshift-cluster-storage-operator` 命名空间中运行。默认情况下，它由 Cluster Version Operator (CVO) 在所有集群中安装。
+
+CSI Snapshot Controller Operator 安装 CSI 快照控制器，该控制器在 `openshift-cluster-storage-operator` 命名空间中运行。
+
+== 卷快照 CRD
+
+在统信容器云管理平台安装过程中，CSI Snapshot Controller Operator 在 `snapshot.storage.k8s.io/v1`  API 组中创建以下快照自定义资源定义 (CRD) ：
+
+`VolumeSnapshotContent`::
+
+一个快照记录了由集群管理员在集群中置备的卷的状态。
++
+与 `PersistentVolume` 对象类似，`VolumeSnapshotContent` CRD 是一个集群资源，指向存储后端的实际快照。
++
+对于手动预置备的快照，集群管理员会创建大量 `VolumeSnapshotContent` CRD。它们在存储系统中记录了实际卷快照的详情。
++
+`VolumeSnapshotContent` CRD 没有命名空间，供集群管理员使用。
+
+`VolumeSnapshot`::
+
+与 `PersistentVolumeClaim` 对象类似， `VolumeSnapshot` CRD 定义了开发人员对快照的请求。CSI Snapshot Controller Operator 运行 CSI 快照控制器，该控制器使用适当的 `VolumeSnapshotContent` CRD 处理 `VolumeSnapshot` CRD 的绑定。绑定是一个一对一的映射。
++
+`VolumeSnapshot` CRD 有命名空间限制。开发人员使用 CRD 作为快照的唯一请求。
+
+`VolumeSnapshotClass`::
+
+集群管理员可以指定属于 `VolumeSnapshot` 对象的不同属性。这些属性可能会在存储系统中使用相同卷的快照之间有所不同，在这种情况下，使用持久性卷声明的相同存储类来表示它们。
++
+`VolumeSnapshotClass` CRD 定义了在创建快照时要使用的 `csi-external-snapshotter` sidecar 的参数。这可让存储后端知道在支持多个选项时动态创建哪些快照。
++
+动态置备的快照使用 `VolumeSnapshotClass ` CRD 指定在创建快照时要使用的 storage-provider 特定参数。
++
+`VolumeSnapshotContentClass`  CRD 没有命名空间，集群管理员使用它为存储后端启用全局配置选项。

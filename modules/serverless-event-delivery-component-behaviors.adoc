@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// serverless/develop/serverless-event-delivery.adoc
+
+:_content-type: CONCEPT
+[id="serverless-event-delivery-component-behaviors_{context}"]
+=  频道和代理的事件交付行为模式
+
+频道和代理的事件交付行为模式
+
+[id="serverless-event-delivery-component-behaviors-kafka_{context}"]
+== Knative Kafka 频道和代理
+
+如果事件成功传送到 Kafka 频道或代理接收器，接收器会使用一个 202 状态代码进行响应，这意味着该事件已被安全地存储在 Kafka 主题中且不会丢失。
+
+如果接收器使用任何其他状态代码响应，则事件不会被安全地存储，用户必须执行步骤来解决这个问题。

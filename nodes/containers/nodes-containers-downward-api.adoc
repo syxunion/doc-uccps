@@ -1,0 +1,42 @@
+:_content-type: ASSEMBLY
+:context: nodes-containers-downward-api
+[id="nodes-containers-downward-api"]
+= 允许容器消耗 API 对象
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+
+Downward API 是一种允许容器消耗 API 对象的相关信息且不与 统信容器云管理平台 耦合的机制。此类信息包括 pod 的名称、命名空间和资源值。容器可以使用环境变量或卷插件来消耗来自 Downward API 的信息。
+
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-containers-downward-api-about.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-values.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-values-envars.adoc[leveloffset=+2]
+
+include::modules/nodes-containers-downward-api-container-values-plugin.adoc[leveloffset=+2]
+
+include::modules/nodes-containers-downward-api-container-resources.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-resources-envars.adoc[leveloffset=+2]
+
+include::modules/nodes-containers-downward-api-container-resources-plugin.adoc[leveloffset=+2]
+
+include::modules/nodes-containers-downward-api-container-secrets.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-configmaps.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-envars.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-downward-api-container-escaping.adoc[leveloffset=+1]

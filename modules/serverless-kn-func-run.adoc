@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * serverless/cli_tools/kn-func-ref.adoc
+// * serverless/functions/serverless-functions-getting-started.adoc
+
+:_content-type: REFERENCE
+[id="serverless-kn-func-run_{context}"]
+= 在本地运行一个函数
+
+您可以使用 `kn func run` 命令在当前目录中本地运行函数，或者在 `--path` 标志指定的目录中运行。如果您运行的函数之前没有被构建，或者项目文件自上次构建以来已修改过， `kn func run` 命令将在运行它前构建该函数。
+
+.在当前目录中运行函数的命令示例
+[source,terminal]
+----
+$ kn func run
+----
+
+.在指定为路径的目录中运行函数的示例
+[source,terminal]
+----
+$ kn func run --path=<directory_path>
+----
+
+您也可以在运行该函数前强制重建现有镜像，即使项目文件没有更改项目文件，则使用 `--build` 标志：
+
+.使用 build 标记的 run 命令示例
+[source,terminal]
+----
+$ kn func run --build
+----
+
+如果将 `build` 标志设置为 false，这将禁用构建镜像，并使用之前构建的镜像运行该功能：
+
+.使用 build 标记的 run 命令示例
+[source,terminal]
+----
+$ kn func run --build=false
+----
+
+您可以使用 help 命令了解更多有关 `kn func run` 命令选项的信息：
+
+.构建 help 命令
+[source,terminal]
+----
+$ kn func help run
+----

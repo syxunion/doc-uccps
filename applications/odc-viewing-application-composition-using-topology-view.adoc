@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="odc-viewing-application-composition-using-topology-view"]
+= 使用拓扑视图查看应用程序组成情况
+include::_attributes/common-attributes.adoc[]
+:context: viewing-application-composition-using-topology-view
+
+toc::[]
+
+Web 控制台的 *开发者* 视角中有一个 *拓扑* 视图，它以可视化方式展示项目中的所有应用程序、它们的构建状态，以及关联的组件和服务。
+
+== 先决条件
+要在 *拓扑* 视图中查看应用程序并与之交互，请确保：
+
+* 已登陆到 web 控制台。
+* 处于 *开发者* 视角。
+* 在项目中拥有适当的角色和权限，可在 统信容器云管理平台 中创建应用程序和其他工作负载。
+* 您已使用 *开发者* 视角在 统信容器云管理平台 上创建并部署了应用程序。
+
+include::modules/odc-viewing-application-topology.adoc[leveloffset=+1]
+
+include::modules/odc-interacting-with-applications-and-components.adoc[leveloffset=+1]
+
+include::modules/odc-scaling-application-pods-and-checking-builds-and-routes.adoc[leveloffset=+1]
+
+include::modules/odc-adding-components-to-an-existing-project.adoc[leveloffset=+1]
+
+include::modules/odc-grouping-multiple-components.adoc[leveloffset=+1]
+
+include::modules/odc-adding-services-to-application.adoc[leveloffset=+1]
+
+include::modules/odc-removing-services-from-application.adoc[leveloffset=+1]
+
+include::modules/odc-labels-and-annotations-used-for-topology-view.adoc[leveloffset=+1]

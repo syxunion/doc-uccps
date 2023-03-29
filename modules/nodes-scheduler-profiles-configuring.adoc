@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-profiles.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-profiles-configuring_{context}"]
+= 配置调度程序配置集
+
+您可以将调度程序配置为使用调度程序配置集。
+
+.先决条件
+
+* 使用具有  `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 编辑 `Scheduler` 对象：
++
+[source,terminal]
+----
+$ oc edit scheduler cluster
+----
+
+. 指定在 `spec.profile` 字段中使用的配置集：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  ...
+  name: cluster
+  resourceVersion: "601"
+  selfLink: /apis/config.openshift.io/v1/schedulers/cluster
+  uid: b351d6d0-d06f-4a99-a26b-87af62e79f59
+spec:
+  mastersSchedulable: false
+  profile: HighNodeUtilization <1>
+----
+<1> 设置为 `LowNodeUtilization`, `HighNodeUtilization`, 或 `NoScoring`.
+
+. 保存文件以使改变生效。

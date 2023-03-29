@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent_storage-cinder.adoc
+
+[id="persistent-storage-cinder-provisioning_{context}"]
+= 使用 Cinder 手动置备
+
+当存储可以被挂载为统信容器云管理平台中的卷之前，它必须已存在于底层的存储系统中。
+
+.先决条件
+
+* 为 UnionTech UStack Platform（有栈）配置 统信容器云管理平台
+* Cinder 卷 ID

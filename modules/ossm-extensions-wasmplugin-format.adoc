@@ -1,0 +1,15 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: REFERENCE
+[id="ossm-extensions-wasmplugin-format_{context}"]
+= `WasmPlugin` container format
+
+Istio 在其 Wasm Plugin 机制中支持 OCI（Open Container Initiative） 镜像。您可以将 Wasm 插件分发为容器镜像，您可以使用`spec.url` 字段来引用容器 registry 位置。例如： `quay.io/my-username/my-plugin:latest`。
+
+因为 WASM 模块的每个执行环境(runtime)都可以有特定于运行时的配置参数，因此 WASM 镜像由两个层组成：
+
+* *plugin.wasm* 必需）- 内容层。这个层包含一个包含 WebAssembly 模块字节码的 `.wasm` 二进制文件，它由运行时加载。您必须将此文件命名为 `plugin.wasm`.
+
+* *runtime-config.json* （可选）- 配置层。这个层包含一个 JSON 格式的字符串，用于描述目标运行时模块的元数据。根据目标运行时，配置层也可以包含其他数据。例如，WASM Envoy Filter 的配置包含过滤器上的 root_ids。

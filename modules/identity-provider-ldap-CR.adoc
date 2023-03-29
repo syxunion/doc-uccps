@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+
+[id="identity-provider-ldap-CR_{context}"]
+= LDAP CR 示例
+
+以下自定义资源 (CR) 显示 LDAP 身份提供程序的参数和可接受值。
+
+.LDAP CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: ldapidp <1>
+    mappingMethod: claim <2>
+    type: LDAP
+    ldap:
+      attributes:
+        id: <3>
+        - dn
+        email: <4>
+        - mail
+        name: <5>
+        - cn
+        preferredUsername: <6>
+        - uid
+      bindDN: "" <7>
+      bindPassword: <8>
+        name: ldap-secret
+      ca: <9>
+        name: ca-config-map
+      insecure: false <10>
+      url: "ldap://ldap.example.com/ou=users,dc=acme,dc=com?uid" <11>
+----
+<1> 此提供程序名称作为前缀放在返回的用户 ID 前，以此组成身份名称。
+<2> 控制如何在此提供程序的身份和 User 对象之间建立映射。
+<3> 用作身份的属性列表。使用第一个非空属性。至少需要一个属性。如果列出的属性都没有值，身份验证会失败。定义属性按原样检索，允许使用二进制值。
+<4> 用作电子邮件地址的属的列表。使用第一个非空属性。
+<5> 用作显示名称的属性列表。使用第一个非空属性。
+<6> 为此身份置备用户时用作首选用户名的属性列表。使用第一个非空属性。
+<7> 在搜索阶段用来绑定的可选 DN。如果定义了 bindPassword，则必须设置此项。
+<8> 对包含绑定密码的统信容器云管理平台Secret 对象的可选引用。如果定义了 bindDN，则必须设置此项。
+<9> 可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台ConfigMap 的引用，以用于验证所配置 URL 的服务器证书。仅在 insecure 为 false 时使用。
+<10> 为 true 时，不会对服务器进行 TLS 连接。为 false 时，ldaps:// URL 使用 TLS 进行连接，并且 ldap:// URL 升级到 TLS。当使用 ldaps:// URL 时，此项必须设为 false，因为这些 URL 始终会尝试使用 TLS 进行连接。
+<11> RFC 2255 URL，指定要使用的 LDAP 主机和搜索参数。
+
+[注意]
+====
+要将用户列在 LDAP 集成的白名单中，请使用 `lookup`` 映射方法。在允许从 LDAP 登录前，集群管理员必须为每个 LDAP User 创建一个 `Identity` 对象和用户对象。
+====

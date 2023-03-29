@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="deleting-a-project-using-the-CLI_{context}"]
+= 使用 CLI 删除项目
+
+当您删除项目时，服务器会将项目状态从 *Active* 更新为 *Terminating*。在最终移除项目前，服务器会清除处于 *Terminating* 状态的项目中的所有内容。项目处于 *Terminating* 状态时，您无法将新的内容添加到这个项目中。
+
+.流程
+
+. 运行：
++
+[source,terminal]
+----
+$ oc delete project <project_name>
+----

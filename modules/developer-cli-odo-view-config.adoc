@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/configuring-the-odo-cli.adoc
+
+:_content-type: REFERENCE
+[id="developer-cli-odo-view-config_{context}"]
+= 查看当前配置
+
+您可以使用以下命令查看当前的 odo CLI 配置：
+
+[source,terminal]
+----
+$ odo preference view
+----
+
+.输出示例
+[source,terminal]
+----
+PARAMETER             CURRENT_VALUE
+UpdateNotification
+NamePrefix
+Timeout
+BuildTimeout
+PushTimeout
+Ephemeral
+ConsentTelemetry      true
+----

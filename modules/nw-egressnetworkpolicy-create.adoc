@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "openshift-sdn-egress-firewall"]
+:kind: EgressNetworkPolicy
+:obj: egressnetworkpolicy.network.openshift.io/v1
+:cni: OpenShift SDN
+endif::[]
+ifeval::["{context}" == "configuring-egress-firewall-ovn"]
+:kind: EgressFirewall
+:obj: egressfirewall.k8s.ovn.org/v1
+:cni: OVN-Kubernetes
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-create_{context}"]
+= 创建出口防火墙策略对象
+
+作为集群管理员，您可以为项目创建一个出口防火墙策略对象。
+
+[重要]
+====
+如果项目已经定义了一个 EgressNetworkPolicy 对象，您必须编辑现有的策略来更改出口防火墙规则。
+====
+
+.先决条件
+
+* 使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商插件的集群。
+* 安装 Uccp CLI (`oc`).
+* 您需要使用集群管理员身份登陆到集群。
+
+.流程
+
+. 创建策略规则：
+.. 创建一个 `<policy_name>.yaml` 文件，其中 `<policy_name>` 描述出口策略规则。
+.. 在您创建的文件中，定义出口策略对象。
+
+. 运行以下命令来创建策略对象。将 `<policy_name>` 替换为策略的名称， `<project>` 替换为规则应用到的项目。
++
+[source,terminal]
+----
+$ oc create -f <policy_name>.yaml -n <project>
+----
++
+在以下示例中，在名为 `project1` 的项目中创建一个新的 `EgressNetworkPolicy` 对象：
++
+[source,terminal]
+----
+$ oc create -f default.yaml -n project1
+----
++
+.输出示例
+[source,terminal,subs="attributes"]
+----
+{obj} created
+----
+
+. 可选：`保存 <policy_name>.yaml` 文件，以便在以后进行修改。
+
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::obj[]
+:!obj:
+endif::[]
+ifdef::cni[]
+:!cni:
+endif::[]

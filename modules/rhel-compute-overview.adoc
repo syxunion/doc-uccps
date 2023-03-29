@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="rhel-compute-overview_{context}"]
+= 关于在集群中添加 UOS 计算节点
+
+在 统信容器云管理平台 1.2 中，如果在 x86_64 构架中使用用户置备的基础架构安装，您可以选择将 UnionTech OS Server 20(UOS20)机器用作集群中的计算机器。您必须将 UnionTech OS Cloud 20(USwift)机器用于集群中的 control plane 机器。
+
+如果您选择在集群中使用 UOS 计算机器，则负责所有操作系统生命周期管理和维护。您必须执行系统更新、应用补丁并完成所有其他必要的任务。
+
+[重要]
+====
+* 由于从集群中的机器上删除 统信容器云管理平台 需要破坏操作系统，因此您必须对添加到集群中的所有 UOS 机器使用专用的硬件。
+
+* 添加到 统信容器云管理平台 集群的所有 UOS 机器上都禁用内存交换功能。您无法在这些机器上启用交换内存。
+====
+
+您必须在初始化 control plane 之后将所有 UOS 计算机器添加到集群。

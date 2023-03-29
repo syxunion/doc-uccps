@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="viewing-a-project-using-the-web-console_{context}"]
+= 使用 Web 控制台查看项目
+
+.流程
+
+. 浏览至 *主页* -> *项目*.
+
+. 选择要查看的项目。
++
+在本页中，点击 *工作负载* 以查看项目中的工作负载。

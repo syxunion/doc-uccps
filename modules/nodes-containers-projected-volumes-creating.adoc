@@ -1,0 +1,229 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-projected-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-projected-volumes-creating_{context}"]
+= 为 Pod 配置投射卷
+
+在创建投射卷时，请注意了解投射卷中介绍的卷文件路径情况。
+
+以下示例演示了如何使用投射卷挂载现有的 secret 卷源。可以使用这些步骤从本地文件创建用户名和密码 secret。然后，创建一个只运行一个容器的 pod，使用投射卷将 secret 挂载到同一个共享目录中。
+
+.流程
+
+使用投射卷挂载现有的 secret 卷源。
+
+. 输入以下内容并相应地替换密码和用户信息，创建包含这些 secret 的文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  pass: MWYyZDFlMmU2N2Rm
+  user: YWRtaW4=
+----
++
+user 和 pass 值可以是采用 *base64* 编码的任意有效字符串。
++
+以下示例显示 admin（base64 编码）:
++
+[source,terminal]
+----
+$ echo -n "admin" | base64
+----
++
+.输出示例
+[source,terminal]
+----
+YWRtaW4=
+----
++
+以下示例显示 `1f2d1e2e67df` 密码（base64 编码）：
++
+[source,terminal]
+----
+$ echo -n "1f2d1e2e67df" | base64
+----
++
+.输出示例
+[source,terminal]
+----
+MWYyZDFlMmU2N2Rm
+----
+
+. 使用以下命令来创建 `secret`：
++
+[source,terminal]
+----
+$ oc create -f <secrets-filename>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f secret.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+secret "mysecret" created
+----
+
+. 您可以使用以下命令来检查是否创建了 `secret`：
++
+[source,terminal]
+----
+$ oc get secret <secret-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get secret mysecret
+----
++
+.输出示例
+[source,terminal]
+----
+NAME       TYPE      DATA      AGE
+mysecret   Opaque    2         17h
+----
++
+[source,terminal]
+----
+$ oc get secret <secret-name> -o yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get secret mysecret -o yaml
+----
++
+[source,yaml]
+----
+apiVersion: v1
+data:
+  pass: MWYyZDFlMmU2N2Rm
+  user: YWRtaW4=
+kind: Secret
+metadata:
+  creationTimestamp: 2017-05-30T20:21:38Z
+  name: mysecret
+  namespace: default
+  resourceVersion: "2107"
+  selfLink: /api/v1/namespaces/default/secrets/mysecret
+  uid: 959e0424-4575-11e7-9f97-fa163e4bd54c
+type: Opaque
+----
+
+. 创建类似以下示例的 pod 配置文件，使其包含 `volumes` 部分：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-projected-volume
+spec:
+  containers:
+  - name: test-projected-volume
+    image: busybox
+    args:
+    - sleep
+    - "86400"
+    volumeMounts:
+    - name: all-in-one
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: all-in-one
+    projected:
+      sources:
+      - secret:      <1>
+          name: user
+      - secret:      <1>
+          name: pass
+----
+<1> 您创建的 `secret` 的名称。
+
+. 从配置文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f <your_yaml_file>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f secret-pod.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+pod "test-projected-volume" created
+----
+
+. 验证 `pod` 容器是否在运行，然后留意 pod 的更改：
++
+[source,terminal]
+----
+$ oc get pod <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get pod test-projected-volume
+----
++
+输出结果应该类似以下示例：
++
+.输出示例
+[source,terminal]
+----
+NAME                    READY     STATUS    RESTARTS   AGE
+test-projected-volume   1/1       Running   0          14s
+----
+
+. 在另一个终端中，使用 `oc exec` 命令来打开连接到运行中容器的 shell：
++
+[source,terminal]
+----
+$ oc exec -it <pod> <command>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc exec -it test-projected-volume -- /bin/sh
+----
+
+. 在 shell 中，验证 `projected-volumes` 目录是否包含您的投射源：
++
+[source,terminal]
+----
+/ # ls
+----
++
+.输出示例
+[source,terminal]
+----
+bin               home              root              tmp
+dev               proc              run               usr
+etc               projected-volume  sys               var
+----

@@ -1,0 +1,93 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-managing.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-managing-about_{context}"]
+= 修改节点
+
+要对集群或机器池进行配置更改，您必须创建自定义资源定义（CRD）或  `kubeletConfig` 对象。统信容器云管理平台 使用 Machine Config Controller 来监控是否通过 CRD 进行了更改，以将更改应用到集群。
+
+[注意]
+====
+因为 `kubeletConfig` 对象中的字段直接从上游 Kubernetes 传递给 kubelet，所以对这些字段的验证直接由 kubelet 本身处理。有关这些字段的有效值，请参阅相关的 Kubernetes 文档。kubeletConfig 对象中的无效值可能会导致集群节点不可用。
+====
+
+.流程
+
+. 为您要配置的节点类型，获取与静态 CRD (Machine Config Pool) 关联的标签。执行以下步骤之一：
+
+.. 检查所需机器配置池的当前标签。
++
+例如：
++
+[source,terminal]
+----
+$  oc get machineconfigpool  --show-labels
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      CONFIG                                             UPDATED   UPDATING   DEGRADED   LABELS
+master    rendered-master-e05b81f5ca4db1d249a1bf32f9ec24fd   True      False      False      operator.machineconfiguration.openshift.io/required-for-upgrade=
+worker    rendered-worker-f50e78e1bc06d8e82327763145bfcf62   True      False      False
+----
+
+.. 为所需的机器配置池添加自定义标签。
++
+例如：
++
+[source,terminal]
+----
+$ oc label machineconfigpool worker custom-kubelet=enabled
+----
+
+
+. 为您的配置更改创建一个 `kubeletconfig` 自定义资源（CR）。
++
+例如：
++
+.*custom-config* CR 配置示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: custom-config <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: enabled <2>
+  kubeletConfig: <3>
+    podsPerCore: 10
+    maxPods: 250
+    systemReserved:
+      cpu: 2000m
+      memory: 1Gi
+----
+<1> 为 CR 分配一个名称。
+<2> 指定要应用配置更改的标签，这是您添加到机器配置池中的标签。
+<3> 指定要更改的新值。
+
+. 创建 CR 对象。
++
+[source,terminal]
+----
+$ oc create -f <file-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f master-kube-config.yaml
+----
+
+大多数 Kubelet 配置选项 可由用户设置。不允许覆盖下列选项：
+
+* CgroupDriver
+* ClusterDNS
+* ClusterDomain
+* RuntimeRequestTimeout
+* StaticPodPath

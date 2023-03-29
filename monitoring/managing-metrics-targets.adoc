@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="managing-metrics-targets"]
+= 管理指标目标
+include::_attributes/common-attributes.adoc[]
+:context: managing-metrics-targets
+
+toc::[]
+
+统信容器云管理平台 Monitoring 通过从公开服务端点中提取数据从目标集群组件中收集指标。
+
+在 统信容器云管理平台 Web 控制台的  *Administrator* 视角中，您可以使用 *Metrics Targets*  页面查看、搜索和过滤当前用于提取的端点，这有助于识别和排除问题。例如，您可以查看目标端点的当前状态，以查看 统信容器云管理平台 Monitoring 无法从目标组件中提取指标。
+
+*Metrics Targets*　页面显示默认 统信容器云管理平台 项目和用户定义的项目的目标。
+
+// Accessing the Metrics Targets UI in the Administrator perspective
+include::modules/monitoring-accessing-the-metrics-targets-page.adoc[leveloffset=+1]
+
+// Searching and filtering metrics targets
+include::modules/monitoring-searching-and-filtering-metrics-targets.adoc[leveloffset=+1]
+
+// Getting detailed information about metrics targets
+include::modules/monitoring-getting-detailed-information-about-a-target.adoc[leveloffset=+1]
+
+== Next steps
+
+* xref:../monitoring/managing-alerts.adoc#managing-alerts[管理警报]

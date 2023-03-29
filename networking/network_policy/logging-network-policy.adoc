@@ -1,0 +1,45 @@
+:_content-type: ASSEMBLY
+[id="logging-network-policy"]
+= 记录网络策略事件
+include::_attributes/common-attributes.adoc[]
+:context: logging-network-policy
+
+toc::[]
+
+作为集群管理员，您可以为集群配置网络策略审计日志记录，并为一个或多个命名空间启用日志记录。
+
+[注意]
+====
+网络策略的审计日志记录仅适用于 OVN-Kubernetes 集群网络供应商。.
+====
+
+include::modules/nw-networkpolicy-audit-concept.adoc[leveloffset=+1]
+
+== 网络策略审计配置
+
+审计日志记录的配置作为 OVN-Kubernetes 集群网络配置的一部分指定。以下 YAML 演示了网络策略审计日志记录功能的默认值。
+
+.审计日志记录配置
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  defaultNetwork:
+    ovnKubernetesConfig:
+      policyAuditConfig:
+        destination: "null"
+        maxFileSize: 50
+        rateLimit: 20
+        syslogFacility: local0
+----
+
+下表描述了网络策略审计日志记录的配置字段。
+
+include::modules/nw-operator-cr.adoc[tag=policy-audit]
+
+include::modules/nw-networkpolicy-audit-configure.adoc[leveloffset=+1]
+include::modules/nw-networkpolicy-audit-enable.adoc[leveloffset=+1]
+include::modules/nw-networkpolicy-audit-disable.adoc[leveloffset=+1]

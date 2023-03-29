@@ -1,0 +1,130 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-configure.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-resource-configure-oom_{context}"]
+= 了解 OOM 终止策略
+
+如果容器中所有进程的内存总用量超过内存限制，或者在严重的节点内存耗尽情形下，统信容器云管理平台 可以终止容器中的某个进程。
+
+当进程超出内存（OOM）终止时，这可能会导致容器立即退出。如果容器 PID 1 进程收到 *SIGKILL* ，则容器会立即退出。否则，容器行为将取决于其他进程的行为。
+
+例如，某个容器进程以代码 137 退出，这表示它收到了 SIGKILL 信号。
+
+如果容器没有立即退出，则能够检测到 OOM 终止，如下所示：
+
+. 使用远程 shell 访问 pod：
++
+[source,terminal]
+----
+# oc rsh test
+----
+
+. 运行以下命令，查看 `/sys/fs/cgroup/memory/memory.oom_control` 中的当前 OOM 终止计数：
++
+[source,terminal]
+----
+$ grep '^oom_kill ' /sys/fs/cgroup/memory/memory.oom_control
+oom_kill 0
+----
+
+. 运行以下命令来引发一个 OOM kill：
++
+[source,terminal]
+----
+$ sed -e '' </dev/zero 
+----
++
+.输出示例
+[source,terminal]
+----
+Killed
+----
+
+. 运行以下命令查看 sed 命令的退出状态：
++
+[source,terminal]
+----
+$ echo $?
+----
++
+.输出示例
+[source,terminal]
+----
+137
+----
++
+例如，137 代表容器进程以代码 137 退出，这表示它收到了 SIGKILL 信号。
+
+. 运行以下命令，查看 `/sys/fs/cgroup/memory/memory.oom_control` 中的 OOM 终止计数器：
++
+[source,terminal]
+----
+$ grep '^oom_kill ' /sys/fs/cgroup/memory/memory.oom_control
+oom_kill 1
+----
++
+如果 pod 中的一个或多个进程遭遇 OOM 终止，那么当 pod 随后退出时（不论是否立即发生），它都将会具有原因为 *OOMKilled*　的 *Failed* 阶段。被 OOM 终止的 pod 可能会根据 restartPolicy 的值重启。如果不重启，复制控制器等控制器会看到 pod 的失败状态，并创建一个新 pod 来替换旧 pod。
++
+使用以下命令获取 pod 状态：
++
+[source,terminal]
+----
+$ oc get pod test
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      READY     STATUS      RESTARTS   AGE
+test      0/1       OOMKilled   0          1m
+----
+
+* 如果 pod 没有重启，请运行以下命令来查看 pod:
++
+[source,terminal]
+----
+$ oc get pod test -o yaml
+----
++
+.输出示例
+[source,terminal]
+----
+...
+status:
+  containerStatuses:
+  - name: test
+    ready: false
+    restartCount: 0
+    state:
+      terminated:
+        exitCode: 137
+        reason: OOMKilled
+  phase: Failed
+----
+
+* 如果重启，运行以下命令来查看 pod:
++
+[source,terminal]
+----
+$ oc get pod test -o yaml
+----
++
+.输出示例
+[source,terminal]
+----
+...
+status:
+  containerStatuses:
+  - name: test
+    ready: true
+    restartCount: 1
+    lastState:
+      terminated:
+        exitCode: 137
+        reason: OOMKilled
+    state:
+      running:
+  phase: Running
+----

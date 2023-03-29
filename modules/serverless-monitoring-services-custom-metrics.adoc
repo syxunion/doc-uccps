@@ -1,0 +1,78 @@
+// Module is included in the following assemblies:
+//
+// * /serverless/monitor/serverless-developer-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-monitoring-services-custom-metrics_{context}"]
+= 带有自定义应用程序指标的 Knative 服务
+
+您可以扩展 Knative 服务导出的指标集合。具体的实施取决于您的应用和使用的语言。
+
+以下列表实施了一个 Go 应用示例，它导出处理的事件计数自定义指标。
+
+[source,go]
+----
+package main
+
+import (
+  "fmt"
+  "log"
+  "net/http"
+  "os"
+
+  "github.com/prometheus/client_golang/prometheus" <1>
+  "github.com/prometheus/client_golang/prometheus/promauto"
+  "github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+  opsProcessed = promauto.NewCounter(prometheus.CounterOpts{ <2>
+     Name: "myapp_processed_ops_total",
+     Help: "The total number of processed events",
+  })
+)
+
+
+func handler(w http.ResponseWriter, r *http.Request) {
+  log.Print("helloworld: received a request")
+  target := os.Getenv("TARGET")
+  if target == "" {
+     target = "World"
+  }
+  fmt.Fprintf(w, "Hello %s!\n", target)
+  opsProcessed.Inc() <3>
+}
+
+func main() {
+  log.Print("helloworld: starting server...")
+
+  port := os.Getenv("PORT")
+  if port == "" {
+     port = "8080"
+  }
+
+  http.HandleFunc("/", handler)
+
+  // Separate server for metrics requests
+  go func() { <4>
+     mux := http.NewServeMux()
+     server := &http.Server{
+        Addr: fmt.Sprintf(":%s", "9095"),
+        Handler: mux,
+     }
+     mux.Handle("/metrics", promhttp.Handler())
+     log.Printf("prometheus: listening on port %s", 9095)
+     log.Fatal(server.ListenAndServe())
+  }()
+
+   // Use same port as normal requests for metrics
+  //http.Handle("/metrics", promhttp.Handler()) <5>
+  log.Printf("helloworld: listening on port %s", port)
+  log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+}
+----
+<1> 包含 Prometheus 软件包。
+<2> 定义 `opsProcessed` 指标。
+<3> 递增 `opsProcessed` 指标。
+<4> 将配置为将单独的服务器用于指标请求.
+<5> 将配置为使用与指标和指标子路径正常请求相同的端口。

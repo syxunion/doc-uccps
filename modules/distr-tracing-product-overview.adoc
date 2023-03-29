@@ -1,0 +1,27 @@
+////
+This module included in the following assemblies:
+-service_mesh/v2x/ossm-architecture.adoc
+- distributed-tracing-release-notes.adoc
+-distr_tracing_arch/distr-tracing-architecture.adoc
+-serverless/serverless-tracing.adoc
+////
+
+:_content-type: CONCEPT
+[id="distr-tracing-product-overview_{context}"]
+= 分布式追踪概述
+
+作为服务所有者，您可以使用分布式追踪来检测您的服务，以收集与服务架构相关的信息。
+您可以使用分布式追踪来监控、网络性能分析，并对现代、云原生的基于微服务的应用中组件之间的交互进行故障排除。
+
+通过 {DTShortName} ，您可以执行以下功能：
+
+* 监控分布式事务
+
+* 优化性能和延迟时间
+
+* 执行根原因分析
+
+统信容器云管理平台分布式追踪主要组件：
+
+* *统信容器云管理平台分布式追踪集群* - 此组件基于开源 link:https://www.jaegertracing.io/[Jaeger 项目].
+

@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+//* builds/build-strategies.adoc
+// * openshift_images/create-images.adoc
+
+:_content-type: CONCEPT
+[id="images-create-s2i-build_{context}"]
+= 了解 source-to-image 构建过程
+
+构建过程包含以下三个基本元素，这些元素组合成最终的容器镜像：
+
+* 源
+* Source-to-image (S2I) scripts
+* 构建器镜像
+
+S2I 生成带有构建器镜像的 Dockerfile 作为第一个 `FROM` 指令。然后，由 S2I 生成的 Dockerfile 会被传递给 Buildah。

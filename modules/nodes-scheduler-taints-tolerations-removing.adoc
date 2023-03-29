@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-taints-tolerations.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-taints-tolerations-removing_{context}"]
+= 删除污点和容限
+
+您可以根据需要，从节点移除污点并从 pod 移除容限。您应首先将容限添加到 pod，然后将污点添加到节点，以避免在添加容限前从节点上移除 pod。
+
+.流程
+
+移除污点和容限：
+
+. 从节点移除污点：
++
+[source,terminal]
+----
+$ oc adm taint nodes <node-name> <key>-
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc adm taint nodes ip-10-0-132-248.ec2.internal key1-
+----
++
+.输出示例
+[source,terminal]
+----
+node/ip-10-0-132-248.ec2.internal untainted
+----
+
+. 要从 pod 移除某一容限，请编辑 Pod 规格来移除该容限：
++
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key2"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 3600
+----

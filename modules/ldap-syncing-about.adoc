@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: CONCEPT
+[id="ldap-syncing-about_{context}"]
+= 关于配置 LDAP 同步
+
+在运行 LDAP 同步之前，您需要有一个同步配置文件。此文件包含以下 LDAP 客户端配置详情：
+
+* 用于连接 LDAP 服务器的配置。
+* 依赖于您的 LDAP 服务器中所用模式的同步配置选项。
+* 管理员定义的名称映射列表，用于将统信容器云管理平台组名称映射到 LDAP 服务器中的组。
+
+配置文件的格式取决于您使用的模式，即 RFC 2307、Active Directory 或增强 Active Directory。
+
+[[ldap-client-configuration]]
+LDAP 客户端配置::
+
+配置中的 LDAP 客户端配置部分定义与 LDAP 服务器的连接。
+
+
+.LDAP 客户端配置
+[source,yaml]
+----
+url: ldap://10.0.0.0:389 <1>
+bindDN: cn=admin,dc=example,dc=com <2>
+bindPassword: password <3>
+insecure: false <4>
+ca: my-ldap-ca-bundle.crt <5>
+----
+<1> 连接协议、托管数据库的 LDAP 服务器的 IP 地址以及要连接的端口，格式为 `scheme://host:port`。
+<2> 可选的可分辨名称 (DN)，用作绑定 DN。如果需要升级特权才能检索同步操作的条目，统信容器云管理平台 会使用此项。
+<3> 用于绑定的可选密码。如果需要升级特权才能检索同步操作的条目，统信容器云管理平台 会使用此项。此值也可在环境变量、外部文件或加密文件中提供。
+<4> 为 `false` 时，安全 LDAP ldaps:// URL 使用 TLS 进行连接，并且不安全 LDAP ldap:// URL 会被升级到 TLS。为 true 时，不会对服务器进行 TLS 连接，您不能使用 ldaps:// URL。
+<5> 用于验证所配置 URL 的服务器证书的证书捆绑包。如果为空，统信容器云管理平台 将使用系统信任的根证书。只有 `insecure` 设为 false 时才会应用此项。
+
+[[ldap-query-definition]]
+LDAP 查询定义::
+同步配置由用于同步所需条目的 LDAP 查询定义组成。LDAP 查询的具体定义取决于用来在 LDAP 服务器中存储成员资格信息的模式。
+
+.LDAP 查询定义
+[source,yaml]
+----
+baseDN: ou=users,dc=example,dc=com <1>
+scope: sub <2>
+derefAliases: never <3>
+timeout: 0 <4>
+filter: (objectClass=person) <5>
+pageSize: 0 <6>
+----
+<1> 所有搜索都应从其中开始的目录分支的可分辨名称 (DN)。您需要指定目录树的顶端，但也可以指定目录中的子树。
+<2> 搜索的范围。有效值为 base、one 或 sub。如果未定义，则假定为 sub 范围。下表中可找到范围选项的描述。
+<3> 与 LDAP 树中别名相关的搜索行为。有效值是 `never`、`search`、`base` 或 `always`。如果未定义，则默认为 `always`` 解引用别名。下表中可找到有关解引用行为的描述。
+<4> 客户端可进行搜索的时间限值（`以秒为单位`）。0 代表不实施客户端限制。`
+<5> 有效的 LDAP 搜索过滤器。如果未定义，则默认为 (`objectClass=*``)。
+<6> 服务器响应页面大小的可选最大值，以 LDAP 条目数衡量。如果设为 0，则不对响应页面实施大小限制。当查询返回的条目数量多于客户端或服务器默认允许的数量时，需要设置分页大小。
+
+[[ldap-search]]
+.LDAP 搜索范围选项
+[cols="2a,8a",options="header"]
+|===
+|LDAP 搜索范围 | 描述
+.^|`base`          | 仅考虑通过为查询给定的基本 DN 指定的对象。
+.^|`one`           | 考虑作为查询的基本 DN 的树中同一级上的所有对象。
+the query.
+.^|`sub`           | 考虑根部是为查询给定的基本 DN 的整个子树。
+|===
+
+[[deref-aliases]]
+.LDAP 解引用行为
+[cols="2a,8a",options="header"]
+|===
+|解引用行为 | 描述
+.^|`never`              | 从不解引用 LDAP 树中找到的任何别名。
+.^|`search`             | 仅解引用搜索时找到的别名。
+.^|`base`               | 仅在查找基本对象时解引用别名。
+.^|`always`             | 始终解引用 LDAP 树中找到的所有别名。
+|===
+
+[[user-defined-name-mapping]]
+用户定义的名称映射::
+用户定义的名称映射明确将统信容器云管理平台组的名称映射到可在 LDAP 服务器上找到组的唯一标识符。映射使用普通 YAML 语法。用户定义的映射可为 LDAP 服务器中每个组包含一个条目，或者仅包含这些组的一个子集。如果 LDAP 服务器上的组没有用户定义的名称映射，同步过程中的默认行为是使用指定为统信容器云管理平台组名称的属性。
+
+.用户定义的名称映射
+[source,yaml]
+----
+groupUIDNameMapping:
+  "cn=group1,ou=groups,dc=example,dc=com": firstgroup
+  "cn=group2,ou=groups,dc=example,dc=com": secondgroup
+  "cn=group3,ou=groups,dc=example,dc=com": thirdgroup
+----

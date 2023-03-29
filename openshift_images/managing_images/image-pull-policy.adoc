@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="image-pull-policy"]
+= 镜像拉取（pull）策略
+include::_attributes/common-attributes.adoc[]
+:context: image-pull-policy
+
+toc::[]
+
+Pod 中的每个容器均有容器镜像。在创建了镜像并将其推送（push）到 registry 后，即可在 Pod 中引用它。
+
+include::modules/images-image-pull-policy-overview.adoc[leveloffset=+1]

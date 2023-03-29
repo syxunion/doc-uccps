@@ -1,0 +1,180 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-allowed_{context}"]
+= 添加特定的 registry
+
+您可以通过编辑 image.config.openshift.io/cluster 自定义资源（CR）在 registry 中添加允许进行镜像拉取（pull）和推送（push）操作的 registry 列表（可选）。统信容器云管理平台 会将对此 CR 的更改应用到集群中的所有节点。
+
+在拉取或推送镜像时，容器运行时会搜索 image.config.openshift.io/cluster CR 的 registrySources 参数中列出的 registry。如果您在 allowedRegistries 参数下创建了 registry 列表，则容器运行时仅搜索这些 registry。不在列表中的 registry 会被阻断。
+
+[警告]
+====
+当定义 `allowedRegistries` 参数时，除非明确列出，否则所有 registry（包括 `registry.redhat.io` 和 `quay.io registry` 和默认的内部镜像 registry）都会被阻断。如果使用参数，为了避免 pod 失败，您必须将 `registry.redhat.io` 和 `quay.io registry` 以及 `internalRegistryHostname` 添加到 `allowedRegistries` 列表中，因为环境中有效负载镜像需要它们。对于断开连接的集群，还应添加镜像的 registry。
+====
+
+.流程
+
+. 编辑`image.config.openshift.io/cluster` CR:
++
+[source,terminal]
+----
+$ oc edit image.config.openshift.io/cluster
+----
++
+以下是一个带有允许列表的 `image.config.openshift.io/cluster` CR 示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Image
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2019-05-17T13:44:26Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "8302"
+  selfLink: /apis/config.openshift.io/v1/images/cluster
+  uid: e34555da-78a9-11e9-b92b-06d6c7da38dc
+spec:
+  registrySources: <1>
+    allowedRegistries: <2>
+    - example.com
+    - quay.io
+    - registry.redhat.io
+    - reg1.io/myrepo/myapp:latest
+    - image-registry.openshift-image-registry.svc:5000
+status:
+  internalRegistryHostname: image-registry.openshift-image-registry.svc:5000
+----
+<1> 包含用于决定容器运行时在访问构建和 pod 的镜像时应如何处理个别 registry 的配置。它不包含内部集群 registry 的配置。
+<2> 指定 registry 以及该 registry 中的存储库（可选）用于镜像拉取（pull）和推送（push）操作。阻止所有其他 registry。
++
+[注意]
+====
+可以设置 `allowedRegistries` 参数或 `blockedRegistries` 参数，但不能同时设置这两个参数。
+====
++
+Machine Config Operator（MCO）会监控 `image.config.openshift.io/cluster` 资源以了解对 registry 的任何更改。当 MCO 检测到更改时，它会排空节点，应用更改，并对节点进行 uncordon 处理。节点返回 Ready 状态后，允许的 registry 列表用于更新每个节点上的 `/host/etc/containers/policy.json` 文件中的镜像签名策略。
+
+. 要检查 registry 是否已添加到策略文件中，请在节点上使用以下命令：
++
+[source,terminal]
+----
+$ cat /host/etc/containers/policy.json
+----
++
+以下策略表示，仅允许来自 example.com、quay.io 和 registry.redhat.io registry 中的镜像拉取和推送镜像：
++
+.镜像签名策略文件示例
+[%collapsible]
+====
+[source,terminal]
+----
+{
+   "default":[
+      {
+         "type":"reject"
+      }
+   ],
+   "transports":{
+      "atomic":{
+         "example.com":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "image-registry.openshift-image-registry.svc:5000":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "insecure.com":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "quay.io":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "reg4.io/myrepo/myapp:latest":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "registry.redhat.io":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ]
+      },
+      "docker":{
+         "example.com":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "image-registry.openshift-image-registry.svc:5000":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "insecure.com":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "quay.io":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "reg4.io/myrepo/myapp:latest":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ],
+         "registry.redhat.io":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ]
+      },
+      "docker-daemon":{
+         "":[
+            {
+               "type":"insecureAcceptAnything"
+            }
+         ]
+      }
+   }
+}
+----
+====
+
+[注意]
+====
+如果您的集群使用 `registrySources.insecureRegistries` 参数，请确保将任何不安全的 registry 包含在允许的列表中。
+
+例如：
+
+[source,yml]
+----
+spec:
+  registrySources:
+    insecureRegistries:
+    - insecure.com
+    allowedRegistries:
+    - example.com
+    - quay.io
+    - registry.redhat.io
+    - insecure.com
+    - image-registry.openshift-image-registry.svc:5000
+----
+====

@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// storage/understanding-persistent-storage.adoc[leveloffset=+1]
+
+[id=storage-ephemeral-storage-monitoring_{context}]
+= 监控临时存储
+
+您可以使用 `/bin/df` 作为监控临时容器数据所在卷的临时存储使用情况的工具，即 `/var/lib/kubelet` 和 `/var/lib/containers`。如果集群管理员将 `/var/lib/containers` 放置在单独的磁盘上，则可以使用 df 命令来显示 `/var/lib/kubelet` 的可用空间。
+
+要在 `/var/lib` 中显示已用和可用空间的信息，请输入以下命令：
+
+[source,terminal]
+----
+$ df -h /var/lib
+----
+
+输出显示 `/var/lib` 中的临时存储使用情况：
+
+.输出示例
+[source,terminal]
+----
+Filesystem  Size  Used Avail Use% Mounted on
+/dev/sda1    69G   32G   34G  49% /
+----

@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/default-network-policy.adoc
+// * networking/configuring-networkpolicy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-project-defaults_{context}"]
+= 在新项目模板中添加网络策略
+
+作为集群管理员，您可以在新项目的默认模板中添加网络策略。统信容器云管理平台 将自动创建项目中模板中指定的所有 `NetworkPolicy` 对象。
+
+.先决条件
+
+* 集群使用支持 `NetworkPolicy` 对象的默认 CNI 网络供应商，如设置了 `mode: NetworkPolicy` 的 OpenShift SDN 网络供应商。此模式是 OpenShift SDN 的默认模式。
+* 已安装 Uccp CLI (`oc`).
+* 您需要使用具有 `cluster-admin` 权限的用户登陆到集群。
+* 您必须已为新项目创建了自定义的默认项目模板。
+
+.流程
+
+. 运行以下命令来编辑新项目的默认模板：
++
+[source,terminal]
+----
+$ oc edit template <project_template> -n openshift-config
+----
++
+将 `<project_template>` 替换为您为集群配置的缺省模板的名称。默认模板名称为 `project-request`。
+
+. 在模板中，将每个 `NetworkPolicy` 对象作为一个元素添加到 `objects` 参数中。`objects` 参数可以是一个或多个对象的集合。
++
+在以下示例中，`objects` 参数集合包括几个 `NetworkPolicy` 对象：
++
+[source,yaml]
+----
+objects:
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-same-namespace
+  spec:
+    podSelector: {}
+    ingress:
+    - from:
+      - podSelector: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-openshift-ingress
+  spec:
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            network.openshift.io/policy-group: ingress
+    podSelector: {}
+    policyTypes:
+    - Ingress
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-kube-apiserver-operator
+  spec:
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: openshift-kube-apiserver-operator
+        podSelector:
+          matchLabels:
+            app: kube-apiserver-operator
+    policyTypes:
+    - Ingress
+...
+----
+
+. 可选：通过运行以下命令创建一个新项目，来确认您的网络策略对象已被成功创建：
+
+.. 创建一个新项目
++
+[source,terminal]
+----
+$ oc new-project <project> <1>
+----
+<1> 将 `<project>` 替换为您要创建的项目的名称。
+
+.. 确认新项目模板中的网络策略对象存在于新项目中：
++
+[source,terminal]
+----
+$ oc get networkpolicy
+NAME                           POD-SELECTOR   AGE
+allow-from-openshift-ingress   <none>         7s
+allow-from-same-namespace      <none>         7s
+----

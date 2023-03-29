@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/extending-cli-plugins.adoc
+
+:_content-type: PROCEDURE
+[id="cli-writing-plugins_{context}"]
+= 编写CLI插件
+
+您可以使用任何可以编写命令行命令的编程语言或脚本为统信容器云管理平台 CLI编写插件。请注意，您不能使用插件来覆盖现有的oc命令。
+
+.流程
+
+此过程创建一个简单的Bash插件，它的功能是在执行oc foo命令时将消息输出到终端。
+
+. 创建一个名为 `oc-foo` 的文件。
++
+在命名插件文件时，请记住以下几点：
+
+* 文件必须以 `oc-` 或 `kubectl-` 开始。
+* 文件名决定了调用这个插件的命令。例如，`oc foo ba` 命令将会调用文件名为`oc-foo-bar` 的插件。如果希望命令中包含破折号，也可以使用下划线。例如，可以通过 `oc foo-bar` 命令调用文件名为 `oc-foo_bar` 的插件。
+
+. 将以下内容添加到该文件中。
++
+[source,bash]
+----
+#!/bin/bash
+
+# optional argument handling
+if [[ "$1" == "version" ]]
+then
+    echo "1.0.0"
+    exit 0
+fi
+
+# optional argument handling
+if [[ "$1" == "config" ]]
+then
+    echo $KUBECONFIG
+    exit 0
+fi
+
+echo "I am a plugin named kubectl-foo"
+----
+
+为统信容器云管理平台 CLI安装此插件后，可以使用 `oc foo` 命令调用它。
+
+[role="_additional-resources"]
+.其他资源
+
+* 查看 link:https://github.com/kubernetes/sample-cli-plugin[Sample plugin repository] 中使用 Go 编写的插件示例。
+* 查看 link:https://github.com/kubernetes/cli-runtime/[CLI runtime repository] 中的一组用来帮助使用 Go 编写插件的工具程序。

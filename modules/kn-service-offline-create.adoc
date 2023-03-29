@@ -1,0 +1,142 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+// * serverless/develop/serverless-applications.adoc
+
+:_content-type: PROCEDURE
+[id="creating-an-offline-service_{context}"]
+= 使用离线模式创建服务
+
+您可以在离线模式下执行 `kn service` 命令，以便集群中不会发生任何更改，而是在本地机器上创建服务描述符文件。创建描述符文件后，您可以在向集群传播更改前修改该文件。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 已安装 Knative  (`kn`) CLI.
+
+.流程
+
+. 在离线模式下，创建一个本地 Knative 服务描述符文件：
++
+[source,terminal]
+----
+$ kn service create event-display \
+    --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest \
+    --target ./ \
+    --namespace test
+----
++
+.输出示例
+[source,terminal]
+----
+Service 'event-display' created in namespace 'test'.
+----
++
+* `--target ./` 标志启用脱机模式，并将 `./` 指定为用于存储新目录树的目录。
+如果您没有指定现有目录，但使用文件名，如`--target my-service.yaml`，则不会创建目录树。相反，当前目录中只创建服务描述符 `my-service.yaml` 文件。
+文件名可以具有`.yaml`, `.yml`, 或 `.json` 扩展名。选择 .json 以 JSON 格式创建服务描述符文件。
+* `--namespace test` 选项将新服务放在 `test` 命名空间中。
+如果不使用 `--namespace`，且您登录到 统信容器云管理 集群，则会在当前命名空间中创建描述符文件。否则，描述符文件会在 `default` 命名空间中创建。
+
+. 检查创建的目录结构：
++
+[source,terminal]
+----
+$ tree ./
+----
++
+.输出示例
+[source,terminal]
+----
+./
+└── test
+    └── ksvc
+        └── event-display.yaml
+
+2 directories, 1 file
+----
++
+* 使用 --target 指定的当前 ./ 目录包含新的 test/ 目录，它在指定的命名空间后命名。
+* test/ 目录包含 ksvc，它在资源类型后命名。
+* ksvc 目录包含描述符文件 event-display.yaml，它根据指定的服务名称命名。
+
+. 检查生成的服务描述符文件：
++
+[source,terminal]
+----
+$ cat test/ksvc/event-display.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: event-display
+  namespace: test
+spec:
+  template:
+    metadata:
+      annotations:
+        client.knative.dev/user-image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+      creationTimestamp: null
+    spec:
+      containers:
+      - image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+        name: ""
+        resources: {}
+status: {}
+----
+
+. 列出新服务的信息：
++
+[source,terminal]
+----
+$ kn service describe event-display --target ./ --namespace test
+----
++
+.输出示例
+[source,terminal]
+----
+Name:       event-display
+Namespace:  test
+Age:
+URL:
+
+Revisions:
+
+Conditions:
+  OK TYPE    AGE REASON
+----
+
+* --target ./ 选项指定包含命名空间子目录的目录结构的根目录。另外，您可以使用 --target 选项直接指定 YAML 或 JSON 文件名。可接受的文件扩展包括 .yaml、.yml 和 .json。
++
+* --namespace 选项指定命名空间，与 kn 通信包含所需服务描述符文件的子目录。
++
+如果不使用 --namespace，并且您登录到 统信容器云管理平台 集群，kn 会在以当前命名空间命名的子目录中搜索该服务。否则，kn 在 default/ 子目录中搜索。
+
+. 使用服务描述符文件在集群中创建服务：
++
+[source,terminal]
+----
+$ kn service create -f test/ksvc/event-display.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+Creating service 'event-display' in namespace 'test':
+
+  0.058s The Route is still working to reflect the latest desired specification.
+  0.098s ...
+  0.168s Configuration "event-display" is waiting for a Revision to become ready.
+ 23.377s ...
+ 23.419s Ingress has not yet been reconciled.
+ 23.534s Waiting for load balancer to be ready
+ 23.723s Ready to serve.
+
+Service 'event-display' created to latest revision 'event-display-00001' is available at URL:
+http://event-display-test.apps.example.com
+----

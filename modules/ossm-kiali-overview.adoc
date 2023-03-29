@@ -1,0 +1,15 @@
+////
+This CONCEPT module included in the following assemblies:
+-service_mesh/v1x/ossm-architecture.adoc
+-service_mesh/v2x/ossm-architecture.adoc
+////
+
+:_content-type: CONCEPT
+[id="ossm-kiali-overview_{context}"]
+= Kiali overview
+
+Kiali 为在 {product-title} 上运行的 {SMProductShortName} 提供了一个观察平台。Kiali 可以帮助您定义、验证并观察 Istio 服务网格。它所提供的拓扑结构可以帮助您了解服务网格的结构，并提供服务网格的健康状况信息。
+
+Kiali 实时提供命名空间的交互式图形视图，可让您了解诸如电路断路器、请求率、延迟甚至流量图等功能。Kiali 提供了从应用程序到服务以及负载等不同级别的组件的了解，并可显示与所选图形节点或边缘的上下文信息和图表的交互。Kiali 还提供了验证 Istio 配置（如网关、目的规则、虚拟服务、网格策略等等）的功能。Kiali 提供了详细的指标数据，并可使用基本的 Grafana 集成来进行高级查询。通过将 Jaeger 集成到 Kiali 控制台来提供分布式追踪。
+
+默认情况下，Kiali 作为 {SMProductName} 的一部分被安装。

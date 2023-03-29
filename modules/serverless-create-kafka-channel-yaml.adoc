@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+//  * serverless/develop/serverless-creating-channels.adoc
+//  * serverless/develop/serverless-kafka-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-kafka-channel-yaml_{context}"]
+= 使用 YAML 创建 Kafka 频道
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述频道，并以可重复的方式描述频道。您可以通过创建一个 Kafka 频道，创建由 Kafka 主题支持的 Knative Eventing 频道。要使用 YAML 创建 Kafka 频道，您必须创建一个 YAML 文件来定义 `KafkaChannel` 对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* {ServerlessOperatorName}、Knative Eventing 和 `KnativeKafka` 自定义资源已安装在 {product-title} 集群中。
+* 安装 Uccps CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title}  中创建应用程序和其他工作负载。
+
+.流程
+
+. 创建一个 `KafkaChannel` 对象作为一个 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1beta1
+kind: KafkaChannel
+metadata:
+  name: example-channel
+  namespace: default
+spec:
+  numPartitions: 3
+  replicationFactor: 1
+----
++
+[重要]
+====
+仅支持 OpenShift Serverless 上的 KafkaChannel 对象的 v1beta1 API 版本。不要使用这个 API 的 v1alpha1 版本，因为这个版本现已弃用。
+====
+
+. 应用 `KafkaChannel` YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * serverless/cli_tools/installing-kn.adoc
+
+:_content-type: PROCEDURE
+[id="installing-cli-web-console_{context}"]
+= 使用 {product-title}  控制台安装 Knative CLI
+
+使用 {product-title} 控制台提供了一个简洁、直观的用户界面来安装 Knative (`kn`)  CLI。安装  {ServerlessOperatorName} 后，您会看到从 {product-title} 控制台的 *命令行工具* 页面中下载适用于 Linux 的 Knative (kn) CLI 的链接 。
+
+.先决条件
+
+* 已登陆到  {product-title} web 控制台。
+* Uccps Serverless Operator 和 Knative Serving 已安装在  {product-title} 集群中。
+* 如果要使用验证步骤，您必须安装 Uccps (`oc`) CLI.
+
+.流程
+
+. 从 *命令行工具* 页面下载   Knative (`kn`) 。您可以点 web 控制台右上角的 image:../images/question-circle.png[title="Help"] 图标进入 *命令行工具* 页，并在列表中选择 *命令行工具* in the list.
+
+. 解包存档：
++
+[source,terminal]
+----
+$ tar -xf <file>
+----
+
+. 将 kn 二进制文件移到 PATH 中的目录中。
+
+. 运行以下命令可以查看 PATH 的值：
++
+[source,terminal]
+----
+$ echo $PATH
+----
+
+.验证
+
+* 运行以下命令检查是否已创建了正确的 Knative CLI 资源和路由：
++
+[source,terminal]
+----
+$ oc get ConsoleCLIDownload
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                  DISPLAY NAME                                             AGE
+kn                    kn - OpenShift Serverless Command Line Interface (CLI)   2022-09-20T08:41:18Z
+oc-cli-downloads      oc - OpenShift Command Line Interface (CLI)              2022-09-20T08:00:20Z
+----
++
+[source,terminal]
+----
+$ oc get route -n openshift-serverless
+----
++
+.输出示例
+[source,terminal]
+----
+NAME   HOST/PORT                                  PATH   SERVICES                      PORT       TERMINATION     WILDCARD
+kn     kn-openshift-serverless.apps.example.com          knative-openshift-metrics-3   http-cli   edge/Redirect   None
+----

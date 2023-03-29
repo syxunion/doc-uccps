@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-traffic-management.adoc
+
+:_content-type: REFERENCE
+[id="serverless-custom-revision-urls_{context}"]
+= 修订版本的自定义 URL
+
+使用 `kn service update` 命令为服务分配 `--tag` 标志，可为在更新服务时创建的修订版本创建一个自定义 URL。自定义 URL 使用 `https://<tag>-<service_name>-<namespace>.<domain>` 或 `http://<tag>-<service_name>-<namespace>.<domain>` 格式。
+
+`--tag` 和 `--untag` 标志使用以下语法：
+
+* 需要一个值。
+* 在服务的流量块中表示唯一标签。
+* 在一个命令中可多次指定.
+
+[id="serverless-custom-revision-urls-assign_{context}"]
+== 示例：将标签分配给修订版本
+
+以下示例将标签 `latest` 分配给名为 `example-revision` 的修订版本：
+
+[source,terminal]
+----
+$ kn service update <service_name> --tag @latest=example-tag
+----
+
+[id="serverless-custom-revision-urls-remove_{context}"]
+== 示例：从修订中删除标签
+
+您可以使用 `--untag` 标志来删除自定义 URL。
+
+[NOTE]
+====
+如果修订版本删除了其标签，并分配了流量的 0%，则修订版本将完全从流量块中删除.
+====
+
+以下命令从名为 `example-revision` 的修订版本中删除所有标签：
+
+[source,terminal]
+----
+$ kn service update <service_name> --untag example-tag
+----

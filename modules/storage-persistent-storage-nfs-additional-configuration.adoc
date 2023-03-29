@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+= 其他配置和故障排除
+
+根据所使用的 NFS 版本以及配置，可能还需要额外的配置步骤来进行正确的导出和安全映射。以下是一些可能适用的信息：
+
+[cols="1,2"]
+|===
+
+|NFSv4 挂载错误地显示所有文件的所有者为 `nobody:nobody`
+a|- 可归因于 NFS 中的 `/etc/idmapd.conf` 中的 ID 映射设置。
+
+|在 NFSv4 上禁用 ID 映射
+a|- 在 NFS 客户端和服务器中运行：
++
+[source,terminal]
+----
+# echo 'Y' > /sys/module/nfsd/parameters/nfs4_disable_idmapping
+----
+|===

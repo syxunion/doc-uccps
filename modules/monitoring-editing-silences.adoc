@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="editing-silences_{context}"]
+= 编辑静默
+
+您可以编辑静默，这样会导致现有静默到期，并以更改后的配置创建新静默。
+
+.流程
+
+要在 *管理员* 视角中编辑静默：
+
+. 导航到 *Observe* -> *Alerting* -> *Silences* 页面。
+
+. 针对您想要修改的静默，选择最后一列中的 {kebab}，然后选择 *Edit silence*。
++
+另外，您还可以在静默的 *Silence Details* 页面中选择 *Actions* -> *Edit Silence*
+
+. 在 *Edit Silence* 页面中，输入您的更改并选择 *Silence*。这会使现有的静默到期，并以所选配置创建新静默。
+
+要在 *开发者* 视角中编辑静默：
+
+. 导航到  *Observe* -> *<project_name>* -> *Alerts* 页面。
+
+. 选择警报名称左侧的  *>* 来展开警报的详情。选择展开视图中的警报名称以打开警报的 *Alert Details* 页面。
+
+. 在该页面的 *Silenced By* 部分中选择静默名称，以导航到该静默的 *Silence Details* 页面。
+
+. 选择静默的名称以导航到其 *Silence Details* 页面。
+
+. 在静默的 *Silence Details* 页面中选择 *Actions* -> *Edit Silence* 
+
+. 在 *Edit Silence* 页面中，输入您的更改并选择 *Silence*。这会使现有的静默到期，并以所选配置创建新静默。

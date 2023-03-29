@@ -1,0 +1,111 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+:_content-type: PROCEDURE
+[id="connected-to-disconnected-mirror-images_{context}"]
+= 对容器镜像进行镜像处理(mirror)
+
+正确配置集群后，您可以将外部存储库中的镜像镜像到镜像存储库。
+
+.流程
+
+. 镜像 Operator Lifecycle Manager(OLM)镜像：
+// copied from olm-mirroring-catalog.adoc
++
+[source,terminal]
+----
+$ oc adm catalog mirror registry.redhat.io/redhat/redhat-operator-index:v{product-version} <mirror_registry>:<port>/olm -a <reg_creds>
+----
++
+--
+其中：
+
+`product-version`:: 指定要与 统信容器云管理平台 版本对应的标签，如 1.2。
+`mirror_registry`:: 指定用于镜像 Operator 内容的目标 registry 和命名空间的完全限定域名(FQDN)，其中 `<namespace>` 是 registry 上的任何现有命名空间。
+`reg_creds`:: 指定您修改的 `.dockerconfigjson` 文件的位置。
+--
++
+例如：
++
+[source,terminal]
+----
+$ oc adm catalog mirror registry.redhat.io/redhat/redhat-operator-index:v4.8 mirror.registry.com:443/olm -a ./.dockerconfigjson  --index-filter-by-os='.*'
+----
+
+. 为任何其他统信提供的 Operator 镜像内容：
++
+[source,terminal]
+----
+$ oc adm catalog mirror <index_image> <mirror_registry>:<port>/<namespace> -a <reg_creds>
+----
++
+--
+其中：
+
+`index_image`:: 指定您要镜像的目录的索引镜像。例如，这可能是之前创建的已修剪索引镜像，也可以是默认目录的源索引镜像之一，如  `{index-image-pullspec}`.
+`mirror_registry`:: 指定要将 Operator 内容镜像到的目标 registry 和命名空间的 FQDN，其中 `<namespace>` 是 registry 上的任何现有命名空间。
+`reg_creds`:: 可选：如果需要，指定 registry 凭证文件的位置。
+--
++
+例如：
++
+[source,terminal]
+----
+$ oc adm catalog mirror registry.redhat.io/redhat/community-operator-index:v4.8 mirror.registry.com:443/olm -a ./.dockerconfigjson  --index-filter-by-os='.*'
+----
+
+. 镜像 统信容器云管理平台 镜像存储库：
++
+[source,terminal]
+----
+$ oc adm release mirror -a .dockerconfigjson --from=quay.io/openshift-release-dev/ocp-release:v<product-version>-<architecture> --to=<local_registry>/<local_repository> --to-release-image=<local_registry>/<local_repository>:v<product-version>-<architecture>
+----
++
+--
+其中：
+
+`product-version`:: 指定与要安装的 统信容器云管理平台 版本对应的标签，如 `4.8.15-x86_64`。
+`architecture`:: 为您的服务器指定构架类型，如  `x86_64`。
+`local_registry`:: 指定镜像存储库的 registry 域名。
+`local_repository`:: 指定要在 registry 中创建的存储库名称。
+--
++
+例如：
++
+[source,terminal]
+----
+$ oc adm release mirror -a .dockerconfigjson --from=quay.io/openshift-release-dev/ocp-release:4.8.15-x86_64 --to=mirror.registry.com:443/ocp/release --to-release-image=mirror.registry.com:443/ocp/release:4.8.15-x86_64
+----
++
+.输出示例
++
+[source,terminal]
++
+----
+info: Mirroring 109 images to mirror.registry.com/ocp/release ...
+mirror.registry.com:443/
+  ocp/release
+	manifests:
+  	sha256:086224cadce475029065a0efc5244923f43fb9bb3bb47637e0aaf1f32b9cad47 -> 4.8.15-x86_64-thanos
+  	sha256:0a214f12737cb1cfbec473cc301aa2c289d4837224c9603e99d1e90fc00328db -> 4.8.15-x86_64-kuryr-controller
+  	sha256:0cf5fd36ac4b95f9de506623b902118a90ff17a07b663aad5d57c425ca44038c -> 4.8.15-x86_64-pod
+  	sha256:0d1c356c26d6e5945a488ab2b050b75a8b838fc948a75c0fa13a9084974680cb -> 4.8.15-x86_64-kube-client-agent
+
+…..
+sha256:66e37d2532607e6c91eedf23b9600b4db904ce68e92b43c43d5b417ca6c8e63c mirror.registry.com:443/ocp/release:4.5.41-multus-admission-controller
+sha256:d36efdbf8d5b2cbc4dcdbd64297107d88a31ef6b0ec4a39695915c10db4973f1 mirror.registry.com:443/ocp/release:4.5.41-cluster-kube-scheduler-operator
+sha256:bd1baa5c8239b23ecdf76819ddb63cd1cd6091119fecdbf1a0db1fb3760321a2 mirror.registry.com:443/ocp/release:4.5.41-aws-machine-controllers
+info: Mirroring completed in 2.02s (0B/s)
+
+Success
+Update image:  mirror.registry.com:443/ocp/release:4.5.41-x86_64
+Mirror prefix: mirror.registry.com:443/ocp/release
+----
+
+. 根据需要镜像任何其他 registry：
++
+[source,terminal]
+----
+$ oc image mirror <online_registry>/my/image:latest <mirror_registry>
+----

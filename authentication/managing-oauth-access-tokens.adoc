@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="managing-oauth-access-tokens"]
+= 管理用户拥有的 OAuth 访问令牌
+include::_attributes/common-attributes.adoc[]
+:context: managing-oauth-access-tokens
+
+toc::[]
+
+用户可查看其自身 OAuth 访问令牌，并删除不再需要的任何 OAuth 访问令牌。
+
+// Listing user-owned OAuth access tokens
+include::modules/oauth-list-tokens.adoc[leveloffset=+1]
+
+// Viewing the details of a user-owned OAuth access token
+include::modules/oauth-view-details-tokens.adoc[leveloffset=+1]
+
+// Deleting user-owned OAuth access tokens
+include::modules/oauth-delete-tokens.adoc[leveloffset=+1]

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-github-identity-provider.adoc
+
+:_content-type: PROCEDURE
+[id="identity-provider-registering-github_{context}"]
+= 注册 GitHub 应用程序
+
+要将 GitHub 或 GitHub Enterprise 用作身份提供程序，您必须注册要使用的应用程序。
+
+.流程
+
+. 在 GitHub 上注册应用程序：
+** 对于Github，点击 Settings* -> Developer settings -> OAuth Apps -> Register a new OAuth application
+** 对于 GitHub Enterprise，前往 GitHub Enterprise 主页，然后点击  *Settings -> Developer settings -> Register a new application*.
+. 输入应用程序名称，如 `My Uccp Install`。
+. 输入主页 URL，如 
+`\https://oauth-openshift.apps.<cluster-name>.<cluster-domain>`.
+. 可选：输入应用程序描述。
+. 输入授权回调 URL，其中 URL 末尾包含身份提供程序 name：
++
+----
+https://oauth-openshift.apps.<cluster-name>.<cluster-domain>/oauth2callback/<idp-provider-name>
+----
++
+例如：
++
+----
+https://oauth-openshift.apps.openshift-cluster.example.com/oauth2callback/github
+----
+. 点击  *Register application* GitHub 提供客户端 ID 和客户端 secret。您需要使用这些值来完成身份提供程序配置。

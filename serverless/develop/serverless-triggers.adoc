@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="serverless-triggers"]
+= 触发器
+include::_attributes/common-attributes.adoc[]
+:context: serverless-triggers
+
+toc::[]
+
+include::snippets/serverless-brokers-intro.adoc[]
+
+如果使用 Kafka 代理，您可以将事件的交付顺序从触发器配置为事件 sink。
+
+// ODC
+include::modules/serverless-create-trigger-odc.adoc[leveloffset=+1]
+// kn trigger
+include::modules/serverless-create-kn-trigger.adoc[leveloffset=+1]
+include::modules/kn-trigger-list.adoc[leveloffset=+1]
+include::modules/kn-trigger-describe.adoc[leveloffset=+1]
+include::modules/kn-trigger-filtering.adoc[leveloffset=+1]
+include::modules/kn-trigger-update.adoc[leveloffset=+1]
+include::modules/delete-kn-trigger.adoc[leveloffset=+1]
+// event delivery config
+include::modules/trigger-event-delivery-config.adoc[leveloffset=+1]

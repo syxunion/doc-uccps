@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="quick-start-user-workflow_{context}"]
+= 快速启动用户工作流
+
+当您与现有快速启动指南交互时，这是预期的工作流体验：
+
+. 在 *Administrator* 或 *Developer* 视角中，点击 *Help 图标* 并选择 *Quick Starts*。
+
+. 点快速启动卡。
+
+. 在出现的面板中点 *Start*。
+
+. 完成屏幕的说明，然后点 *Next*。
+
+. 在出现 *Check your work* 模块时，回答问题以确认您成功完成了该任务。
+.. 如果您选择 *Yes*，点 *Next* 来继续到下一个任务。
+.. 如果您选择 *No*，重复任务说明并再次检查您的工作。
+
+. 重复以上第 1 到 6 步，以便快速完成剩余的任务。
+. 完成最后的任务后，点 *Close* 关闭快速启动。

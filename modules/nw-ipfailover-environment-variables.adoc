@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+[id="nw-ipfailover-environment-variables_{context}"]
+= IP 故障转移环境变量
+
+下表包含用于配置 IP 故障转移的变量。
+
+.IP 故障转移环境变量
+[cols="3a,1a,4a",options="header"]
+|===
+
+| 变量名称 | Default | 描述
+
+|`OPENSHIFT_HA_MONITOR_PORT`
+|`80`
+|IP 故障转移 pod 会尝试在每个虚拟 IP（VIP）上打开到此端口的 TCP 连接。如果建立连接，则服务将被视为正在运行。如果此端口设为 0，则测试会始终通过。
+
+|`OPENSHIFT_HA_NETWORK_INTERFACE`
+|
+|IP 故障转移用于发送虚拟路由器冗余协议 (VRRP) 流量的接口名称。默认值为 eth0。
+
+|`OPENSHIFT_HA_REPLICA_COUNT`
+|`2`
+|要创建的副本数。这必须与 IP 故障转移部署配置中的 `spec.replicas` 值匹配。
+
+|`OPENSHIFT_HA_VIRTUAL_IPS`
+|
+|要复制的 IP 地址范围列表。必须提供.例如，`1.2.3.4-6,1.2.3.9`。
+
+|`OPENSHIFT_HA_VRRP_ID_OFFSET`
+|`0`
+|用于设置虚拟路由器 ID 的偏移值。使用不同的偏移值可以在同一集群中存在多个 IP 故障转移配置。默认偏移值为 0，允许的范围是 `0` 到 `255`。
+
+|`OPENSHIFT_HA_VIP_GROUPS`
+|
+|为 VRRP 创建的组数量。如果没有设置，则会为通过 `OPENSHIFT_HA_VIP_GROUPS` 变量指定的每个虚拟 IP 范围创建一个组。
+
+|`OPENSHIFT_HA_IPTABLES_CHAIN`
+|输入
+|`iptables` 链的名称，用于自动添加允许 VRRP 流量的 `iptables` 规则。如果没有设置值，则不会添加 `iptables` 规则。如果链不存在，则不会创建它。
+
+|`OPENSHIFT_HA_CHECK_SCRIPT`
+|
+|定期运行的脚本的 pod 文件系统中的完整路径名称，以验证应用是否正在运行。
+
+|`OPENSHIFT_HA_CHECK_INTERVAL`
+|`2`
+|检查脚本运行的期间（以秒为单位）。
+
+|`OPENSHIFT_HA_NOTIFY_SCRIPT`
+|
+|当状态发生变化时运行的脚本的 pod 文件系统的完整路径名称。
+
+|`OPENSHIFT_HA_PREEMPTION`
+|`preempt_nodelay 300`
+|处理新的具有更高优先级主机的策略。nopreempt 策略不会将 master 从较低优先级主机移到优先级更高的主机。
+|===

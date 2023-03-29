@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-rfc2307_{context}"]
+= 使用 RFC 2307 模式同步组
+
+对于 RFC 2307 模式，以下示例将同步名为 `admins` 的组，该组有两个成员 `Jane` 和 `Jim`。这些示例阐述了：
+
+* 如何将组和用户添加到 LDAP 服务器中。
+* 同步之后统信容器云管理平台中会生成什么组记录。
+
+[注意]
+====
+这些示例假定所有用户都是其各自组的直接成员。具体而言，没有任何组的成员是其他组。如需有关如何同步嵌套组的信息，请参见嵌套成员资格同步示例。
+====
+
+在 RFC 2307 模式中，用户（Jane 和 Jim）和组都作为第一类条目存在于 LDAP 服务器上，组成员资格则存储在组的属性中。以下 ldif 片段定义了这个模式的用户和组：
+
+.使用 RFC 2307 模式的 LDAP 条目：`rfc2307.ldif`
+[source,ldif]
+----
+  dn: ou=users,dc=example,dc=com
+  objectClass: organizationalUnit
+  ou: users
+  dn: cn=Jane,ou=users,dc=example,dc=com
+  objectClass: person
+  objectClass: organizationalPerson
+  objectClass: inetOrgPerson
+  cn: Jane
+  sn: Smith
+  displayName: Jane Smith
+  mail: jane.smith@example.com
+  dn: cn=Jim,ou=users,dc=example,dc=com
+  objectClass: person
+  objectClass: organizationalPerson
+  objectClass: inetOrgPerson
+  cn: Jim
+  sn: Adams
+  displayName: Jim Adams
+  mail: jim.adams@example.com
+  dn: ou=groups,dc=example,dc=com
+  objectClass: organizationalUnit
+  ou: groups
+  dn: cn=admins,ou=groups,dc=example,dc=com <1>
+  objectClass: groupOfNames
+  cn: admins
+  owner: cn=admin,dc=example,dc=com
+  description: System Administrators
+  member: cn=Jane,ou=users,dc=example,dc=com <2>
+  member: cn=Jim,ou=users,dc=example,dc=com
+----
+<1> 组是 LDAP 服务器中的第一类条目。
+<2> 组成员使用作为组属性的标识引用来列出。
+
+.先决条件
+
+* 创建配置文件。
+
+.流程
+
+* 使用 `rfc2307_config.yaml` 文件运行同步：
++
+[source,terminal]
+----
+$ oc adm groups sync --sync-config=rfc2307_config.yaml --confirm
+----
++
+统信容器云管理平台 创建以下组记录作为上述同步操作的结果：
++
+.使用 `rfc2307_config.yaml` 文件创建的统信容器云管理平台组
+[source,yaml]
+----
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  annotations:
+    openshift.io/ldap.sync-time: 2015-10-13T10:08:38-0400 <1>
+    openshift.io/ldap.uid: cn=admins,ou=groups,dc=example,dc=com <2>
+    openshift.io/ldap.url: LDAP_SERVER_IP:389 <3>
+  creationTimestamp:
+  name: admins <4>
+users: <5>
+- jane.smith@example.com
+- jim.adams@example.com
+----
+<1> 此统信容器云管理平台组与 LDAP 服务器最后一次同步的时间，采用 ISO 6801 格式。
+<2> LDAP 服务器上组的唯一标识符。
+<3> 存储该组记录的 LDAP 服务器的 IP 地址和主机。
+<4> 根据同步文件指定的组的名称。
+<5> 属于组的成员的用户，名称由同步文件指定。

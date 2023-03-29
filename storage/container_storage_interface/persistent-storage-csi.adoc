@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-csi"]
+= 配置 CSI 卷
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-csi
+
+toc::[]
+
+容器存储接口 (CSI) 允许统信容器云管理平台使用支持 CSI 接口的存储后端提供的持久性存储。
+
+[注意]
+====
+统信容器云管理平台1.2 支持 CSI 规范的 版本 1.5.0。
+====
+
+include::modules/persistent-storage-csi-architecture.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-external-controllers.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-csi-driver-daemonset.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-csi-drivers-supported.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-dynamic-provisioning.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-mysql-example.adoc[leveloffset=+1]

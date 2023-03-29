@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * machine_management/applying-autoscaling.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: REFERENCE
+[id="cluster-autoscaler-cr_{context}"]
+= ClusterAutoscaler 资源定义
+
+此 `ClusterAutoscaler` 资源定义显示了集群自动扩展的参数和示例值。
+
+
+[source,yaml]
+----
+apiVersion: "autoscaling.openshift.io/v1"
+kind: "ClusterAutoscaler"
+metadata:
+  name: "default"
+spec:
+  podPriorityThreshold: -10 <1>
+  resourceLimits:
+    maxNodesTotal: 24 <2>
+    cores:
+      min: 8 <3>
+      max: 128 <4>
+    memory:
+      min: 4 <5>
+      max: 256 <6>
+    gpus:
+      - type: nvidia.com/gpu <7>
+        min: 0 <8>
+        max: 16 <9>
+      - type: amd.com/gpu
+        min: 0
+        max: 4
+  scaleDown: <10>
+    enabled: true <11>
+    delayAfterAdd: 10m <12>
+    delayAfterDelete: 5m <13>
+    delayAfterFailure: 30s <14>
+    unneededTime: 5m <15>
+    utilizationThreshold: "0.4" <16>
+----
+<1> 指定 Pod 必须超过哪一优先级才能让机器自动扩展部署更多节点。输入一个 32 位整数值。`podPriorityThreshold` 值将与您分配给每个 Pod 的 PriorityClass 值进行比较。
+<2> 指定要部署的最大节点数。这个值是集群中部署的机器总数，而不仅仅是自动扩展器控制的机器。确保这个值足够大，足以满足所有 control plane 和计算机器以及您在 `MachineAutoscaler` 资源中指定的副本总数。
+<3> 指定在集群中部署的最小内核数。
+<4> 指定集群中要部署的最大内核数。
+<5> 指定集群中最小内存量（以 GiB 为单位）。
+<6> 指定集群中的最大内存量（以 GiB 为单位）。
+<7> 可选：指定要部署的 `GPU` 节点的类型。只有 `nvidia.com/gpu` 和 `amd.com/gpu` 是有效的类型。
+<8> 指定在集群中部署的最小 `GPU` 数。
+<9> 指定集群中要部署的最大 `GPU` 数量。
+<10> 在此部分中，您可以指定每个操作要等待的时长，可以使用任何有效的 ParseDuration 间隔，包括 `ns`、`us`、`ms`、`s`、`m` 和 `h`。
+<11> 指定集群自动扩展是否可以删除不必要的节点。
+<12> 可选：指定在最近添加节点之后要等待多久才能删除节点。如果不指定值，则使用默认值 `10m`。
+<13> 可选：指定在最近删除节点之后要等待多久才能删除节点。如果没有指定值，则使用默认值 `0s`。
+<14> 可选：指定在发生缩减失败之后要等待多久才能删除节点。如果不指定值，则使用默认值 `3m`。
+<15> 可选：指定不必要的节点有资格删除前的周期。如果不指定值，则使用默认值 `10m`。
+<16> 可选： 指定以下节点使用率级别，这个级别以下的节点是不必要的，可以删除。节点使用率是请求的资源的总和（由节点分配的资源划分），且值必须大于 "0"，但小于 "1"。如果没有指定值，集群自动扩展会使用默认值 "0.5"，它对应于 50% 的使用率。这个值必须以字符串形式表示。
+
+[注意]
+====
+执行扩展操作时，集群自动扩展会保持在 `ClusterAutoscaler` 资源定义中设置的范围，如要部署的最小和最大内核数，或集群中的内存量。但是，集群自动扩展无法将集群中的当前值修正为在这些范围内。
+
+最小和最大 CPU、内存和 GPU 值是通过计算集群中所有节点上的这些资源来确定，即使集群自动扩展无法管理该节点。例如，control plane 节点在集群的总内存中考虑，即使集群自动扩展不管理 control plane 节点。
+====

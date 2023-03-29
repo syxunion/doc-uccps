@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-oauth-auth_{context}"]
+=  统信容器云管理平台 OAuth 身份验证
+
+OAUTH 身份验证激活方法：配置 Jenkins UI 中 *Configure Global Security* 面板上的选项，或者将 Jenkins *Deployment configuration* 上的 `Uccps_ENABLE_OAUTH` 环境变量设置为非 `false`。这会激活 统信容器云管理平台 Login 插件，该插件从 Pod 数据或通过与 统信容器云管理平台 API 服务器交互来检索配置信息。
+
+有效凭证由 统信容器云管理平台 身份提供程序控制。
+
+Jenkins 支持浏览器和非浏览器访问。
+
+登录时，有效用户会自动添加到 Jenkins 授权列表中，其中的 统信容器云管理平台 角色规定了用户拥有的特定 Jenkins 权限。默认使用的角色是预定义的 `admin`、`edit` 和 `view`。登录插件对 Jenkins 正在其中运行的项目或命名空间中的那些角色执行自身 SAR 请求。
+
+具有 `Admin` 角色的用户拥有传统 Jenkins 管理用户权限，而具有 `edit` 或 `view` 角色的用户的权限逐渐减少。
+
+默认的 统信容器云管理平台 `admin`、`edit` 和 `view` 角色以及这些角色在 Jenkins 实例中分配的 Jenkins 权限均可配置。
+
+在 统信容器云管理平台 pod 中运行 Jenkins 时，登录插件会在 Jenkins 正在其中运行的命名空间中查找名为 `Uccps-jenkins-login-plugin-config` 的配置映射。
+
+如果该插件找到并可以在该配置映射中读取，您可以定义到 Jenkins 权限映射的角色。具体来说：
+
+ * 登录插件将配置映射中的键值对视为 Jenkins 权限到 统信容器云管理平台 角色映射。
+ * 其中，键是 Jenkins 权限组短 ID 和 Jenkins 权限短 ID，两者之间用连字符隔开。
+ * 如果要向 统信容器云管理平台 角色添加 Overall Jenkins Administer 权限，键应为 `Overall-Administer`。
+ * 要了解有哪些权限组和权限 ID 可用，请转至 Jenkins 控制台中的列表授权页，并在它们提供的表中查找组 ID 和个别权限。
+ * 键值对的值是权限应当应用到的 统信容器云管理平台 角色的列表，各个角色之间用逗号隔开。
+ * 如果要将 `Overall Jenkins Administer` 权限添加到默认的 `admin` 和 `edit` 角色以及您创建的新 Jenkins 角色，则 `Overall-Administer` 键的值将为 `admin,edit,jenkins`。
+
+
+[注意]
+====
+使用 统信容器云管理平台 OAuth 时，统信容器云管理平台 Jenkins 镜像中预填充了管理特权的 `admin` 用户不会被授予这些特权。要授予这些权限，统信容器云管理平台 集群管理员必须在 统信容器云管理平台 身份提供程序中显式定义该用户，并为该用户分配 `admin` 角色。
+====
+
+最初建立用户后，可对存储的 Jenkins 用户权限进行更改。统信容器云管理平台 Login 插件轮询 统信容器云管理平台 API 服务器以获取权限，并使用从 统信容器云管理平台 检索的权限更新存储在 Jenkins 中的每个用户的权限。如果 Jenkins UI 用于为 Jenkins 用户更新权限，则权限更改将在插件下次轮询 统信容器云管理平台 时被覆盖。
+
+您可通过 Uccps_permissions_poll_interval 环境变量来控制轮询频率。默认轮询间隔为五分钟。
+
+使用 Oauth 身份验证创建新的 Jenkins 服务的最简单方式是借助模板。

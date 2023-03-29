@@ -1,0 +1,45 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-vsphere"]
+= 使用 VMware vSphere 卷的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-efs
+
+toc::[]
+
+统信容器云管理平台允许使用 VMware vSphere 的虚拟机磁盘 (VMDK) 卷。您可以使用 VMware vSphere 为统信容器云管理平台集群置备持久性存储。我们假设您对 Kubernetes 和 VMware vSphere 已有一定了解。
+
+VMware vSphere 卷可以动态置备。统信容器云管理平台在 vSphere 中创建磁盘，并将此磁盘附加到正确的镜像。
+
+[注意]
+====
+统信容器云管理平台将新卷置备为独立持久性卷，它们可以在集群中的任何节点上自由附加和分离卷。因此，您无法备份使用快照的卷，或者从快照中恢复卷。如需更多信息 ，请参阅快照限制。
+====
+
+Kubernetes 持久性卷框架允许管理员提供带有持久性存储的集群，并使用户可以在不了解底层存储架构的情况下请求这些资源。
+
+持久性卷不与某个特定项目或命名空间相关联，它们可以在统信容器云管理平台集群间共享。持久性卷声明是针对某个项目或者命名空间的，相应的用户可请求它。
+
+[重要]
+====
+统信容器云管理平台默认使用 in-tree（非 CSI）插件来置备 vSphere 存储。
+
+在以后的统信容器云管理平台版本中，计划使用现有树内插件置备的卷迁移到对应的 CSI 驱动程序。CSI 自动迁移应该可以无缝进行。迁移不会改变您使用所有现有 API 对象的方式，如持久性卷、持久性卷声明和存储类。有关迁移的更多信息，请参阅 CSI 自动迁移。
+
+完全迁移后，未来的统信容器云管理平台版本将最终删除树内插件。
+====
+
+== 动态置备 VMware vSphere 卷
+
+动态置备 VMware vSphere 卷是推荐的方法。
+
+== 先决条件
+* 在一个满足您使用的组件要求的 VMware vSphere 版本上安装了统信容器云管理平台集群。
+
+
+include::modules/persistent-storage-vsphere-dynamic-provisioning.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-vsphere-dynamic-provisioning-cli.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-vsphere-static-provisioning.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-vsphere-formatting.adoc[leveloffset=+2]

@@ -1,0 +1,31 @@
+[id="nw-multi-network-policy-differences_{context}"]
+= 多网络策略和网络策略之间的区别
+
+虽然 `MultiNetworkPolicy` API 实现 `NetworkPolicy` API，但有几个重要的区别：
+
+* 您必须使用 `MultiNetworkPolicy` API：
++
+[source,yaml]
+----
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+----
+
+* 当使用 CLI 与多网络策略交互时，您必须使用 `multi-networkpolicy` 资源名称。例如，您可以使用 `oc get multi-networkpolicy <name>` 命令来查看多网络策略对象，其中 `<name>` 是多网络策略的名称。
+
+* 您必须使用定义 macvlan 额外网络的网络附加定义名称指定一个注解：
++
+[source,yaml]
+----
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/policy-for: <network_name>
+----
++
+--
+其中：
+
+`<network_name>`:: 指定网络附加定义的名称。
+--

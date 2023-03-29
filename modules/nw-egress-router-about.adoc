@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/using-an-egress-router.adoc
+// * networking/ovn_kubernetes_network_provider/using-an-egress-router-ovn.adoc
+
+ifeval::["{context}" == "using-an-egress-router-ovn"]
+:ovn:
+:egress-pod-image-name: registry.redhat.io/openshift3/ose-pod
+
+// Image names are different for OKD
+ifdef::openshift-origin[]
+:egress-pod-image-name: quay.io/openshift/origin-pod
+endif::[]
+
+endif::[]
+
+ifeval::["{context}" == "using-an-egress-router"]
+:openshift-sdn:
+endif::[]
+
+:_content-type: CONCEPT
+[id="nw-egress-router-about_{context}"]
+= 关于出口路由器 pod
+
+统信容器云管理平台 出口路由器（egress router ） pod 使用一个来自专用的私有源 IP 地址，将网络流量重定向到指定的远程服务器。出口路由器 pod 可以将网络流量发送到设置为仅允许从特定 IP 地址访问的服务器。
+
+[注意]
+====
+出口路由器 pod 并不适用于所有外向的连接。创建大量出口路由器 pod 可能会超过您的网络硬件的限制。例如，为每个项目或应用程序创建出口路由器 pod 可能会导致，在转换为使用软件来进行 MAC 地址过滤前超过了网络接口可以处理的本地 MAC 地址的数量。
+====
+
+[重要]
+====
+出口路由器镜像与 Amazon AWS、Azure Cloud 或其他不支持第 2 层操作的云平台不兼容，因为它们与 macvlan 流量不兼容。
+====
+
+[id="nw-egress-router-about-modes_{context}"]
+== 出口路由器模式
+
+在 _重定向_ 模式中，出口路由器 Pod 配置 `iptables` 规则，将流量从其自身 IP 地址重定向到一个或多个目标 IP 地址。需要使用保留源 IP 地址的客户端 pod 必须修改来连接到出口路由器，而不是直接连接到目标 IP。
+
+在 _HTTP 代理模式_ 中，出口路由器 pod 作为一个 HTTP 代理在端口 8080 上运行。这个模式只适用于连接到基于 HTTP 或基于 HTTPS 服务的客户端，但通常需要较少的更改就可以使客户端 pod 正常工作。很多程序可以通过设置环境变量来使用 HTTP 代理服务器。
+
+在 _DNS 代理模式_ 中，出口路由器 pod 作为基于 TCP 服务的 DNS 代理运行，将其自身的 IP 地址转换到一个或多个目标 IP 地址。要使用保留的源 IP 地址，客户端 pod 必须进行修改来连接到出口路由器 pod，而不是直接连接到目标 IP 地址。此修改确保了外部的目的地将流量视为来自一个已知源的流量。
+
+重定向模式可用于除 HTTP 和 HTTPS 以外的所有服务。对于 HTTP 和 HTTPS 服务，请使用 HTTP 代理模式。对于使用 IP 地址或域名的基于 TCP 的服务，请使用 DNS 代理模式。
+
+
+[id="nw-egress-router-about-router-pod-implementation_{context}"]
+== 出口路由器 pod 的实现
+
+出口路由器 pod 的设置由一个初始化容器执行。该容器在特权环境中运行，以便可以配置 macvlan 接口并设置 `iptables` 规则。在初始化容器完成设置 `iptables` 规则后会退出。接下来，出口路由器 pod 会执行容器来处理出口路由器流量。取决于出口路由器的模式，所使用的镜像会有所不同。
+
+环境变量决定 egress-router 镜像使用的地址。镜像将 macvlan 接口配置为使用 `EGRESS_SOURCE` 作为其 IP 地址，并将 `EGRESS_GATEWAY` 作为网关的 IP 地址。
+
+网络地址转换（NAT）规则被设置，使任何到 TCP 或 UDP 端口上的 pod 的集群 IP 地址的连接被重新指向由 `EGRESS_DESTINATION` 变量指定的 IP 地址的同一端口。
+
+如果集群中只有部分节点能够声明指定的源 IP 地址并使用指定的网关，您可以指定一个 `nodeName` 或 `nodeSelector` 来表示哪些节点可以接受。
+
+
+[id="nw-egress-router-about-deployments_{context}"]
+== 部署注意事项
+
+出口路由器 pod 会为节点的主网络接口添加额外的 IP 地址和 MAC 地址。因此，您可能需要配置虚拟机监控程序或云供应商来允许额外的地址。
+
+Uniontech UStack Platform::
+
+如果在 有栈 上部署 统信容器云管理平台，则必须允许来自 OpenStack 环境上的出口路由器 Pod 的 IP 和 MAC 地址的流量。如果您不允许流量，则通信会失败：
++
+[source,terminal]
+----
+$ openstack port set --allowed-address \
+  ip_address=<ip_address>,mac_address=<mac_address> <neutron_port_uuid>
+----
+
+VMware vSphere::
+
+如果您使用 VMware vSphere，请参阅 VMWare 文档来保证 vSphere 标准交换器的安全。通过从 vSphere Web 客户端中选择主机虚拟交换机来查看并更改 VMWare vSphere 默认设置。
+
+具体来说，请确保启用了以下功能：
+
+* MAC 地址更改
+* Forged Transits
+* Promiscuous Mode Operation
+
+[id="nw-egress-router-about-failover_{context}"]
+== 故障切换配置
+
+为了避免停机，可以使用 Deployment 资源部署出口路由器 pod，如下例所示。要为示例部署创建新 Service 对象，使用 `oc expose deployment/egress-demo-controller` 命令。
+
+[source,yaml,subs="attributes+"]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: egress-demo-controller
+spec:
+  replicas: 1 <1>
+  selector:
+    matchLabels:
+      name: egress-router
+  template:
+    metadata:
+      name: egress-router
+      labels:
+        name: egress-router
+      annotations:
+        pod.network.openshift.io/assign-macvlan: "true"
+    spec: <2>
+      initContainers:
+        ...
+      containers:
+        ...
+----
+<1> 确保副本数被设置为 1，因为在任何同一个时间点上，只有一个 pod 可以使用给定的出口源 IP 地址。这意味着，在一个节点上运行的路由器只有一个副本。
+
+<2> 为出口路由器 pod 指定 Pod 对象模板。

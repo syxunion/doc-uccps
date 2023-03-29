@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="editing-egress-firewall-ovn"]
+= nw-egressnetworkpolicy-view.adoc
+include::_attributes/common-attributes.adoc[]
+:context: editing-egress-firewall-ovn
+
+toc::[]
+
+作为集群管理员，您可以修改现有出口防火墙的网络流量规则。
+
+include::modules/nw-egressnetworkpolicy-edit.adoc[leveloffset=+1]

@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="changing-cluster-network-mtu"]
+= 更改集群网络的 MTU
+include::_attributes/common-attributes.adoc[]
+:context: changing-cluster-network-mtu
+
+toc::[]
+
+[role="_abstract"]
+作为集群管理员，您可以在集群安装后更改集群网络的 MTU。这一更改具有破坏性，因为必须重启集群节点才能完成 MTU 更改。您只能为使用 OVN-Kubernetes 或 OpenShift SDN 集群网络供应商的集群更改 MTU。
+
+include::modules/nw-cluster-mtu-change-about.adoc[leveloffset=+1]
+include::modules/nw-cluster-mtu-change.adoc[leveloffset=+1]

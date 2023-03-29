@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="gpu-resources"]
+= 使用无服务器应用程序的 NVIDIA GPU 资源
+:context: gpu-resources
+
+toc::[]
+
+NVIDIA 支持在统信容器云管理平台上试验性地使用 GPU 资源。
+
+include::modules/serverless-gpu-resources-kn.adoc[leveloffset=+1]

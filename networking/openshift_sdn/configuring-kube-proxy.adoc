@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="configuring-kube-proxy"]
+= 配置 kube-proxy
+include::_attributes/common-attributes.adoc[]
+:context: configuring-kube-proxy
+
+toc::[]
+
+Kubernetes 网络代理 (kube-proxy) 在每个节点上运行，并由 Cluster Network Operator (CNO) 管理。kube-proxy 维护网络规则，以转发与服务关联的端点的连接。
+
+include::modules/nw-kube-proxy-sync.adoc[leveloffset=+1]
+include::modules/nw-kube-proxy-config.adoc[leveloffset=+1]
+include::modules/nw-kube-proxy-configuring.adoc[leveloffset=+1]

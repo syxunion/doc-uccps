@@ -1,0 +1,212 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="configuring_remote_write_storage_{context}"]
+= 配置远程写入存储
+
+[role="_abstract"]
+您可以配置远程写入存储，使 Prometheus 能够将最接近的指标发送到远程系统，以进行长期存储。这样做不会影响 Prometheus 存储指标的方式和时长。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件*
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件*
+** 您可以使用具有  `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有  `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps  CLI (`oc`).
+* 您已设置了一个远程写入兼容端点（如 Thanos），并且知道端点 URL。
+* 您已为远程写入端点设置了身份验证凭证。
++
+[小心]
+====
+要降低安全风险，请避免在不使用加密 HTTP 的情况下通过未加密的 HTTP 向端点发送指标。
+====
+
+.流程
+
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+. 在 `data/config.yaml/prometheusK8s` 下添加一个 `remoteWrite:` 部分。
+
+. 在本节中添加端点 URL 和身份验证凭证：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        <endpoint_authentication_credentials>
+----
++
+对于 `endpoint_authentication_credentials` ，请替换端点的凭据。目前支持的身份验证方法是基本身份验证 (`basicAuth`) 和客户端 TLS (`tlsConfig`)  身份验证。
++
+* 以下示例配置基本身份验证：
++
+[source,yaml]
+----
+basicAuth:
+  username:
+    <usernameSecret>
+  password:
+    <passwordSecret>
+----
+相应地替换 `<usernameSecret>` 和 `<passwordSecret>`
++
+以下示例显示了基本的身份验证配置， `remoteWriteAuth` 是 name 值，user 和 password 是 key 值。这些值包含端点身份验证凭证：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        basicAuth:
+          username:
+            name: remoteWriteAuth
+            key: user
+          password:
+            name: remoteWriteAuth
+            key: password
+----
++
+* 以下示例配置客户端 TLS 身份验证：
++
+[source,yaml]
+----
+tlsConfig:
+  ca:
+    <caSecret>
+  cert:
+    <certSecret>
+  keySecret:
+    <keySecret>
+----
+相应地替换 `<caSecret>`, `<certSecret>`, 和 `<keySecret>` accordingly. 
++
+以下示例显示了一个 TLS 验证配合，使用 `selfsigned-mtls-bundle` 作为 `name` 值 `ca.crt` 为 `ca` `key` 值, `client.crt` 为 `cert` `key` 值,  `client.key` 为 `keySecret` `key` 值:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        tlsConfig:
+          ca:
+            secret:
+              name: selfsigned-mtls-bundle
+              key: ca.crt
+          cert:
+            secret:
+              name: selfsigned-mtls-bundle
+              key: client.crt
+          keySecret:
+            name: selfsigned-mtls-bundle
+            key: client.key
+----
+
+. 在身份验证凭证后添加 write relabel 配置值：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        <endpoint_authentication_credentials>
+        <write_relabel_configs>
+----
++
+对于 `<write_relabel_configs>` ，请替换您要发送到远程端点的指标写入重新标记配置列表。
++
+以下示例演示了如何转发名为 `my_metric` 的单个指标：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        writeRelabelConfigs:
+        - sourceLabels: [__name__]
+          regex: 'my_metric'
+          action: keep
+
+----
++
+
+. 如果需要，通过更改 `name` 和 `namespace` `metadata` 值，为监控用户定义的项目的 Prometheus 实例配置远程写入，如下所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      remoteWrite:
+      - url: "https://remote-write.endpoint"
+        <endpoint_authentication_credentials>
+        <write_relabel_configs>
+----
++
+[注意]
+====
+Prometheus 配置映射组件在 `cluster-monitoring-config` `ConfigMap` 对象中被称为 `prometheusK8s`，在 `user-workload-monitoring-config` `ConfigMap` 对象中称为 `prometheus` 。
+====
+
+. 保存文件以将更改应用到 ConfigMap 对象。受新配置重启影响的 Pod 会自动重启。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到  `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+保存对监控 `ConfigMap` 对象的更改可能会重新部署相关项目中的 pod 和其他资源。保存更改还可能在该项目中重新启动正在运行的监控进程。
+====
+

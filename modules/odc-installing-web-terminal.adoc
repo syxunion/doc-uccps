@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// web_console/odc-about-web-terminal.adoc
+
+:_content-type: PROCEDURE
+[id="odc-installing-web-terminal_{context}"]
+= 安装 web 终端
+
+您可以使用 统信容器云管理平台 OperatorHub 中列出的 Web Terminal Operator 来安装 Web 终端。安装 Web Terminal Operator 时，会自动安装命令行配置（如 DevWorkspace CRD）所需的自定义资源定义（CRD）。打开 web 终端时，web 控制台会创建所需的资源。
+
+.先决条件
+* 使用具有 `cluster-admin` 权限的账户访问 统信容器云管理平台 集群。
+
+.流程
+. 在 Web 控制台的 *Administrator* 视角中，导航到 *Operators -> OperatorHub*。
+. 使用  *Filter by keyword* 复选框在目录中搜索 Web Terminal Operator，然后点击  *Web Terminal* 标题
+. 参阅 *Web Terminal*  页面中有关 Operator 的简单描述，然后点击 *Install*。
+. 在 *Install Operator*  页面中，保留所有字段的默认值。
+
+** *Update Channel* 菜单中的 *fast* 选项启用 Web Terminal Operator 最新版本的安装。
+** *Installation Mode* 菜单中的 *All namespaces on the cluster* 选项可让 Operator 监视并可供集群中的所有命名空间使用。
+** *Installed Namespace* 菜单中的 *openshift-operators* 选项会在默认的 `openshift-operators` 命名空间中安装 Operator。
+** *Approval Strategy* 菜单中的 *Automatic* 选项确保以后对 Operator 的升级由 Operator Lifecycle Manager 自动处理。
+
+. 点 *Install*.
+. 在 *Installed Operators* 页面中，点 *View Operator* 来验证 *Installed Operators* 页面中是否列出了 Operator。
++
+[注意]
+====
+在 统信容器云管理平台 4.8 之前，Web Terminal Operator 将其所有功能捆绑到单个 Operator 中。从 统信容器云管理平台 4.8 开始，Web Terminal Operator 将 DevWorkspace Operator 安装为依赖项，以提供相同的功能。
+====
+
+. 安装 Operator 后，刷新页面以查看控制台右上角的命令行终端图标。

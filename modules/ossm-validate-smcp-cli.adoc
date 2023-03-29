@@ -1,0 +1,31 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v2x/ossm-create-smcp.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-validate-control-plane-cli_{context}"]
+= Validating your SMCP installation with the CLI
+您可以从命令行验证 `ServiceMeshControlPlane` 创建。
+
+.Procedure
+
+. 以具有 `cluster-admin` 角色的用户身份登录 {product-title} CLI 。
++
+[source,terminal]
+----
+$ oc login https://<HOSTNAME>:6443
+----
++
+. 运行以下命令，以验证  {SMProductShortName} control plane 安装，其中 `istio-system` 是安装 {SMProductShortName} control plane 的命名空间。
+[source,terminal]
+----
+$ oc get smcp -n istio-system
+----
++
+当 `STATUS` 列是 `ComponentsReady`时，安装成功完成。
++
+[source,terminal]
+----
+NAME    READY   STATUS            PROFILES      VERSION   AGE
+basic   10/10   ComponentsReady   ["default"]   2.1.1     66m
+----

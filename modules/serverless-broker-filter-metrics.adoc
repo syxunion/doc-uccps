@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-broker-filter-metrics_{context}"]
+= 代理过滤指标
+
+您可以使用以下指标调试代理过滤器，查看它们的执行方式，以及过滤器正在分配哪些事件。您还可以测量事件的过滤操作的延迟。
+
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`event_count`
+|代理接收的事件数。
+|计数
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `response_code`, `response_code_class`, `trigger_name`, `unique_name`
+|整数 (无单位)
+
+|`event_dispatch_latencies`
+|将事件发送到频道的时间
+|Histogram
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `response_code`, `response_code_class`, `trigger_name`, `unique_name`
+|Milliseconds
+
+|`event_processing_latencies`
+|将事件分配给触发器订阅者前处理事件所需的时间。
+|Histogram
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `trigger_name`, `unique_name`
+|Milliseconds
+|===

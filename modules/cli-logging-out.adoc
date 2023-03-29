@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/getting-started.adoc
+
+[id="cli-logging-out_{context}"]
+= 注销 Uccps CLI
+
+您可以注销 Uccps CLI 以结束当前会话。
+
+* 使用 `oc logout` 命令。
++
+[source,terminal]
+----
+$ oc logout
+----
++
+.输出示例
+[source,terminal]
+----
+Logged "user1" out on "https://openshift.example.com"
+----
+
+This deletes the saved authentication token from the server and removes it from
+your configuration file.

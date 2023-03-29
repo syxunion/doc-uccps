@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-working.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-working-marking_{context}"]
+= 了解如何将节点标记为不可调度或可以调度
+
+默认情况下，具有 `Ready` 状态的健康节点被标记为可以调度，这意味着您可以在节点上放置新 pod。如果手动将节点标记为不可调度，则会阻止在该节点上调度任何新的 pod。节点上的现有 pod 不受影响。
+
+* 以下命令将一个或多个节点标记为不可调度：
++
+.输出示例
+[source,terminal]
+----
+$ oc adm cordon <node>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc adm cordon node1.example.com
+----
++
+.输出示例
+[source,terminal]
+----
+node/node1.example.com cordoned
+
+NAME                 LABELS                                        STATUS
+node1.example.com    kubernetes.io/hostname=node1.example.com      Ready,SchedulingDisabled
+----
+
+* 以下命令将当前不可调度的一个或多个节点标记为可以调度：
++
+[source,terminal]
+----
+$ oc adm uncordon <node1>
+----
++
+另外，您也可以使用 `--selector=<node_selector>` 选项将选定的节点标记为可以调度或不可调度，而不指定具体的节点名称（如 <node>）。

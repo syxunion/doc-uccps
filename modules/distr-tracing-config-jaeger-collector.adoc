@@ -1,0 +1,66 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-jaeger-collector_{context}"]
+= Jaeger Collector 配置选项
+
+Jaeger Collector 组件负责接收 tracer 捕获的 span，在使用 `production` 策略时将其写入持久性 Elasticsearch 存储，或使用`streaming` 策略时将其写入 AMQ Streams。
+
+Collector 是无状态的，因此很多 Jaeger Collector 实例可以并行运行。除了 Elasticsearch 集群的位置，收集器几乎不需要任何配置。
+
+.Operator 用来定义 Jaeger Collector 的参数
+[options="header"]
+[cols="l, a, a"]
+|===
+|参数 |描述 |值
+|collector:
+  replicas:
+|指定要创建的 Collector 副本数。
+|整数，如 5。
+|===
+
+
+.传递给 Collector 的配置参数
+[options="header"]
+[cols="l, a, a"]
+|===
+|参数 |描述 |值
+|spec:
+ collector:
+  options: {}
+|定义 Jaeger Collector 的配置选项。
+|
+
+|options:
+  collector:
+    num-workers:
+|从队列中拉取的 worker 数量。
+|整数，如 50。
+
+|options:
+  collector:
+    queue-size:
+|Collector 队列的大小。
+|整数，如 2000
+
+|options:
+  kafka:
+    producer:
+      topic: jaeger-spans
+|`topic` 参数标识收集器用来生成消息的 Kafka 配置以及要使用消息的 ingester。
+|producer 的标签。
+
+|options:
+  kafka:
+    producer:
+      brokers: my-cluster-kafka-brokers.kafka:9092
+|标识 Collector 用来生成消息的 Kafka 配置。如果没有指定代理。
+|
+
+|options:
+  log-level:
+|Collector 的日志记录级别。
+|可能的值有： `debug`, `info`, `warn`, `error`, `fatal`, `panic`.
+|===

@@ -1,0 +1,68 @@
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-audit-enable_{context}"]
+= 为命名空间启用网络策略审计日志记录
+
+作为集群管理员，您可以为命名空间启用网络策略审计日志记录。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+* 要为命名空间启用网络策略审计日志记录，请输入以下命令：
++
+[source,terminal]
+----
+$ oc annotate namespace <namespace> \
+  k8s.ovn.org/acl-logging='{ "deny": "alert", "allow": "notice" }'
+----
++
+--
+其中：
+
+`<namespace>`:: 指定命名空间的名称。
+--
++
+[提示]
+====
+您还可以应用以下 YAML 来启用审计日志记录：
+
+[source,yaml]
+----
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: <namespace>
+  annotations:
+    k8s.ovn.org/acl-logging: |-
+      {
+        "deny": "alert",
+        "allow": "notice"
+      }
+----
+====
++
+.输出示例
+[source,terminal]
+----
+namespace/verify-audit-logging annotated
+----
+
+.验证
+
+* 显示网络策略审计日志中的最新条目：
++
+[source,terminal]
+----
+$ for pod in $(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node --no-headers=true | awk '{ print $1 }') ; do
+    oc exec -it $pod -n openshift-ovn-kubernetes -- tail -4 /var/log/ovn/acl-audit-log.log
+  done
+----
++
+.输出示例
+[source,text]
+----
+2021-06-13T19:33:11.590Z|00005|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_deny-all", verdict=drop, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:39,dl_dst=0a:58:0a:80:02:37,nw_src=10.128.2.57,nw_dst=10.128.2.55,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+----

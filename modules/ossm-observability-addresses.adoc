@@ -1,0 +1,75 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-observability-addresses_{context}"]
+= Discovering console addresses
+
+{SMProductName} 提供以下控制台来查看您的服务网格数据：
+
+* *Kiali 控制台* -  Kiali 是 {SMProductName} 的管理控制台。
+* *Jaeger 控制台* - Jaeger 是 {DTProductName} 分布式追踪的管理控制台。
+* *Grafana 控制台* - Grafana 为网格管理员提供 Istio 数据的高级查询和指标分析和仪表板。另外，Grafana 可以用来分析服务网格指标。
+* *Prometheus 控制台* - {SMProductName} 使用 Prometheus 存储来自服务的遥测信息。
+
+安装 Service Mesh control plane 时，它会为每个安装的组件自动生成路由。获得路由地址后，您可以访问 Kiali、Jaeger、Prometheus 或 Grafana 控制台来查看和管理您的服务网格数据。
+
+.前提条件
+
+* 必须启用并安装组件。例如，如果您没有安装分布式追踪，您将无法访问 Jaeger 控制台。
+
+.从 Uccps 控制台的步骤
+
+. 以具有 cluster-admin 权限的用户身份登录到 {product-title} 控制台。 
+
+. 进入 *网络* -> *路由*.
+
+. 在 *路由* 页面中，从 *命名空间* 菜单中选择 {SMProductShortName}  项目，如 `istio-system` 。
++
+*位置* 列显示每个路由的链接地址。
++
+. 如有必要，使用过滤器来查找您要访问的路由的组件控制台。单击路由 *位置* 控制台。
+
+. 单击 *Log In With Uccps*.
+
+.通过 CLI 操作的步骤
+. 以具有 `cluster-admin` 角色的用户身份登录 {product-title} CLI 。
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:6443
+----
++
+. 切换到 {SMProductShortName} control plane 项目。在本例中， `istio-system` 是 Service Mesh control plane 项目。运行以下命令：
++
+[source,terminal]
+----
+$ oc project istio-system
+----
++
+. 要获取各种  {SMProductName} 控制台的路由，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get routes
+----
++
+这个命令返回 Kiali、Jaeger、Prometheus 和 Grafana web 控制台以及服务网格中任何其他路由的 URL。您应该看到类似如下的输出：
++
+
+[source,terminal]
+----
+NAME                    HOST/PORT                         SERVICES              PORT    TERMINATION
+bookinfo-gateway        bookinfo-gateway-yourcompany.com  istio-ingressgateway          http2
+grafana                 grafana-yourcompany.com           grafana               <all>   reencrypt/Redirect
+istio-ingressgateway    istio-ingress-yourcompany.com     istio-ingressgateway  8080
+jaeger                  jaeger-yourcompany.com            jaeger-query          <all>   reencrypt
+kiali                   kiali-yourcompany.com             kiali                 20001   reencrypt/Redirect
+prometheus              prometheus-yourcompany.com        prometheus            <all>   reencrypt/Redirect
+----
+
+. 将您要从 `HOST/PORT` 列访问的控制台的 URL 复制到浏览器中以打开控制台。
+
+. 单击 *Log In With Uccps*.

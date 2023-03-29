@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="disabling_grafana_{context}"]
+= 禁用默认的 Grafana 部署
+
+默认情况下，使用显示集群指标的仪表板集合部署了只读 Grafana 实例。Grafana 实例不可用户配置。
+
+您可以禁用 Grafana 部署，从而导致从集群中删除相关的资源。如果您不需要这些仪表板且希望在集群中节省资源，则可能会这样做。您仍然能够查看 web 控制台中包含的指标和仪表板。Grafana 可以随时安全地启用。
+
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps  CLI (`oc`).
+
+.流程
+
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+. 在 `data/config.yaml` 下为 grafana 组件添加 `enabled: false`：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    grafana:
+      enabled: false
+----
+
+. 保存文件以使改变生效。应用更改时，资源将开始自动删除。
++
+[警告]
+====
+此更改会导致一些组件，包括 Prometheus 和 Thanos Querier，正在重启。如果您还没有遵循 "配置持久性存储" 部分中的步骤，这可能会导致之前收集的指标丢失。
+====
+
+. 检查 Grafana pod 是否不再运行。以下示例列出了  `openshift-monitoring` 项目中的 pod 状态：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get pods
+----
++
+[注意]
+====
+应用更改后可能需要几分钟时间来终止这些 pod。
+====

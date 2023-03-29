@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-managing.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-working-master-schedulable_{context}"]
+= 将 control plane 节点配置为可以调度
+
+您可以将 control plane 节点配置为可以调度，这意味着允许在 master 节点上放置新的 pod。默认情况下，control plane 节点不可调度。
+
+您可以将 master 设置为可调度，但必须保留 worker 节点。
+
+[注意]
+====
+您可以在裸机集群中部署没有 worker 节点的 统信容器云管理平台。在这种情况下，control plane 节点会被标记为可以调度。
+====
+
+您可以通过配置 `mastersSchedulable` 字段来允许或禁止调度 control plane 节点。
+
+[重要]
+====
+当您将 control plane 节点从默认的不可调度配置为可以调度时，需要额外的订阅。这是因为 control plane 节点随后变为 worker 节点。
+====
+
+.流程
+
+. 编辑 `schedulers.config.openshift.io` 资源。
++
+[source,terminal]
+----
+$ oc edit schedulers.config.openshift.io cluster
+----
+
+. 配置 `mastersSchedulable` 字段。
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  creationTimestamp: "2019-09-10T03:04:05Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "433"
+  selfLink: /apis/config.openshift.io/v1/schedulers/cluster
+  uid: a636d30a-d377-11e9-88d4-0a60097bee62
+spec:
+  mastersSchedulable: false <1>
+status: {}
+----
+<1> 设置为 `true`  以允许调度 control plane 节点，或设置为 `false` 以禁止调度 control plane 节点。
+
+. 保存文件以使改变生效。

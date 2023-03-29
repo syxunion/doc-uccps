@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="serverless-apiserversource"]
+= 创建 API 服务器源
+include::_attributes/common-attributes.adoc[]
+:context: serverless-apiserversource
+
+toc::[]
+
+API 服务器源是一个事件源，可用于将事件接收器（sink），如 Knative 服务，连接到 Kubernetes API 服务器。API 服务器源监视 Kubernetes 事件并将其转发到 Knative Eventing 代理。
+
+// dev console
+include::modules/odc-creating-apiserversource.adoc[leveloffset=+1]
+// kn commands
+include::modules/apiserversource-kn.adoc[leveloffset=+1]
+include::modules/specifying-sink-flag-kn.adoc[leveloffset=+2]
+// YAML
+include::modules/apiserversource-yaml.adoc[leveloffset=+1]

@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/editing-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/editing-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "openshift-sdn-egress-firewall"]
+:kind: EgressNetworkPolicy
+:res: egressnetworkpolicy
+:cni: OpenShift SDN
+endif::[]
+ifeval::["{context}" == "editing-egress-firewall-ovn"]
+:kind: EgressFirewall
+:res: egressfirewall
+:cni: OVN-Kubernetes
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-egressnetworkpolicy-edit_{context}"]
+= 编辑 EgressNetworkPolicy 对象
+
+作为集群管理员，您可以更新一个项目的出口防火墙。
+
+.先决条件
+
+* 使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商插件的集群。
+* 安装 Uccp CLI（oc）。
+* 您需要使用集群管理员身份登陆到集群。
+
+.流程
+
+. 查找项目的 EgressNetworkPolicy 对象的名称。将 `<project>` 替换为项目的名称。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get -n <project> {res}
+----
+
+. 可选，如果您在创建出口网络防火墙时没有保存 EgressNetworkPolicy 对象的副本，请输入以下命令来创建副本。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get -n <project> {res} <name> -o yaml > <filename>.yaml
+----
++
+将 `<project>` 替换为项目的名称。将 `<name>` 替换为 Pod 的名称。将 `<filename>` 替换为要将 YAML 保存到的文件的名称。
+
+. 更改了策略规则后，请输入以下命令替换 `EgressNetworkPolicy` 对象。将 `<filename>` 替换为包含更新的 EgressNetworkPolicy 对象的文件名称。
++
+[source,terminal]
+----
+$ oc replace -f <filename>.yaml
+----
+
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::res[]
+:!res:
+endif::[]
+ifdef::cni[]
+:!cni:
+endif::[]

@@ -1,0 +1,162 @@
+// Module included in the following assemblies:
+//
+// * networking/verifying-connectivity-endpoint.adoc
+
+[id="nw-pod-network-connectivity-check-object_{context}"]
+= PodNetworkConnectivityCheck 对象字段
+
+`PodNetworkConnectivityCheck` 对象字段在下表中描述。
+
+.PodNetworkConnectivityCheck 对象字段
+[cols="2,1,3a",options="header"]
+|===
+
+|字段|类型|描述
+
+|`metadata.name`
+|`字符串`
+|对象的名称，其格式如下： `<source>-to-<target>`。`<target>` 描述的目的地包括以下字符串之一：
+
+* `load-balancer-api-external`
+* `load-balancer-api-internal`
+* `kubernetes-apiserver-endpoint`
+* `kubernetes-apiserver-service-cluster`
+* `network-check-target`
+* `openshift-apiserver-endpoint`
+* `openshift-apiserver-service-cluster`
+
+|`metadata.namespace`
+|`字符串`
+|与对象关联的命名空间。此值始终为 `openshift-network-diagnostics`。
+
+|`spec.sourcePod`
+|`字符串`
+|连接检查来源于的 pod 的名称，如 `network-check-source-596b4c6566-rgh92`。
+
+|`spec.targetEndpoint`
+|`字符串`
+|连接检查的目标，如 `api.devcluster.example.com:6443`。
+
+|`spec.tlsClientCert`
+|`object`
+|要使用的 TLS 证书配置。
+
+|`spec.tlsClientCert.name`
+|`字符串`
+|使用的 TLS 证书的名称（若有）。默认值为空字符串。
+
+|`status`
+|`对象`
+|代表连接测试条件和最近连接发生和失败的日志的对象。
+
+|`status.conditions`
+|`数组`
+|连接检查以及任何之前的状态的最新状态。
+
+|`status.failures`
+|`数组`
+|连接测试日志不会失败。
+
+|`status.outages`
+|`数组`
+|涵盖任何中断的时间连接测试日志。
+
+|`status.successes`
+|`数组`
+|成功尝试的连接测试日志。
+
+|===
+
+下表描述了 `status.conditions` 阵列中对象的字段：
+
+.status.conditions
+[cols="2,1,3",options="header"]
+|===
+|字段 |类型 |描述
+
+|`lastTransitionTime`
+|`字符串`
+|连接条件从一个状态转换到另一个状态的时间。
+
+|`message`
+|`字符串`
+|有关最后一次转换的详情（人类可读的格式）。
+
+|`reason`
+|`字符串`
+|有关最后一次转换的详情（机器可读的格式）。
+
+|`status`
+|`字符串`
+|条件的状态。
+
+|`type`
+|`字符串`
+|条件的状态。
+
+|===
+
+下表描述了 `status.conditions` 阵列中对象的字段：
+
+.status.outages
+[cols="2,1,3",options="header"]
+|===
+|字段 |类型 |描述
+
+|`end`
+|`字符串`
+|连接失败时的时间戳。
+
+|`endLogs`
+|`数组`
+|连接日志条目，包括与成功关闭相关的日志条目。
+
+|`message`
+|`字符串`
+|以人类可读格式显示停机详情概述。
+
+|`start`
+|`字符串`
+|第一次检测到连接失败时的时间戳。
+
+|`startLogs`
+|`数组`
+|连接日志条目，包括原始失败。
+
+|===
+
+[discrete]
+== 连接日志字段
+
+下表中描述了连接日志条目的字段。该对象用于以下字段：
+
+* `status.failures[]`
+* `status.successes[]`
+* `status.outages[].startLogs[]`
+* `status.outages[].endLogs[]`
+
+.连接日志对象
+[cols="2,1,3",options="header"]
+|===
+|字段 |类型 |描述
+
+|`latency`
+|`字符串`
+|记录操作的持续时间。
+
+|`message`
+|`字符串`
+|以人类可读格式提供的状态信息。
+
+|`reason`
+|`字符串`
+|以可读格式提供状态的原因。这个值是 `TCPConnect`、`TCPConnectError`、`DNSResolve`、`DNSError` 之一。
+
+|`success`
+|`boolean`
+|指明日志条目是否成功或失败。
+
+|`time`
+|`字符串`
+|连接检查的开始时间。
+|===

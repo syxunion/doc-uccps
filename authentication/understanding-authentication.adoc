@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="understanding-authentication"]
+= 了解身份验证
+include::_attributes/common-attributes.adoc[]
+:context: understanding-authentication
+
+toc::[]
+
+用户若要与统信容器云管理平台交互，必须先进行集群的身份验证。身份验证层识别与统信容器云管理平台API 请求关联的用户。然后，授权层使用有关请求用户的信息来确定是否允许该请求。
+
+作为管理员，您可以为统信容器云管理平台配置身份验证。
+
+include::modules/rbac-users.adoc[leveloffset=+1]
+
+include::modules/rbac-groups.adoc[leveloffset=+1]
+
+include::modules/rbac-api-authentication.adoc[leveloffset=+1]
+
+include::modules/oauth-server-overview.adoc[leveloffset=+2]
+
+include::modules/oauth-token-requests.adoc[leveloffset=+2]
+
+include::modules/authentication-api-impersonation.adoc[leveloffset=+3]
+
+include::modules/authentication-prometheus-system-metrics.adoc[leveloffset=+3]

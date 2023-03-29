@@ -1,0 +1,68 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-volumes-removing_{context}"]
+= 从 pod 中删除卷和卷挂载
+
+您可以从 pod 中移除卷或卷挂载。
+
+.流程
+
+从 pod 模板中移除卷：
+
+[source,terminal]
+----
+$ oc set volume <object_type>/<name> --remove [options]
+----
+
+.移除卷时支持的选项
+[cols="3a*",options="header"]
+|===
+
+|选项 |描述 |默认
+
+|`--name`
+|卷的名称。
+|
+
+|`-c, --containers`
+|按名称选择容器。它还可以使用通配符 '*’ 来匹配任意字符。
+|`'*'`
+
+|`--confirm`
+|指定您想要一次性移除多个卷。
+|
+
+|`-o, --output`
+|显示修改后的对象，而不在服务器上更新它们。支持的值有 json 和 yaml。
+|
+
+|`--output-version`
+|输出给定版本的修改后对象。
+|`api-version`
+|===
+
+例如：
+
+* 从 `DeploymentConfig` 对象 *d1* 中删除卷 *v1*
++
+[source,terminal]
+----
+$ oc set volume dc/d1 --remove --name=v1
+----
+
+* 为 `DeploymentConfig` 对象从 *d1* 的容器 *c1* 中卸载卷 *v1*，并在 *d1* 上的任何容器都没有引用时删除卷 *v1*：
++
+[source,terminal]
+----
+$ oc set volume dc/d1 --remove --name=v1 --containers=c1
+----
+
+* 移除复制控制器 *r1* 的所有卷：
++
+[source,terminal]
+----
+$ oc set volume rc/r1 --remove --confirm
+----

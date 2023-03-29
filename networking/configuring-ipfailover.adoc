@@ -1,0 +1,74 @@
+:_content-type: ASSEMBLY
+[id="configuring-ipfailover"]
+= 配置 IP 故障转移
+include::_attributes/common-attributes.adoc[]
+:context: configuring-ipfailover
+
+toc::[]
+
+本节论述了为 统信容器云管理平台 集群上的 pod 和服务配置 IP 故障转移。
+
+IP 故障转移（IP failover）在一组节点上管理一个虚拟 IP（VIP）地址池。集合中的每个 VIP 都由从集合中选择的节点提供服务。只要单个节点可用，就会提供 VIP。无法将 VIP 显式分发到节点上，因此可能存在没有 VIP 的节点和其他具有多个 VIP 的节点。如果只有一个节点，则所有 VIP 都在其中。
+
+[注意]
+====
+VIP 必须可以从集群外部路由。
+====
+
+IP 故障转移会监控每个 VIP 上的端口，以确定该端口能否在节点上访问。如果端口无法访问，则不会向节点分配 VIP。如果端口设为 0，则会禁止此检查。检查脚本执行所需的测试。
+
+IP 故障转移使用 Keepalived 在一组主机上托管一组外部访问的 VIP 地址。在一个时间点上，每个 VIP 仅由一个主机提供服务。Keepalived 使用虚拟路由器冗余协议（VRRP）决定在主机集合中使用哪个主机提供 VIP 服务。如果主机不可用，或者 Keepalived 正在监视的服务没有响应，则 VIP 会切换到主机集中的另外一个主机。这意味着只要主机可用，便始终可以提供 VIP 服务。
+
+当运行 Keepalived 的节点通过检查脚本时，该节点上的 VIP 可以根据其优先级和当前 master 的优先级以及抢占策略决定进入 master 状态。
+
+集群管理员可以通过 `OPENSHIFT_HA_NOTIFY_SCRIPT` 变量提供一个脚本，每当节点上的 VIP 的状态发生变化时会调用此脚本。keepalived 在为 VIP 提供服务时为 master 状态；当另一个节点提供 VIP 服务时，状态为 `backup`；当检查脚本失败时，状态为 `fault`。每当状态更改时，notify 脚本都会被调用，并显示新的状态。
+
+您可以在 统信容器云管理平台 上创建 IP 故障转移部署配置。IP 故障转移部署配置指定 VIP 地址的集合，以及服务它们的一组节点。一个集群可以具有多个 IP 故障转移部署配置，各自管理自己的一组唯一的 VIP 地址。IP 故障转移配置中的每个节点运行 IP 故障转移 pod，此 pod 运行 Keepalived。
+
+使用 VIP 访问带有主机网络的 pod 时，应用程序 pod 在运行 IP 故障转移 pod 的所有节点上运行。这可让任何 IP 故障转移节点成为主节点，并在需要时为 VIP 服务。如果应用程序 pod 没有在所有具有 IP 故障转移功能的节点上运行，有些 IP 故障转移节点不会为 VIP 服务，或者某些应用 pod 都不会接收任何流量。对 IP 故障转移和应用容器集使用相同的选择器和复制数，以避免这种不匹配。
+
+在使用 VIP 访问服务时，任何节点都可以位于节点的 IP 故障转移集中，因为无论应用容器集在哪里运行，该服务都可以在所有节点上访问。任何 IP 故障转移节点可以随时变成主节点。服务可以使用外部 IP 和服务端口，或者可以使用 `NodePort`。
+
+在服务定义中使用外部 IP 时，VIP 被设置为外部 IP，IP 故障转移监控端口则设为服务端口。在使用节点端口时，该端口在集群的每个节点上打开，服务则从当前服务于 VIP 的任何节点对流量进行负载平衡。在这种情况下，IP 故障转移监控端口在服务定义中设置为 `NodePort`。
+
+[重要]
+====
+设置 `NodePort` 是一个特权操作。
+====
+
+[重要]
+====
+即使一个服务 VIP 具有高可用性，但性能仍会受到影响。keepalived 确保每个 VIP 都由配置中的某个节点提供服务，即使其他节点没有，也可以在同一节点上出现多个 VIP。当 IP 故障转移在同一节点上放置多个 VIP 时，在一组 VIP 间进行外部负载平衡的策略可能会被破解。
+====
+
+当使用 `ingressIP` 时，您可以将 IP 故障切换设置为与 `ingressIP` 范围相同的 VIP 范围。您还可以禁用监控端口。在本例中，所有 VIP 都出现在集群的同一节点上。任何用户都可以使用 `ingressIP` 设置服务，并使其具有高可用性。
+
+[重要]
+====
+集群中最多有 254 个 VIP。
+====
+
+include::modules/nw-ipfailover-environment-variables.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-configuration.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-virtual-ip-addresses-concept.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-configuring-check-notify-scripts.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-configuring-vrrp-preemption.adoc[leveloffset=+1]
+
+//Omitted the following procedure for now. We can update it to use `oc debug` if needed.
+//include::modules/nw-ipfailover-configuring-keepalived-multicast.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-vrrp-ip-offset.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-configuring-more-than-254.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-cluster-ha-ingress.adoc[leveloffset=+1]
+
+include::modules/nw-ipfailover-remove.adoc[leveloffset=+1]
+
+//[role="_additional-resources"]
+//== Additional resources
+//TCP connection

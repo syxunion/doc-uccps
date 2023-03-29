@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="adding-a-custom-logo_{context}"]
+= 添加自定义徽标和产品名称
+
+您可以通过添加自定义徽标或自定义产品名称来创建自定义品牌。因为这些设置相互独立，因此可以两者都设置或只设置其中的一个。
+
+.先决条件
+
+* 您必须具有管理员特权。
+* 创建一个要使用的徽标文件。徽标可以是通用图像格式的文件，包括 GIF 、JPG 、PNG 或 SVG ，并有 `max-height` 为 `60px` 的限制。
+
+.流程
+
+. 在 `openshift-config` 命名空间中将您的徽标文件导入到配置映射中：
++
+[source,terminal]
+----
+$ oc create configmap console-custom-logo --from-file /path/to/console-custom-logo.png -n openshift-config
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来创建配置映射：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: console-custom-logo
+  namespace: openshift-config
+binaryData:
+  console-custom-logo.png: <base64-encoded_logo> ... <1>
+----
+<1> 提供有效的 base64 编码徽标。
+====
+
+. 编辑 web 控制台的 Operator 配置使其包含 `customLogoFile` 和 `customProductName`：
++
+[source,terminal]
+----
+$ oc edit consoles.operator.openshift.io cluster
+----
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  customization:
+    customLogoFile:
+      key: console-custom-logo.png
+      name: console-custom-logo
+    customProductName: My Console
+----
++
+更新 Operator 配置后，它将会把自定义的 logo 配置映射同步到控制台命名空间中，并将其挂载到 console pod 并重新部署。
+
+. 检查操作是否成功。如果有任何问题，控制台集群 Operator 将报告 `Degraded` 状态，控制台 Operator 配置也会报告 `CustomLogoDegraded` 状态，但状态类似于 `KeyOrFilenameInvalid` 或 `NoImageProvided`。
++
+运行以下命令检查 `clusteroperator`：
++
+[source,terminal]
+----
+$ oc get clusteroperator console -o yaml
+----
++
+运行以下命令检查 console Operator 配置：
++
+[source,terminal]
+----
+$ oc get consoles.operator.openshift.io -o yaml
+----

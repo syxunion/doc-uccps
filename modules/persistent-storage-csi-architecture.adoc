@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent_storage-csi.adoc
+
+[id="persistent-storage-csi-architecture_{context}"]
+= CSI 架构
+
+CSI 驱动程序通常由容器镜像提供。这些容器不了解其运行的 统信容器云管理平台。要在统信容器云管理平台中使用与 CSI 兼容的存储后端，集群管理员必须部署几个组件，作为统信容器云管理平台和存储驱动程序间的桥接。
+
+下图提供了在统信容器云管理平台集群中以 pod 运行的组件的概述。
+
+image::csi-arch-rev1.png["Architecture of CSI components"]
+
+对于不同的存储后端，可以运行多个 CSI 驱动程序。每个驱动程序需要其自身的外部控制器部署，以及带驱动程序和 CSI 注册器的守护进程集。

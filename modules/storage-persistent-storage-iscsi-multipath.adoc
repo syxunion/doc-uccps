@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage-iscsi.adoc
+
+[id="iscsi-multipath_{context}"]
+= iSCSI 多路径
+对于基于 iSCSI 的存储，您可以使用相同的 IQN 为多个目标入口 IP 地址配置多路径。通过多路径，当路径中的一个或者多个组件失败时，仍可保证对持久性卷的访问。
+
+使用 portals 字段在 pod 规格中指定多路径。例如：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iscsi-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 10.0.0.1:3260
+    portals: ['10.0.2.16:3260', '10.0.2.17:3260', '10.0.2.18:3260'] <1>
+    iqn: iqn.2016-04.test.com:storage.target00
+    lun: 0
+    fsType: ext4
+    readOnly: false
+----
+<1> 使用 `portals` 字段添加额外的目标门户。

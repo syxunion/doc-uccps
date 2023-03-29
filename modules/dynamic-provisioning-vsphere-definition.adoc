@@ -1,0 +1,23 @@
+// Module included in the following definitions:
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+
+[id="vsphere-definition_{context}"]
+= VMware vSphere 对象定义
+
+.vsphere-storageclass.yaml
+[source,yaml]
+----
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: <storage-class-name> <1>
+provisioner: kubernetes.io/vsphere-volume <2>
+parameters:
+  diskformat: thin <3>
+----
+<1> 存储类的名称。持久性卷声明使用此存储类来置备关联的持久性卷。
+<2> 有关在统信容器云管理平台中使用 VMware vSphere 的详情，请参阅 VMware vSphere 文档。
+<3> `diskformat`: `thin`, `zeroedthick` 和 `eagerzeroedthick` 都是有效的磁盘格式。如需有关磁盘格式类型的更多详情，请参阅 vSphere 文档。默认值为 thin。

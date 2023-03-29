@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+[id="enable-cluster-wide-proxy"]
+= 配置集群范围代理
+include::_attributes/common-attributes.adoc[]
+:context: config-cluster-wide-proxy
+
+toc::[]
+
+生产环境可能会拒绝直接访问互联网，而是提供 HTTP 或 HTTPS 代理。您可以通过修改现有集群的 Proxy 对象或在新集群的 install-config.yaml 文件中配置代理设置，将 统信容器云管理平台 配置为使用代理。
+
+== 先决条件
+
+* 查看集群需要访问的站点中的内容，决定这些站点中的任何站点是否需要绕过代理。默认情况下，所有集群系统的出站流量都需经过代理，包括对托管集群的云供应商 API 的调用。系统范围的代理仅会影响系统组件，而不会影响用户工作负载。若有需要，将站点添加到 Proxy 对象的 spec.noProxy 字段来绕过代理服务器。
++
+[注意]
+====
+Proxy 对象 `status.noProxy` 字段使用安装配置中的 `networking.machineNetwork[].cidr`、`networking.clusterNetwork[].cidr` 和 `networking.serviceNetwork[]` 字段的值填充。
+
+对于在 Amazon Web Services(AWS)、Google Cloud Platform(GCP)、Microsoft Azure 和 Uniontech UStack Platform上安装, Proxy 对象 status.noProxy 字段也会使用实例元数据端点填充(169.254.169.254)。
+====
+
+include::modules/nw-proxy-configure-object.adoc[leveloffset=+1]
+
+include::modules/nw-proxy-remove.adoc[leveloffset=+1]

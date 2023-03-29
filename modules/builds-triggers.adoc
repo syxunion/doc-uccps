@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+[id="builds-triggers_{context}"]
+= 构建触发器
+
+在定义 `BuildConfig` 时，您可以定义触发器来控制应该运行 `BuildConfig` 的环境。可用的构建触发器如下：
+
+* Webhook
+* 镜像更改
+* 配置更改

@@ -1,0 +1,154 @@
+// Module included in the following assemblies:
+//
+// * networking/using-sctp.adoc
+
+:image: registry.access.redhat.com/ubi8/ubi
+
+ifdef::openshift-origin[]
+:image: fedora:31
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-sctp-verifying_{context}"]
+= 验证流控制传输协议 (SCTP) 已启用
+
+您可以通过创建一个 pod 以及侦听 SCTP 流量的应用程序，将其与服务关联，然后连接到公开的服务，来验证 SCTP 是否在集群中工作。
+
+.先决条件
+
+* 从集群访问互联网来安装 nc 软件包。
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 创建 pod 启动 SCTP 侦听程序：
+
+.. 创建名为 `sctp-server.yaml` 的文件，该文件使用以下 YAML 定义 pod:
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sctpserver
+  labels:
+    app: sctpserver
+spec:
+  containers:
+    - name: sctpserver
+      image: {image}
+      command: ["/bin/sh", "-c"]
+      args:
+        ["dnf install -y nc && sleep inf"]
+      ports:
+        - containerPort: 30102
+          name: sctpserver
+          protocol: SCTP
+----
+
+.. 运行以下命令来创建 pod：
++
+[source,terminal]
+----
+$ oc create -f sctp-server.yaml
+----
+
+. 为 SCTP 侦听程序 pod 创建服务。
+
+.. 创建名为 `sctp-service.yaml` 的文件，该文件使用以下 YAML 定义服务：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: sctpservice
+  labels:
+    app: sctpserver
+spec:
+  type: NodePort
+  selector:
+    app: sctpserver
+  ports:
+    - name: sctpserver
+      protocol: SCTP
+      port: 30102
+      targetPort: 30102
+----
+
+.. 要创建服务，请输入以下命令：
++
+[source,terminal]
+----
+$ oc create -f sctp-service.yaml
+----
+
+. 为 SCTP 客户端创建 pod。
+
+.. 使用以下 YAML 创建名为 `sctp-client.yaml` 的文件：
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sctpclient
+  labels:
+    app: sctpclient
+spec:
+  containers:
+    - name: sctpclient
+      image: {image}
+      command: ["/bin/sh", "-c"]
+      args:
+        ["dnf install -y nc && sleep inf"]
+----
+
+.. 运行以下命令来创建 Pod 对象：
++
+[source,terminal]
+----
+$ oc apply -f sctp-client.yaml
+----
+
+. 在服务器中运行 SCTP 侦听程序。
+
+.. 要连接到服务器 pod，请输入以下命令：
++
+[source,terminal]
+----
+$ oc rsh sctpserver
+----
+
+.. 要启动 SCTP 侦听程序，请输入以下命令：
++
+[source,terminal]
+----
+$ nc -l 30102 --sctp
+----
+
+. 连接到服务器上的 SCTP 侦听程序。
+
+.. 在终端程序里打开一个新的终端窗口或标签页。
+
+.. 获取 `sctpservice` 服务的 IP 地址。使用以下命令：
++
+[source,terminal]
+----
+$ oc get services sctpservice -o go-template='{{.spec.clusterIP}}{{"\n"}}'
+----
+
+.. 要连接到客户端 pod，请输入以下命令：
++
+[source,terminal]
+----
+$ oc rsh sctpclient
+----
+
+.. 要启动 SCTP 客户端，请输入以下命令。将 `<cluster_IP>` 替换为 `sctpservice` 服务的集群 IP 地址。
++
+[source,terminal]
+----
+# nc <cluster_IP> 30102 --sctp
+----

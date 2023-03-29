@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-run-bundle_{context}"]
+= bundle
+
+`run bundle` 子命令使用 Operator Lifecycle Manager（OLM）以捆绑包格式部署 Operator。
+
+.`run bundle` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`--index-image` (string)
+|在其中注入捆绑包的索引镜像。默认镜像为 `quay.io/operator-framework/upstream-opm-builder:latest`。
+
+|`--install-mode <install_mode_value>`
+|安装 Operator 的集群服务版本（CSV）支持的模式，如` AllNamespaces` 或 `SingleNamespace`。
+
+|`--timeout <duration>`
+|安装超时。默认值为 `2m0s`。
+
+|`--kubeconfig` (string)
+|用于 CLI 请求的 `kubeconfig` 文件的路径。
+
+|`n`, `--namespace` (string)
+|如果存在，代表在其中运行 CLI 请求的命名空间。
+
+|`-h`, `--help`
+|`run bundle` 子命令的帮助输出。
+
+|===

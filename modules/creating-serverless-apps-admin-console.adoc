@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// serverless/admin_guide/serverless-cluster-admin-serving.adoc
+
+:_content-type: PROCEDURE
+[id="creating-serverless-apps-admin-console_{context}"]
+=  使用管理员视角创建无服务器应用程序
+
+include::snippets/serverless-apps.adoc[]
+
+创建服务并部署应用程序后，Knative 会为应用程序的这个版本创建一个不可变的修订版本。Knative 还将执行网络操作，为您的应用程序创建路由、入口、服务和负载平衡器，并根据流量自动扩展或缩减 pod。
+
+.先决条件
+
+要使用 *管理员* 视角创建无服务器应用程序，请确定您已完成了以下步骤。
+
+* 安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 您已登录到 Web 控制台，且处于 *管理员* 视角。
+
+.流程
+
+. 进入 *Serverless* -> *服务*  页面。
+. 在 *创建* 列表中，选择 *服务*。
+. 手动输入 YAML 或 JSON 定义，或者将文件拖放到编辑器中。
+. 点 *创建*.

@@ -1,0 +1,124 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-rebooting.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-rebooting-gracefully_{context}"]
+= 正常重新引导节点
+
+在重启节点前，建议备份 etcd 数据以避免该节点上出现数据丢失。
+
+[注意]
+====
+对于需要用户执行 `oc login` 命令而不是在 `kubeconfig` 文件中管理集群的单节点 Uccps(SNO)集群，`oc adm` 命令在 cordon 和 drain 操作节点后可能无法使用。这是因为`openshift-oauth-apiserver` pod  因 cordon 而没有运行。您可以使用 SSH 访问节点，如以下步骤中所示。
+
+在 SNO 集群中，当封锁和排空时，pod 无法重新调度。但是，这样做会给 pod（特别是工作负载 pod）提供时间，以正确地停止和释放相关资源。
+==== 
+
+.流程
+
+执行节点正常重启：
+
+. 将节点标记为不可调度。
++
+[source,terminal]
+----
+$ oc adm cordon <node1>
+----
+
+. 排空节点以删除所有正在运行的 pod：
++
+[source,terminal]
+----
+$ oc adm drain <node1> --ignore-daemonsets --delete-emptydir-data --force
+----
++
+您可能会收到与自定义 pod 中断预算(PDB)关联的 pod 不会被被驱除。
++
+.错误示例
+[source,terminal]
+----
+error when evicting pods/"rails-postgresql-example-1-72v2w" -n "rails" (will retry after 5s): Cannot evict pod as it would violate the pod's disruption budget.
+----
++
+在本例中，再次运行 drain 命令，添加 `disable-eviction` 标记，这将绕过 PDB 检查：
++
+[source,terminal]
+----
+$ oc adm drain <node1> --ignore-daemonsets --delete-emptydir-data --force --disable-eviction 
+----
+
+. 以 debug 模式访问节点：
++
+[source,terminal]
+----
+$ oc debug node/<node1>
+----
+
+. 将您的根目录改为 `/host`:
++
+[source,terminal]
+----
+$ chroot /host
+----
+
+. 重启节点：
++
+[source,terminal]
+----
+$ systemctl reboot
+----
++
+目前，节点进入 `NotReady` 状态。
++
+[NOTE]
+====
+对于某些 SNO 集群，在对节点进行 cordon 和 drain 后，`oc` 命令可能无法使用，因为  `openshift-oauth-apiserver` pod 没有运行。您可以使用 SSH 连接到该节点并执行重启。
+
+[source,terminal]
+----
+$ ssh core@<master-node>.<cluster_name>.<base_domain>
+----
+
+[source,terminal]
+----
+$ sudo systemctl reboot
+----
+====
+
+. 重启完成后，运行以下命令将节点标记为可以调度：
++
+[source,terminal]
+----
+$ oc adm uncordon <node1>
+----
++
+[注意]
+====
+对于某些 SNO 集群，在对节点进行 cordon 和 drain 后，`oc` 命令可能无法使用，因为 `openshift-oauth-apiserver` pod 没有运行。您可以使用 SSH 连接节点并取消记录它。
+
+[source,terminal]
+----
+$ ssh core@<target_node>
+----
+
+[source,terminal]
+----
+$ sudo oc adm uncordon <node> --kubeconfig /etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/node-kubeconfigs/localhost.kubeconfig
+----
+====
+
+. 验证节点是否已就绪：
++
+[source,terminal]
+----
+$ oc get node <node1>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME    STATUS  ROLES    AGE     VERSION
+<node1> Ready   worker   6d22h   v1.18.3+b0068a8
+----
+

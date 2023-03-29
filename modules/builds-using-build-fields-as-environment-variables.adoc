@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+:_content-type: PROCEDURE
+[id="builds-using-build-fields-as-environment-variables_{context}"]
+= 使用构建字段作为环境变量
+
+您可以注入构建对象的信息，使用 fieldPath 环境变量源指定要获取值的字段的 `JsonPath`。
+
+[注意]
+====
+Jenkins Pipeline 策略不支持将 `valueFrom` 语法用于环境变量。
+====
+
+.流程
+
+* 将 `fieldPath` 环境变量源设置为您有兴趣获取其值的字段的 `JsonPath`：
++
+[source,yaml]
+----
+env:
+  - name: FIELDREF_ENV
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.name
+----

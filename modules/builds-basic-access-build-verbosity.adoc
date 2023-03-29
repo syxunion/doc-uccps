@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-access-build-verbosity_{context}"]
+= 启用日志详细程度
+
+您可以传递 `BUILD_LOGLEVEL` 环境变量作为 `BuildConfig` 中 `sourceStrategy` 或 `dockerStrategy` 的一部分，来实现更为详细的输出。
+
+[注意]
+====
+管理员可以通过配置 `env/BUILD_LOGLEVEL`，为整个 统信容器云管理平台 实例设置默认的构建详细程度。此默认值可以通过在给定的 BuildConfig 中指定 `BUILD_LOGLEVEL` 来覆盖。您可以通过将 `--build-loglevel` 传递给 `oc start-build`，在命令行中为非二进制构建指定优先级更高的覆盖。
+====
+
+源构建的可用日志级别如下：
+
+[horizontal]
+ 0 级:: 生成运行 `assemble` 脚本的容器的输出，以及所有遇到的错误。这是默认值。
+ 1 级:: 生成有关已执行进程的基本信息。
+ 2 级:: 生成有关已执行进程的非常详细的信息。
+ 3 级:: 生成有关已执行进程的非常详细的信息，以及存档内容的列表。
+ 4 级:: 目前生成与 3 级相同的信息。
+ 5 级:: 生成以上级别中包括的所有内容，另外还提供 Docker 推送消息。
+
+.流程
+
+* 要启用更为详细的输出，请传递 `BUILD_LOGLEVEL` 环境变量作为 `BuildConfig` 中 `sourceStrategy` 或 `dockerStrategy` 的一部分：
++
+[source,yaml]
+----
+sourceStrategy:
+...
+  env:
+    - name: "BUILD_LOGLEVEL"
+      value: "2" <1>
+----
+<1> 将此值调整为所需的日志级别。

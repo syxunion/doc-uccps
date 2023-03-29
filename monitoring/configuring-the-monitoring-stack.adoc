@@ -1,0 +1,149 @@
+:_content-type: ASSEMBLY
+[id="configuring-the-monitoring-stack"]
+= 配置监控堆栈
+include::_attributes/common-attributes.adoc[]
+:context: configuring-the-monitoring-stack
+
+toc::[]
+
+安装之前，统信容器云管理平台 4 安装程序只提供少量的配置选项。大多数 统信容器云管理平台 框架组件（包括集群监控堆栈）都在安装后进行配置。
+
+本节介绍支持的配置，演示如何配置监控堆栈，并且展示几个常见的配置情景。
+
+== 先决条件
+
+* 监控堆栈会带来额外的资源需求。请参考缩放 Cluster Monitoring Operator 中的计算资源建议，并验证您是否有充足的资源。
+
+// Maintenance and support for monitoring
+include::modules/monitoring-maintenance-and-support.adoc[leveloffset=+1]
+include::modules/monitoring-support-considerations.adoc[leveloffset=+2]
+include::modules/monitoring-unmanaged-monitoring-operators.adoc[leveloffset=+2]
+
+// Preparing to configure the monitoring stack
+[id="preparing-to-configure-the-monitoring-stack"]
+== 准备配置监控堆栈
+
+您可以通过创建和更新监控配置映射来配置监控堆栈。
+
+include::modules/monitoring-creating-cluster-monitoring-configmap.adoc[leveloffset=+2]
+include::modules/monitoring-creating-user-defined-workload-monitoring-configmap.adoc[leveloffset=+2]
+
+// Configuring the monitoring stack
+include::modules/monitoring-configuring-the-monitoring-stack.adoc[leveloffset=+1]
+
+// Configurable monitoring components
+include::modules/monitoring-configurable-monitoring-components.adoc[leveloffset=+1]
+
+// Moving monitoring components to different nodes
+include::modules/monitoring-moving-monitoring-components-to-different-nodes.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.Additional resources
+
+* 有关创建监控配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈]
+* xref:../monitoring/enabling-monitoring-for-user-defined-projects.adoc#enabling-monitoring-for-user-defined-projects[为用户定义的项目启用监控]
+* xref:../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-updating_nodes-nodes-working[了解如何更新节点上的标签]
+* xref:../nodes/scheduling/nodes-scheduler-node-selectors.adoc#nodes-scheduler-node-selectors[使用节点选择器将 pod 放置到特定节点]
+
+// Assigning tolerations to monitoring components
+include::modules/monitoring-assigning-tolerations-to-monitoring-components.adoc[leveloffset=+1]
+
+// Configuring persistent storage
+[id="configuring-persistent-storage"]
+== 配置持久性存储
+
+如果使用持久性存储运行集群监控，您的指标将保存在持久性卷（PV）中，并可在 Pod 重新启动或重新创建后保留。如果您需要预防指标或警报数据丢失，这是理想方案。在生产环境中，强烈建议配置持久性存储。由于 IO 需求很高，使用本地存储颇有优势。
+
+
+[id="persistent-storage-prerequisites"]
+=== 持久性存储的先决条件
+
+* 分配充足的专用本地持久性存储，以确保磁盘不会被填满。您需要的存储量取决于 Pod 的数目。如需有关持久性存储系统要求的信息，请参阅 Prometheus 数据库存储要求。
+
+* 验证持久性卷(PV)已准备好以供持久性卷声明(PVC)使用，每个副本一个 PV。因为 Prometheus 和 Alertmanager 有两个副本，所以您需要四个 PV 来支持整个监控堆栈。PV 可从 Local Storage Operator 获得，但如果您启用了动态置备存储，则不会被使用。
+
+* 在配置持久性卷时，使用 `Filesystem` 作为 `volumeMode` 参数的存储类型值。
+
+* xref:../storage/persistent_storage/persistent-storage-local.adoc#persistent-storage-using-local-volume[配置本地持久性存储。]
++
+[注意]
+====
+如果将本地卷用于持久性存储，请不要使用原始块卷，这在 `LocalVolume`  对象中的 `volumeMode: Block` 描述。Prometheus 无法使用原始块卷。
+====
+
+include::modules/monitoring-configuring-a-local-persistent-volume-claim.adoc[leveloffset=+2]
+include::modules/monitoring-modifying-retention-time-for-prometheus-metrics-data.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.Additional resources
+
+* 有关创建监控 配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈。]
+* xref:../monitoring/enabling-monitoring-for-user-defined-projects.adoc#enabling-monitoring-for-user-defined-projects[为用户定义的项目启用监控]
+* xref:../storage/understanding-persistent-storage.adoc#understanding-persistent-storage[了解持久性存储]
+* xref:../scalability_and_performance/optimizing-storage.adoc#optimizing-storage[优化存储]
+
+// Configuring remote write storage for Prometheus
+include::modules/monitoring-configuring-remote-write-storage.adoc[leveloffset=+1]
+
+
+// Managing scrape sample limits for user-defined projects
+include::modules/monitoring-limiting-scrape-samples-in-user-defined-projects.adoc[leveloffset=+1]
+include::modules/monitoring-setting-a-scrape-sample-limit-for-user-defined-projects.adoc[leveloffset=+2]
+include::modules/monitoring-creating-scrape-sample-alerts.adoc[leveloffset=+2]
+
+
+
+
+
+进度条--------------------------------------------
+
+//Configuring external alertmanagers
+include::modules/monitoring-configuring-external-alertmanagers.adoc[leveloffset=1]
+
+//Attaching additional labels to your time series and alerts
+include::modules/monitoring-attaching-additional-labels-to-your-time-series-and-alerts.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关创建监控 配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈] 。
+* xref:../monitoring/enabling-monitoring-for-user-defined-projects.adoc#enabling-monitoring-for-user-defined-projects[为用户定义的项目启用监控]
+
+// Setting log levels for monitoring components
+include::modules/monitoring-setting-log-levels-for-monitoring-components.adoc[leveloffset=+1]
+
+// Setting query log for Prometheus
+include::modules/monitoring-setting-query-log-file-for-prometheus.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关创建监控配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈]
+* 有关启用用户定义的监控的步骤，请参阅 xref:../monitoring/enabling-monitoring-for-user-defined-projects.adoc#enabling-monitoring-for-user-defined-projects[启用用户定义的项目监控]。
+
+// Enabling query logging for Thanos Querier
+include::modules/monitoring-enabling-query-logging-for-thanos-querier.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关创建监控 配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈]
+
+// Setting audit log levels for the Prometheus Adapter
+include::modules/monitoring-setting-audit-log-levels-for-the-prometheus-adapter.adoc[leveloffset=1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关创建监控 配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈]
+
+// Disabling the default Grafana deployment
+include::modules/monitoring-disabling-grafana.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关创建监控 配置映射的步骤，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#preparing-to-configure-the-monitoring-stack[准备配置监控堆栈]
+
+// Disabling the local Alertmanager
+include::modules/monitoring-disabling-the-local-alertmanager.adoc[leveloffset=+1]

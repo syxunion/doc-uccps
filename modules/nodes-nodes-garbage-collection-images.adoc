@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-garbage-collection.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-garbage-collection-images_{context}"]
+= 了解如何通过垃圾回收移除镜像
+
+镜像垃圾回收依靠节点上 *cAdvisor* 报告的磁盘用量来决定从节点中移除哪些镜像。
+
+镜像垃圾收集策略基于两个条件：
+
+* 触发镜像垃圾回收的磁盘用量百分比（以整数表示）。默认值为 *85*。
+
+* 镜像垃圾回收试尝试释放的磁盘用量百分比（以整数表示）。默认值为 *80*。
+
+对于镜像垃圾回收，您可以使用自定义资源修改以下任意变量。
+
+随着新容器运行，新镜像即会出现。所有镜像都标有时间戳。如果镜像正在运行（上方第一个列表）或者刚被检测到（上方第二个列表），它将标上当前的时间。其余镜像的标记来自于以前的运行。然后，所有镜像都根据时间戳进行排序。
+
+一旦开始回收，首先删除最旧的镜像，直到满足停止条件。

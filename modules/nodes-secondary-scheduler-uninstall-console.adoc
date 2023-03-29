@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/nodes-secondary-scheduler-uninstalling.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-secondary-scheduler-uninstall-console_{context}"]
+= 卸载 Secondary Scheduler Operator
+
+您可以使用 Web 控制台卸载 UnionTech Uccps 的 Secondary Scheduler Operator。
+
+.先决条件
+
+* 您可以使用 `cluster-admin` 权限访问集群。
+* 访问 统信容器云管理平台 web 控制台。
+* 安装了 Secondary Scheduler Operator for UnionTech Uccps。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+. 为 UnionTech Uccps Operator 卸载二级调度程序 Operator。
+.. 导航到 *Operators* -> *Installed Operators*。
+..点击 *{secondary-scheduler-operator}* 条目旁的 Options 菜单 {kebab} 并点  *Uninstall Operator*。
+.. 在确认对话框中，点 *Uninstall*。

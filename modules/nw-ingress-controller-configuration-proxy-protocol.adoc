@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-controller-configuration-proxy-protocol_{context}"]
+= 为 Ingress Controller 配置 PROXY 协议
+
+当 Ingress Controller 使用 HostNetwork 或 NodePortService 端点发布策略类型时，集群管理员可配置 PROXY 协议。PROXY 协议使负载均衡器能够为 Ingress Controller 接收的连接保留原始客户端地址。原始客户端地址可用于记录、过滤和注入 HTTP 标头。在默认配置中，Ingress Controller 接收的连接只包含与负载均衡器关联的源地址。
+
+云部署不支持此功能。具有这个限制的原因是，当 统信容器云管理平台 在云平台中运行时，IngressController 指定应使用服务负载均衡器，Ingress Operator 会配置负载均衡器服务，并根据保留源地址的平台要求启用 PROXY 协议。
+
+[警告]
+====
+要防止连接失败，请将 Ingress Controller 和负载均衡器配置为使用 PROXY 协议。
+====
+
+
+.先决条件
+* 已创建一个 Ingress Controller。
+
+.流程
+. 编辑 Ingress Controller 资源：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator edit ingresscontroller/default
+----
+
+. 设置 PROXY 配置：
++
+* 如果您的 Ingress Controller 使用 hostNetwork 端点发布策略类型，将 `spec.endpointPublishingStrategy.hostNetwork.protocol` 子字段设置为 `PROXY`：
++
+.hostNetwork 配置为 PROXY 的示例
+[source,yaml]
+----
+  spec:
+    endpointPublishingStrategy:
+      hostNetwork:
+        protocol: PROXY
+      type: HostNetwork
+----
+* 如果您的 Ingress Controller 使用 NodePortService 端点发布策略类型，将 `spec.endpointPublishingStrategy.nodePort.protocol` 子字段设置为 PROXY：
++
+.Sample `nodePort` configuration to `PROXY`
+[source,yaml]
+----
+  spec:
+    endpointPublishingStrategy:
+      nodePort:
+        protocol: PROXY
+      type: NodePortService
+----

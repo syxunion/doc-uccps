@@ -1,0 +1,93 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-manila.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-csi-manila-dynamic-provisioning_{context}"]
+= 动态置备 Manila CSI 卷
+
+统信容器云管理平台为每个可用 Manila 共享类型安装一个存储类。
+
+所创建的 YAML 文件与 Manila 及其 Container Storage Interface（CSI）插件完全分离。作为应用程序开发人员，您可以动态置备 ReadWriteMany（RWX）存储，并部署应用程序 pod 使用 YAML 清单安全地使用存储。
+
+在您的内部环境中，可以使用与 AWS、GCP、Azure 和其他平台中的统信容器云管理平台使用的相同的 pod 和持久性卷声明（PVC）定义（PVC 定义中的存储类引用除外）。
+
+[注意]
+====
+Manila 服务是可选的。如果 UnionTech UStack Platform（有栈）中没有启用该服务，则不会安装 Manila CSI 驱动程序，也不会创建 Manila 存储类。
+====
+
+.先决条件
+
+* UStack 被部署为带有适当的 Manila 共享基础架构，以便使用它来在统信容器云管理平台中动态置备和挂载卷。
+
+.流程 (UI)
+
+使用 web 控制台动态创建 Manila CSI 卷：
+
+. 在统信容器云管理平台控制台中，点击 *存储* → *持久性卷声明*.
+
+. 在持久性卷声明概述页中，点  *创建持久性卷声明*.
+
+. 在接下来的页面中定义所需选项。
+
+.. 选择适当的存储类。
+
+.. 输入存储声明的唯一名称。
+
+.. 选择访问模式来指定您要创建的 PVC 的读写访问权限。
++
+[重要]
+====
+如果您希望此 PVC 所使用的持久性卷（PV）可以被挂载到集群中的多个节点上的多个 pod 时，使用 RWX。
+====
+
+. 定义存储声明的大小。
+
+. 点击 *Create* 创建持久性卷声明，并生成一个持久性卷。
+
+.流程 (CLI)
+
+使用命令行界面（CLI）动态创建 Manila CSI 卷：
+
+. 使用以下 YAML 描述的 `PersistentVolumeClaim` 对象创建并保存一个文件：
+
++
+.pvc-manila.yaml
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-manila
+spec:
+  accessModes: <1>
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-manila-gold <2>
+----
++
+<1> 如果您希望此 PVC 所使用的持久性卷（PV）可以被挂载到集群中的多个节点上的多个 pod 时，使用 RWX。
+<2> 置备存储后端的存储类的名称。Manila StorageClasses 由 Operator 置备，并包含 `csi-manila-` 前缀。
++
+. 运行以下命令，创建上一步中保存的对象：
++
+[source,terminal]
+----
+$ oc create -f pvc-manila.yaml
+----
++
+创建了一个新的 PVC。
+
+. 运行以下命令验证卷已创建并就绪：
++
+[source,terminal]
+----
+$ oc get pvc pvc-manila
+----
++
+`pvc-manila` 显示它的状态为 Bound。
+
+现在，您可以使用新的 PVC 来配置 pod。

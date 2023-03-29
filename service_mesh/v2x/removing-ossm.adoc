@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="removing-ossm"]
+= Uninstalling Service Mesh
+include::_attributes/common-attributes.adoc[]
+:context: removing-ossm
+
+toc::[]
+
+要从现有的 {product-title} 实例卸载  {SMProductName}  并删除其资源，您必须删除 control plane、删除 Operator，并运行命令来手动删除某些资源。
+
+include::modules/ossm-control-plane-remove.adoc[leveloffset=+1]
+
+include::modules/ossm-remove-operators.adoc[leveloffset=+1]
+
+include::modules/ossm-remove-cleanup.adoc[leveloffset=+1]

@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="managing-cli-profiles"]
+= 管理 CLI 配置集
+include::_attributes/common-attributes.adoc[]
+:context: managing-cli-profiles
+
+toc::[]
+
+CLI 配置文件允许您配置不同的配置文件或上下文，以用于 CLI 工具概述。上下文由与 nickname 关联的 用户身份验证 和 统信容器云管理平台 服务器信息组成。
+
+include::modules/about-cli-profiles-switch.adoc[leveloffset=+1]
+
+include::modules/manual-configuration-of-cli-profiles.adoc[leveloffset=+1]
+
+include::modules/load-and-merge-rules.adoc[leveloffset=+1]

@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-start-source_{context}"]
+= 使用源启动构建
+
+您可以通过直接推送源来启动构建，而不依赖于 Git 源拉取或构建的 Dockerfile；源可以是 Git 或 SVN 工作目录的内容、您想要部署的一组预构建二进制工件，或者单个文件。这可以通过为 start-build 命令指定以下选项之一来完成：
+
+[cols="1,2",options="header"]
+|===
+|选项 |描述
+
+|`--from-dir=<directory>`
+|指定将要存档并用作构建的二进制输入的目录。
+
+|`--from-file=<file>`
+|指定将成为构建源中唯一文件的单个文件。该文件放在空目录的根目录中，其文件名与提供的原始文件相同。
+
+|`--from-repo=<local_source_repo>`
+|指定用作构建二进制输入的本地存储库的路径。添加 `--commit`选项以控制要用于构建的分支、标签或提交。
+|===
+
+将任何这些选项直接传递给构建时，内容将流传输到构建中并覆盖当前的构建源设置。
+
+[注意]
+====
+从二进制输入触发的构建不会在服务器上保留源，因此基础镜像更改触发的重新构建将使用构建配置中指定的源。
+====
+
+.流程
+
+* 使用以下命令从源启动构建，以将本地 Git 存储库的内容作为标签 `v2` 的存档发送：
++
+[source,terminal]
+----
+$ oc start-build hello-world --from-repo=../hello-world --commit=v2
+----

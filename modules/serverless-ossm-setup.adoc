@@ -1,0 +1,221 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-ossm-setup.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-ossm-setup_{context}"]
+= 将 Service Mesh 与 Uccps Serverless 集成
+
+您可以在不使用 Kourier 作为默认入口的情况下将 Service Mesh 与 Uccps Serverless 集成。要做到这一点，在完成以下步骤前不要安装 Knative Serving 组件。在创建 `KnativeServing`  自定义资源定义(CRD)将 Knative Serving 与 Service Mesh 集成时，还需要额外的步骤，它们不会在一般的 Knative Serving 安装过程中介绍。如果您要将 Service Mesh 集成为 OpenShift Serverless 安装的默认的且唯一的 ingress，这个步骤可能很有用。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的  {product-title} 帐户。
+
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+* 安装 统信容器云管理平台服务网格扩展组件，并在 `istio-system` 命名空间中创建 `ServiceMeshControlPlane` 资源。如果要使用 mTLS 功能，还必须将 `ServiceMeshControlPlane` 资源的 `spec.security.dataPlane.mtls` 字段设置为 `true`.
++
+
+* 安装 统信容器云管理平台无服务扩展组件
+
+* 安装  Uccps CLI (`oc`).
+
+.流程
+
+. 将您要与 Service Mesh 集成的命名空间作为成员添加到 `ServiceMeshMemberRoll` 对象中：
++
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  members: <1>
+    - knative-serving
+    - <namespace>
+----
+<1> 要与 Service Mesh 集成的命名空间列表。
++
+[重要]
+====
+此命名空间列表必须包含 knative-serving 命名空间。.
+====
+
+. 应用 `ServiceMeshMemberRoll` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 创建必要的网关，以便 Service Mesh 可以接受流量：
++
+.使用 HTTP 的 `knative-local-gateway` 对象示例
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: knative-ingress-gateway
+  namespace: knative-serving
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "*"
+      tls:
+        mode: SIMPLE
+        credentialName: <wildcard_certs> <1>
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+ name: knative-local-gateway
+ namespace: knative-serving
+spec:
+ selector:
+   istio: ingressgateway
+ servers:
+   - port:
+       number: 8081
+       name: http
+       protocol: HTTP <2>
+     hosts:
+       - "*"
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: knative-local-gateway
+ namespace: istio-system
+ labels:
+   experimental.istio.io/disable-gateway-port-translation: "true"
+spec:
+ type: ClusterIP
+ selector:
+   istio: ingressgateway
+ ports:
+   - name: http2
+     port: 80
+     targetPort: 8081
+----
+<1> 添加包含通配符证书的 secret 名称。
+<2> `knative-local-gateway` 提供 HTTP 流量。使用 HTTP 表示来自 Service Mesh 外部的流量不会加密，但使用内部主机名，如 `example.default.svc.cluster.local`。您可以通过创建另一个通配符证书和使用不同的 `protocol` spec 的额外网关来为这个路径设置加密。
++
+.使用 HTTPS 的 `knative-local-gateway` 对象示例
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: knative-local-gateway
+  namespace: knative-serving
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "*"
+      tls:
+        mode: SIMPLE
+        credentialName: <wildcard_certs>
+----
+
+. 应用 `Gateway` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 通过创建以下 `KnativeServing`  自定义资源定义 (CRD) 来安装 Knative Serving，该定义还启用了 Istio 集成：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  ingress:
+    istio:
+      enabled: true <1>
+  deployments: <2>
+  - name: activator
+    annotations:
+      "sidecar.istio.io/inject": "true"
+      "sidecar.istio.io/rewriteAppHTTPProbers": "true"
+  - name: autoscaler
+    annotations:
+      "sidecar.istio.io/inject": "true"
+      "sidecar.istio.io/rewriteAppHTTPProbers": "true"
+----
+<1> 启用 Istio 集成。
+<2> 为 Knative Serving data plane pod 启用 sidecar 注入。
+
+. 应用 `KnativeServing` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 创建一个启用了 sidecar 注入并使用 pass-through 路由的 Knative Service：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: <service_name>
+  namespace: <namespace> <1>
+  annotations:
+    serving.knative.openshift.io/enablePassthrough: "true" <2>
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true" <3>
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    spec:
+      containers:
+      - image: <image_url>
+----
+<1> 作为 Service Mesh member roll 一部分的命名空间。
+<2> 指示 Knative Serving 生成  {product-title} 直通启用路由，以便您已生成的证书直接通过 ingress 网关提供。
+<3> 将 Service Mesh sidecar 注入 Knative 服务 pod。
+
+. 应用 `Service` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+.验证
+
+* 使用 CA 信任的安全连接访问无服务器应用程序：
++
+[source,terminal]
+----
+$ curl --cacert root.crt <service_url>
+----
++
+.示例命令
+[source,terminal]
+----
+$ curl --cacert root.crt https://hello-default.apps.openshift.example.com
+----

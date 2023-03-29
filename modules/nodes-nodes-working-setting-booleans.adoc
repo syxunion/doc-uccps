@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/nodes-nodes-managing.adoc
+
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-working-setting-booleans"]
+
+= 设置 SELinux 布尔值
+
+统信容器云管理平台 允许您在 UnionTech Enterprise Linux CoreOS (Uswift) 节点上启用和禁用 SELinux 布尔值。以下流程解释了如何使用 Machine Config Operator (MCO) 修改节点上的 SELinux 布尔值。此流程使用 container_manage_cgroup 作为示例布尔值。您可以将这个值修改为您需要的任何布尔值。
+
+.先决条件
+
+* 已安装 Uccps CLI (oc).
+
+.流程
+
+. 使用 `MachineConfig` 对象创建新 YAML 文件，如下例所示：
++
+[source, yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-worker-setsebool
+spec:
+  config:
+    ignition:
+      version: 2.2.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Set SELinux booleans
+          Before=kubelet.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/sbin/setsebool container_manage_cgroup=on
+          RemainAfterExit=true
+
+          [Install]
+          WantedBy=multi-user.target graphical.target
+        enabled: true
+        name: setsebool.service
+----
++
+
+. 运行以下命令来创建新的 `MachineConfig` 对象：
++
+[source,terminal]
+----
+$ oc create -f 99-worker-setsebool.yaml
+----
+
+[注意]
+====
+对 MachineConfig 对象应用任何更改将导致所有受影响的节点在应用更改后安全重启。
+====

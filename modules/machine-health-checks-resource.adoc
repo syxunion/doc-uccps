@@ -1,0 +1,88 @@
+// Module included in the following assemblies:
+//
+// * machine_management/deploying-machine-health-checks.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+
+[id="machine-health-checks-resource_{context}"]
+= MachineHealthCheck 资源示例
+
+所有基于云的安装类型的 `MachineHealthCheck` 资源，以及裸机以外的资源，类似以下 YAML 文件：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineHealthCheck
+metadata:
+  name: example <1>
+  namespace: openshift-machine-api
+spec:
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-machine-role: <role> <2>
+      machine.openshift.io/cluster-api-machine-type: <role> <2>
+      machine.openshift.io/cluster-api-machineset: <cluster_name>-<label>-<zone> <3>
+  unhealthyConditions:
+  - type:    "Ready"
+    timeout: "300s" <4>
+    status: "False"
+  - type:    "Ready"
+    timeout: "300s" <4>
+    status: "Unknown"
+  maxUnhealthy: "40%" <5>
+  nodeStartupTimeout: "10m" <6>
+----
+<1> 指定要部署的机器健康检查的名称。
+<2> 为要检查的机器池指定一个标签。
+<3> 以 `<cluster_name>-<label>-<zone>` 格式 指定要跟踪的机器集。例如，`prod-node-us-east-1a`。
+<4> 指定节点条件的超时持续时间。如果在超时时间内满足了条件，则会修复机器。超时时间较长可能会导致不健康的机器上的工作负载长时间停机。
+<5> 指定目标池中允许同时修复的机器数量。这可设为一个百分比或一个整数。如果不健康的机器数量超过 `maxUnhealthy` 设定的限制，则不会执行补救。
+<6> 指定机器健康检查在决定机器不健康前必须等待节点加入集群的超时持续时间。
+
+[注意]
+====
+`matchLabels` 只是示例; 您必须根据具体需要映射您的机器组。
+====
+
+[id="machine-health-checks-short-circuiting_{context}"]
+== 短路机器健康检查补救
+
+短路可确保仅在集群健康时机器健康检查修复机器。通过 MachineHealthCheck 资源中的 maxUnhealthy 字段配置短路。
+Short-circuiting is configured through the `maxUnhealthy` field in the `MachineHealthCheck` resource.
+
+如果用户在修复任何机器前为 `maxUnhealthy` 字段定义了一个值，`MachineHealthCheck` 会将 `maxUnhealthy` 的值与它决定不健康的目标池中的机器数量进行比较。如果不健康的机器数量超过 `maxUnhealthy` 限制，则不会执行补救。
+
+[重要]
+====
+如果没有设置 `maxUnhealthy`，则默认值为 `100%`，无论集群状态如何，机器都会被修复。
+====
+
+适当的 `maxUnhealthy` 值取决于您部署的集群规模以及 `MachineHealthCheck` 覆盖的机器数量。例如，您可以使用 `maxUnhealthy` 值覆盖多个可用区间的多个机器集，以便在丢失整个区时，`maxUnhealthy` 设置可以在集群中阻止进一步补救。在没有多个可用区的全局 Azure 区域，您可以使用可用性集来确保高可用性。
+
+`maxUnhealthy` 字段可以设置为整数或百分比。根据 `maxUnhealthy` 值，有不同的补救实现。
+
+=== 使用绝对值设置 maxUnhealthy
+
+如果将 `maxUnhealthy` 设为 `2`:
+
+* 如果 2 个或更少节点不健康，则可执行补救
+* 如果 3 个或更多节点不健康，则不会执行补救
+
+这些值与机器健康检查要检查的机器数量无关。
+
+=== 使用百分比设置 maxUnhealthy
+
+如果 `maxUnhealthy` 被设置为 `40%`，有 25 个机器被检查：
+
+* 如果有 10 个或更少节点处于不健康状态，则可执行补救
+* 如果 11 个或多个节点不健康，则不会执行补救
+
+如果 `maxUnhealthy` 被设置为 `40%`，有 6 个机器被检查：
+
+* 如果 2 个或更少节点不健康，则可执行补救
+* 如果 3 个或更多节点不健康，则不会执行补救
+
+[注意]
+====
+当被检查的 `maxUnhealthy` 机器的百分比不是一个整数时，允许的机器数量会被舍入到一个小的整数。
+====

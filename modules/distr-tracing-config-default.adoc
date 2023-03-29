@@ -1,0 +1,124 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-default_{context}"]
+= 分布式追踪默认配置选项
+
+Jaeger 自定义资源(CR)定义创建分布式追踪平台资源时要使用的架构和设置。您可以修改这些参数以根据您的业务需求自定义分布式追踪平台实施。
+
+.Jaeger 通用 YAML 示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: name
+spec:
+  strategy: <deployment_strategy>
+  allInOne:
+    options: {}
+    resources: {}
+  agent:
+    options: {}
+    resources: {}
+  collector:
+    options: {}
+    resources: {}
+  sampling:
+    options: {}
+  storage:
+    type:
+    options: {}
+  query:
+    options: {}
+    resources: {}
+  ingester:
+    options: {}
+    resources: {}
+  options: {}
+----
+
+.Jaeger Jaeger 参数
+[options="header"]
+|===
+|参数 |描述 |值 |默认值
+
+|`apiVersion:`
+|
+|创建对象时要使用的 API 版本。
+|`jaegertracing.io/v1`
+
+|`jaegertracing.io/v1`
+|`kind:`
+|定义要创建的 Kubernetes 对象的种类。
+|`jaeger`
+
+|
+|`metadata:`
+|有助于唯一标识对象的数据，包括 name 字符串、UID 和可选 namespace。
+|
+|{product-title} automatically generates the `UID` and completes the `namespace` with the name of the project where the object is created.
+
+|`name:`
+|对象的名称。
+|The name of your {JaegerShortName} instance.
+|`jaeger-all-in-one-inmemory`
+
+|`spec:`
+|要创建的对象的规格。
+|Contains all of the configuration parameters for your {JaegerShortName} instance. When a common definition for all Jaeger components is required, it is defined under the `spec` node. When the definition relates to an individual component, it is placed under the `spec/<component>` node.
+|N/A
+
+|`strategy:`
+|Jaeger 部署策略
+|`allInOne`, `production`, or `streaming`
+|`allInOne`
+
+|`allInOne:`
+|因为 allInOne 镜像在单个 pod 中部署了 Agent、Collector、Query、Ingester 和 Jaeger UI，所以此部署的配置必须在 allInOne 参数下嵌套组件配置。
+|
+|
+
+|`agent:`
+|定义代理的配置选项。
+|
+|
+
+|`collector:`
+|定义 Jaeger Collector 的配置选项。
+|
+|
+
+|`sampling:`
+|定义用于追踪的抽样策略的配置选项。
+|
+|
+
+|`storage:`
+|定义存储的配置选项。所有与存储相关的选项都必须放在 storage 下，而不是放在 allInOne 或其他组件选项下。
+|
+|
+
+|`query:`
+|定义 Query 服务的配置选项。
+|
+|
+
+|`ingester:`
+|定义 Ingester 服务的配置选项。
+|
+|
+|===
+
+以下示例 YAML 是使用默认设置创建 {JaegerName} 平台部署的最低要求。
+
+.最低要求示例  dist-tracing-all-in-one.yaml
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-all-in-one-inmemory
+----

@@ -1,0 +1,28 @@
+////
+This module included in the following assemblies:
+-service_mesh/v2x/ossm-architecture.adoc
+-dist_tracing_arch/distr-tracing-architecture.adoc
+////
+:_content-type: CONCEPT
+[id="distr-tracing-architecture_{context}"]
+= {DTProductName} 架构
+
+{DTProductName}  由几个组件组成，它们一起收集、存储和显示追踪数据。
+
+* *{JaegerName}* - 此组件基于开源的 link:https://www.jaegertracing.io/[Jaeger 项目].
+
+** *客户端* （Jaeger 客户端、跟踪器、报告程序、客户端库）- {JaegerShortName} 是 OpenTracing API 的特定语言实施。它们可以用来为各种现有开源框架（如 Camel (Fuse) 、Spring Boot (RHOAR) 、MicroProfile (RHOAR/Thorntail) 、Wilfly (EAP) 等提供分布式追踪工具。
+
+** *代理* （Jaeger 代理，Server Queue, Processor Workers） - {JaegerShortName} 代理是一个网络守护进程，侦听通过用户数据报协议(UDP)发送并发送到 Collector。这个代理应被放置在要管理的应用程序的同一主机上。这通常是通过容器环境（如 Kubernetes）中的 sidecar 来实现。
+
+** *Jaeger Collector* (Collector, Queue, Workers) - 与 Jaeger 代理类似，Jaeger Collector 接收 span，并将它们放置在内部队列中进行处理。这允许 Jaeger Collector 立即返回到客户端/代理，而不是等待 span 变为存储。
+
+** *Storage*  (Data Store) - 收集器需要一个持久的存储后端。{JaegerName} 提供了用于 span 存储的可插拔机制。请注意：在这个发行本中，唯一支持的存储是 Elasticsearch。
+
+** *Query* (Query Service) - Query 是一个从存储中检索 trace 的服务。
+
+** *Ingester* (Ingester Service) - {DTProductName} 可以使用 Apache Kafka 作为 Collector 和实际的 Elasticsearch 后端存储之间的缓冲。Ingester 是一个从 Kafka 读取数据并写入 Elasticsearch 存储后端的服务。
+
+** *Jaeger 控制台* – 使用 {JaegerName} 平台用户界面，您可以视觉化您的分布式追踪数据。在搜索页面中，您可以查找 trace，并查看组成一个独立 trace 的 span 详情。
+
+* *统信容器云管理平台分布式追踪数据收集* - 此组件基于开源 link:https://opentelemetry.io/[OpenTelemetry 项目].

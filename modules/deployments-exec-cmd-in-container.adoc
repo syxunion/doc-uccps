@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-exe-cmd-in-container_{context}"]
+= 在容器内执行命令
+
+您可以为容器添加命令，用来覆盖决镜像的 `ENTRYPOINT` 设置来改变容器的启动行为。这与生命周期 hook 不同，后者在每个部署的指定时间点上运行一次。
+
+.流程
+
+. 在 部署配置的 `spec` 字段中添加 `command` 参数。您也可以添加 `args` 字段来修改 `command`（如果 `command` 不存在，则修改 `ENTRYPOINT`）。
++
+[source,yaml]
+----
+spec:
+  containers:
+  - name: <container_name>
+    image: 'image'
+    command:
+      - '<command>'
+    args:
+      - '<argument_1>'
+      - '<argument_2>'
+      - '<argument_3>'
+----
++
+例如，使用 `-jar` 和 `/opt/app-root/springboots2idemo.jar` 参数来执行 `java` 命令：
++
+[source,yaml]
+----
+spec:
+  containers:
+  - name: example-spring-boot
+    image: 'image'
+    command:
+      - java
+    args:
+      - '-jar'
+      - /opt/app-root/springboots2idemo.jar
+----

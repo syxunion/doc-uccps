@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/opm/cli-opm-install.adoc
+
+:_content-type: PROCEDURE
+[id="olm-installing-opm_{context}"]
+= 安装 opm CLI
+
+您可以在您的 Linux、macOS 或者 Windows 工作站上安装 `opm` CLI 工具。
+
+.先决条件
+
+* 对于 Linux，您必须提供以下软件包：RHEL 8 满足以下要求：
+** `podman` 1.9.3+（推荐版本 2.0+）
+** `glibc` 版本 2.28+
+
+.流程
+
+. 导航到 Uccps 镜像站点并下载与您的操作系统匹配的 tarball 的最新版本。
+
+. 解包存档。
+
+** 对于 Linux 或者 macOS:
++
+[source,terminal,subs="attributes+"]
+----
+$ tar xvf <file>
+----
+
+** 对于 Windows，使用 ZIP 程序解压存档。
+
+. 将文件放在 `PATH` 中的任何位置。
++
+
+* 对于 Linux 或者 macOS:
+
+.. 检查 `PATH`:
++
+[source,terminal]
+----
+$ echo $PATH
+----
+
+.. 移动文件。例如：
++
+[source,terminal]
+----
+$ sudo mv ./opm /usr/local/bin/
+----
+
+.验证
+
+* 安装 `opm` CLI 后，验证是否可用：
++
+[source,terminal]
+----
+$ opm version
+----

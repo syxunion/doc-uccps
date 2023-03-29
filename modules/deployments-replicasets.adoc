@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/what-deployments-are.adoc
+
+[id="deployments-repliasets_{context}"]
+= 副本集（Replica set）
+
+与复制控制器类似, `ReplicaSet` 是一个原生 Kubernetes API 对象，可以确保在任意给定时间运行指定数量的 pod 副本。副本集与复制控制器之间的区别在于，副本集支持基于集合的选择器要求，而复制控制器只支持基于相等的选择器要求。
+
+[注意]
+====
+只有您需要自定义更新编配，或根本不需要更新时，才使用副本集。否则，使用部署。副本集可以独立使用，但由部署使用用来编配 pod 创建、删除和更新。部署会自动管理其副本集，为 pod 提供声明性更新，且不需要手动管理它们创建的副本集。
+====
+
+以下是 `ReplicaSet` 定义示例：
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend-1
+  labels:
+    tier: frontend
+spec:
+  replicas: 3
+  selector: 
+    matchLabels: 
+      tier: frontend
+    matchExpressions: 
+      - {key: tier, operator: In, values: [frontend]}
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - image: openshift/hello-openshift
+        name: helloworld
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      restartPolicy: Always
+----

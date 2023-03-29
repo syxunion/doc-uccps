@@ -1,0 +1,10 @@
+:_content-type: ASSEMBLY
+[id="nw-ovn-kubernetes-disabling-multicast"]
+= 为项目禁用多播
+include::_attributes/common-attributes.adoc[]
+:context: ovn-kubernetes-disabling-multicast
+
+toc::[]
+
+include::modules/nw-disabling-multicast.adoc[leveloffset=+1]
+

@@ -1,0 +1,26 @@
+////
+Module included in the following assemblies:
+- distributed-tracing-release-notes.adoc
+////
+////
+Feature – Describe the new functionality available to the customer. For enhancements, try to describe as specifically as possible where the customer will see changes.
+Reason – If known, include why has the enhancement been implemented (use case, performance, technology, etc.). For example, showcases integration of X with Y, demonstrates Z API feature, includes latest framework bug fixes.
+Result – If changed, describe the current user experience.
+////
+:_content-type: REFERENCE
+[id="distr-tracing-rn-new-features_{context}"]
+= 新功能及功能增强
+
+== 统信容器云管理平台分布式追踪 2.3.1 的新功能及功能增强
+
+此统信容器云管理平台分布式追踪发行版本解决了 CVE 报告的安全漏洞问题以及程序错误。
+
+=== Component versions supported in {DTProductName} version 2.7
+
+[options="header"]
+|===
+|Operator |组件 |版本
+|{JaegerName}
+|Jaeger
+|1.30
+|===

@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-view-build-details_{context}"]
+= 查看构建详情
+
+您可以使用 Web 控制台或 `oc describe` CLI 命令查看构建详情。
+
+这会显示，包括：
+
+* 构建源。
+* 构建策略。
+* 输出目的地。
+* 目标 registry 中的镜像摘要。
+* 构建的创建方式。
+
+如果构建采用 Docker 或 Source 策略，则 oc describe 输出还包括用于构建的源修订的相关信息，包括提交 ID、作者、提交者和消息等。
+
+.流程
+
+* 要查看构建详情，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe build <build_name>
+----

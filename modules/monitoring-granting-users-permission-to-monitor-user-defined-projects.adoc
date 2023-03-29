@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+[id="granting-users-permission-to-monitor-user-defined-projects_{context}"]
+= 授予用户权限来监控用户定义的项目
+
+集群管理员可以监控所有 统信容器云管理平台 核心项目和用户定义的项目。
+
+集群管理员可以授予开发人员和其他用户权限来监控他们自己的项目。通过分配以下监控角色中的一个即可授予权限。
+
+* *monitoring-rules-view* 角色提供对项目的 `PrometheusRule` 自定义资源的读取访问权限。
+
+* *monitoring-rules-edit* 角色授予用户权限来为项目创建、修改和删除 `PrometheusRule` 自定义资源。
+
+* *monitoring-edit* 角色授予与 `monitoring-rules-edit` 角色相同的权限。另外，它还允许用户为服务或 Pod 创建新的提取目标。使用此角色 ，您还可以创建、修改和删除 `ServiceMonitor` 和 `PodMonitor` 资源。
+
+您还可以授予用户权限来配置负责监控用户定义的项目的组件：
+
+* `openshift-user-workload-monitoring` 项目中的  *user-workload-monitoring-config-edit* 角色允许您编辑  `user-workload-monitoring-config` `ConfigMap` 使用此角色，您可以编辑 ConfigMap，为用户定义的工作负载监控配置 Prometheus、Prometheus Operator 和 Thanos Ruler。
+
+您还可以授予用户权限来为用户定义的项目配置警报路由：
+
+* The **alert-routing-edit** 角色授予用户权限来为项目创建、更新和删除 AlertmanagerConfig 自定义资源。
+
+本节详细介绍了如何使用 统信容器云管理平台 Web 控制台或 CLI 分配这些角色。

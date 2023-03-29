@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-dockerfile-path_{context}"]
+= 使用 Dockerfile 路径
+
+默认情况下，docker 构建使用位于 `BuildConfig.spec.source.contextDir` 字段中指定的上下文的根目录下的 Dockerfile。
+
+`dockerfilePath` 字段允许构建使用不同的路径来定位 Dockerfile，该路径相对于 `BuildConfig.spec.source.contextDir` 字段。它可以是不同于默认 Dockerfile 的其他文件名，如 `MyDockerfile`，也可以是子目录中 Dockerfile 的路径，如 `dockerfiles/app1/Dockerfile`。
+
+.流程
+
+要通过构建的 `dockerfilePath` 字段使用不同的路径来定位 Dockerfile，请设置：
+
+[source,yaml]
+----
+strategy:
+  dockerStrategy:
+    dockerfilePath: dockerfiles/app1/Dockerfile
+----

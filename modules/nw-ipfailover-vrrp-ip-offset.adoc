@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: CONCEPT
+[id="nw-ipfailover-vrrp-ip-offset_{context}"]
+= 关于 VRRP ID 偏移
+
+每个 IP 转移 pod 由 IP 故障转移部署配置管理，每个节点 1 个 pod，以一个 Keepalived 守护进程运行。配置更多 IP 故障转移部署配置后，会创建更多 pod，更多的守护进程加入常见的虚拟路由器冗余协议（VRRP）协商。此协商由所有 Keepalived 守护进程完成，它决定了哪些节点服务是哪个虚拟 IP（VIP）。
+
+Keepalived 内部为每个 VIP 分配一个唯一的 vrrp-id。协商使用这一组 vrrp-ids，在做出决策时，胜出的 vrrp-id 对应的 VIP 将在胜出的节点上服务。
+
+因此，对于 IP 故障转移部署配置中定义的每个 VIP，IP 故障转移 pod 必须分配对应的 vrrp-id。这可以从 `OPENSHIFT_HA_VRRP_ID_OFFSET` 开始，并按顺序将 vrrp-ids 分配到 VIP 列表来实现。vrrp-ids 的值可在 1..255 之间。
+
+当存在多个 IP 故障转移部署配置时，您必须指定 `OPENSHIFT_HA_VRRP_ID_OFFSET`，以便在部署配置中增加 VIP 的数量，并且没有 `vrrp-id` 范围重叠。

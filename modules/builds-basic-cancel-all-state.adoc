@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-cancel-all-state_{context}"]
+= 取消给定状态下的所有构建
+
+您可以取消给定状态下的所有构建，如 `new` 或 `pending` 状态，同时忽略其他状态下的构建。
+
+.流程
+
+* 要取消给定状态下的所有内容，请输入以下命令：
++
+[source,terminal]
+----
+$ oc cancel-build bc/<buildconfig_name>
+----

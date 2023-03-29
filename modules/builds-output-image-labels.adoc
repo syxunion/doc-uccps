@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * builds/managing-build-output.adoc
+
+[id="builds-output-image-labels_{context}"]
+= 输出镜像标签
+
+ifdef::openshift-enterprise,openshift-webscale,openshift-origin[]
+docker and
+endif::[]
+source-to-image (S2I)` builds set the following labels on output images:
+
+[options="header"]
+|===
+
+|标签 |描述
+
+|`io.openshift.build.commit.author`
+|构建中使用的源提交的作者
+
+|`io.openshift.build.commit.date`
+|构建中使用的源提交的日期
+
+|`io.openshift.build.commit.id`
+|构建中使用的源提交的哈希值
+
+|`io.openshift.build.commit.message`
+|构建中使用的源提交的消息
+
+|`io.openshift.build.commit.ref`
+|源中指定的分支或引用
+
+|`io.openshift.build.source-location`
+|构建的源 URL
+|===
+
+您还可以使用 `BuildConfig.spec.output.imageLabels` 字段指定将应用到构建配置构建的每个镜像的自定义标签列表。
+
+.应用到所构建镜像的自定义标签
+[source,yaml]
+----
+spec:
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "my-image:latest"
+    imageLabels:
+    - name: "vendor"
+      value: "MyCompany"
+    - name: "authoritative-source-url"
+      value: "registry.mycompany.com"
+----

@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="custom-builds-buildah"]
+= 使用 Buildah 自定义镜像构建
+include::_attributes/common-attributes.adoc[]
+:context: custom-builds-buildah
+
+toc::[]
+
+
+在 统信容器云管理平台 1.2 中，主机节点上没有 docker socket。这意味着，不能保证自定义构建的 _mount docker socket_ 选项会提供可在自定义构建镜像中使用的可访问 docker socket。
+
+如果您需要此功能来构建和推送镜像，请将 Buildah 工具添加到自定义构建镜像中，并在自定义构建逻辑中使用它来构建并推送镜像。以下是如何使用 Buildah 运行自定义构建的示例。
+
+[注意]
+====
+使用自定义构建策略需要普通用户默认情况下不具备的权限，因为它允许用户在集群上运行的特权容器内执行任意代码。此级别的访问权限可被用来进行可能对集群造成损害的操作，因此应仅授权给信任的用户。
+====
+
+== 先决条件
+
+* 查看如何 xref:../../cicd/builds/securing-builds-by-strategy.adoc#securing-builds-by-strategy[授予自定义构建权限]。
+
+
+include::modules/builds-create-custom-build-artifacts.adoc[leveloffset=+1]
+include::modules/builds-build-custom-builder-image.adoc[leveloffset=+1]
+include::modules/builds-use-custom-builder-image.adoc[leveloffset=+1]

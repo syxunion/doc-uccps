@@ -1,0 +1,176 @@
+// Module included in the following assemblies:
+//
+// * networking/routes/route-configuration.adoc
+
+[id="nw-route-specific-annotations_{context}"]
+= 特定于路由的注解
+
+Ingress Controller 可以为它公开的所有路由设置默认选项。单个路由可以通过在其注解中提供特定配置来覆盖这些默认设置。红帽不支持在 Operator 管理的路由中添加路由注解。
+
+[重要]
+====
+要创建带有多个源 IP 或子网的白名单，请使用以空格分隔的列表。任何其他限定类型会导致忽略列表，而不发出警告或错误消息。
+====
+
+//For all the variables outlined in this section, you can set annotations on the
+//*route definition* for the route to alter its configuration.
+
+.路由注解
+[cols="3*", options="header"]
+|===
+|变量 | 描述 | 默认的环境变量
+|`haproxy.router.openshift.io/balance`| 设置负载平衡算法。可用选项是 `random`、`source`、`roundrobin` 和 `leastconn`。默认值为 `leastconn`。| passthrough 路由 使用 `ROUTER_TCP_BALANCE_SCHEME` 。否则，使用 `ROUTER_LOAD_BALANCE_algorithm`。
+|`haproxy.router.openshift.io/disable_cookies`| 禁用使用 cookie 来跟踪相关连接。如果设置为 'true' 或 'TRUE'，则使用均衡算法选择每个传入 HTTP 请求的后端服务连接。|
+|`router.openshift.io/cookie_name`| 指定一个可选的、用于此路由的 `cookie`。名称只能包含大写字母和小写字母、数字、"_" 和 "-"。默认为路由的内部密钥进行哈希处理。 |
+|`haproxy.router.openshift.io/pod-concurrent-connections`| 设置路由器支持的 pod 允许的最大连接数。
+注： 如果有多个 pod，每个 pod 都有这些数量的连接。如果有多个路由器，它们之间没有协调关系，每个路由器都可能会多次连接。如果没有设置，或者将其设定为 0，则没有限制。 |
+|`haproxy.router.openshift.io/rate-limit-connections`| 设置 `'true'` 或 `'TRUE'` 可启用速率限制功能，该功能通过每个路由上的特定后端的贴子实施。
+注：使用此注解可提供基本保护，防止分布式拒绝服务 (DDoS) 攻击。 |
+|`haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp`| 限制通过同一源 IP 地址进行的并发 TCP 连接数。它接受一个数字值。
+注：使用此注解可提供基本保护，防止分布式拒绝服务 (DDoS) 攻击。 |
+|`haproxy.router.openshift.io/rate-limit-connections.rate-http`| 限制具有相同源 IP 地址的客户端可以发出 HTTP 请求的速率。它接受一个数字值。
+注：使用此注解可提供基本保护，防止分布式拒绝服务 (DDoS) 攻击。 |
+|`haproxy.router.openshift.io/rate-limit-connections.rate-tcp`| 限制具有相同源 IP 地址的客户端可以进行 TCP 连接的速率。它接受一个数字值。
+注：使用此注解可提供基本保护，防止分布式拒绝服务 (DDoS) 攻击。 |
+|`haproxy.router.openshift.io/timeout` | 为路由设定服务器端超时。(TimeUnits) | `ROUTER_DEFAULT_SERVER_TIMEOUT`
+|`haproxy.router.openshift.io/timeout-tunnel` | 这个超时适用于隧道连接，如明文、边缘、重新加密或透传路由。使用明文、边缘或重新加密路由类型，此注解作为带有现有超时值的超时隧道应用。对于 passthrough 路由类型，注解优先于设置任何现有的超时值 | `ROUTER_DEFAULT_TUNNEL_TIMEOUT`
+|`ingresses.config/cluster ingress.operator.openshift.io/hard-stop-after` | 您可以设置 IngressController 或 ingress 配置。此注解重新部署路由器，并将 HA 代理配置为在全局后发出 haproxy hard-stop- after 全局 选项，用于定义执行干净的软停止的最长时间。 | `ROUTER_HARD_STOP_AFTER`
+|`router.openshift.io/haproxy.health.check.interval`| 为后端健康检查设定间隔。(TimeUnits) | `ROUTER_BACKEND_CHECK_INTERVAL`
+|`haproxy.router.openshift.io/ip_whitelist`
+| 为路由设置白名单。白名单是以空格分开的 IP 地址和 CIDR 范围列表，用来代表批准的源地址。来自白名单以外的 IP 地址的请求会被丢弃。
+白名单中允许的最大 IP 地址和 CIDR 范围数为 61。|
+|`haproxy.router.openshift.io/hsts_header` | 为 `edge terminated` 或 `re-encrypt` 路由设置 `Strict-Transport-Security` 标头。 |
+|`haproxy.router.openshift.io/log-send-hostname` | 在 `Syslog` 标头中设置 `hostname` 字段。使用系统的主机名。如果路由器启用了任何 Ingress API 日志记录方法（如 sidecar 或 Syslog 工具），则默认启用 `log-send-hostname`。 |
+|`haproxy.router.openshift.io/rewrite-target` | 在后端中设置请求的重写路径。 |
+|`router.openshift.io/cookie-same-site` | 设置一个值来限制 cookies。值是：
+
+`Lax`: cookies 在访问的站点和第三方站点间进行传输。
+
+`Strict`: cookies 仅限于访问的站点。
+
+`None`: cookies 仅限于指定的站点。
+
+这个值仅适用于重新加密和边缘路由。如需更多信息，请参阅 SameSite cookies 文档。
+
+|`haproxy.router.openshift.io/set-forwarded-headers` | 设置用于处理每个路由的 Forwarded 和 X-Forwarded-For HTTP 标头的策略。值是：
+
+`append`: Append附加标头，保留任何现有的标头。这是默认值。
+
+`replace`: 设置标头，删除任何现有的标头。
+
+`never`: 不设置标头，而是保留任何现有的标头。
+
+`if-none`: 如果没有设置标头，则设置它。| `ROUTER_SET_FORWARDED_HEADERS`
+
+|===
+
+[注意]
+====
+环境变量不能编辑。
+====
+
+.路由器超时变量
+
+`TimeUnits` 由一个数字及一个时间单位表示：`us *(microseconds)`, `ms（毫秒，默认）`、`s（秒）`、`m （分钟）`、`h *(小时)` 、`d （天）`。
+
+正则表达式是： [1-9][0-9]*(`us`\|`ms`\|`s`\|`m`\|`h`\|`d`).
+[cols="2,1,2a", options="header"]
+|===
+|变量 | 默认 | 描述
+| `ROUTER_BACKEND_CHECK_INTERVAL` | `5000ms` | 后端上后续存活度检查之间的时长。
+| `ROUTER_CLIENT_FIN_TIMEOUT` | `1s` | 控制连接到路由的客户端的 TCP FIN 超时周期。如果发送到关闭连接的 FIN 在给定时间内没有回答，HAProxy 会关闭连接。如果设置为较低值，并且在路由器上使用较少的资源，则这不会产生任何损害。
+| `ROUTER_DEFAULT_CLIENT_TIMEOUT` | `30s` | 客户端必须确认或发送数据的时长。
+| `ROUTER_DEFAULT_CONNECT_TIMEOUT` | `5s` | 最长连接时间。
+| `ROUTER_DEFAULT_SERVER_FIN_TIMEOUT` | `1s` | 控制路由器到支持路由的 pod 的 TCP FIN 超时。
+| `ROUTER_DEFAULT_SERVER_TIMEOUT` | `30s` | 服务器必须确认或发送数据的时长。
+| `ROUTER_DEFAULT_TUNNEL_TIMEOUT` | `1h` | TCP 或 WebSocket 连接保持打开的时长。每当 HAProxy 重新加载时，这个超时期限都会重置。
+| `ROUTER_SLOWLORIS_HTTP_KEEPALIVE` | `300s` | 设置等待出现新 HTTP 请求的最长时间。如果设置得太低，可能会导致浏览器和应用程序无法期望较小的 keepalive 值。
+
+某些有效的超时值可以是某些变量的总和，而不是特定的预期超时。例如： `ROUTER_SLOWLORIS_HTTP_KEEPALIVE` 调整 `timeout http-keep-alive`。默认情况下，它设置为 `300s`，但 `HAProxy` 也会在 `tcp-request` inspect-delay 上等待，它被设置为 `5s`。在这种情况下，整个超时时间将是 `300s` 加 `5s`。
+| `ROUTER_SLOWLORIS_TIMEOUT` | `10s` | HTTP 请求传输可以花费的时间长度。
+| `RELOAD_INTERVAL` | `5s` | 允许路由器至少执行重新加载和接受新更改的频率。
+| `ROUTER_METRICS_HAPROXY_TIMEOUT` | `5s` | 收集 HAProxy 指标的超时时间。
+
+|===
+
+.设置自定义超时的路由
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 5500ms <1>
+...
+----
+<1> 使用 `HAProxy` 支持的时间单位（`us`, `ms`, `s`, `m`,` h`, `d`）指定新的超时时间。如果没有提供时间单位，ms 会被默认使用。
+
+[注意]
+====
+如果为 passthrough 路由设置的服务器端的超时值太低，则会导致 WebSocket 连接在那个路由上经常出现超时的情况。
+====
+
+.只允许一个特定 IP 地址的路由
+[source,yaml]
+----
+metadata:
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: 192.168.1.10
+----
+
+.允许多个 IP 地址的路由
+[source,yaml]
+----
+metadata:
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: 192.168.1.10 192.168.1.11 192.168.1.12
+----
+
+.允许 IP 地址 CIDR 网络的路由
+[source,yaml]
+----
+metadata:
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: 192.168.1.0/24
+----
+
+.允许 IP 地址和 IP 地址 CIDR 网络的路由
+[source,yaml]
+----
+metadata:
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: 180.5.61.153 192.168.1.0/24 10.0.0.0/8
+----
+
+.指定重写对象的路由
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: / <1>
+...
+----
+<1> 将 `/` 设为后端请求的重写路径。
+
+在路由上设置 `haproxy.router.openshift.io/rewrite-target` 注解，指定 Ingress Controller 在将请求转发到后端应用程序之前，应该使用此路由在 HTTP 请求中重写路径。与 `spec.path` 中指定的路径匹配的请求路径部分将替换为注解中指定的重写对象。
+
+下表提供了在 `spec.path`、请求路径和重写对象的各种组合中重写行为的路径示例。
+
+.rewrite-target 示例：
+[cols="4*", options="header"]
+|===
+|Route.spec.path|请求路径|重写目标| 转发请求路径
+|/foo|/foo|/|/
+|/foo|/foo/|/|/
+|/foo|/foo/bar|/|/bar
+|/foo|/foo/bar/|/|/bar/
+|/foo|/foo|/bar|/bar
+|/foo|/foo/|/bar|/bar/
+|/foo|/foo/bar|/baz|/baz/bar
+|/foo|/foo/bar/|/baz|/baz/bar/
+|/foo/|/foo|/|N/A（请求路径不匹配路由路径）
+|/foo/|/foo/|/|/
+|/foo/|/foo/bar|/|/bar
+|===

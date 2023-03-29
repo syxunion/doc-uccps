@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent_storage-cinder.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-cinder-volume-security_{context}"]
+= Cinder 卷安全
+
+如果在应用程序中使用 Cinder PV，请在其部署配置中配置安全性。
+
+.先决条件
+- 必须创建一个使用适当 `fsGroup` 策略的 SCC。
+
+.流程
+
+. 创建一个服务帐户并将其添加到 SCC：
++
+[source,terminal]
+----
+$ oc create serviceaccount <service_account>
+----
++
+[source,terminal]
+----
+$ oc adm policy add-scc-to-user <new_scc> -z <service_account> -n <project>
+----
+
+. 在应用程序的部署配置中，提供服务帐户名称和 `securityContext`：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: frontend-1
+spec:
+  replicas: 1  <1>
+  selector:    <2>
+    name: frontend
+  template:    <3>
+    metadata:
+      labels:  <4>
+        name: frontend <5>
+    spec:
+      containers:
+      - image: openshift/hello-openshift
+        name: helloworld
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      restartPolicy: Always
+      serviceAccountName: <service_account> <6>
+      securityContext:
+        fsGroup: 7777 <7>
+----
+<1> 要运行的 pod 的副本数。
+<2> 要运行的 pod 的标签选择器。
+<3> 控制器创建的 pod 模板。
+<4> pod 上的标签。它们必须包含标签选择器中的标签。
+<5> 扩展任何参数后的最大名称长度为 63 个字符。
+<6> 指定您创建的服务帐户。
+<7> 为 pod 指定 `fsGroup`。

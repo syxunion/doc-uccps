@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-retrying-deployment_{context}"]
+= 重试部署
+
+如果 `部署配置` 的当前修订无法部署，您可以重启部署过程。
+
+.流程
+
+. 重启已经失败的部署过程：
++
+[source,terminal]
+----
+$ oc rollout retry dc/<name>
+----
++
+如果成功部署了最新的修订，该命令会显示一条消息，且不会重试部署过程。
++
+[注意]
+====
+重试部署会重启部署过程，且不创建新的部署修订。重启的复制控制器具有与失败时相同的配置。
+====

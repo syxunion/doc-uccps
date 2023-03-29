@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id='configuring-the-odo-cli']
+= 配置 odo CLI
+include::_attributes/common-attributes.adoc[]
+:context: configuring-the-odo-cli
+
+toc::[]
+
+// Comment out per https://issues.redhat.com/browse/RHDEVDOCS-3594
+// include::modules/developer-cli-odo-using-command-completion.adoc[leveloffset=+1]
+
+您可以在 preference.yaml 文件中找到 odo 的全局设置，该文件位于 `$HOME/.odo` 目录中。
+
+您可以通过导出 `GLOBALODOCONFIG` 变量来为 `preference.yaml` 文件设置不同的位置。
+
+// view config
+include::modules/developer-cli-odo-view-config.adoc[leveloffset=+1]
+// set key
+include::modules/developer-cli-odo-set-config.adoc[leveloffset=+1]
+// unset key
+include::modules/developer-cli-odo-unset-config.adoc[leveloffset=+1]
+// preference ref table
+include::modules/developer-cli-odo-preference-table.adoc[leveloffset=+1]
+
+include::modules/developer-cli-odo-ignoring-files-or-patterns.adoc[leveloffset=+1]

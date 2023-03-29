@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="creating-network-policy"]
+= 创建网络策略
+include::_attributes/common-attributes.adoc[]
+:context: creating-network-policy
+
+toc::[]
+
+作为具有 admin 角色的用户，您可以为命名空间创建网络策略。
+
+include::modules/nw-networkpolicy-create.adoc[leveloffset=+1]
+
+include::modules/nw-networkpolicy-object.adoc[leveloffset=+1]

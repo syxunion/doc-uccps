@@ -1,0 +1,138 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-daemonsets.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-daemonsets-creating_{context}"]
+= 创建 daemonset
+
+在创建守护进程集时，使用 `nodeSelector` 字段来指示守护进程集应在其上部署副本的节点。
+
+.先决条件
+
+* 在开始使用守护进程集之前，通过将命名空间注解  `openshift.io/node-selector` 设置为空字符串来禁用命名空间中的默认项目范围节点选择器：
++
+[source,terminal]
+----
+$ oc patch namespace myproject -p \
+    '{"metadata": {"annotations": {"openshift.io/node-selector": ""}}}'
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来为命名空间禁用默认的项目范围节点选择器：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <namespace>
+  annotations:
+    openshift.io/node-selector: ''
+----
+====
+
+* 如果您要创建新项目，请覆盖默认节点选择器：
++
+[source,terminal]
+----
+$ oc adm new-project <name> --node-selector=""
+----
+
+.流程
+
+创建守护进程集：
+
+. 定义守护进程集 yaml 文件：
++
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hello-daemonset
+spec:
+  selector:
+      matchLabels:
+        name: hello-daemonset <1>
+  template:
+    metadata:
+      labels:
+        name: hello-daemonset <2>
+    spec:
+      nodeSelector: <3>
+        role: worker
+      containers:
+      - image: openshift/hello-openshift
+        imagePullPolicy: Always
+        name: registry
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      serviceAccount: default
+      terminationGracePeriodSeconds: 10
+----
+<1> 决定哪些 pod 属于守护进程集的标签选择器。
+<2> pod 模板的标签选择器。必须与上述标签选择器匹配。
+<3> 决定应该在哪些节点上部署 pod 副本的节点选择器。节点上必须存在匹配的标签。
+
+. 创建守护进程集对象：
++
+[source,terminal]
+----
+$ oc create -f daemonset.yaml
+----
+
+. 验证 pod 是否已创建好，并且每个节点都有 pod 副本：
++
+.. 查找 daemonset pod：
++
+[source,terminal]
+----
+$ oc get pods
+----
++
+.输出示例
+[source,terminal]
+----
+hello-daemonset-cx6md   1/1       Running   0          2m
+hello-daemonset-e3md9   1/1       Running   0          2m
+----
++
+.. 查看 pod 以验证 pod 已放置到节点上：
++
+[source,terminal]
+----
+$ oc describe pod/hello-daemonset-cx6md|grep Node
+----
++
+.输出示例
+[source,terminal]
+----
+Node:        openshift-node01.hostname.com/10.14.20.134
+----
++
+[source,terminal]
+----
+$ oc describe pod/hello-daemonset-e3md9|grep Node
+----
++
+.输出示例
+[source,terminal]
+----
+Node:        openshift-node02.hostname.com/10.14.20.137
+----
+
+[重要]
+====
+* 如果更新守护进程设置的 pod 模板，现有的 pod 副本不会受到影响。
+
+* 如果您删除了守护进程集，然后在创建新守护进程集时使用不同的模板和相同的标签选择器，它会将现有 pod 副本识别为具有匹配的标签，因而不更新它们，也不会创建新的副本，尽管 pod 模板中存在不匹配。
+
+* 如果您更改了节点标签，守护进程集会把 pod 添加到与新标签匹配的节点，并从不匹配新标签的节点中删除 pod。
+
+要更新守护进程集，请通过删除旧副本或节点来强制创建新的 pod 副本。
+====

@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: CONCEPT
+[id="eco-maintaining-bare-metal-nodes_{context}"]
+= 维护裸机节点
+
+在裸机基础架构上部署 统信容器云管理平台 时，与在云基础架构上部署相比，还需要考虑其他注意事项。与云环境不同，集群节点被视为临时的，重新置备裸机节点需要大量时间和精力来进行维护任务。
+
+当因为内核错误或 NIC 卡硬件故障造成裸机节点失败时，故障节点上的工作负载需要在集群中的另一个节点上重启，同时问题节点被修复或替换。节点维护模式允许集群管理员安全关闭节点，将工作负载移到集群的其它部分，并确保工作负载不会中断。详细进度和节点状态详情会在维护过程中提供。
+

@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-ebs.adoc
+// * storage/container_storage_interface/persistent-storage-csi-manila.adoc
+// * storage/container_storage_interface/persistent-storage-csi-ovirt.adoc
+
+:_content-type: CONCEPT
+[id="csi-about_{context}"]
+= 关于 CSI
+在过去，存储厂商一般会把存储驱动作为 Kubernetes 的一个部分提供。随着容器存储接口（CSI）的实现，第三方厂商可以使用标准接口来提供存储插件，而无需更改核心 Kubernetes 代码。
+
+CSI Operators 为统信容器云管理平台用户提供了存储选项，如卷快照，它无法通过 in-tree 卷插件实现。

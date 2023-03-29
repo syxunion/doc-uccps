@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+//* nodes/pods/configmaps.adoc
+//* applications/config-maps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmaps-use-case-setting-command-line-arguments_{context}"]
+= 使用配置映射为容器命令设置命令行参数
+
+配置映射也可用于设置容器中的命令或参数的值。这可以通过 Kubernetes 替换语法 $(VAR_NAME) 来实现。考虑以下配置映射：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: special-config
+  namespace: default
+data:
+  special.how: very
+  special.type: charm
+----
+
+.流程
+
+* 要将值注入容器中的命令中，您必须使用您要用作环境变量的键，如环境变量用例中的 ConfigMap 中一样。然后，您可以使用 $(VAR_NAME) 语法在容器的命令中引用它们。
++
+.配置为注入特定环境变量的 Pod 规格示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "echo $(SPECIAL_LEVEL_KEY) $(SPECIAL_TYPE_KEY)" ] <1>
+      env:
+        - name: SPECIAL_LEVEL_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: special-config
+              key: special.how
+        - name: SPECIAL_TYPE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: special-config
+              key: special.type
+  restartPolicy: Never
+----
+<1> 使用您要用作环境变量的键将值注入到容器中的命令中。
++
+当此 pod 运行时，test-container 容器中运行的 echo 命令的输出如下：
++
+----
+very charm
+----

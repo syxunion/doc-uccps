@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * serverless/monitor/cluster-logging-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="using-cluster-logging-to-find-logs-for-knative-serving-components_{context}"]
+= 使用 Uccps Logging 查找 Knative Serving 组件的日志
+
+.先决条件
+
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 获取 Kibana 路由：
++
+[source,terminal]
+----
+$ oc -n openshift-logging get route kibana
+----
+
+. 使用路由的 URL 导航到 Kibana 仪表板并登录。
+
+. 检查是否将索引设置为 *.all*。如果索引未设置为 *.all*，则只会列出 OpenShift Container Platform 系统日志。
+
+. 使用 `knative-serving` 命名空间过滤日志。在搜索框中输入 `kubernetes.namespace_name:knative-serving` 以过滤结果。
+

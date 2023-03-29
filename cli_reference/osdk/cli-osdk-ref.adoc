@@ -1,0 +1,43 @@
+:_content-type: ASSEMBLY
+[id="cli-osdk-ref"]
+= Operator SDK CLI 参考
+include::_attributes/common-attributes.adoc[]
+:context: cli-osdk-ref
+
+toc::[]
+
+Operator SDK 命令行界面（CLI）是一个开发组件，旨在更轻松地编写 Operator。
+
+.Operator SDK CLI 语法
+[source,terminal]
+----
+$ operator-sdk <command> [<subcommand>] [<argument>] [<flags>]
+----
+
+如需有关 Operator SDK 的完整文档，请参阅 Operators。
+
+include::modules/osdk-cli-ref-bundle.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-cleanup.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-completion.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-create.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-generate.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-generate-bundle.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需了解包括使用 make bundle 命令来调用 generate bundle 子命令的完整流程，请参阅捆绑 Operator 和 Operator Lifecycle Manager 部署。
+
+include::modules/osdk-cli-ref-generate-kustomize.adoc[leveloffset=+2]
+
+include::modules/osdk-cli-ref-init.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-run.adoc[leveloffset=+1]
+include::modules/osdk-cli-ref-run-bundle.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关可能安装模式的详细信息，请参阅 Operator 组成员资格。
+
+include::modules/osdk-cli-ref-run-bundle-upgrade.adoc[leveloffset=+2]
+include::modules/osdk-cli-ref-scorecard.adoc[leveloffset=+1]

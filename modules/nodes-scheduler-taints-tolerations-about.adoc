@@ -1,0 +1,283 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-taints-tolerations.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+
+:_content-type: CONCEPT
+[id="nodes-scheduler-taints-tolerations-about_{context}"]
+= 了解污点和容限
+
+通过使用污点（taint），节点可以拒绝调度 pod，除非 pod 具有匹配的容限（toleration）。
+
+您可以通过节点规格（NodeSpec）将污点应用到节点，并通过 Pod 规格（PodSpec）将容限应用到 pod。当您应用污点时，调度程序无法将 pod 放置到该节点上，除非 pod 可以容限该污点。
+
+.节点规格中的污点示例
+[source,yaml]
+----
+spec:
+  taints:
+  - effect: NoExecute
+    key: key1
+    value: value1
+....
+----
+
+.Example toleration in a `Pod` spec
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1"
+    operator: "Equal"
+    value: "value1"
+    effect: "NoExecute"
+    tolerationSeconds: 3600
+....
+----
+
+
+污点与容限由 key、value 和 effect 组成。
+
+[id="taint-components-table_{context}"]
+.污点和容限组件
+[cols="3a,8a",options="header"]
+|===
+
+|参数 |描述
+
+|`key`
+|`key` 是任意字符串，最多 253 个字符。key 必须以字母或数字开头，可以包含字母、数字、连字符、句点和下划线。
+
+|`value`
+| `value`  是任意字符串，最多 63 个字符。value 必须以字母或数字开头，可以包含字母、数字、连字符、句点和下划线。
+
+|`effect`
+
+|effect 的值包括：
+[frame=none]
+[cols="2a,3a"]
+!====
+!`NoSchedule` ^[1]^
+!* 与污点不匹配的新 pod 不会调度到该节点上。
+* 该节点上现有的 pod 会保留。
+!`PreferNoSchedule`
+!* 与污点不匹配的新 pod 可以调度到该节点上，但调度程序会尽量不这样调度。
+* 该节点上现有的 pod 会保留。
+!`NoExecute`
+!* 与污点不匹配的新 pod 无法调度到该节点上。
+* 节点上没有匹配容限的现有 pod 将被移除。
+!====
+
+|`operator`
+|[frame=none]
+[cols="2,3"]
+!====
+!`Equal`
+!`key`/`value`/`effect` 参数必须匹配。这是默认值。
+!`Exists`
+!`key`/`effect` 参数必须匹配。您必须保留一个空的 value 参数，这将匹配任何值。
+!====
+
+|===
+[.small]
+--
+如果向 control plane 节点添加了一个 `NoSchedule` 污点，节点必须具有  `node-role.kubernetes.io/master=:NoSchedule` 污点，这默认会添加。
++
+例如：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    machine.openshift.io/machine: openshift-machine-api/ci-ln-62s7gtb-f76d1-v8jxv-master-0
+    machineconfiguration.openshift.io/currentConfig: rendered-master-cdc1ab7da414629332cc4c3926e6e59c
+...
+spec:
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+...
+----
+--
+
+容限与污点匹配：
+
+* 如果 `operator` 参数设为 `Equal`:
+** `key` 参数相同;
+** `value` 参数相同;
+** `effect` 参数相同.
+
+* 如果 `operator` 参数设为 `Exists`:
+** `key` 参数相同;
+** `effect` 参数相同.
+
+统信容器云管理平台 中内置了以下污点：
+
+* `node.kubernetes.io/not-ready`: 节点未就绪。这与节点状况 Ready=False 对应。
+* `node.kubernetes.io/unreachable`: 节点无法从节点控制器访问。这与节点状况 Ready=Unknown 对应。
+* `node.kubernetes.io/memory-pressure`: 节点存在内存压力问题。这与节点状况 MemoryPressure=True 对应。
+* `node.kubernetes.io/disk-pressure`: 节点存在磁盘压力问题。这与节点状况 DiskPressure=True 对应。
+* `node.kubernetes.io/network-unavailable`: 节点网络不可用。
+* `node.kubernetes.io/unschedulable`: 节点不可调度。
+* `node.cloudprovider.kubernetes.io/uninitialized`: 当节点控制器通过外部云提供商启动时，在节点上设置这个污点来将其标记为不可用。在云控制器管理器中的某个控制器初始化这个节点后，kubelet 会移除此污点。
+* `node.kubernetes.io/pid-pressure`: 节点具有 pid 压力。这与节点状况 PIDPressure=True 对应。
++
+[重要]
+====
+统信容器云管理平台 不设置默认的 pid.available `evictionHard`.
+====
+
+
+[id="nodes-scheduler-taints-tolerations-about-seconds_{context}"]
+== 了解如何使用容限秒数来延迟 pod 驱除
+
+您可以通过在 Pod 规格或 MachineSet 对象中指定 tolerationSeconds 参数，指定 pod 在被驱除前可以保持与节点绑定的时长。如果将具有 NoExecute effect 的污点添加到节点，则容限污点（包含 tolerationSeconds 参数）的 pod，在此期限内 pod 不会被驱除。
+
+.输出示例
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1"
+    operator: "Equal"
+    value: "value1"
+    effect: "NoExecute"
+    tolerationSeconds: 3600
+----
+
+在这里，如果此 pod 正在运行但没有匹配的容限，pod 保持与节点绑定 3600 秒，然后被驱除。如果污点在这个时间之前移除，pod 就不会被驱除。
+
+[id="nodes-scheduler-taints-tolerations-about-multiple_{context}"]
+== 了解如何使用多个污点
+
+您可以在同一个节点中放入多个污点，并在同一 pod 中放入多个容限。统信容器云管理平台 按照如下所述处理多个污点和容限：
+
+. 处理 pod 具有匹配容限的污点。
+. 其余的不匹配污点在 pod 上有指示的 effect：
++
+* 如果至少有一个不匹配污点具有 NoSchedule effect，则 统信容器云管理平台 无法将 pod 调度到该节点上。
+* 如果没有不匹配污点具有 NoSchedule effect，但至少有一个不匹配污点具有 PreferNoSchedule effect，则 统信容器云管理平台 尝试不将 pod 调度到该节点上。
+* 如果至少有一个未匹配污点具有 NoExecute effect，统信容器云管理平台 会将 pod 从该节点驱除（如果它已在该节点上运行），或者不将 pod 调度到该节点上（如果还没有在该节点上运行）。
++
+** 不容许污点的 Pod 会立即被驱除。
++
+** 如果 Pod 容许污点而没有在 Pod 规格中指定 tolerationSeconds，则会永久保持绑定。
++
+** 如果 Pod 容许污点，且指定了 tolerationSeconds，则会在指定的时间里保持绑定。
+
+例如：
+
+* 向节点添加以下污点：
++
+[source,terminal]
+----
+$ oc adm taint nodes node1 key1=value1:NoSchedule
+----
++
+[source,terminal]
+----
+$ oc adm taint nodes node1 key1=value1:NoExecute
+----
++
+[source,terminal]
+----
+$ oc adm taint nodes node1 key2=value2:NoSchedule
+----
+
+* pod 具有以下容限：
++
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1"
+    operator: "Equal"
+    value: "value1"
+    effect: "NoSchedule"
+  - key: "key1"
+    operator: "Equal"
+    value: "value1"
+    effect: "NoExecute"
+----
+
+在本例中，pod 无法调度到节点上，因为没有与第三个污点匹配的容限。如果在添加污点时 pod 已在节点上运行，pod 会继续运行，因为第三个污点是三个污点中 pod 唯一不容许的污点。
+
+[id="nodes-scheduler-taints-tolerations-about-taintNodesByCondition_{context}"]
+== 了解 pod 调度和节点状况（根据状况保留节点）
+
+Taint Nodes By Condition （默认启用）可自动污点报告状况的节点，如内存压力和磁盘压力。如果某个节点报告一个状况，则添加一个污点，直到状况被清除为止。这些污点具有 NoSchedule effect；即，pod 无法调度到该节点上，除非 pod 有匹配的容限。
+
+在调度 pod 前，调度程序会检查节点上是否有这些污点。如果污点存在，则将 pod 调度到另一个节点。由于调度程序检查的是污点而非实际的节点状况，因此您可以通过添加适当的 pod 容限，将调度程序配置为忽略其中一些节点状况。
+
+为确保向后兼容，守护进程会自动将下列容限添加到所有守护进程中：
+
+* node.kubernetes.io/memory-pressure
+* node.kubernetes.io/disk-pressure
+* node.kubernetes.io/unschedulable (1.10 或更高版本)
+* node.kubernetes.io/network-unavailable (仅限主机网络)
+
+您还可以在守护进程集中添加任意容限。
+
+
+[id="nodes-scheduler-taints-tolerations-about-taintBasedEvictions_{context}"]
+== 了解根据状况驱除 pod（基于垃圾的驱除）
+
+Taint-Based Evictions 功能默认是启用的，可以从遇到特定状况（如 not-ready 和 unreachable）的节点驱除 pod。当节点遇到其中一个状况时，统信容器云管理平台 会自动给节点添加污点，并开始驱除 pod 以及将 pod 重新调度到其他节点。
+
+Taint Based Evictions 具有 NoExecute 效果，不容许污点的 pod 都被立即驱除，容许污点的 pod 不会被驱除，除非 pod 使用 tolerationSeconds 参数。
+
+tolerationSeconds 参数允许您指定 pod 保持与具有节点状况的节点绑定的时长。如果在 tolerationSections 到期后状况仍然存在，则污点会保持在节点上，并且具有匹配容限的 pod 将被驱除。如果状况在 tolerationSeconds 到期前清除，则不会删除具有匹配容限的 pod。
+
+如果使用没有值的 tolerationSeconds 参数，则 pod 不会因为未就绪和不可访问的节点状况而被驱除。
+
+[注意]
+====
+统信容器云管理平台 会以限速方式驱除 pod，从而防止在主控机从节点分离等情形中发生大量 pod 驱除。
+
+默认情况下，如果给定区域中的节点超过 55% 的节点不健康，节点生命周期控制器会将该区域的状态改为 PartialDisruption，并且 pod 驱除率会减少。对于此状态的小型集群（默认为 50 个节点或更少），这个区中的节点不会污点，驱除会被停止。
+
+如需更多信息，请参阅 Kubernetes 文档中的 有关驱除率限制。
+====
+
+统信容器云管理平台 会自动为 node.kubernetes.io/not-ready 和 node.kubernetes.io/unreachable 添加容限并设置 tolerationSeconds=300，除非 Pod 配置中指定了其中任一种容限。
+
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300 <1>
+  - key: node.kubernetes.io/unreachable
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 300
+----
+
+<1> 这些容限确保了在默认情况下，pod 在检测到这些节点条件问题中的任何一个时，会保持绑定 5 分钟。
+
+您可以根据需要配置这些容限。例如，如果您有一个具有许多本地状态的应用程序，您可能希望在发生网络分区时让 pod 与节点保持绑定更久一些，以等待分区恢复并避免 pod 驱除行为的发生。
+
+由守护进程集生成的 pod 在创建时会带有以下污点的 NoExecute 容限，且没有 `tolerationSeconds`:
+
+* `node.kubernetes.io/unreachable`
+* `node.kubernetes.io/not-ready`
+
+因此，守护进程集 pod 不会被驱除。
+
+[id="nodes-scheduler-taints-tolerations-all_{context}"]
+== 容限所有污点
+
+您可以通过添加 operator: "Exists" 容限而无需 key 和 value 参数，将节点配置为容许所有污点。具有此容限的 Pod 不会从具有污点的节点中删除。
+
+.用于容忍所有污点的Pod 规格
+[source,yaml]
+----
+spec:
+  tolerations:
+  - operator: "Exists"
+----

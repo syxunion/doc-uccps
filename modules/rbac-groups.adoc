@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+
+[id="rbac-groups_{context}"]
+= 组
+
+用户可以分配到一个或多个组中，每个组代表特定的用户集合。在管理授权策略时，可使用组同时为多个用户授予权限，例如允许访问一个项目中的多个对象，而不必单独授予用户权限。
+
+除了明确定义的组外，还有系统组或虚拟组，它们由集群自动置备。
+
+以下列出了最重要的默认虚拟组：
+
+//WHY?
+
+[cols="2,5",options="header"]
+|===
+
+|虚拟组 |描述
+
+|`system:authenticated` |自动与所有经过身份验证的用户关联。
+|`system:authenticated:oauth` |自动与所有使用 OAuth 访问令牌经过身份验证的用户关联。
+
+|===

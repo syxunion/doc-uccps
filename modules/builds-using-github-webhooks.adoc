@@ -1,0 +1,89 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-using-github-webhooks_{context}"]
+= 使用 GitHub Webhook
+
+当存储库更新时，GitHub Webhook 处理 GitHub 发出的调用。在定义触发器时，您必须指定一个 secret，它将是您在配置 Webhook 时提供给 GitHub 的 URL 的一部分。
+
+GitHub Webhook 定义示例：
+
+[source,yaml]
+----
+type: "GitHub"
+github:
+  secretReference:
+    name: "mysecret"
+----
+
+[注意]
+====
+Webhook 触发器配置中使用的 `secret` 与在 GitHub UI 中配置 Webhook 时遇到的 secret 字段不同。前者使 Webhook URL 唯一且难以预测，后者是一个可选的字符串字段，用于创建正文的 HMAC 十六进制摘要，作为 `X-Hub-Signature` 标头来发送。
+====
+
+`oc describe` 命令将有效负载 URL 返回为 GitHub Webhook URL（请参阅“显示 Webhook URL”），其结构如下：
+
+.输出示例
+[source,terminal]
+----
+https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/github
+----
+
+.P先决条件
+
+* 从 GitHub 存储库创建 `BuildConfig`。
+
+.流程
+
+. 配置 GitHub Webhook：
+
+.. 从 GitHub 存储库创建 `BuildConfig` 后，运行以下命令：
++
+[source,terminal]
+----
+$ oc describe bc/<name-of-your-BuildConfig>
+----
++
+这会生成一个 Webhook GitHub URL，如下所示：
++
+.输出示例
+[source,terminal]
+----
+<https://api.starter-us-east-1.openshift.com:443/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/github
+----
+
+.. 从 GitHub Web 控制台将此 URL 剪切并粘贴到 GitHub 中。
+
+.. 在 GitHub 存储库中，从 *Settings -> Webhooks* 中选择 *Add Webhook*。
+
+.. 将 URL 输出粘贴到 *Payload URL* 字段。
+
+.. 将 *Content Type* 从 GitHub 默认的 `application/x-www-form-urlencoded` 更改为 `application/json`。
+
+.. 点击 *Add webhook*。
++
+您应该看到一条来自 GitHub 的消息，说明您的 Webhook 已配置成功。
++
+现在，每当您将更改推送到 GitHub 存储库时，新构建会自动启动，成功构建后也会启动新部署。
++
+[注意]
+====
+Gogs 支持与 GitHub 相同的 Webhook 有效负载格式。因此，如果您使用的是 Gogs 服务器，也可以在 BuildConfig 中定义 GitHub Webhook 触发器，并由 Gogs 服务器触发它。
+====
+
+. 提供含有有效 JSON 内容的文件后，如 `payload.json`，您可以使用 curl 手动触发 `Webhook`：
++
+[source,terminal]
+----
+$ curl -H "X-GitHub-Event: push" -H "Content-Type: application/json" -k -X POST --data-binary @payload.json https://<openshift_api_host:port>/apis/build.openshift.io/v1/namespaces/<namespace>/buildconfigs/<name>/webhooks/<secret>/github
+----
++
+只有在 API 服务器没有适当签名的证书时，才需要 `-k` 参数。
+
+[role="_additional-resources"]
+.其他资源
+
+//* link:https://developer.github.com/webhooks/[GitHub]
+* link:https://gogs.io[Gogs]

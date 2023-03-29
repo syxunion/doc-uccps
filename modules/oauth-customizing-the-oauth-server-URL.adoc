@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-internal-oauth.adoc
+
+:_content-type: PROCEDURE
+[id="customizing-the-oauth-server-url_{context}"]
+= 自定义内部 OAuth 服务器 URL
+
+您可以通过在集群 Ingress 配置的 spec.componentRoutes 字段中设置自定义主机名和 TLS 证书来自定义内部 OAuth 服务器 URL。
+
+[警告]
+====
+如果更新内部 OAuth 服务器 URL，则可能会破坏集群中需要与 Uccp OAuth 服务器通信以检索 OAuth 访问令牌的组件的信任。在调用 OAuth 端点时，需要信任 OAuth 服务器的组件需要包含适当的 CA 捆绑包。例如：
+
+[source,terminal]
+----
+$ oc login -u <username> -p <password> --certificate-authority=<path_to_ca.crt> <1>
+----
+<1> 对于自签名证书，`ca.crt` 文件必须包含自定义 CA 证书，否则登录将无法成功。
+
+Cluster Authentication Operator 在 `openshift-config-managed` 命名空间中的 `oauth-serving-cert` 配置映射中发布 OAuth 服务器的 serving 证书。您可以在配置映射的 data.ca-bundle.crt 键中找到证书。
+====
+
+.先决条件
+
+* 已使用具有管理特权的用户身份登录集群。
+* 您已在 openshift-config 命名空间中创建了包含 TLS 证书和密钥的 secret。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
++
+[提示]
+====
+您可以使用 `oc create secret tls` 命令创建 TLS secret。
+====
+
+.流程
+
+. 编辑集群 `Ingress` 配置：
++
+[source,terminal]
+----
+$ oc edit ingress.config.openshift.io cluster
+----
+
+. 设置自定义主机名以及可选的服务证书和密钥：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+spec:
+  componentRoutes:
+    - name: oauth-openshift
+      namespace: openshift-authentication
+      hostname: <custom_hostname> <1>
+      servingCertKeyPairSecret:
+        name: <secret_name> <2>
+----
+<1> 自定义主机名.
+<2> 对 `openshift-config` 命名空间中的 secret 的引用，该 secret 包含 TLS 证书 (`tls.crt`) 和密钥 (`tls.key`)。如果自定义主机名后缀的域与集群域后缀不匹配，则需要此项。如果后缀匹配，secret 是可选的。
+
+. 保存文件以使改变生效。

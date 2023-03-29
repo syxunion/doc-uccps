@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="deploying-applications-ossm"]
+= Enabling sidecar injection
+include::_attributes/common-attributes.adoc[]
+:context: deploying-applications-ossm
+
+toc::[]
+
+将包含您的服务的命名空间添加到网格后，下一步是在应用程序的 Deployment 资源中启用自动 sidecar 注入功能。您必须为每个部署启用自动 sidecar 注入。
+
+如果您已安装 Bookinfo 示例应用程序，则会部署应用程序，并作为安装过程的一部分注入 sidecar。如果您使用自己的项目和服务，请在统信人容器云管理平台上部署应用程序。
+
+
+== 先决条件
+
+* xref:../../service_mesh/v2x/ossm-create-mesh.adoc#ossm-tutorial-bookinfo-overview_ossm-create-mesh[部署到服务网格的服务]，如 Bookinfo 示例应用程序。
+
+* 部署资源文件。
+
+include::modules/ossm-automatic-sidecar-injection.adoc[leveloffset=+1]
+
+include::modules/ossm-sidecar-validate-kiali.adoc[leveloffset=+1]
+
+
+include::modules/ossm-sidecar-injection-env-var.adoc[leveloffset=+1]
+
+include::modules/ossm-update-app-sidecar.adoc[leveloffset=+1]

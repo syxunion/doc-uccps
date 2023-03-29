@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * virt/logging_events_monitoring/virt-openshift-cluster-monitoring.adoc
+// * monitoring/monitoring-overview.adoc
+
+// This module uses a conditionalized title so that the module
+// can be re-used in associated products but the title is not
+// included in the existing OpenShift assembly.
+
+:_content-type: CONCEPT
+[id="understanding-the-monitoring-stack_{context}"]
+= 了解监控堆栈
+
+统信容器云管理平台 监控堆栈基于 Prometheus 开源项目及其更广的生态系统。监控堆栈包括以下组件：
+
+* *默认平台监控组件*. 在 统信容器云管理平台 安装过程中，默认会在 openshift-monitoring 项目中安装一组平台监控组件。这为包括 Kubernetes 服务在内的 统信容器云管理平台 核心组件提供了监控。默认监控堆栈还为集群启用远程健康状态监控。下图中的 *默认安装* 部分说明了这些组件。
+
+* *用于监控用户定义项目的组件*. 在选择性地为用户定义的项目启用监控后，会在 openshift-user-workload-monitoring 项目中安装其他监控组件。这为用户定义的项目提供了监控。下图中的 *用户* 部分说明了这些组件。

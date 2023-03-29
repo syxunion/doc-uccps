@@ -1,0 +1,85 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="creating-custom-links_{context}"]
+= 在 Web 控制台中创建自定义链接
+
+.先决条件
+
+* 您必须具有管理员特权。
+
+.流程
+
+. 在 *Administration* -> *Custom Resource Definitions* 点击 *ConsoleLink*.
+. 选择 *Instances* 标签
+. 点击 *Create Console Link* 并编辑文件
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: example
+spec:
+  href: 'https://www.example.com'
+  location: HelpMenu <1>
+  text: Link 1
+----
+<1> 有效的位置设置为 `HelpMenu`、`UserMenu`、`ApplicationMenu` 和 `NamespaceDashboard`。
++
+要使自定义链接出现在所有命名空间中，请按照以下示例操作：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: namespaced-dashboard-link-for-all-namespaces
+spec:
+  href: 'https://www.example.com'
+  location: NamespaceDashboard
+  text: This appears in all namespaces
+----
++
+要使自定义链接只出现在某些命名空间中，请按照以下示例操作：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: namespaced-dashboard-for-some-namespaces
+spec:
+  href: 'https://www.example.com'
+  location: NamespaceDashboard
+  # This text will appear in a box called "Launcher" under "namespace" or "project" in the web console
+  text: Custom Link Text
+  namespaceDashboard:
+    namespaces:
+    # for these specific namespaces
+    - my-namespace
+    - your-namespace
+    - other-namespace
+----
++
+要使自定义链接出现在应用程序菜单中，请按照以下示例操作：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: application-menu-link-1
+spec:
+  href: 'https://www.example.com'
+  location: ApplicationMenu
+  text: Link 1
+  applicationMenu:
+    section: My New Section
+    # image that is 24x24 in size
+    imageURL: https://via.placeholder.com/24
+----
+
+. 点击 *Save* 以应用您的更改。

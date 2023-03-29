@@ -1,0 +1,94 @@
+:_content-type: ASSEMBLY
+[id="cco-mode-passthrough"]
+= 使用 passthrough 模式
+include::_attributes/common-attributes.adoc[]
+:context: cco-mode-passthrough
+
+toc::[]
+
+Amazon Web Services（AWS）、Microsoft Azure、Google Cloud Platform（GCP）、Uniontech UStack Platform和 VMware vSphere 支持 passthrough 模式。
+
+在 passthrough 模式中，Cloud Credential Operator（CCO）将提供的云凭证传递给请求云凭证的组件。凭证必须具有执行安装的权限，并可以完成集群中组件所需的操作，但并不需要可以创建新凭证的权限。CCO 不会尝试在 passthrough 模式中创建额外的有限范围凭证。
+
+[注意]
+====
+xref:../../authentication/managing_cloud_provider_credentials/cco-mode-manual.adoc#cco-mode-manual[手动模式] 是唯一支持 Microsoft Azure Stack Hub 的 CCO 配置。
+====
+
+[id="passthrough-mode-permissions"]
+== passthrough 模式权限要求
+在使用 CCO 的 passthrough 模式时，请确保您提供的凭证满足运行或安装统信容器云管理平台的云要求。如果提供的凭证由 CCO 传递给一个创建 `CredentialsRequest` CR 的组件，则该组件会在尝试调用没有权限的 API 时报告错误。
+
+[id="passthrough-mode-permissions-aws"]
+=== Amazon Web Services (AWS) 权限
+您在 AWS 中提供的 passthrough 模式的凭证必须具有您正在运行或安装的统信容器云管理平台版本所需的所有 `credentialsRequest` CR 的所有请求权限。
+
+要找到所需的 `CredentialsRequest` CR，请参阅为 AWS 手动创建 IAM。
+
+[id="passthrough-mode-permissions-azure"]
+=== Microsoft Azure 权限
+您在 Azure 中提供的 passthrough 模式的凭证必须具有您正在运行或安装的统信容器云管理平台版本所需的所有 `credentialsRequest` CR 的所有请求权限。
+
+要找到所需的 `CredentialsRequest` CR，请参阅为 Azure 手动创建 IAM。
+
+[id="passthrough-mode-permissions-gcp"]
+=== Google Cloud Platform (GCP) 权限
+您在 GCP 中提供的 passthrough 模式的凭证必须具有您正在运行或安装的统信容器云管理平台版本所需的所有 `credentialsRequest` CR 的所有请求权限。
+
+要找到所需的 `CredentialsRequest` CR，请参阅为 GCP 手动创建 IAM。
+
+[id="passthrough-mode-permissions-rhosp"]
+=== UStack Platform（统信有栈）权限
+要在 UStack 上安装统信容器云管理平台集群，CCO 需要具有 `member` 用户角色权限的凭证。
+
+
+[id="passthrough-mode-permissions-vsware"]
+=== VMware vSphere 权限
+要在 VMware vSphere 上安装统信容器云管理平台集群，CCO 需要具有以下 vSphere 权限的凭证：
+
+.所需的 vSphere 权限
+[cols="1,2"]
+|====
+|类别 |权限
+
+|数据存储
+|分配空间
+
+|目录
+|创建和删除目录
+
+|vSphere 标记
+|所有权限
+
+|网络
+|分配网络
+
+|资源
+|为资源池分配虚拟机
+
+|配置集驱动的存储
+|所有权限
+
+|vApp
+|所有权限
+
+|虚拟机器
+|所有权限
+
+|====
+
+
+[id="passthrough-mode-maintenance"]
+== passthrough 模式凭证维护
+
+如果 `CredentialsRequest` CR 随着集群升级而变化，您必须手动更新 passthrough 模式凭证以满足要求。为了避免升级过程中出现凭证问题，请在升级前检查发行镜像中的 CredentialsRequest CR。要找到云供应商所需的 CredentialsRequest CR，请参阅为 AWS、Azure 或 GCP 手动创建 IAM。
+
+
+[id="passthrough-mode-reduce-permissions"]
+== 在安装后减少权限
+
+在使用 passthrough 模式时，每个组件都有相同的权限供所有其他组件使用。如果您在安装后不减少权限，则所有组件都有运行安装程序所需的广泛权限。
+
+安装后，您可以将凭证的权限减少到仅限运行集群所需的权限，这由您正在使用的统信容器云管理平台版本的发行镜像中的 `CredentialsRequest`` CR 定义。
+
+要找到 AWS、Azure 或 GCP 所需的 `CredentialsRequest` CR，并了解如何更改 CCO 所用权限，请参阅为 AWS、Azure 或 GCP 手动创建 IAM。

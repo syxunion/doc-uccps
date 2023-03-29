@@ -1,0 +1,101 @@
+// Module included in the following assemblies:
+//
+// * networking/routes/route-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-creating-a-route-via-an-ingress_{context}"]
+= 通过 Ingress 对象创建路由
+
+一些生态系统组件与 `Ingress` 资源集成，但与路由资源不集成。要涵盖此问题单，统信容器云管理平台 会在创建 Ingress 对象时自动创建受管路由对象。当相应 Ingress 对象被删除时，这些路由对象会被删除。
+
+.流程
+
+. 在 统信容器云管理平台 控制台中或通过 `oc create` 命令来定义 Ingress 对象：
++
+.Ingress 的 YAML 定义
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  annotations:
+    route.openshift.io/termination: "reencrypt" <1>
+spec:
+  rules:
+  - host: www.example.com <2>
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - www.example.com
+    secretName: example-com-tls-certificate
+----
++
+<1> `route.openshift.io/termination` 注解可用于配置 Route 的 `spec.tls.termination` 字段，因为 Ingress 没有此字段。可接受的值为 `edge`、`passthrough` 和 `reencrypt`。所有其他值都会被静默忽略。当注解值未设置时，edge 是默认路由。模板文件中必须定义 TLS 证书详细信息，才能实现默认的边缘路由。
+<2> 如果您在 `route.openshift.io/termination` 注解中指定 `passthrough` 值，在 spec 中将 path 设置为 ''，将 `pathType` 设置为 `ImplementationSpecific`：
+
++
+[source,terminal]
+----
+$ oc apply -f ingress.yaml
+----
++
+
+. 列出您的路由：
++
+[source,terminal]
+----
+$ oc get routes
+----
++
+结果包括一个自动生成的路由，其名称以 `frontend-` 开头：
++
+[source,terminal]
+----
+NAME             HOST/PORT         PATH    SERVICES    PORT    TERMINATION          WILDCARD
+frontend-gnztq   www.example.com           frontend    443     reencrypt/Redirect   None
+----
++
+如果您检查这个路由，它会类似于：
++
+.自动生成的路由的 YAML 定义
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-gnztq
+  ownerReferences:
+  - apiVersion: networking.k8s.io/v1
+    controller: true
+    kind: Ingress
+    name: frontend
+    uid: 4e6c59cc-704d-4f44-b390-617d879033b6
+spec:
+  host: www.example.com
+  path: /
+  port:
+    targetPort: https
+  tls:
+    certificate: |
+      -----BEGIN CERTIFICATE-----
+      [...]
+      -----END CERTIFICATE-----
+    insecureEdgeTerminationPolicy: Redirect
+    key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      [...]
+      -----END RSA PRIVATE KEY-----
+    termination: reencrypt
+  to:
+    kind: Service
+    name: frontend
+----

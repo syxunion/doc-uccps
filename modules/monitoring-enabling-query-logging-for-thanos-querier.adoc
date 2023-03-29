@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+[id="enabling-query-logging-for-thanos-querier_{context}"]
+:_content-type: PROCEDURE
+= 为 Thanos Querier 启用查询日志记录
+
+[role="_abstract"]
+对于  `openshift-monitoring` 项目中的默认平台监控，您可以启用 Cluster Monitoring Operator 来记录 Thanos Querier 运行的所有查询。
+
+[重要]
+====
+因为日志轮转不被支持，所以只在您需要对问题进行故障排除时临时启用此功能。完成故障排除后，通过恢复您对  `ConfigMap` 对象所做的更改来禁用查询日志记录以启用该功能。
+====
+
+.先决条件
+
+* 已安装 Uccps CLI (`oc`).
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+
+.流程
+
+您可以在 `openshift-monitoring` 项目中为 Thanos Querier 启用查询日志记录：
+
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
++
+. 在 `data/config.yaml`  中添加 `thanosQuerier` 部分并添加值，如下例所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    thanosQuerier:
+      enableRequestLogging: <value> <1>
+      logLevel: <value> <2>
+      
+
+----
+<1> 将值设为 `true` 以启用日志记录，并将 `false` 设置为 disable logging 。默认值为 `false`
+<2> 将值设为 `debug`, `info`, `warn`, 或 `error`。如果 `logLevel` 没有值，则日志级别默认为 `error`。
++
+. 保存文件以使改变生效。
++
+[警告]
+====
+当您将更改保存到监控配置映射时，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====
+
+.验证
+
+. 验证 Thanos Querier pod 是否正在运行。以下示例命令列出了 `openshift-monitoring` 项目中的 pod 状态：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get pods
+----
++
+. 使用以下示例命令作为模型运行测试查询：
++
+[source,terminal]
+----
+$ token=`oc sa get-token prometheus-k8s -n openshift-monitoring`
+$ oc -n openshift-monitoring exec -c prometheus prometheus-k8s-0 -- curl -k -H "Authorization: Bearer $token" 'https://thanos-querier.openshift-monitoring.svc:9091/api/v1/query?query=cluster_version'
+----
+. 运行以下命令来读取查询日志：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring logs <thanos_querier_pod_name> -c thanos-query
+----
++
+[注意]
+====
+因为 `thanos-querier`  pod 是高度可用的(HA)pod，所以您可能只能看到一个 pod 的日志。
+====
++
+. 检查日志记录的查询信息后，通过将配置映射中的 `enableRequestLogging` 值更改为 false 来禁用查询日志记录。
+

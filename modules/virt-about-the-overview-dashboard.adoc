@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * virt/logging_events_monitoring/virt-using-dashboard-to-get-cluster-info.adoc
+// * web_console/using-dashboard-to-get-cluster-information.adoc
+
+ifeval::["{context}" == "virt-using-dashboard-to-get-cluster-info"]
+:virt-cluster:
+endif::[]
+
+:_content-type: CONCEPT
+[id="virt-about-the-overview-dashboard_{context}"]
+= 关于 统信容器云管理平台 仪表板页
+
+统信容器云管理平台 仪表板由以下各卡组成：
+
+* *Details* 提供有关信息型集群详情的简单概述。
++
+状态包括 *ok*, *error*, *warning*, *in progress*, 和 *unknown*。资源可添加自定义状态名称。
++
+** 集群 ID
+** 提供者
+** 版本
+* *Cluster Inventory* 详细列出资源数目和相关状态。这在通过干预解决问题时非常有用，其中包含以下相关信息：
+** 节点数
+** pod 数量
+** 持久性存储卷声明
+ifdef::virt-cluster[]
+** Virtual machines (available if {VirtProductName} is installed)
+endif::virt-cluster[]
+** 集群中的裸机主机，根据其状态列出（只在 *metal3* 环境中可用）。
+ifdef::virt-cluster[]
+* *Cluster Health* summarizes the current health of the cluster as a whole, including relevant alerts and descriptions. If {VirtProductName} is installed, the overall health of {VirtProductName} is diagnosed as well. If more than one subsystem is present, click *See All* to view the status of each subsystem.
+endif::virt-cluster[]
+* *Cluster Capacity* 图表可帮助管理员了解在什么时候集群需要额外的资源。此表包含一个内环和一个外环。内环显示当前的消耗，外环显示为资源配置的阈值，其中包括以下信息：
+** CPU 时间
+** 内存分配
+** 所消耗的存储
+** 所消耗的网络资源
+* *Cluster Utilization* 显示在指定时间段内各种资源的能力，以帮助管理员了解高资源消耗的范围和频率。
+* *Events*  列出了与集群中最近活动相关的消息，如创建 pod 或虚拟机迁移到另一台主机。
+* *Top Consumers* 可帮助管理员了解集群资源是如何被消耗的。点一个资源可以进入一个包括详细信息的页面，它列出了对指定集群资源（CPU 、内存或者存储）消耗最多的 Pod 和节点。
+
+ifeval::["{context}" == "virt-using-dashboard-to-get-cluster-info"]
+:!virt-cluster:
+endif::[]

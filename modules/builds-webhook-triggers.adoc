@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+[id="builds-webhook-triggers_{context}"]
+= Webhook 触发器
+
+Webhook 触发器通过发送请求到 统信容器云管理平台 API 端点来触发新构建。您可以使用 GitHub、GitLab、Bitbucket 或通用 Webhook 来定义这些触发器。
+
+目前，统信容器云管理平台 Webhook 仅支持各种基于 Git 的源代码管理系统 (SCM) 的推送事件的类同版本。所有其他事件类型都会忽略。
+
+处理推送事件时，统信容器云管理平台 control plane 主机确认事件内的分支引用是否与对应 `BuildConfig` 中的分支引用匹配。如果匹配，它会检查 统信容器云管理平台 构建的 Webhook 事件中记录的确切提交引用。如果不匹配，则不触发构建。
+
+[注意]
+====
+`oc new-app` 和 `oc new-build` 会自动创建 GitHub 和通用 Webhook 触发器，但其他所需的 Webhook 触发器都必须手动添加。您可以通过设置触发器来手动添加触发器。
+====
+
+对于所有 Webhook，您必须使用名为 `WebHookSecretKey` 的键定义 secret，并且其值是调用 Webhook 时要提供的值。然后，Webhook 定义必须引用该 secret。secret可确保 URL 的唯一性，防止他人触发构建。键的值将与 Webhook 调用期间提供的 secret 进行比较。
+
+例如，此处的 GitHub Webhook 具有对名为 `mysecret` 的 secret 的引用：
+
+[source,yaml]
+----
+type: "GitHub"
+github:
+  secretReference:
+    name: "mysecret"
+----
+
+该 secret 的定义如下。注意 secret 的值采用 base64 编码，如 `Secret` 对象的 `data` 字段所要求。
+
+[source,yaml]
+----
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: mysecret
+    creationTimestamp:
+  data:
+    WebHookSecretKey: c2VjcmV0dmFsdWUx
+----

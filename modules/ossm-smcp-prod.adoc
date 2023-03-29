@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-deploy-production.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-smcp-prod_{context}"]
+= Configuring your ServiceMeshControlPlane resource for production
+
+如果您已安装了一个基本的 `ServiceMeshControlPlane` 资源来测试 Service Mesh，则必须将其配置为生产环境中的 {SMProductName} 。
+
+您无法更改现有 `ServiceMeshControlPlane` 资源的  `metadata.name`  字段。对于生产环境部署，您必须自定义默认模板。
+
+.流程
+
+. 为生产环境配置分布式追踪平台。
++
+.. 编辑 `ServiceMeshControlPlane` 资源以使用 `production` 部署策略，方法是将 `spec.addons.jaeger.install.storage.type` 设置为 `Elasticsearch` ，并在 `install`.中指定额外的配置选项。您可以创建并配置 Jaeger 实例，并将 `spec.addons.jaeger.name` 设置为 Jaeger 实例的名称
++
+.默认 Jaeger 参数，包括 Elasticsearch
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 100
+    type: Jaeger
+  addons:
+    jaeger:
+      name: MyJaeger
+      install:
+        storage:
+          type: Elasticsearch
+        ingress:
+          enabled: true
+  runtime:
+    components:
+      tracing.jaeger.elasticsearch: # only supports resources and image name
+        container:
+          resources: {}
+----
+
+.. 为生产环境配置抽样率。如需更多信息，请参阅性能和可扩展性部分。
+
+. 通过从外部证书颁发机构安装安全证书，确保您的安全证书已就绪。如需更多信息，请参阅安全部分。
+
+. 验证结果。输入以下命令验证 ServiceMeshControlPlane 资源是否已正确更新。在本例中， `basic` 是 `ServiceMeshControlPlane` 资源的名称。
++
+[source,terminal]
+----
+$ oc get smcp basic -o yaml
+----

@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * machine_management/user_infra/adding-bare-metal-compute-user-infra.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="machine-user-infra-machines-iso_{context}"]
+= 使用 ISO 镜像创建更多 Uswift 机器
+
+您可以使用 ISO 镜像为裸机集群创建更多 UnionTech OS Cloud 20(USwift)计算机器，以创建机器。
+
+.先决条件
+
+* 获取集群计算机器的 Ignition 配置文件的 URL。在安装过程中将该文件上传到 HTTP 服务器。
+
+.流程
+
+. 使用 ISO 文件在更多计算机器上安装 Uswift。在安装集群前，使用创建机器时使用的相同方法：
+** 将 ISO 镜像刻录到磁盘并直接启动。
+** 在 LOM 接口中使用 ISO 重定向。
+
+. 实例启动后，按 `TAB` 或 `E` 键编辑内核命令行。
+. 将参数添加到内核命令行：
++
+[source,terminal]
+----
+coreos.inst.install_dev=sda <1>
+coreos.inst.ignition_url=http://example.com/worker.ign <2>
+----
+<1> 指定要安装到的系统块设备。
+<2> 指定计算 Ignition 配置文件的 URL。只支持 HTTP 和 HTTPS 协议。
+
+. 按 `Enter` 键完成安装。安装 Uswift 后，系统会重启。系统重启后，它会应用您指定的 Ignition 配置文件。
+
+. 继续为集群创建更多计算机器。

@@ -1,0 +1,114 @@
+:_content-type: ASSEMBLY
+[id="serverless-traffic-management"]
+= 流量管理
+include::_attributes/common-attributes.adoc[]
+:context: serverless-traffic-management
+
+toc::[]
+
+在 Knative 应用程序中，可以通过创建流量分割来管理流量。流量分割被配置为由 Knative 服务管理的路由的一部分。
+
+image::knative-service-architecture.png[Traffic management for a Knative application]
+
+配置路由允许将请求发送到服务的不同修订版本。此路由由 `traffic` 对象的 `Service` spec 决定。
+// add additional resources link to knative services /apps docs
+
+`traffic` 规格声明由一个或多个修订版本组成，每个修订版本负责处理整个流量的一部分。路由到每个修订版本的流量百分比必须添加到 100%，由 Knative 验证确保。
+
+`traffic` 规格中指定的修订版本可以是固定的、名为修订的修订版本，或者可以指向"latest"修订，该修订跟踪服务所有修订版本列表的头。"latest" 修订版本是一个浮动引用类型，它在创建了新修订版本时更新。每个修订版本都可以附加标签，为该修订版本创建一个额外访问 URL。
+
+`traffic` 规格可通过以下方法修改：
+
+* 直接编辑 Service 对象的 YAML。
+* 使用 Knative (kn) CLI  `--traffic` 标志。
+* 使用 {product-title}  Web 控制台。
+
+当您创建 Knative 服务时，它没有任何默认 `traffic` spec 设置。
+
+[id="serverless-traffic-management-spec-examples"]
+== traffic 规格示例
+
+以下示例显示了一个 `traffic` 规格，其中 100% 的流量路由到该服务的最新修订版本。在 `status` 下，您可以看到 `latestRevision` 解析为的最新修订版本的名称：
+
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+...
+  traffic:
+  - latestRevision: true
+    percent: 100
+status:
+  ...
+  traffic:
+  - percent: 100
+    revisionName: example-service
+----
+
+以下示例显示了一个  `traffic` 规格，其中 100% 的流量路由到当前标记为 `current` 修订版本，并且该修订版本的名称指定为 `example-service`。标记为 `latest` 的修订版本会保持可用，即使没有流量路由到它：
+
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+...
+  traffic:
+  - tag: current
+    revisionName: example-service
+    percent: 100
+  - tag: latest
+    latestRevision: true
+    percent: 0
+----
+
+以下示例演示了如何扩展 traffic 规格中的修订版本列表，以便在多个修订版本间分割流量。这个示例将 50% 的流量发送到标记为 current 修订版本，50% 的流量发送到标记为 candidate 的修订版本。标记为 latest 的修订版本会保持可用，即使没有流量路由到它：
+
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+...
+  traffic:
+  - tag: current
+    revisionName: example-service-1
+    percent: 50
+  - tag: candidate
+    revisionName: example-service-2
+    percent: 50
+  - tag: latest
+    latestRevision: true
+    percent: 0
+----
+
+// kn flags
+include::modules/serverless-traffic-splitting-flags-kn.adoc[leveloffset=+1]
+// creating custom URLs by using tags
+include::modules/serverless-custom-revision-urls.adoc[leveloffset=+2]
+// kn CLI
+include::modules/serverless-create-traffic-split-kn.adoc[leveloffset=+1]
+
+// ODC
+include::modules/odc-splitting-traffic-between-revisions-using-developer-perspective.adoc[leveloffset=+1]
+
+// blue-green
+include::modules/serverless-blue-green-deploy.adoc[leveloffset=+1]
+
+////
+# move this to services / apps docs eventually, also include diagram again there
+
+Each time the configuration of a service is updated, a new revision for the service is created.
+
+A revision is a point-in-time snapshot of the code and configuration for each modification made to a Knative service. Revisions are immutable objects and can be retained for as long as they are required or used. Knative Serving revisions can be automatically scaled up and down according to incoming traffic.
+////

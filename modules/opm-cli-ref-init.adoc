@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/opm/cli-opm-ref.adoc
+
+[id="opm-cli-ref-init_{context}"]
+= init
+
+生成 `olm.package` 声明性配置 blob。
+
+.命令语法
+[source,terminal]
+----
+$ opm init <package_name> [<flags>]
+----
+
+.`init` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-c`, `--default-channel` (string)
+|如果未指定，订阅的频道将默认为。
+
+|`-d`, `--description` (string)
+|Operator 的 README.md 或者其它文档的路径。
+
+|`-i`, `--icon` (string)
+|软件包图标的路径.
+
+|`-o`, `--output` (string)
+|输出格式： `json`（默认值）或 `yaml`。
+
+|===

@@ -1,0 +1,21 @@
+:_content-type: ASSEMBLY
+[id="configuring-externalip"]
+= 为服务配置 ExternalIP
+include::_attributes/common-attributes.adoc[]
+:context: configuring-externalip
+
+toc::[]
+
+作为集群管理员，您可以指定可向集群中服务发送流量的集群外部 IP 地址块。
+
+这个功能通常最适用于在裸机硬件上安装的集群。
+
+== 先决条件
+
+* 您的网络基础架构必须将外部 IP 地址的流量路由到集群。
+
+include::modules/nw-externalip-about.adoc[leveloffset=+1]
+
+include::modules/nw-externalip-object.adoc[leveloffset=+1]
+
+include::modules/nw-externalip-configuring.adoc[leveloffset=+1]

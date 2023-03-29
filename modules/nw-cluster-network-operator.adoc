@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+// * networking/cluster-network-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-cluster-network-operator_{context}"]
+= Cluster Network Operator
+
+Cluster Network Operator 从 `operator.openshift.io` API 组实现 `network` API。Operator 通过使用守护进程集，部署 OpenShift SDN 默认 Container Network Interface（CNI）网络供应商插件，或部署您在集群安装过程中选择的默认网络供应商插件。
+
+.流程
+
+Cluster Network Operator 在安装过程中被 `部署` 为一个 Kubernetes 部署。
+
+. 运行以下命令，以查看部署状态：
++
+[source,terminal]
+----
+$ oc get -n openshift-network-operator deployment/network-operator
+----
++
+.输出示例
+[source,terminal]
+----
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+network-operator   1/1     1            1           56m
+----
+
+. 运行以下命令，以查看 Cluster Network Operator 的状态：
++
+[source,terminal]
+----
+$ oc get clusteroperator/network
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+network   4.5.4     True        False         False      50m
+----
++
+以下字段提供有关 Operator 状态的信息：`AVAILABLE`、`Progressing` 和 `DEGRADED`。当 Cluster Network Operator 报告可用状态条件时，`AVAILABLE` 字段为 `True`。

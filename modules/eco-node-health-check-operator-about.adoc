@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/eco-node-health-check-operator.adoc
+
+:_content-type: CONCEPT
+[id="about-node-health-check-operator_{context}"]
+= 关于 Node Health Check Operator
+
+Node Health Check Operator 部署 `NodeHealthCheck` 控制器，以检测集群中某个节点的健康状态。 `NodeHealthCheck` 控制器创建 `NodeHealthCheck` 自定义资源(CR)，用于定义一组条件和阈值来确定节点的健康状态。
+
+Node Health Check Operator 还会安装 Poison Pill Operator 作为默认补救供应商。
+
+当 Node Health Check Operator 检测到不健康的节点时，它会创建一个补救 CR 触发补救供应商。例如，控制器会创建 `PoisonPillRemediation` CR，它会触发 Poison Pill Operator 来修复不健康的节点。
+
+`NodeHealthCheck` CR 类似以下 YAML 文件：
+
+[source,yaml]
+----
+apiVersion: remediation.medik8s.io/v1alpha1
+kind: NodeHealthCheck
+metadata:
+  name: nodehealthcheck-sample
+spec:
+  minHealthy: 51% <1>
+  pauseRequests: <2>
+    - <pause-test-cluster> 
+  remediationTemplate: <3>
+    apiVersion: poison-pill.medik8s.io/v1alpha1
+    name: group-x
+    namespace: openshift-operators
+    kind: PoisonPillRemediationTemplate
+  selector: <4>
+    matchExpressions:
+      - key: node-role.kubernetes.io/worker
+        operator: Exists
+  unhealthyConditions: <5>
+    - type: Ready
+      status: "False"
+      duration: 300s <6>
+    - type: Ready
+      status: Unknown
+      duration: 300s <6>
+----
+
+<1> 指定补救供应商同时修复目标池中节点所需的健康节点数量（以百分比或数量）。如果健康节点的数量等于或超过 `minHealthy` 设定的限制，则会出现补救。默认值为 51%。
+<2> 防止任何新的补救启动，同时允许持续补救保留。默认值为空。但是，您可以输入字符串数组来识别暂停补救的原因。例如 `pause-test-cluster`。
++
+[注意]
+====
+在升级过程中，集群中的节点可能会临时不可用，并被识别为不健康。对于 worker 节点，当 Operator 检测到集群正在升级时，它会停止修复新的不健康节点，以防止此类节点重新引导。
+====
+<3> 指定补救供应商的补救模板。例如，在 Poison Pill Operator 中。
+<4> 指定与您要检查的标签或表达式匹配的 `selector` 。默认值为空，用于选择所有节点。
+<5> 指定决定节点是否被视为不健康的条件列表。
+<6> 指定节点状况的超时持续时间。如果在超时时间内满足了条件，则会修复该节点。超时时间较长可能会导致不健康节点上的工作负载长时间停机。
+
+[id="understanding-nhc-operator-workflow_{context}"]
+== 了解 Node Health Check Operator 工作流
+
+当节点标识为不健康状态时，Node Health Check Operator 会检查其他节点不健康的数量。如果健康的节点数量超过 `NodeHealthCheck` CR 的 `minHealthy` 字段中指定的数量，控制器会从补救供应商在外部补救模板中提供的详细信息创建一个补救 CR。补救后，kubelet 会更新节点的健康状况。
+
+当节点处于健康状态时，控制器会删除外部补救模板。
+
+[id="how-nhc-prevent-conflict-with-mhc_{context}"]
+== 关于节点健康检查如何防止与机器健康检查冲突
+
+当同时部署节点健康检查和机器健康检查时，节点健康检查会避免与机器健康检查冲突。
+
+[注意]
+====
+统信容器云管理平台 将  `machine-api-termination-handler` 部署为默认的 `MachineHealthCheck` 资源。
+====
+
+以下列表概述了部署节点健康检查和机器健康检查时的系统行为：
+
+* 如果只有默认机器健康检查，则节点健康检查将继续识别不健康的节点。但是，节点健康检查会忽略处于 Terminating 状态的不健康节点。默认机器健康检查处理处于 Terminating 状态的不健康节点。
++
+.日志消息示例
+[source,terminal]
+----
+INFO MHCChecker	ignoring unhealthy Node, it is terminating and will be handled by MHC	{"NodeName": "node-1.example.com"}
+----
+
+* 如果修改了默认机器健康检查 (例如， `unhealthyConditions` 为  `Ready`), 或者是否创建额外的机器健康检查，则节点健康检查被禁用。
++
+.日志消息示例
+----
+INFO controllers.NodeHealthCheck disabling NHC in order to avoid conflict with custom MHCs configured in the cluster {"NodeHealthCheck": "/nhc-worker-default"}
+----
+
+* 当只存在默认的机器健康检查，则会重新启用节点健康检查。
++
+.日志消息示例
+----
+INFO controllers.NodeHealthCheck re-enabling NHC, no conflicting MHC configured in the cluster {"NodeHealthCheck": "/nhc-worker-default"}
+----

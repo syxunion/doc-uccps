@@ -1,0 +1,100 @@
+// Module included in the following assemblies:
+//
+// * applications/projects/configuring-project-creation.adoc
+
+:_content-type: PROCEDURE
+[id="disabling-project-self-provisioning_{context}"]
+= 禁用项目自助置备功能
+
+您可以防止经过身份验证的用户组自助置备新项目。
+
+.流程
+
+. 以具有 `cluster-admin` 特权的用户身份登录。
+
+. 运行以下命令，以查看 `self-provisioners` 集群角色绑定用法：
++
+[source,terminal]
+----
+$ oc describe clusterrolebinding.rbac self-provisioners
+----
++
+.输出示例
+[source,terminal]
+----
+Name:		self-provisioners
+Labels:		<none>
+Annotations:	rbac.authorization.kubernetes.io/autoupdate=true
+Role:
+  Kind:	ClusterRole
+  Name:	self-provisioner
+Subjects:
+  Kind	Name				Namespace
+  ----	----				---------
+  Group	system:authenticated:oauth
+----
++
+检查 `self-provisioners` 部分中的主题 Subjects。
+
+. 从 `system:authenticated:oauth` 组中移除 `self-provisioner` 集群角色。
+
+** 如果 `self-provisioners` 集群角色绑定仅将 `self-provisioner` 角色绑定至 `system:authenticated:oauth` 组，请运行以下命令：
++
+[source,terminal]
+----
+$ oc patch clusterrolebinding.rbac self-provisioners -p '{"subjects": null}'
+----
+
+** 如果 `self-provisioners` 集群角色将 `self-provisioner` 角色绑定到 `system:authenticated:oauth` 组以外的多个用户、组或服务帐户，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm policy \
+    remove-cluster-role-from-group self-provisioner \
+    system:authenticated:oauth
+----
+
+. 编辑 `self-provisioners` 集群角色绑定，以防止自动更新角色。自动更新会使集群角色重置为默认状态。
+
+** 使用 CLI 更新角色绑定：
+
+... 运行以下命令：
++
+[source,terminal]
+----
+$ oc edit clusterrolebinding.rbac self-provisioners
+----
+
+... 在显示的角色绑定中，将 `rbac.authorization.kubernetes.io/autoupdate` 参数值设置为 `false`，如下例所示：
++
+[source,yaml]
+----
+apiVersion: authorization.openshift.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "false"
+  ...
+----
+
+** 使用单个命令更新角色绑定：
++
+[source,terminal]
+----
+$ oc patch clusterrolebinding.rbac self-provisioners -p '{ "metadata": { "annotations": { "rbac.authorization.kubernetes.io/autoupdate": "false" } } }'
+----
+
+. 以通过身份验证的用户身份登陆，验证是否无法再自助置备项目：
++
+[source,terminal]
+----
+$ oc new-project test
+----
++
+.输出示例
+[source,terminal]
+----
+Error from server (Forbidden): You may not request a new project via this API.
+----
++
+您可以对此项目请求消息进行自定义，以提供特定于您的组织的更多有用说明。

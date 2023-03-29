@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// storage/persistent_storage/persistent-storage-flexvolume.adoc
+
+:_content-type: PROCEDURE
+[id="flexvolume-installing_{context}"]
+
+= 安装 FlexVolume 驱动程序
+
+用于扩展统信容器云管理平台的 FlexVolume 驱动程序仅在节点上执行。要实现 FlexVolume，需要调用的操作列表和安装路径都是必需的。
+
+.先决条件
+
+* FlexVolume 驱动程序必须实现以下操作：
+
+`init`::
+初始化驱动程序。它会在初始化所有节点的过程中被调用。
+
+** 参数: 无
+** 执行于: 节点
+** 预期输出: 默认 JSON
+
+`mount`::
+挂载一个卷到目录。这可包括挂载该卷所需的任何内容，包括查找该设备，然后挂载该设备。
+
+** 参数: `<mount-dir>` `<json>`
+** 执行于: 节点
+** 预期输出: 默认 JSON
+
+`unmount`::
+从目录中卸载卷。这可以包括在卸载后清除卷所必需的任何内容。
+
+** 参数: `<mount-dir>`
+** 执行于: 节点
+** 预期输出: 默认 JSON
+
+`mountdevice`::
+将卷的设备挂载到一个目录，然后 pod 可以从这个目录绑定挂载。
+
+这个 call-out 不会传递 FlexVolume spec 中指定的 "secrets"。如果您的驱动需要 secret，不要实现这个 call-out。
+
+** 参数: `<mount-dir>` `<json>`
+** 执行于: 节点
+** 预期输出: 默认 JSON
+
+`unmountdevice`::
+从目录中卸载卷的设备。
+
+** 参数: `<mount-dir>`
+** 执行于: 节点
+** 预期输出: 默认 JSON
+
+* 所有其他操作都应该返回带有 `{"status"："Not supported"}` 及退出代码 `1` 的 JSON。
+
+.流程
+
+安装 FlexVolume 驱动程序：
+
+. 确保可执行文件存在于集群中的所有节点上。
+
+.将可执行文件放在卷插件路径: `/etc/kubernetes/kubelet-plugins/volume/exec/<vendor>～<driver>/<driver>`。
+
+例如，要为存储 `foo` 安装 FlexVolume 驱动程序，请将可执行文件放在: `/etc/kubernetes/kubelet-plugins/volume/exec/openshift.com~foo/foo`。

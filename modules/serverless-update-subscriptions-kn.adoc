@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-subs.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-update-subscriptions-kn_{context}"]
+= 使用 Knative CLI 更新订阅
+
+您可以使用 `kn subscription update` 命令以及使用 Knative (kn) CLI 从终端更新订阅的适当标志。使用 Knative CLI 更新订阅可提供比直接更新 YAML 文件更精简且直观的用户界面。
+
+.先决条件
+
+* 已安装 Knative (kn) CLI。
+* 您已创建了订阅。
+
+.流程
+
+* 更新订阅：
++
+[source,terminal]
+----
+$ kn subscription update <subscription_name> \
+  --sink <sink_prefix>:<sink_name> \ <1>
+  --sink-dead-letter <sink_prefix>:<sink_name> <2>
+----
+<1> `--sink`  指定要将事件传送到的更新目标目的地。您可以使用以下前缀之一指定接收器类型：
+`ksvc`:: Knative 服务。
+`channel`:: 作为目的地的频道。这里只能引用默认频道类型。
+`broker`:: Eventing 代理。
+<2>可选： `--sink-dead-letter` 是一个可选标志，可用于指定在无法发送事件时哪些事件应发送到的接收器。
++
+.Example command
+[source,terminal]
+----
+$ kn subscription update mysubscription --sink ksvc:event-display
+----

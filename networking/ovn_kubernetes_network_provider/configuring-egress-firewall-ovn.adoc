@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="configuring-egress-firewall-ovn"]
+= 为项目配置出口防火墙
+include::_attributes/common-attributes.adoc[]
+:context: configuring-egress-firewall-ovn
+
+toc::[]
+
+作为集群管理员，您可以为项目创建一个出口防火墙，用于限制离开 统信容器云管理平台 集群的出口流量。
+
+include::modules/nw-egressnetworkpolicy-about.adoc[leveloffset=+1]
+include::modules/nw-egressnetworkpolicy-object.adoc[leveloffset=+1]
+include::modules/nw-egressnetworkpolicy-create.adoc[leveloffset=+1]

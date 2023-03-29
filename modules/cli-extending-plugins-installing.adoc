@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/extending-cli-plugins.adoc
+
+:_content-type: PROCEDURE
+[id="cli-installing-plugins_{context}"]
+= 安装和使用CLI插件
+
+为统信容器云管理平台 CLI编写自定义插件后，必须安装它以使用它提供的功能。
+
+.先决条件
+
+* 已安装 `oc`  CLI工具。
+* 有一个 CLI 插件文件，其文件名以 `oc-` 或 kubectl-开始。
+
+.流程
+
+. 将插件文件设置为可执行文件。
++
+[source,terminal]
+----
+$ chmod +x <plugin_file>
+----
+. 将文件放在 `PATH` 中的任何位置，例如 `/usr/local/bin/`。
++
+[source,terminal]
+----
+$ sudo mv <plugin_file> /usr/local/bin/.
+----
+. 运行 `oc plugin list` 以确认插件可以被列出。
++
+[source,terminal]
+----
+$ oc plugin list
+----
++
+.输出示例
+[source,terminal]
+----
+The following compatible plugins are available:
+
+/usr/local/bin/<plugin_file>
+----
++
+如果您的插件没有被列出，检查文件是否以 `OC-` 或`kubectl-` 开始，是否可执行，并在您的 `PATH` 中。
+. 调用插件引入的新命令或选项。
++
+例如，如果您从 Sample plug-in repository 构建并安装了 kubectl-ns 插件，则可以使用以下命令查看当前命名空间。
++
+[source,terminal]
+----
+$ oc ns
+----
++
+请注意，调用插件的命令取决于插件的文件名。例如，文件名为 `oc-foo-bar` 的插件会被 `oc foo bar` 命令调用。

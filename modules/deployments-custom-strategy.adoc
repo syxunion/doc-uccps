@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+[id="deployments-custom-strategy_{context}"]
+= Custom 策略
+
+自定义（Custom）策略允许您提供自己的部署行为。
+
+.Custom 策略定义示例
+[source,yaml]
+----
+strategy:
+  type: Custom
+  customParams:
+    image: organization/strategy
+    command: [ "command", "arg1" ]
+    environment:
+      - name: ENV_1
+        value: VALUE_1
+----
+
+在上例中，`organization/strategy` 容器镜像提供部署行为。可选的 `command` 数组覆盖镜像的 `Dockerfile` 中指定的任何 `CMD` 指令。提供的可选环境变量添加到策略过程的执行环境中。
+
+另外，统信容器云管理平台 为部署过程提供以下环境变量：
+
+[cols="4,8",options="header"]
+|===
+|环境变量 |描述
+
+.^|`OPENSHIFT_DEPLOYMENT_NAME`
+|新部署的名称，即复制控制器。
+
+.^|`OPENSHIFT_DEPLOYMENT_NAMESPACE`
+|新部署的命名空间。
+|===
+
+新部署的副本数最初为零。该策略负责使新部署积极使用最能满足用户需求的逻辑。
+
+另外，也可使用 `customParams` 对象将自定义部署逻辑注入现有的部署策略中。提供自定义 `shell` 脚本逻辑并调用 `openshift-deploy` 二进制文件。用户不必提供自定义的部署器容器镜像；本例中使用默认的 统信容器云管理平台 部署器镜像：
+
+[source,yaml]
+----
+strategy:
+  type: Rolling
+  customParams:
+    command:
+    - /bin/sh
+    - -c
+    - |
+      set -e
+      openshift-deploy --until=50%
+      echo Halfway there
+      openshift-deploy
+      echo Complete
+----
+
+这会产生以下部署：
+
+[source,terminal]
+----
+Started deployment #2
+--> Scaling up custom-deployment-2 from 0 to 2, scaling down custom-deployment-1 from 2 to 0 (keep 2 pods available, don't exceed 3 pods)
+    Scaling custom-deployment-2 up to 1
+--> Reached 50% (currently 50%)
+Halfway there
+--> Scaling up custom-deployment-2 from 1 to 2, scaling down custom-deployment-1 from 2 to 0 (keep 2 pods available, don't exceed 3 pods)
+    Scaling custom-deployment-1 down to 1
+    Scaling custom-deployment-2 up to 2
+    Scaling custom-deployment-1 down to 0
+--> Success
+Complete
+----
+
+如果自定义部署策略过程需要访问 统信容器云管理平台 API 或 Kubernetes API，执行该策略的容器可以使用容器中的服务帐户令牌进行身份验证。

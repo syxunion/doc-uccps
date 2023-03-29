@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+:_content-type: PROCEDURE
+[id="quota-creating-object-count-quotas_{context}"]
+= 创建对象数配额
+
+您可以为 统信容器云管理平台 上的所有标准命名空间资源类型创建对象数配额，如 `BuildConfig` 和 `部署配置`。对象配额数将定义的配额施加于所有标准命名空间资源类型。
+
+在使用资源配额时，对象会根据创建的配额进行收费。这些类型的配额对防止耗尽资源很有用处。只有在项目中有足够的备用资源时，才能创建配额。
+
+.流程
+
+为资源配置对象数配额：
+
+. 运行以下命令：
++
+[source,terminal]
+----
+$ oc create quota <name> \
+    --hard=count/<resource>.<group>=<quota>,count/<resource>.<group>=<quota> <1>
+----
+<1> `<resource>` 变量是资源名称，`<group>` 则是 API 组（如果适用）。使用 `oc api-resources` 命令可以列出资源及其关联的 API 组。
++
+例如：
++
+[source,terminal]
+----
+$ oc create quota test \
+    --hard=count/deployments.extensions=2,count/replicasets.extensions=4,count/pods=3,count/secrets=4
+----
++
+.输出示例
+[source,terminal]
+----
+resourcequota "test" created
+----
++
+本例将列出的资源限制为集群中各个项目的硬限值。
+
+. 验证是否创建了配额：
++
+[source,terminal]
+----
+$ oc describe quota test
+----
++
+.输出示例
+[source,terminal]
+----
+Name:                         test
+Namespace:                    quota
+Resource                      Used  Hard
+--------                      ----  ----
+count/deployments.extensions  0     2
+count/pods                    0     3
+count/replicasets.extensions  0     4
+count/secrets                 0     4
+----

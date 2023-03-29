@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-csi-snapshots"]
+= CSI 卷快照
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-csi-snapshots
+
+toc::[]
+
+本小节论述了如何通过支持的 Container Storage Interface (CSI) 驱动程序使用进行卷快照，以帮助防止统信容器云管理平台中的数据丢失。建议先熟悉持久性卷的概念。
+
+include::modules/persistent-storage-csi-snapshots-overview.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-controller-sidecar.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-operator.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-provision.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-create.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-delete.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-snapshots-restore.adoc[leveloffset=+1]

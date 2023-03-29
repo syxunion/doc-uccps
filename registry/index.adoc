@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="registry-overview"]
+= 统信容器云管理平台registry 概述
+include::_attributes/common-attributes.adoc[]
+:context: registry-overview
+
+toc::[]
+
+统信容器云管理平台可以使用您的源代码构建镜像，并进行部署及管理其生命周期。它提供了一个内部集成的容器镜像 registry，它可以部署到统信容器云管理平台环境中，以便本地管理镜像。此概述包含统信容器云管理平台常用的 registry 的参考信息和链接，着重介绍内部镜像 registry。
+
+include::modules/registry-integrated-openshift-registry.adoc[leveloffset=+1]
+
+include::modules/registry-third-party-registries.adoc[leveloffset=+1]
+
+include::modules/registry-quay-overview.adoc[leveloffset=+1]

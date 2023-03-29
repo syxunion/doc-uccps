@@ -1,0 +1,29 @@
+// Module filename: nw-configuring-route-timeouts.adoc
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+:_content-type: PROCEDURE
+[id="nw-configuring-route-timeouts_{context}"]
+= 配置路由超时
+
+如果您的服务需要低超时（满足服务级别可用性 (SLA) 目的）或高超时（具有慢速后端的情况），您可以为现有路由配置默认超时。
+
+.先决条件
+* 您需要在运行的集群中部署了 Ingress Controller。
+
+.流程
+. 使用 `oc annotate` 命令，为路由添加超时：
++
+[source,terminal]
+----
+$ oc annotate route <route_name> \
+    --overwrite haproxy.router.openshift.io/timeout=<timeout><time_unit> <1>
+----
+<1> 支持的时间单位是微秒 (us)、毫秒 (ms)、秒钟 (s)、分钟 (m)、小时 (h)、或天 (d)。
++
+以下示例在名为 `myroute` 的路由上设置两秒的超时：
++
+[source,terminal]
+----
+$ oc annotate route myroute --overwrite haproxy.router.openshift.io/timeout=2s
+----

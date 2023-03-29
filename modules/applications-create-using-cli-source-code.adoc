@@ -1,0 +1,139 @@
+[id="applications-create-using-cli-source-code_{context}"]
+= 从源代码创建应用程序
+
+您可以使用 `new-app` 命令，从本地或远程 Git 存储库中的源代码创建应用程序。
+
+`new-app` 命令会创建一个构建配置，其本身会从您的源代码中创建一个新的应用程序镜像。new-app 命令通常还会创建一个 `Deployment` 对象来部署新镜像，以及为运行您的镜像的部署提供负载均衡访问的服务。
+
+统信容器云管理平台 会自动检测要使用管道还是源构建策略，如果进行源构建，则还检测适当的语言构建器镜像。
+
+== 本地
+
+从本地目录中的 Git 存储库创建应用程序：
+
+[source,terminal]
+----
+$ oc new-app /<path to source code>
+----
+
+[注意]
+====
+如果使用本地 Git 存储库，该存储库必须具有一个名为 `origin` 的远程源，指向可由 统信容器云管理平台 集群访问的 URL。如果没有可识别的远程源，运行 `new-app` 命令将创建一个二进制构建。
+====
+
+== 远程
+
+从远程 Git 存储库创建新应用程序：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/sclorg/cakephp-ex
+----
+
+从私有远程 Git 存储库创建应用程序：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/youruser/yourprivaterepo --source-secret=yoursecret
+----
+
+[注意]
+====
+如果使用私有远程 Git 存储库，您可以使用 `--source-secret` 标志指定一个现有源克隆 secret，此 secret 将注入到构建配置中以访问存储库。
+====
+
+您可以通过指定 `--context-dir` 标志来使用源代码存储库的子目录。从远程 Git 存储库和上下文子目录创建应用程序：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/sclorg/s2i-ruby-container.git \
+    --context-dir=2.0/test/puma-test-app
+----
+
+另外，在指定远程 URL 时，您可以通过在 URL 末尾附加 `#<branch_name>` 来指定要使用的 Git 分支：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world.git#beta4
+----
+
+== 构建策略检测
+
+在创建新应用程序时，如果源存储库的根目录或指定上下文目录中存在 Jenkinsfile 文件，则 统信容器云管理平台 会生成管道构建策略。否则，它会生成源构建策略。
+
+通过将 `--strategy` 标志设为 `pipeline` 或 `source`，即可覆盖构建策略。
+
+[source,terminal]
+----
+$ oc new-app /home/user/code/myapp --strategy=docker
+----
+
+[注意]
+====
+`oc` 命令要求包含构建源的文件在远程 Git 存储库中可用。对于所有 Source 构建，您必须使用 `git remote -v`。
+====
+
+== 语言检测
+
+如果您使用源构建策略, `new-app` 会尝试根据存储库根目录或指定上下文目录中是否存在特定文件来确定要使用的语言构建器：
+
+.`new-app` 检测语言标准
+[cols="4,8",options="header"]
+|===
+
+|语言 |文件
+ifdef::openshift-enterprise,openshift-webscale,openshift-aro,openshift-online[]
+|`dotnet`
+|`project.json`, `pass:[*.csproj]`
+endif::[]
+|`jee`
+|`pom.xml`
+
+|`nodejs`
+|`app.json`, `package.json`
+
+|`perl`
+|`cpanfile`, `index.pl`
+
+|`php`
+|`composer.json`, `index.php`
+
+|`python`
+|`requirements.txt`, `setup.py`
+
+|`ruby`
+|`Gemfile`, `Rakefile`, `config.ru`
+
+|`scala`
+|`build.sbt`
+
+|`golang`
+|`Godeps`, `main.go`
+|===
+
+检测了语言后，`new-app` 会在 统信容器云管理平台 服务器上搜索具有与所检测语言匹配的 `suppors` 注解的镜像流标签，或与所检测语言的名称匹配的镜像流。如果找不到匹配项，`new-app` 会在 Docker Hub registry 中搜索名称上与所检测语言匹配的镜像。
+
+您可以通过指定镜像（镜像流或容器规格）和存储库（以 `~` 作为分隔符），来覆盖构建器用于特定源存储库的镜像。请注意，如果进行这一操作，就不会执行构建策略检测和语言检测。
+
+例如，使用 `myproject/my-ruby` 镜像流以及位于远程存储库中的源：
+
+[source,terminal]
+----
+$ oc new-app myproject/my-ruby~https://github.com/openshift/ruby-hello-world.git
+----
+
+使用 `openshift/ruby:latest` 容器镜像流以及本地仓库中的源：
+
+[source,terminal]
+----
+$ oc new-app openshift/ruby-20-centos7:latest~/home/user/code/my-ruby-app
+----
+
+[注意]
+====
+语言检测需要在本地安装 Git 客户端，以便克隆并检查您的存储库。如果 Git 不可用，您可以使用 `<image>～<repository>` 语法指定要与存储库搭配使用的构建器镜像，以避免语言检测步骤。
+
+调用 `-i <image> <repository>` 需要 `new-app` 尝试克隆 `repository`，从而判断其工件类型；如果 Git 不可用，此操作会失败。
+
+调用 `-i <image> --code <repository>` 需要 `new-app` 克隆 repository，从而能判断 image 应用作源代码的构建器，还是另外部署（使用数据库镜像时）。
+====

@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+[id="persistent-storage-csi-snapshots-controller-sidecar_{context}"]
+= CSI 快照控制器和 sidecar
+
+统信容器云管理平台提供了一个部署到 control plane 中的快照控制器。另外，您的 CSI 驱动程序厂商会提供 CSI 快照 sidecar，它会在安装 CSI 驱动程序的过程中做为一个辅助（helper）容器。
+
+CSI 快照控制器和 sidecar 通过统信容器云管理平台API 提供卷快照。这些外部组件在集群中运行。
+
+外部控制器由 CSI Snapshot Controller Operator 部署。
+
+== 外部控制器
+CSI 快照控制器绑定 `VolumeSnapshot` 和 `VolumeSnapshotContent` 对象。控制器通过创建和删除 `VolumeSnapshotContent` 对象来管理动态置备。
+
+== 外部 sidecar
+您的 CSI 驱动程序厂商提供 `csi-external-snapshotter` sidecar。这是和 CSI 驱动程序一起部署的单独的 helper 容器。sidecar 通过触发 `CreateSnapshot` 和 `DeleteSnapshot` 操作来管理快照。请根据驱动程序厂商提供的说明进行操作。

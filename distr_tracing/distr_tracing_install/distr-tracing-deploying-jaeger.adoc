@@ -1,0 +1,79 @@
+:_content-type: ASSEMBLY
+[id="distr-tracing-deploying"]
+= 配置和部署分布式追踪
+include::_attributes/common-attributes.adoc[]
+:context: deploying-distr-tracing-platform
+
+toc::[]
+
+统信容器云管理平台分布式追踪 Operator 使用一个自定义资源定义(CRD)文件来定义创建和部署分布式追踪平台资源时要使用的架构和配置设置。您可以安装默认配置或修改该文件以更好地满足您的业务要求。
+
+统信容器云管理平台分布式追踪 具有预定义的部署策略。您可以在自定义资源文件中指定一个部署策略。当您创建分布式追踪平台实例时，Operator 会使用此配置文件创建部署所需的对象。
+
+.Jaeger 自定义资源文件显示部署策略
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: MyConfigFile
+spec:
+  strategy: production <1>
+----
+
+<1> 统信容器云管理平台分布式追踪 Operator 目前支持以下部署策略：
+
+* *allInOne* (默认) - 这个策略主要用于开发、测试和演示目的，它不用于生产环境。主要的后端组件 Agent、Collector 和 Query 服务都打包成单一可执行文件，默认为使用内存存储。
++
+[注意]
+====
+内存存储不是持久性的，这意味着如果分布式追踪平台实例关闭、重启或被替换，您的 trace 数据将会丢失。此外，内存存储无法扩展，因为每个 Pod 都有自己的内存。对于持久性存储，您必须使用 production 或 streaming 策略，这些策略使用 Elasticsearch 作为默认存储。
+====
+
+* *production* - production 策略主要用于生产环境，在生产环境中，对 trace 数据进行长期存储非常重要，同时需要更容易扩展和高度可用的构架。因此，每个后端组件都将单独部署。Agent 可以作为检测应用程序上的 sidecar 注入。Query 和 Collector 服务被配置为使用一个受支持的存储类型 - 当前为 Elasticsearch。可以根据性能和恢复能力的需要提供每个组件的多个实例。
+
+* *streaming* - 策略旨在提供在 Collector 和 Elasticsearch 后端存储之间有效发挥作用的流传输功能，以此增强 production 策略。这样做的好处是在高负载情况下降低后端存储压力，并允许其他 trace 后处理功能直接从流传输平台 (AMQ Streams/ Kafka) 中利用实时 span 数据。
++
+[注意]
+====
+有两种方法可用来安装和使用 统信容器云管理平台分布式追踪，作为服务网格的一部分或作为独立组件。如果您已将分布式追踪作为 统信容器云管理平台服务网格 的一部分安装，您可以作为 xref:../../service_mesh/v2x/installing-ossm.adoc#installing-ossm[ServiceMeshControlPlane] 的一部分执行基本配置，但为了完全控制，应配置一个 Jaeger CR，然后在 xref:../../service_mesh/v2x/ossm-observability.html#ossm-config-external-jaeger_observability[reference your distributed tracing configuration file in the ServiceMeshControlPlane] 中引用您的分布式追踪配置文件。
+====
+
+include::modules/distr-tracing-deploy-default.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-deploy-production-es.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-deploy-streaming.adoc[leveloffset=+1]
+
+[id="validating-your-jaeger-deployment"]
+== 验证部署
+
+include::modules/distr-tracing-accessing-jaeger-console.adoc[leveloffset=+2]
+
+[id="customizing-your-deployment"]
+== 自定义部署
+
+include::modules/distr-tracing-deployment-best-practices.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-default.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-jaeger-collector.adoc[leveloffset=+2]
+
+//include::modules/distr-tracing-config-otel-collector.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-sampling.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-storage.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-query.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-config-ingester.adoc[leveloffset=+2]
+
+[id="injecting-sidecars"]
+== 注入 sidecar
+
+统信容器云管理平台分布式追踪平台依赖于应用程序 pod 中的代理 sidecar 来提供代理。统信容器云管理平台分布式追踪 Operator 可以将 Agent sidecar 注入 Deployment 工作负载。您可以使用自动 sidecar 注入功能或手动管理它。
+
+include::modules/distr-tracing-sidecar-automatic.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-sidecar-manual.adoc[leveloffset=+2]

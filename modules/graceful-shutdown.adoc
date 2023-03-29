@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/graceful-cluster-shutdown.adoc
+
+:_content-type: PROCEDURE
+[id="graceful-shutdown_{context}"]
+= 关闭集群
+
+您可以以安全的方式关闭集群，以便稍后重启集群。
+
+[注意]
+====
+您可以在安装日期起的一年内关闭集群，并期望它可以正常重启。安装日期起一年后，集群证书会过期。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已进行 etcd 备份。
++
+[重要]
+====
+执行此流程前务必要进行 etcd 备份，以便在重启集群遇到任何问题时可以恢复集群。
+====
+
+.流程
+
+. 如果您要长时间关闭集群，请确定证书过期的日期。
++
+[source,terminal]
+----
+$ oc -n openshift-kube-apiserver-operator get secret kube-apiserver-to-kubelet-signer -o jsonpath='{.metadata.annotations.auth\.openshift\.io/certificate-not-after}'
+----
++
+.输出示例
+----
+2022-08-05T14:37:50Zuser@user:~ $ <1>
+----
+<1> 为确保集群可以正常重启，请计划在指定的日期或之前重启集群。当集群重启时，可能需要您手动批准待处理的证书签名请求 (CSR) 来恢复 kubelet 证书。
+
+. 关闭集群中的所有节点。您可以从云供应商的 Web 控制台完成此操作，或者运行以下循环：
++
+[source,terminal]
+----
+$ for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}'); do oc debug node/${node} -- chroot /host shutdown -h 1; done <1>
+----
+<1> `-h 1` 表示此过程在 control-plane 节点关闭前可以持续的时间（以分钟为单位）。对于具有 10 个或更多节点的大型集群，请它设置为 10 分钟或更长时间，以确保所有计算节点都已关闭。
++
+.输出示例
+----
+Starting pod/ip-10-0-130-169us-east-2computeinternal-debug ...
+To use host binaries, run `chroot /host`
+Shutdown scheduled for Mon 2021-09-13 09:36:17 UTC, use 'shutdown -c' to cancel.
+
+Removing debug pod ...
+Starting pod/ip-10-0-150-116us-east-2computeinternal-debug ...
+To use host binaries, run `chroot /host`
+Shutdown scheduled for Mon 2021-09-13 09:36:29 UTC, use 'shutdown -c' to cancel.
+----
++
+使用以下方法关闭节点可让 pod 安全终止，从而减少数据崩溃的可能性。
++
+[注意]
+====
+为大规模集群调整关闭时间：
+[source,terminal]
+----
+$ for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}'); do oc debug node/${node} -- chroot /host shutdown -h 10; done
+----
+====
++
+[注意]
+====
+在关闭前，不需要排空统信容器云管理平台中附带的标准 pod 的控制平面节点。
+
+集群管理员负责确保在集群重启后，彻底重启自己的工作负载。如果因为自定义工作负载的原因已在关闭前排空控制平面节点，您必须在重启后将控制平面节点标记为可调度，然后集群才可以重新正常工作。
+====
+
+. 关闭不再需要的集群依赖项，如外部存储或 LDAP 服务器。在进行操作前请务必查阅您的厂商文档。
+

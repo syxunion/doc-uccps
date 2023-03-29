@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-configuring-post-commit-build-hooks_{context}"]
+= 配置提交后构建 hook
+
+配置提交后构建 hook 的方法有多种。以下示例中所有形式具有同等作用，也都执行 `bundle exec rake test --verbose`。
+
+.流程
+
+* Shell 脚本：
++
+[source,yaml]
+----
+postCommit:
+  script: "bundle exec rake test --verbose"
+----
++
+`script` 值是通过 /bin/sh -ic 执行的 shell 脚本。当 shell 脚本适合执行构建 hook 时可使用此选项。例如，用于运行前文所述的单元测试。若要控制镜像入口点，或者如果镜像没有 `/bin/sh`，可使用 `command` 和/或 `args`。
++
+[注意]
+====
+引入的额外 `-i` 标志用于改进搭配 CentOS 和 RHEL 镜像时的体验，未来的发行版中可能会剔除。
+====
+
+* 命令作为镜像入口点：
++
+[source,yaml]
+----
+postCommit:
+  command: ["/bin/bash", "-c", "bundle exec rake test --verbose"]
+----
++
+在这种形式中，`command` 是要运行的命令，它会覆盖 exec 形式中的镜像入口点，如 Dockerfile 引用中所述。如果镜像没有 `/bin/sh`，或者您不想使用 shell，则需要这样做。在所有其他情形中，使用 `script` 可能更为方便。
+
+* 命令带有参数：
++
+[source,yaml]
+----
+postCommit:
+  command: ["bundle", "exec", "rake", "test"]
+  args: ["--verbose"]
+----
++
+这种形式相当于将参数附加到 `command`。
+
+[注意]
+====
+同时提供 `script` 和 `command` 会产生无效的构建 hook。
+====

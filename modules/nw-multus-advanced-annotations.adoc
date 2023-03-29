@@ -1,0 +1,186 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/attaching-pod.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multus-advanced-annotations_{context}"]
+= 指定特定于 pod 的地址和路由选项
+
+将 pod 附加到额外网络时，您可能需要在特定 pod 中指定有关该网络的其他属性。这可让您更改路由的某些方面，并指定静态 IP 地址和 MAC 地址。要达到此目的，您可以使用 JSON 格式的注解。
+
+.先决条件
+
+* pod 必须与额外网络处于相同的命名空间。
+* 安装 Uccp CLI (`oc`).
+* 您必须登录集群。
+
+.流程
+
+要在指定地址和/或路由选项的同时将 pod 添加到额外网络，请完成以下步骤：
+
+. 编辑 `Pod` 资源定义。如果要编辑现有 `Pod` 资源，请运行以下命令在默认编辑器中编辑其定义。将 <name> 替换为要编辑的 Pod 资源的名称。
++
+[source,terminal]
+----
+$ oc edit pod <name>
+----
+
+. 在 Pod 资源定义中，将 `k8s.v1.cni.cncf.io/networks` 参数添加到 pod `metadata` 映射中。`k8s.v1.cni.cncf.io/networks` 接受 JSON 字符串，该字符串除指定附加属性外，还引用 `NetworkAttachmentDefinition` 自定义资源（CR）名称的对象。
++
+[source,yaml]
+----
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[<network>[,<network>,...]]' <1>
+----
+<1> 将 `<network>` 替换为 JSON 对象，如下例所示。单引号是必需的。
+
+. 在以下示例中，通过 `default-route` 参数，注解指定了哪个网络附加将使用默认路由。
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '
+    {
+      "name": "net1"
+    },
+    {
+      "name": "net2", <1>
+      "default-route": ["192.0.2.1"] <2>
+    }'
+spec:
+  containers:
+  - name: example-pod
+    command: ["/bin/bash", "-c", "sleep 2000000000000"]
+    image: centos/tools
+----
+<1> `name` 是与 pod 关联的额外网络的名称。
+<2> `default-route` 指定了一个网关，当在路由表中没有其它路由条目时使用这个网关。如果指定了多个 `default-route` 键，这将导致 pod 无法成为活跃状态。
+
+默认路由将导致任何没有在其它路由中指定的流量被路由到网关。
+
+[重要]
+====
+将 统信容器云管理平台 的默认路由设置为默认网络接口以外的接口时，可能会导致应该是 pod 和 pod 间的网络流量被路由到其他接口。
+====
+
+要验证 pod 的路由属性，可使用 `oc` 命令在 pod 中执行 `ip` 命令。
+
+[source,terminal]
+----
+$ oc exec -it <pod_name> -- ip route
+----
+
+[注意]
+====
+您还可以引用 pod 的 `k8s.v1.cni.cncf.io/networks-status` 来查看哪个额外网络已经分配了默认路由，这可以通过 JSON 格式的对象列表中的 `default-route` 键实现。
+====
+
+要为 pod 设置静态 IP 地址或 MAC 地址，您可以使用 JSON 格式的注解。这要求您创建允许此功能的网络。这可以在 CNO 的 rawCNIConfig 中指定。
+
+. 运行以下命令来编辑 CNO CR：
++
+[source,terminal]
+----
+$ oc edit networks.operator.openshift.io cluster
+----
+
+以下 YAML 描述了 CNO 的配置参数：
+
+.Cluster Network Operator YAML 配置
+[source,yaml]
+----
+name: <name> <1>
+namespace: <namespace> <2>
+rawCNIConfig: '{ <3>
+  ...
+}'
+type: Raw
+----
+<1> 为您要创建的额外网络附加指定名称。该名称在指定的 `namespace` 中需要是唯一的。
+
+<2> 指定要在其中创建网络附加的命名空间。如果您未指定值，则使用 `default` 命名空间。
+
+<3> 基于以下模板，以 JSON 格式指定 CNI 插件配置。
+
+以下对象描述了使用 macvlan CNI 插件的静态 MAC 地址和 IP 地址的配置参数：
+
+.使用静态 IP 和 MAC 地址的 macvlan CNI 插件 JSON 配置对象
+[source,json]
+----
+{
+  "cniVersion": "0.3.1",
+  "name": "<name>", <1>
+  "plugins": [{ <2>
+      "type": "macvlan",
+      "capabilities": { "ips": true }, <3>
+      "master": "eth0", <4>
+      "mode": "bridge",
+      "ipam": {
+        "type": "static"
+      }
+    }, {
+      "capabilities": { "mac": true }, <5>
+      "type": "tuning"
+    }]
+}
+----
+
+<1> 指定要创建的额外网络附加的名称。该名称在指定的 `namespace` 中需要是唯一的。
+
+<2> 指定 CNI 插件配置的数组。第一个对象指定 macvlan 插件配置，第二个对象指定 tuning 插件配置。
+
+<3> 指定一个请求启用 CNI 插件运行时配置功能的静态 IP 地址功能。
+
+<4> 指定 macvlan 插件使用的接口。
+
+<5> 指定一个请求启用 CNI 插件的静态 MAC 地址功能。
+
+以上网络附加可能会以 JSON 格式的注解引用，同时使用相关的键来指定将哪些静态 IP 和 MAC 地址分配给指定 pod。
+
+使用以下内容编辑 pod：
+
+[source,terminal]
+----
+$ oc edit pod <name>
+----
+
+.使用静态 IP 和 MAC 地址的 macvlan CNI 插件 JSON 配置对象
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {
+        "name": "<name>", <1>
+        "ips": [ "192.0.2.205/24" ], <2>
+        "mac": "CA:FE:C0:FF:EE:00" <3>
+      }
+    ]'
+----
+
+<1> 使用在创建 `rawCNIConfig` 时提供的 `<name>` 。
+
+<2> 提供包括子网掩码的 IP 地址。
+
+<3> 提供 MAC 地址。
+
+[注意]
+====
+静态 IP 地址和 MAC 地址不需要同时使用，您可以单独使用，也可以一起使用。
+====
+
+要验证一个带有额外网络的 pod 的 IP 地址和 MAC 属性，请使用 `oc` 命令在 pod 中执行 ip 命令。
+
+[source,terminal]
+----
+$ oc exec -it <pod_name> -- ip a
+----

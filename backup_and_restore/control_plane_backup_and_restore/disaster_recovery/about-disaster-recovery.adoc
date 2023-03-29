@@ -1,0 +1,34 @@
+:_content-type: ASSEMBLY
+[id="about-dr"]
+= 关于灾难恢复
+include::_attributes/common-attributes.adoc[]
+:context: about-dr
+
+toc::[]
+
+灾难恢复文档为管理员提供了如何从统信容器云管理平台集群可能出现的几个灾难情形中恢复的信息。作为管理员，您可能需要遵循以下一个或多个步骤将集群恢复为工作状态。
+
+[重要]
+====
+灾难恢复要求您至少有一个健康的控制平面主机。
+====
+
+xref:../../../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-2-restoring-cluster-state.adoc#dr-restoring-cluster-state[恢复到一个以前的集群状态]::
+如果您希望将集群恢复到一个以前的状态时（例如，管理员错误地删除了一些关键信息），则可以使用这个解决方案。这包括您丢失了大多数控制平面主机并导致 etcd 仲裁丢失，且集群离线的情况。只要您执行了 etcd 备份，就可以按照这个步骤将集群恢复到之前的状态。
++
+	如果适用，您可能还需要从过期的控制平面证书中恢复。
++
+[警告]
+====
+在一个正在运行的集群中恢复到以前的集群状态是破坏性的，而不稳定的操作。这仅应作为最后的手段使用。
+
+在执行恢复前，请参阅关于恢复集群状态以了解有关对集群的影响的更多信息。
+====
++
+[注意]
+====
+如果大多数 master 仍可用，且仍有 etcd 仲裁，请按照以下步骤替换一个不健康的 etcd 成员。
+====
+
+xref:../../../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-3-expired-certs.adoc#dr-recovering-expired-certs[从控制平面证书已过期的情况下恢复]::
+如果控制平面证书已经过期，则可以使用这个解决方案。例如：在第一次证书轮转前（在安装后 24 小时内）关闭了集群，您的证书将不会被轮转，且会过期。可以按照以下步骤从已过期的控制平面证书中恢复。

@@ -1,0 +1,221 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-custom-event-sources.adoc
+
+:_content-type: REFERENCE
+[id="serverless-sinkbinding-reference_{context}"]
+= 接收器绑定引用
+// this section probably needs a rewrite / restructure; feels like multiple modules maybe for a larger ref doc. Out of scope for this PR.
+
+您可以通过创建接收器绑定，将 `PodSpecable` 对象用作事件源。您可以在创建 `SinkBinding` 对象时配置多个参数。
+
+`SinkBinding` 对象支持以下参数：
+
+[cols=3*,options="header"]
+|===
+|字段
+|描述
+|必需或可选
+
+|`apiVersion`
+|指定 API 版本，如 `sources.knative.dev/v1`.
+|必需
+
+|`kind`
+|将此资源对象标识为 `SinkBinding` 对象。
+|必需
+
+|`metadata`
+|指定唯一标识 `SinkBinding` 对象的元数据。例如，名称。
+|必需
+
+|`spec`
+|指定此 `SinkBinding` 对象的配置信息。
+|必需
+
+|`spec.sink`
+|对解析为 URI 作为 sink 的对象的引用。
+|必需
+
+|`spec.subject`
+|提及通过绑定实施来增强运行时合同的资源。
+|必需
+
+|`spec.ceOverrides`
+|定义覆盖来控制发送到 sink 的事件的输出格式和修改。
+|可选
+
+|===
+
+[id="serverless-sinkbinding-reference-subject-parameters_{context}"]
+== 主题参数
+
+`Subject` 参数引用通过绑定实施来增强运行时合同的资源。您可以为`Subject` 定义配置多个字段。
+
+`Subject` 定义支持以下字段：
+
+[cols=3*,options="header"]
+|===
+|字段
+|描述
+|必需 或 可选
+
+|`apiVersion`
+|引用的 API 版本。
+|必需
+
+|`kind`
+|引用的类型。
+|必需
+
+|`namespace`
+|引用的命名空间。如果省略，则默认为对象的命名空间。
+|Optional
+
+|`name`
+|引用的名称。
+|如果配置 选择器，请不要使用。
+
+|`selector`
+|引用的选择器。
+|如果配置 名称，请不要使用。
+
+|`selector.matchExpressions`
+|标签选择器要求列表。
+|仅使用 matchExpressions 或 matchLabels 中的一个。
+
+|`selector.matchExpressions.key`
+|选择器应用到的标签键。
+|使用 matchExpressions 时需要此项。
+
+|`selector.matchExpressions.operator`
+|代表键与一组值的关系。有效的运算符为  `In`, `NotIn`, `Exists` 和 `DoesNotExist`.
+|使用 matchExpressions 时需要此项。
+
+|`selector.matchExpressions.values`
+|字符串值数组。如果 `operator`  参数值是  `In` 或 `NotIn`，则值数组必须是非空的。如果  `operator` 参数值是 `Exists` 或 `DoesNotExist`则值数组必须为空。这个数组会在策略性合并补丁中被替换。
+|使用 matchExpressions 时需要此项。
+
+|`selector.matchLabels`
+|键值对映射 `matchLabels` tchLabels 映射中的每个键值对等同于 `matchExpressions`元素，其中 key 字段是  `matchLabels.<key>`, `operator` 为 `In`,  `values` 数组仅包含 `matchLabels.<value>`.
+|仅使用 matchExpressions 或 matchLabels 中的一个。
+
+|===
+
+.主题参数示例
+
+根据以下 YAML，选择 `default` 命名空间中名为 `mysubject` 的 `Deployment` 对象：
+
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: bind-heartbeat
+spec:
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    namespace: default
+    name: mysubject
+  ...
+----
+
+根据以下 YAML，可以选择在 `default` 命名空间中带有 `working=example`  标签的 `Job` 对象：
+
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: bind-heartbeat
+spec:
+  subject:
+    apiVersion: batch/v1
+    kind: Job
+    namespace: default
+    selector:
+      matchLabels:
+        working: example
+  ...
+----
+
+根据以下 YAML，可以选择在 `default` 命名空间中带有 `working=example` 或 `working=sample`  标签的 `Pod` 对象：
+
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: bind-heartbeat
+spec:
+  subject:
+    apiVersion: v1
+    kind: Pod
+    namespace: default
+    selector:
+      - matchExpression:
+        key: working
+        operator: In
+        values:
+          - example
+          - sample
+  ...
+----
+
+[id="serverless-sinkbinding-reference-cloudevent-overrides_{context}"]
+== CloudEvent 覆盖
+
+`ceOverrides` 定义提供覆盖控制发送到 sink 的 CloudEvent 输出格式和修改。您可以为 `ceOverrides` 定义配置多个字段。
+
+`ceOverrides` 定义支持以下字段：
+
+[cols=3*,options="header"]
+|===
+|字段
+|描述
+|必需 或 可选
+
+|`extensions`
+|指定在出站事件中添加或覆盖哪些属性。每个 extensions 键值对在事件上作为属性扩展进行独立设置。
+|选填
+
+|===
+
+[注意]
+====
+仅允许有效的 CloudEvent 属性名称作为扩展。您无法从扩展覆盖配置设置 spec 定义的属性。例如，您无法修改 type 属性。
+====
+
+.CloudEvent Overrides 示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: bind-heartbeat
+spec:
+  ...
+  ceOverrides:
+    extensions:
+      extra: this is an extra attribute
+      additional: 42
+----
+
+这会在 `subject` 上设置 `K_CE_OVERRIDES` 环境变量：
+
+.输出示例
+[source,terminal]
+----
+{ "extensions": { "extra": "this is an extra attribute", "additional": "42" } }
+----
+
+[id="serverless-sinkbinding-reference-include-label_{context}"]
+== include 标签
+
+要使用接收器绑定，您需要为资源或包含资源的命名空间分配 `bindings.knative.dev/include: "true"`  标签。如果资源定义不包括该标签，集群管理员可以通过运行以下命令将它附加到命名空间：
+
+[source,terminal]
+----
+$ oc label namespace <namespace> bindings.knative.dev/include=true
+----

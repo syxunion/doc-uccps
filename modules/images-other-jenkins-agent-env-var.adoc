@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins-agent.adoc
+
+[id="images-other-jenkins-agent-env-var_{context}"]
+= Jenkins 代理环境变量
+
+每个 Jenkins 代理容器均可通过以下环境变量进行配置。
+
+[options="header"]
+|===
+| 变量 | 定义 | 值和设置示例
+
+|`JAVA_MAX_HEAP_PARAM`,
+`CONTAINER_HEAP_PERCENT`,
+`JENKINS_MAX_HEAP_UPPER_BOUND_MB`
+|这些值控制 Jenkins JVM 的最大堆大小。如果设置了 `JAVA_MAX_heap_PARAM`，则优先使用其值。否则，最大堆大小将动态计算为容器内存限值的 `CONTAINER_HEAP_PERCENT`，可选上限为 `JENKINS_MAX_HEAP_UPPER_BOUND_MB MiB`。
+
+默认情况下，Jenkins JVM 的最大堆大小设置为容器内存限值的 50%，且无上限。
+|`JAVA_MAX_HEAP_PARAM` 设置示例： `-Xmx512m`
+
+`CONTAINER_HEAP_PERCENT` 默认 `0.5`, 或 50%
+
+`JENKINS_MAX_HEAP_UPPER_BOUND_MB` 设置示例： `512 MiB`
+
+|`JAVA_INITIAL_HEAP_PARAM`,
+`CONTAINER_INITIAL_PERCENT`
+|这些值控制 Jenkins JVM 的初始堆大小。如果设置了 `JAVA_INITIAL_heap_PARAM`，则优先使用其值。否则，初始堆大小将动态计算为动态计算的最大堆大小的 `CONTAINER_INITIAL_PERCENT`。
+
+默认情况下，JVM 设置初始堆大小。
+|`JAVA_INITIAL_HEAP_PARAM` 设置示例： `-Xms32m`
+
+`CONTAINER_INITIAL_PERCENT` 设置示例： `0.1`, or 10%
+
+|`CONTAINER_CORE_LIMIT`
+|如果设置，请将用于调整内部 JVM 线程数的内核数指定为整数。
+|设置示例： `2`
+
+|`JAVA_TOOL_OPTIONS`
+|指定应用于该容器中运行的所有 JVM 的选项。不建议覆盖该值。
+|默认 `-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true`
+
+|`JAVA_GC_OPTS`
+|指定 Jenkins JVM 垃圾回收参数。不建议覆盖该值。
+|默认 `-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90`
+
+|`JENKINS_JAVA_OVERRIDES`
+|指定适用于 Jenkins JVM 的附加选项。这些选项附加至所有其他选项中，包括上面的 Java 选项，必要时可用于覆盖其中任何一个选项。用空格分开各个附加选项；如有任意选项包含空格字符，请使用反斜杠转义。
+|设置示例: `-Dfoo -Dbar`; `-Dfoo=first\ value -Dbar=second\ value`
+
+
+|===

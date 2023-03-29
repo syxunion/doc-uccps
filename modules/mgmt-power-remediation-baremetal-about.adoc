@@ -1,0 +1,108 @@
+// Module included in the following assemblies:
+
+// * machine_management/mgmt-power-remediation-baremetal
+
+:_content-type: PROCEDURE
+[id="mgmt-power-remediation-baremetal-about_{context}"]
+= 关于裸机的基于电源的补救
+在裸机集群中，修复节点对于确保集群的整体健康状况至关重要。以物理方式修复集群可能会有一定难度，且在使机器进入安全或操作状态时出现任何延迟，这会增加集群处于降级状态的时间，以及后续故障可能会导致集群离线的风险。基于电源的补救可帮助解决此类问题。
+
+基于电源的补救不重新置备节点，而是使用电源控制器关闭不可操作的节点。这种类型的补救也称为电源隔离。
+
+统信容器云管理平台 使用 `MachineHealthCheck` 控制器来检测出现故障的裸机节点。基于电源的补救速度会较快，它只重启有问题的节点，而不是从集群中移除。
+
+基于电源的补救提供以下功能：
+
+* 允许恢复 control plane 节点
+* 在超聚合环境中减少了数据丢失的风险
+* 减少了因为恢复物理机器造成的停机时间
+
+[id="machine-health-checks-bare-metal_{context}"]
+== 裸机上的 MachineHealthCheck
+
+在裸机集群上删除机器会触发重新置备裸机主机。通常，裸机重新置备是一个需要较长时间的过程，在这个过程中，集群缺少计算资源，应用程序可能会中断。要将默认补救过程从机器删除到主机的节能周期，请使用 `machine.openshift.io/remediation-strategy: external-baremetal` 注解来注解 `MachineHealthCheck` 资源。
+
+设置注解后，不健康的机器会使用 BMC 凭证进行节能。
+
+[id="mgmt-understanding-remediation-process_{context}"]
+== 了解补救过程
+
+补救过程按如下方式运行：
+
+. MachineHealthCheck（MHC）控制器检测到节点不健康。
+. MHC 通知裸机控制器，它请求关闭不健康的节点。
+. 关闭电源后，节点会被删除，这允许集群将受影响的工作负载重新调度到其他节点上。
+. 裸机机器控制器请求启动节点。
+. 节点启动后，节点会重新注册到集群，从而会创建新节点。
+. 重新创建节点后，裸机控制器会在删除前恢复不健康节点上存在的注解和标签。
+
+[注意]
+====
+如果电源操作未完成，裸机控制器会触发不健康节点的重新置备，除非这是 control plane 节点或外部置备的节点。
+====
+
+[id="mgmt-creating-mhc-baremetal_{context}"]
+== 为裸机创建 MachineHealthCheck 资源
+
+.先决条件
+
+* 统信容器云管理平台 使用安装程序置备的基础架构（IPI）安装。
+* 访问基板管理控制器（或 BMC 访问每个节点）
+* 网络访问不健康节点的 BMC 接口。
+
+.流程
+. 创建一个 `healthcheck.yaml` 文件，其中包含您的机器健康检查的定义。
+. 使用以下命令将 `healthcheck.yaml` 文件应用到集群：
+
+[source,terminal]
+----
+$ oc apply -f healthcheck.yaml
+----
+
+.裸机的 `MachineHealthCheck` 资源示例
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineHealthCheck
+metadata:
+  name: example <1>
+  namespace: openshift-machine-api
+  annotations:
+    machine.openshift.io/remediation-strategy: external-baremetal <2>
+spec:
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-machine-role: <role> <3>
+      machine.openshift.io/cluster-api-machine-type: <role> <3>
+      machine.openshift.io/cluster-api-machineset: <cluster_name>-<label>-<zone> <4>
+  unhealthyConditions:
+  - type:    "Ready"
+    timeout: "300s" <5>
+    status: "False"
+  - type:    "Ready"
+    timeout: "300s" <5>
+    status: "Unknown"
+  maxUnhealthy: "40%" <6>
+  nodeStartupTimeout: "10m" <7>
+----
+
+<1> 指定要部署的机器健康检查的名称。
+<2> 对于裸机集群，您必须在 annotations 部分中包含 `machine.openshift.io/remediation-strategy: external-baremetal` 注解来启用电源周期补救。采用这种补救策略时，不健康的主机会被重启，而不是从集群中删除。
+<3> 为要检查的机器池指定一个标签。
+<4> 以 `<cluster_name>-<label>-<zone>` 格式 指定要跟踪的机器集。例如，`prod-node-us-east-1a`。
+<5> 指定节点条件的超时持续时间。如果在超时时间内满足了条件，则会修复机器。超时时间较长可能会导致不健康的机器上的工作负载长时间停机。
+<6> 指定目标池中允许同时修复的机器数量。这可设为一个百分比或一个整数。如果不健康的机器数量超过 `maxUnhealthy` 设定的限制，则不会执行补救。
+<7> 指定机器健康检查在决定机器不健康前必须等待节点加入集群的超时持续时间。
+
+[注意]
+====
+`matchLabels` 只是示例; 您必须根据具体需要映射您的机器组。
+====
+
+[mgmt-troubleshooting-issue-power-remediation_{context}]
+== 基于电源补救的故障排除
+
+要排除基于电源补救的问题，请验证以下内容：
+
+* 您可以访问 BMC。
+* BMC 连接到负责运行补救任务的 control plane 节点。

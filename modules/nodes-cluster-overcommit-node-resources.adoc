@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-overcommit-node-resources_{context}"]
+
+= 为系统进程保留资源
+
+为提供更可靠的调度并且最大程度减少节点资源过量使用，每个节点都可以保留一部分资源供系统守护进程使用（节点上必须运行这些守护进程才能使集群正常工作）。特别是，建议您为内存等不可压缩的资源保留资源。
+
+.流程
+
+要明确为非 pod 进程保留资源，请通过指定可用于调度的资源来分配节点资源。如需了解更多详细信息，请参阅“为节点分配资源”。

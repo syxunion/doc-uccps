@@ -1,0 +1,18 @@
+// Module included in the following assemblies
+//
+// * storage/expanding-persistent-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="expanding-recovering-from-failure_{context}"]
+= 在扩展卷失败时进行恢复
+
+如果扩展底层存储失败，统信容器云管理平台管理员可以手动恢复 PVC 的状态，并取消改变大小的请求。否则，控制器会在没有管理员干预的情况，一直尝试改变大小的请求。
+
+.流程
+
+. 把与 PVC 进行绑定的 PV 的 reclaim 策略设为 `Retain`。编辑 PV，把 `persistentVolumeReclaimPolicy` 的值改为 Retain。
+. 删除 PVC。这将会在以后重新创建。
+. 为了确保可以把 PVC 绑定到一个带有 Retain 设置的 PV，手工编辑 PV，把 `claimRef` 从 PV specs 中删除。这会将 PV 标记为 `Available`。
+. 以较小的大小，或底层存储架构可以分配的大小，重新创建 PVC。
+. 将 PVC 的 `volumeName` 值设为 PV 的名称。这使 PVC 只会绑定到置备的 PV。
+. 恢复 PV 上的 reclaim 策略。

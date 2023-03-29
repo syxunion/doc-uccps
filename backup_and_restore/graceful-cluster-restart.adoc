@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="graceful-restart-cluster"]
+= 正常重启集群
+include::_attributes/common-attributes.adoc[]
+:context: graceful-restart-cluster
+
+toc::[]
+
+本文档论述了在安全关闭后重启集群的过程。
+
+尽管在重启后集群应该可以正常工作，但可能会因为意外状况集群可能无法恢复，例如：
+
+* 关机过程中的 etcd 数据崩溃
+* 因硬件原因造成节点故障
+* 网络连接问题。
+
+如果集群无法恢复，请按照以下步骤 xref:../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-2-restoring-cluster-state.adoc#dr-restoring-cluster-state[恢复到以前的集群状态].
+
+== 先决条件
+
+* 已 xref:../backup_and_restore/graceful-cluster-shutdown.adoc#graceful-shutdown-cluster[安全关闭集群]。
+
+// Restarting the cluster
+include::modules/graceful-restart.adoc[leveloffset=+1]
+

@@ -1,0 +1,68 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/deploying-egress-router-dns-redirection.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-router-dns-mode_{context}"]
+= 以 DNS 代理模式部署出口路由器 pod
+
+在 _DNS 代理模式_ 中，出口路由器 pod 作为基于 TCP 服务的 DNS 代理运行，将其自身的 IP 地址转换到一个或多个目标 IP 地址。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`)。
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建出口路由器 pod。
+
+. 为出口路由器 pod 创建服务：
+
+.. 创建名为 `egress-router-service.yaml` 的文件，其包含以下 YAML。将 `spec.ports` 设置为您之前为 `EGRESS_DNS_PROXY_DESTINATION` 环境变量定义的端口列表。
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-dns-svc
+spec:
+  ports:
+    ...
+  type: ClusterIP
+  selector:
+    name: egress-dns-proxy
+----
++
+例如：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-dns-svc
+spec:
+  ports:
+  - name: con1
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: con2
+    protocol: TCP
+    port: 100
+    targetPort: 100
+  type: ClusterIP
+  selector:
+    name: egress-dns-proxy
+----
+
+.. 要创建服务，请输入以下命令：
++
+[source,terminal]
+----
+$ oc create -f egress-router-service.yaml
+----
++
+Pod 现在可以连接至此服务。使用保留的出口 IP 地址将其代理到外部服务器的对应端口。

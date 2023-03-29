@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/ossm-deploy-mod-v2x.adoc
+
+
+[id="ossm-deploy-multi-mesh_{context}"]
+= Multimesh or federated deployment model
+
+_Federation_ （联邦） 是一种部署模型，可让您在不同管理域中管理的单独网格间共享服务和工作负载。
+
+Istio 多集群模型需要在网格和远程访问独立网格所在的所有 Kubernetes API 服务器之间具有高度信任。Red Hat OpenShift Service Mesh 联邦针对 Service Mesh 的多集群实施，该方法假设网格之间的信任最小。
+
+_federated mesh_ （federated mesh） 是作为单个网格组成的一组网格。每个网格中的服务可以是独特的服务，例如通过从另一个网格中导入服务的网格添加服务，可以为网格中的相同服务提供额外的工作负载，提供高可用性或两者的组合。加入联邦的所有网格都保持单独管理，您必须明确配置要导出哪些服务并从联邦中的其他网格导入。证书生成、指标和追踪集合等支持功能在其各自网格中保持本地。

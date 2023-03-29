@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/what-deployments-are.adoc
+
+[id="deployments-and-deploymentconfigs_{context}"]
+= 部署配置
+
+在复制控制器的基础上，统信容器云管理平台 增加了对软件开发和部署生命周期的支持，及 `部署配置` 的概念。在最简单的情形中，`部署配置` 会创建一个新的复制控制器，并允许它启动 pod。
+
+但是，从 `部署配置` 部署的 统信容器云管理平台 也支持从镜像的现有部署过渡到新部署，同时还可以定义在创建复制控制器之前或之后运行的 hook。
+
+`DeploymentConfig` 部署系统提供以下功能：
+
+* `部署配置`，这是运行应用程序的模板。
+* 为响应事件而触发自动化部署的触发器。
+* 用户可自定义的部署策略，用于从上一版本过渡到新版本。在 pod 内运行的策略，通常称为部署过程。
+* 一组 hook（生命周期 hook），用于在部署生命周期的不同点上执行自定义行为。
+* 应用程序的版本控制，以便在部署失败时支持手动或自动的回滚。
+* 复制的手动扩展和自动扩展。
+
+在创建 `部署配置` 时，会创建一个复制控制器来代表 `部署配置` 的 pod 模板。如果部署被改变，则会使用最新的 pod 模板创建一个新的复制控制器，并运行部署过程来缩减旧复制控制器并扩展新的复制控制器。
+
+在创建时，自动从服务负载均衡器和路由器中添加和移除应用程序的实例。只要应用程序支持接收 `TERM` 信号时安全关机，您可以确保运行的用户连接拥有正常完成的机会。
+
+统信容器云管理平台 `部署配置` 定义以下详细信息：
+
+. `ReplicationController` 定义的元素。
+. 自动创建新部署的触发器。
+. 在部署之间过渡的策略。
+. 生命周期 hook。
+
+每次触发部署时，无论是手动还是自动，部署器 Pod 均管理部署（包括缩减旧复制控制器、扩展新复制控制器以及运行 hook）。部署 pod 在完成部署后会无限期保留，以便保留其部署日志。当部署被另一个部署替换时，以前的复制控制器会被保留，以便在需要时轻松回滚。
+
+.`DeploymentConfig` 定义示例
+[source,yaml]
+----
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: frontend
+spec:
+  replicas: 5
+  selector:
+    name: frontend
+  template: { ... }
+  triggers:
+  - type: ConfigChange 
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - helloworld
+      from:
+        kind: ImageStreamTag
+        name: hello-openshift:latest
+    type: ImageChange  
+  strategy:
+    type: Rolling      
+----

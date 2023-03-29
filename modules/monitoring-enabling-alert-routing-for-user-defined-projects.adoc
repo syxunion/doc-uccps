@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-alert-routing-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="enabling-alert-routing-for-user-defined-projects_{context}"]
+= 为用户定义的项目启用警报路由
+
+[role="_abstract"]
+您可以为用户定义的项目启用警报路由。通过这样做，您可以启用具有  **alert-routing-edit** 角色的用户，以在 Alertmanager 中为用户定义的项目配置警报路由和接收器。
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑 `cluster-monitoring-config` `ConfigMap`  对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
++
+. 在 `data/config.yaml` 中的 `alertmanagerMain` 键下添加  `enableUserAlertmanagerConfig: true` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+    alertmanagerMain:
+      enableUserAlertmanagerConfig: true <1>
+----
+<1> 当设置为 `true`　时，`enableUserAlertmanagerConfig` 参数为集群中用户定义的项目启用警报路由。
++
+. 保存文件以使改变生效。自动启用用户定义的项目的警报路由。

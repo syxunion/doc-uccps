@@ -1,0 +1,21 @@
+// Module filename: nw-enabling-hsts.adoc
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+[id="nw-enabling-hsts_{context}"]
+= HTTP 严格传输安全性
+
+HTTP 严格传输安全性 (HSTS) 策略是一种安全增强，向浏览器客户端发送信号，表示路由主机上仅允许 HTTPS 流量。HSTS 也通过信号 HTTPS 传输来优化 Web 流量，无需使用 HTTP 重定向。HSTS 对于加快与网站的交互非常有用。
+
+强制 HSTS 策略时，HSTS 会向站点的 HTTP 和 HTTPS 响应添加 Strict Transport Security 标头。您可以在路由中使用 `insecureEdgeTerminationPolicy` 值，以将 HTTP 重定向到 HTTPS。强制 HSTS 时，客户端会在发送请求前将所有请求从 HTTP URL 更改为 HTTPS，无需重定向。
+
+集群管理员可将 HSTS 配置为执行以下操作：
+
+* 根据每个路由启用 HSTS
+* 根据每个路由禁用 HSTS
+* 对一组域强制每个域的 HSTS，或者结合使用命名空间标签与域
+
+[重要]
+====
+HSTS 仅适用于安全路由，可以是 edge-terminated 或 re-encrypt。其配置在 HTTP 或传递路由上无效。
+====

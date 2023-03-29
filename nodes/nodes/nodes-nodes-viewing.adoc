@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-viewing"]
+= 查看和列出 统信容器云管理平台 集群中的节点
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-viewing
+
+toc::[]
+
+您可以列出集群中的所有节点，以获取节点的相关信息，如状态、年龄、内存用量和其他详情。
+
+在执行节点管理操作时，CLI 与代表实际节点主机的节点对象交互。主控机（master）使用来自节点对象的信息执行健康检查，以此验证节点。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-viewing-listing.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-viewing-listing-pods.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-viewing-memory.adoc[leveloffset=+1]

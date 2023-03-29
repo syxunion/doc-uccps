@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/customizing-installation-ossm.adoc
+
+:_content-type: CONCEPT
+[id="ossm-specifying-jaeger-configuration_{context}"]
+= Specifying Jaeger configuration in the SMCP
+
+您可以在 `ServiceMeshControlPlane` 资源的 `addons`  部分配置 Jaeger。但是，您可以在 SMCP 中配置的内容有一些限制。
+
+当 SMCP 将配置信息传递给 Red Hat OpenShift distributed tracing Platform Operator 时，它会触发三种部署策略之一： `allInOne`, `production`, 或 `streaming`.

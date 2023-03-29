@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins-agent.adoc
+
+[id="images-other-jenkins-agent-memory_{context}"]
+= Jenkins 代理内存要求
+
+所有 Jenkins 代理均使用 JVM 来托管 Jenkins JNLP 代理和运行任何 Java 应用程序，如 `javac`、Maven 或 Gradle。
+
+默认情况下，Jenkins JNLP 代理 JVM 会将容器内存限值的 50% 用于其堆。该值可通过 `CONTAINER_HEAP_PERCENT` 环境变量修改，还可设置上限或整个覆盖。
+
+默认情况下，Jenkins 代理容器中运行的其它进程（如 shell 脚本或从管道运行的 `oc` 命令）在不引发 OOM 终止的情况下，所用内存均不得超过剩余的 50% 内存限值。
+
+默认情况下，Jenkins 代理容器中运行的每个其他 JVM 进程最多可将 25％ 的容器内存限值用于其堆。对于很多构建工作负载，可能还需调整此限值。

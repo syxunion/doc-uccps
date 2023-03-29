@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * monitoring/accessing-third-party-monitoring-uis-and-apis.adoc
+
+:_content-type: PROCEDURE
+[id="accessing-third-party-monitoring-web-service-apis"]
+= 访问第三方监控 Web 服务 API
+
+[role="_abstract"]
+您可以从命令行访问第三方 Web 服务 API 以监控堆栈组件，如 Prometheus、Alertmanager、Thanos Ruler 和 Thanos Querier。 
+
+以下示例演示了如何查询 Alertmanager 服务 API 接收器。本例要求关联用户帐户与 `openshift-monitoring` 命名空间中的  `monitoring-alertmanager-edit` 角色绑定，并且帐户具有查看路由的权限。此访问仅支持使用 Bearer 令牌进行身份验证。
+
+[source, terminal]
+----
+$ host=$(oc -n openshift-monitoring get route alertmanager-main -ojsonpath={.spec.host})
+$ token=$(oc whoami -t)
+$ curl -H "Authorization: Bearer $token" -k "https://$host/api/v2/receivers"
+----
+
+[注意]
+====
+要访问 Thanos Ruler 和 Thanos Querier 服务 API，请求的帐户必须具有命名空间资源的 `get` 权限，这些资源可通过向帐户授予 `cluster-monitoring-view` 集群角色来完成。
+====

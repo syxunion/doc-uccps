@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using_images/customizing-s2i-images.adoc
+
+:_content-type: PROCEDURE
+[id="images-using-customizing-s2i-images-scripts-embedded_{context}"]
+= 调用嵌入在镜像中的脚本
+
+构建器镜像提供自己的 Source-to-image（S2I）脚本版本，它适用于最常用的用例。如果这些脚本无法满足您的需要，S2I 提供了在 .s2i/bin 目录中添加自定义脚本覆盖它们的方法。但是，这样做代表完全替换了标准脚本。在某些情况下，替换脚本是可以接受的，但在其他情况下，您可以在脚本之前或之后运行一些命令，同时保留镜像中提供的脚本逻辑。要重复使用标准脚本，您可以创建一个运行自定义逻辑的 wrapper 脚本，并将它进一步分配给镜像中的默认脚本。
+
+.流程
+
+. 查看 `io.Uccps.s2i.scripts-url` 标签的值，以确定构建器镜像中的脚本位置：
++
+[source,terminal]
+----
+$ podman inspect --format='{{ index .Config.Labels "io.openshift.s2i.scripts-url" }}' wildfly/wildfly-centos7
+----
++
+.输出示例
+[source,terminal]
+----
+image:///usr/libexec/s2i
+----
++
+您检查了 `wildfly/wildfly-centos7` 构建器镜像，并发现脚本位于 `/usr/libexec/s2i` 目录中。
++
+. 创建一个包含其它命令中嵌套的标准脚本之一的脚本：
++
+.`.s2i/bin/assemble` 脚本
+[source,bash]
+----
+#!/bin/bash
+echo "Before assembling"
+
+/usr/libexec/s2i/assemble
+rc=$?
+
+if [ $rc -eq 0 ]; then
+    echo "After successful assembling"
+else
+    echo "After failed assembling"
+fi
+
+exit $rc
+----
++
+这个示例显示了一个自定义 assemble 脚本，它输出信息，从镜像中运行标准 assemble 脚本，并根据 assemble 脚本的退出代码输出另一个信息。
++
+[重要]
+====
+当嵌套 run 脚本时，您必须使用 `exec` 来调用它来确保正确处理信号。使用 `exec` 也无法在调用默认镜像运行脚本后运行附加命令。
+====
++
+.`.s2i/bin/run` 脚本
+[source,bash]
+----
+#!/bin/bash
+echo "Before running application"
+exec /usr/libexec/s2i/run
+----

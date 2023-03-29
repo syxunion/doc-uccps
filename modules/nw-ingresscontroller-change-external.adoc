@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+[id="nw-ingresscontroller-change-external_{context}"]
+= nw-ingresscontroller-change-external.adoc
+
+当集群管理员在没有指定集群为私有的情况下安装新集群时，将默认 Ingress Controller 创建，并将 `scope` 设置为 `External`。
+
+Ingress Controller 的范围可以在安装过程中或之后配置为 `Internal`，集群管理员可以将 内部 Ingress Controller 更改为 `External`。
+
+[重要]
+====
+在某些平台上，需要删除并重新创建服务。
+
+更改范围可能会导致 Ingress 流量中断，这可能会持续几分钟。这适用于需要删除和重新创建服务的平台，因为流程可能会导致 统信容器云管理平台 取消置备现有服务负载均衡器、置备一个新服务负载均衡器并更新 DNS。
+====
+
+.先决条件
+
+* 已安装 `oc` CLI.
+
+.流程
+
+* 要将 内部范围的 Ingress Controller 更改为外部，请输入以下命令：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontrollers/private --type=merge --patch='{"spec":{"endpointPublishingStrategy":{"type":"LoadBalancerService","loadBalancer":{"scope":"External"}}}}'
+----
++
+.验证
++
+* 要将 内部范围的 Ingress Controller 更改为外部，请输入以下命令：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator get ingresscontrollers/default -o yaml
+----
++
+** `Progressing` 状态条件指示您必须执行进一步的操作。例如，状态条件可以通过输入以下命令来指示需要删除该服务：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress delete services/router-default
+----
++
+如果删除了该服务，Ingress Operator 会重新创建为 `External`。

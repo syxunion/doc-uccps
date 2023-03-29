@@ -1,0 +1,107 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-vertical-autoscaler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-vertical-autoscaler-configuring_{context}"]
+= 使用 Vertical Pod Autoscaler Operator
+
+您可以通过创建 VPA 自定义资源（CR）来使用 Vertical Pod Autoscaler Operator（VPA）。CR 指明应分析哪些 pod，并决定 VPA 应该对这些 pod 执行的操作。
+
+.流程
+
+为特定工作负载对象创建 VPA CR:
+
+. 切换到您要缩放的工作负载对象所在的项目。
+
+.. 创建一个 VPA CR YAML 文件：
++
+[source,yaml]
+----
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       Deployment <1>
+    name:       frontend <2>
+  updatePolicy:
+    updateMode: "Auto" <3>
+  resourcePolicy: <4>
+    containerPolicies:
+    - containerName: my-opt-sidecar
+      mode: "Off"
+----
+<1> 指定您需要这个 VPA 管理的工作负载对象类型： `Deployment`, `StatefulSet`, `Job`, `DaemonSet`, `ReplicaSet`, 或 `ReplicationController`.
+<2> 指定您希望此 VPA 管理的现有工作负载对象的名称。
+<3> 指定 VPA 模式：
+* `auto` 会在与控制器关联的 pod 上自动应用推荐的资源。VPA 会终止现有的 pod，并使用推荐的资源限制和请求创建新 pod。
+* `recreate` 会在与工作负载对象关联的 pod 上自动应用推荐的资源。VPA 会终止现有的 pod，并使用推荐的资源限制和请求创建新 pod。recreate 模式应该很少使用，只有在需要确保每当资源请求改变时 pod 就需要重启时才使用。
+* `initial` 在创建与工作负载对象关联的 pod 时自动应用推荐的资源。VPA 会学习新的资源建议，但不会更新 pod。
+* `off` 仅为与工作负载对象关联的 pod 生成资源建议。VPA 不会更新 pod，它只会学习新的资源建议，且不会将建议应用到新 pod。
+<4> 可选。指定不需要受 VPA 影响的容器，将模式设置为 Off。
+
+
+.. 创建 VPA CR:
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+在一段短暂的时间后，VPA 会了解与工作负载对象关联的 pod 中容器的资源使用情况。
++
+您可以使用以下命令查看 VPA 建议：
++
+[source,terminal]
+----
+$ oc get vpa <vpa-name> --output yaml
+----
++
+输出显示 CPU 和内存请求的建议，如下所示：
++
+.输出示例
+[source,yaml]
+----
+...
+status:
+
+...
+
+  recommendation:
+    containerRecommendations:
+    - containerName: frontend
+      lowerBound: <1>
+        cpu: 25m
+        memory: 262144k
+      target: <2>
+        cpu: 25m
+        memory: 262144k
+      uncappedTarget: <3>
+        cpu: 25m
+        memory: 262144k
+      upperBound: <4>
+        cpu: 262m
+        memory: "274357142"
+    - containerName: backend
+      lowerBound:
+        cpu: 12m
+        memory: 131072k
+      target:
+        cpu: 12m
+        memory: 131072k
+      uncappedTarget:
+        cpu: 12m
+        memory: 131072k
+      upperBound:
+        cpu: 476m
+        memory: "498558823"
+
+...
+----
+<1> `lowerBound` 是最低的推荐资源级别。
+<2> `target` 是推荐的资源级别。
+<3> `upperBound` 是最高的推荐资源级别。
+<4> `uncappedTarget` 是最新资源建议。

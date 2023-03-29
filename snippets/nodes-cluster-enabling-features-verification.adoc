@@ -1,0 +1,49 @@
+// Text snippet included in the following modules:
+//
+// * modules/clusters/nodes-cluster-enabling-features-install.adoc
+// * modules/clusters/nodes-cluster-enabling-features-console.adoc
+// * modules/nodes-cluster-enabling-features-cli.adoc
+
+:_content-type: SNIPPET
+
+
+在节点返回就绪状态后，您可以通过查看节点上的 `kubelet.conf` 文件来验证是否启用了功能门。
+
+. 从 web 控制台中的 *Administrator* 视角，导航到 *Compute* -> *Nodes*。
+
+. 选择一个节点。
+
+. 在 *Node 详情* 页面中，点 *Terminal*。
+
+. 在终端窗口中，将根目录改为主机：
++
+[source,terminal]
+----
+sh-4.2# chroot /host
+----
+
+. 查看 `kubelet.conf`  文件：
++
+[source,terminal]
+----
+sh-4.2# cat /etc/kubernetes/kubelet.conf
+----
++
+.输出示例
++
+[source,terminal]
+----
+ ...
+featureGates:
+  InsightsOperatorPullingSCA: true,
+  LegacyNodeRoleBehavior: false
+ ...
+----
++
+集群中启用了列为 `true` 的功能。
++
+[注意]
+====
+列出的功能因 统信容器云管理平台 版本而异。
+====
+

@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * virt/virtual_machines/virtual_disks/virt-hot-plugging-virtual-disks.adoc
+
+:_content-type: PROCEDURE
+[id="virt-hot-plugging-a-virtual-disk-using-the-web-console{context}"]
+= Hot-plugging a virtual disk using the web console
+
+Hot-plug virtual disks that you want to attach to a virtual machine instance (VMI) while a virtual machine is running.
+
+.Prerequisites
+* You must have a running virtual machine to hot-plug a virtual disk.
+
+.Procedure
+
+. Click *Virtualization* -> *VirtualMachines* from the side menu.
+
+. Select a running virtual machine to open the *VirtualMachine details* page.
+
+. On the *Disks* tab, click *Add disk*.
+
+. In the *Add disk* window, fill in the information for the virtual disk that you want to hot-plug.
+
+. Click *Add*.

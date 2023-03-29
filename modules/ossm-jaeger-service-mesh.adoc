@@ -1,0 +1,17 @@
+////
+This CONCEPT module included in the following assemblies:
+-service_mesh/v1x/ossm-vs-community.adoc
+-service_mesh/v2x/ossm-vs-community.adoc
+////
+
+[id="ossm-jaeger-service-mesh_{context}"]
+= Distributed tracing and service mesh
+
+使用 {product-title} 上的 Service Mesh 安装 {JaegerShortName} 平台与社区 Jaeger 安装不同。为了解决问题、提供额外功能或处理不同之处，这些不同有时是必须的。
+
+* {SMProductShortName} 默认启用分布式追踪。
+* 为 {SMProductShortName} 默认启用 ingress 
+* Zipkin 端口名称已改为 `jaeger-collector-zipkin` (从 `http`)
+* 当选择 `production` 或 `streaming` 部署选项时，Jaeger 会默认使用 Elasticsearch 作为存储。
+* Istio 的社区版本提供了一个通用的 "tracing" 路由。 {SMProductName}  使用由 {JaegerName}  安装的 "jaeger" 路由，并已受到 OAuth 的保护。
+* {SMProductName} 为 Envoy proxy 使用 sidecar， Jaeger 也为 Jaeger agent 使用 sidecar。这两个 sidecar 是单独配置的，不应该相互混淆。proxy sidecar 会创建和 pod 的入站和出站相关的 span。agent sidecar 收到应用程序提供的 span ，并将其发送到 Jaeger 收集器。

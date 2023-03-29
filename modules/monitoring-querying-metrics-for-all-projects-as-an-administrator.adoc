@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+// * virt/logging_events_monitoring/virt-prometheus-queries.adoc
+
+:_content-type: PROCEDURE
+[id="querying-metrics-for-all-projects-as-an-administrator_{context}"]
+= 以集群管理员身份查询所有项目的指标
+
+作为集群管理员，或具有所有项目的查看权限的用户，您可以在 Metrics UI 中访问所有 统信容器云管理平台 默认项目和用户定义的项目的指标。
+
+[注意]
+====
+只有集群管理员可以访问 统信容器云管理平台 Monitoring 提供的第三方 UI。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色或所有项目的查看权限的用户访问集群。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 在 统信容器云管理平台 Web 控制台内的  *管理员* 视角中，选择 *Observe* -> *Metrics*.
+
+. 选择 *Insert Metric at Cursor* 来查看预定义的查询列表。
+
+. 要创建自定义查询，请将 Prometheus Query Language (PromQL) 查询添加到 *Expression* 字段。
+
+. 要添加多个查询，选择 *Add Query*.
+
+. 要删除查询，选择查询旁边的 {kebab} ，然后选择 *Delete query*.
+
+. 要禁止运行查询，请选择查询旁边的 {kebab} 并选择 *Disable query*.
+
+. 选择 *Run Queries* 来运行您已创建的查询。图表中会直观呈现查询的指标。如果查询无效，则 UI 会显示错误消息。
++
+[注意]
+====
+如果查询对大量数据进行运算，这可能会在绘制时序图时造成浏览器超时或过载。要避免这种情况，请选择 *Hide graph* 并且仅使用指标表来校准查询。然后，在找到可行的查询后，启用图表来绘制图形。
+====
+
+. 可选：页面 URL 现在包含您运行的查询。要在以后再次使用这一组查询，请保存这个 URL。
+

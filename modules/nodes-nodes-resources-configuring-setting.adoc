@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-resources-configuring.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-resources-configuring-setting_{context}"]
+= 手动为节点分配资源
+
+统信容器云管理平台 支持对 CPU 和内存资源类型执行分配。ephemeral-resource 资源类型也被支持。对于 cpu 类型，资源数量以内核数为单位来指定，例如 `200m`, `0.5`, 或 `1`. 对于 `memory` 和 `ephemeral-storage`，则以字节数为单位来指定，例如 `200Ki`, `50Mi`, 或 `5Gi`。
+
+作为管理员，您可以通过一组 `<resource_type>=<resource_quantity>`对 (如, `cpu=200m,memory=512Mi`).
+
+有关推荐的 system-reserved 值的详情，请参考 推荐的 system-reserved 值。
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` CRD 关联的标签。执行以下步骤之一：
++
+查看 Machine Config Pool：
+[source,terminal]
+----
+$ oc describe machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: "2022-11-16T15:34:25Z"
+  generation: 1
+  labels:
+    custom-kubelet: small-pods <1>
+----
+<1> 如果添加了标签，它会出现在 labels 下。
++
+如果标签不存在，则添加一个键/值对：
++
+[source,terminal]
+----
+$ oc label machineconfigpool worker custom-kubelet=small-pods
+----
+[提示]
+====
+您还可以应用以下 YAML 来添加标签：
+
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  labels:
+    custom-kubelet: small-pods
+  name: worker
+----
+====
+
+.流程
+
+. 为配置更改创建自定义资源 (CR)。
++
+.资源分配 CR 的示例配置
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: set-allocatable <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: small-pods <2> 
+  kubeletConfig:
+    systemReserved: <3>
+      cpu: 1000m
+      memory: 1Gi
+----
+<1> 为 CR 分配一个名称。
+<2> 指定来自机器配置池的标签。
+<3> 为节点组件和系统组件指定要保留的资源。

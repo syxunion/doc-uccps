@@ -1,0 +1,44 @@
+// Module filename: nw-path-based-routes.adoc
+// Module included in the following assemblies:
+// * networking/routes/route-configuration.adoc
+
+[id="nw-path-based-routes_{context}"]
+= 基于路径的路由
+
+基于路径的路由指定了一个路径组件，可以与 URL 进行比较，该 URL 需要基于 HTTP 的路由流量。因此，可以使用同一主机名提供多个路由，每个主机名都有不同的路径。路由器应该匹配基于最具体路径的路由。不过，这还取决于路由器的实现。
+
+下表显示了路由及其可访问性示例：
+
+.Route availability
+[cols="3*", options="header"]
+|===
+|Route | 当比较到 | 可访问
+.2+|_www.example.com/test_ |_www.example.com/test_|是
+|_www.example.com_|否
+.2+|_www.example.com/test_ and _www.example.com_ | _www.example.com/test_|是
+|_www.example.com_|是
+.2+|_www.example.com_|_www.example.com/text_|是（由主机匹配，而不是路由）
+|_www.example.com_|是
+|===
+
+.带有路径的未安全路由
+
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: route-unsecured
+spec:
+  host: www.example.com
+  path: "/test" <1>
+  to:
+    kind: Service
+    name: service-name
+----
+<1> 该路径是基于路径的路由的唯一添加属性。
+
+[注意]
+====
+使用 passthrough TLS 时，基于路径的路由不可用，因为路由器不会在这种情况下终止 TLS，且无法读取请求的内容。
+====

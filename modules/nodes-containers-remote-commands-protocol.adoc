@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-remote-commands.adoc
+
+[id="nodes-containers-remote-commands-protocol_{context}"]
+= 用于从客户端发起远程命令的协议
+
+客户端通过向 Kubernetes API 服务器发出请求，来发起在容器中执行远程命令的操作：
+
+[source, terminal]
+----
+/proxy/nodes/<node_name>/exec/<namespace>/<pod>/<container>?command=<command>
+----
+
+在以上 URL 中：
+
+- `<node_name>` 是节点的 FQDN。
+- `<namespace>` 是目标 pod 的项目。
+- `<pod>` 是目标 pod 的名称。
+- `<container>` 是目标容器的名称。
+- `<command>` 是要执行的命令。
+
+例如：
+
+[source, terminal]
+----
+/proxy/nodes/node123.openshift.com/exec/myns/mypod/mycontainer?command=date
+----
+
+另外，客户端也可以在请求中添加参数来指示是否有以下要求：
+
+- 客户端应向远程容器的命令发送输入 (stdin)。
+- 客户端的终端是 TTY。
+- 远程容器的命令应该将来自 stdout 的输出发送到客户端。
+- 远程容器的命令应该将来自 stderr 的输出发送到客户端。
+
+向 API 服务器发送 exec 请求后，客户端会将连接升级到支持多路复用的流；当前使用 *HTTP/2*。
+
+客户端为 stdin、stdout 和 stderr 分别创建一个流。为了区分流，客户端将流的 streamType 标头设置为 stdin、stdout 或 stderr 之一。
+
+在完成远程命令执行请求后，客户端关闭所有流、升级的连接和底层连接。

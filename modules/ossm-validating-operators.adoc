@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+[id="ossm-validating-operators_{context}"]
+= Validating Operator installation
+
+//The Operator installation steps include verifying the Operator status in the OpenShift console.
+
+安装 {SMProductName} Operators, 时，Uccps 会在成功安装 Operator 时自动创建以下对象：
+
+* 配置映射
+* 自定义资源定义
+* 部署
+* pods
+* 副本集
+* 角色
+* 角色绑定
+* secrets
+* 服务帐户
+* services
+
+.通过 {product-title} 控制台
+
+您可以使用 {product-title} console 控制台验证 Operator pod 是否可用并运行。
+
+. 导航到 *工作负载* -> *Pods*.
+. 选择 `openshift-operators` 命名空间。
+. 验证以下 pod 是否存在，状态是否为 `running`：
+** `istio-operator`
+** `jaeger-operator`
+** `kiali-operator`
+. 选择 `openshift-operators-uniontech` 命名空间。
+. 验证 `elasticsearch-operator` pod 是否存在，状态是否为 `running`。
+
+.从命令行
+
+. 使用以下命令，验证 Operator pod 可用并在 `openshift-operators` 命名空间中运行：
++
+[source,terminal]
+----
+$ oc get pods -n openshift-operators
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                               READY   STATUS    RESTARTS   AGE
+istio-operator-bb49787db-zgr87     1/1     Running   0          15s
+jaeger-operator-7d5c4f57d8-9xphf   1/1     Running   0          2m42s
+kiali-operator-f9c8d84f4-7xh2v     1/1     Running   0          64s
+----
++
+. 使用以下命令验证 Elasticsearch Operator：
++
+[source,terminal]
+----
+$ oc get pods -n openshift-operators-redhat
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                      READY   STATUS    RESTARTS   AGE
+elasticsearch-operator-d4f59b968-796vq     1/1     Running   0          15s
+----

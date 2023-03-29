@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_aws/installing-aws-user-infra.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_aws/installing-restricted-networks-aws.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+
+:_content-type: PROCEDURE
+[id="installation-registry-storage-non-production_{context}"]
+= 在非生产集群中为镜像 registry 配置存储
+
+您必须为 Image Registry Operator 配置存储。对于非生产集群，您可以将镜像 registry 设置为空目录。如果您这样做，重启 registry 时会丢失所有镜像。
+
+.流程
+
+* 将镜像 registry 存储设置为空目录：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+----
++
+[警告]
+====
+仅为非生产集群配置这个选项。
+====
++
+如果在 Image Registry Operator 初始化其组件前运行这个命令，`oc patch` 命令会失败并显示以下错误：
++
+[source,terminal]
+----
+Error from server (NotFound): configs.imageregistry.operator.openshift.io "cluster" not found
+----
++
+等待几分钟，然后再次运行 命令。

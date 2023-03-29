@@ -1,0 +1,21 @@
+:_content-type: ASSEMBLY
+[id="distr-tracing-architecture"]
+= 分布式追踪架构
+include::_attributes/common-attributes.adoc[]
+:context: distributed-tracing-architecture
+
+toc::[]
+
+每次用户在某个应用程序中执行一项操作时，一个请求都会在所在的系统上执行，而这个系统可能需要几十个不同服务的共同参与才可以做出相应的响应。统信容器云管理平台分布式追踪可让您执行分布式追踪，在组成一个应用程序的多个微服务间记录请求的路径。
+
+分布式追踪是用来将不同工作单元的信息关联起来的技术，通常是在不同进程或主机中执行的，以便理解分布式事务中的整个事件链。开发人员可以视觉化在大型微服务架构中调用的流程。它对理解序列化、并行性和延迟来源有价值。
+
+统信容器云管理平台分布式追踪记录了在微服务的整个堆栈间执行单个请求，并将其显示为 _trace_ 。_trace_ 是系统的数据/执行路径。一个端到端的 trace 由一个或者多个 span 组成。
+
+ _span_ 代表 统信容器云管理平台分布式追踪中的逻辑工作单元，它包含操作名称、操作的开始时间和持续时间，以及可能的标签和日志。span 可能会被嵌套并排序以模拟因果关系。
+
+include::modules/distr-tracing-product-overview.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-features.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-architecture.adoc[leveloffset=+1]

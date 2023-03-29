@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-plugins.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-plugins-device-mgr_{context}"]
+= 了解设备管理器
+
+设备管理器提供了一种机制，可借助称为“设备插件”的插件公告专用节点硬件资源。
+
+您可以公告专用的硬件，而不必修改任何上游代码。
+
+[重要]
+====
+统信容器云管理平台 支持设备插件 API，但设备插件容器则由各家供应商提供支持。
+====
+
+设备管理器将设备公告为 *外部资源*。用户 pod 可以利用相同的 *限制/请求* 机制来使用设备管理器公告的设备，这一机制也用于请求任何其他 *扩展资源*.
+
+在启动时，设备插件会在 *_/var/lib/kubelet/device-plugins/kubelet.sock_* 上调用 Register 将自身注册到设备管理器，并启动位于 *_/var/lib/kubelet/device-plugins/<plugin>.sock_* 的 gRPC 服务，以服务设备管理器请求。
+
+在处理新的注册请求时，设备管理器会在设备插件服务中调用 ListAndWatch 远程过程调用(RPC)。作为响应，设备管理器通过 gRPC 流从插件中获取 *设备* 对象列表。设备管理器将监控流以获取插件中的新更新。在插件一侧，插件还会保持流打开，并且每当任何设备的状态发生变化时，就会通过同一流连接将新设备列表发送到设备管理器。
+
+在处理新的 pod 准入请求时，Kubelet 将请求的扩展资源传递给设备管理器以进行设备分配。设备管理器在其数据库中检查，以验证是否存在对应的插件。如果插件存在，并且有可分配的设备以及本地缓存，则会在该特定设备插件中调用 Allocate RPC。
+
+此外，设备插件也可以执行其他几个特定于设备的操作，如驱动程序安装、设备初始化和设备重置。这些功能视具体实现而异。

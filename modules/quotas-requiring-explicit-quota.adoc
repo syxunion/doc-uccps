@@ -1,0 +1,137 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+// NOTE: This is currently not configurable in 4.1, removing from 4.1 docs.
+
+:_content-type: PROCEDURE
+[id="configuring-explicit-resource-quotas_{context}"]
+= 配置显式资源配额
+
+在项目请求模板中配置显式资源配额，以便在新项目中应用特定资源配额。
+
+.先决条件
+
+* 使用具有 cluster-admin 角色的用户访问集群。
+
+* 安装 Uccp CLI（oc）。
+
+.流程
+
+. 在项目请求模板中添加资源配额定义：
++
+** 如果集群中不存在项目请求模板：
+.. 创建 bootstrap 项目模板并将其输出到名为 `template.yaml`的文件：
++
+[source,terminal]
+----
+$ oc adm create-bootstrap-project-template -o yaml > template.yaml
+----
++
+.. 在 `template.yaml` 中添加资源配额定义。以下示例定义了名为 'storage-consumption' 的资源配额。定义必须在模板的 `parameter:` 部分前添加：
++
+[source,yaml]
+----
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: storage-consumption
+    namespace: ${PROJECT_NAME}
+  spec:
+    hard:
+      persistentvolumeclaims: "10" 
+      requests.storage: "50Gi" 
+      gold.storageclass.storage.k8s.io/requests.storage: "10Gi" 
+      silver.storageclass.storage.k8s.io/requests.storage: "20Gi" 
+      silver.storageclass.storage.k8s.io/persistentvolumeclaims: "5" 
+      bronze.storageclass.storage.k8s.io/requests.storage: "0" 
+      bronze.storageclass.storage.k8s.io/persistentvolumeclaims: "0"
+----
++
+.. 通过 `openshift-config` 命名空间中修改的 `template.yaml` 文件创建项目请求模板：
++
+[source,terminal]
+----
+$ oc create -f template.yaml -n openshift-config
+----
++
+[注意]
+====
+要将配置作为 `kubectl.kubernetes.io/last-applied-configuration`注解包括，将 `--save-config` 选项添加到 `oc create` 命令中。
+====
++
+默认情况下，模板称为 `project-request`。
++
+** 如果项目请求模板已在集群中存在：
++
+[注意]
+====
+	如果您使用配置文件以声明性或必要方式管理集群中的对象，请使用这些文件编辑现有项目请求模板。
+====
++
+.. 列出 `openshift-config` 命名空间中的模板：
++
+[source,terminal]
+----
+$ oc get templates -n openshift-config
+----
++
+.. 编辑现有项目请求模板：
++
+[source,terminal]
+----
+$ oc edit template <project_request_template> -n openshift-config
+----
++
+.. 将资源配额定义（如前面的 `storage-consumption` 示例）添加到现有模板中。定义必须在模板的 `parameter:` 部分前添加。
+
+. 如果您创建了项目请求模板，在集群的项目配置资源中引用它：
+.. 访问项目配置资源进行编辑：
++
+** 使用 web 控制台：
+... 导航至 *管理员* -> *集群设置* 页面。
+... 单击 *配置* 以查看所有配置资源。
+... 找到 *Project* 的条目，并点击 *Edit YAML*。
++
+** 使用 CLI：
+... 编辑 `project.config.openshift.io/cluster` 资源：
++
+[source,terminal]
+----
+$ oc edit project.config.openshift.io/cluster
+----
++
+.. 更新项目配置资源的 `spec` 部分，使其包含 `projectRequestTemplate` 和 `name` 参数。以下示例引用了默认项目请求模板（名称为 `project-request`）:
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Project
+metadata:
+  ...
+spec:
+  projectRequestTemplate:
+    name: project-request
+----
+
+. 验证在创建项目时是否应用了资源配额：
+.. 创建一个项目：
++
+[source,terminal]
+----
+$ oc new-project <project_name>
+----
++
+.. 列出项目的资源配额：
++
+[source,terminal]
+----
+$ oc get resourcequotas
+----
++
+.. 详细描述资源配额：
++
+[source,terminal]
+----
+$ oc describe resourcequotas <resource_quota_name>
+----

@@ -1,0 +1,15 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: CONCEPT
+[id="distr-tracing-deployment-best-practices_{context}"]
+= 部署最佳实践
+
+* {DTProductName} 实例名称必须是唯一的。如果您有多个 {JaegerName} 平台实例并使用 sidecar 注入的代理，则 {JaegerName} 平台实例应具有唯一的名称，注入注解应该明确指定追踪数据的名称。
+
+* 如果您有多租户实现，且租户由命名空间分开，请将 {JaegerName} 平台实例部署到每个租户命名空间中。
+
+** 多租户安装或 {product-dedicated} 不支持将代理作为 daemonset。代理作为 sidecar 是这些用例唯一支持的配置。
+
+* 如果您要作为 {DTShortName} 的一部分安装分布式追踪，则分布追踪资源必须与 `ServiceMeshControlPlane` 资源在同一个命名空间中。

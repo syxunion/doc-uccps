@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * authentication/tokens-scoping.adoc
+
+:_content-type: CONCEPT
+[id="tokens-scoping-about_{context}"]
+= 关于界定令牌作用域
+
+您可以创建有范围令牌，将某些权限委派给其他用户或服务帐户。例如，项目管理员可能希望委派创建 Pod 的权限。
+
+
+有范围的令牌用来标识给定用户，但仅限于其范围指定的特定操作。只有具有 cluster-admin 角色的用户才能创建有范围的令牌。
+
+通过将令牌的范围集合转换为 `PolicyRule` 集合来评估其范围。然后，请求会与这些规则进行匹配。请求属性必须至少匹配其中一条范围规则，才能传递给 "normal" 授权程序进行进一步授权检查。
+
+[id="scoping-tokens-user-scopes_{context}"]
+== User 范围
+
+用户范围主要用于获取给定用户的信息。它们是基于意图的，因此会自动为您创建规则：
+
+* `user:full` - 允许使用用户的所有权限对 API 进行完全的读/写访问。
+* `user:info` - 允许只读访问用户的信息，如名称和组。
+* `user:check-access` - 允许访问 `self-localsubjectaccessreviews` 和 `self-subjectaccessreviews`。这些是在请求对象中传递空用户和组的变量。
+* `user:list-projects` - 允许只读访问，可以列出用户可访问的项目。
+
+[id="scoping-tokens-role-scope_{context}"]
+== 角色范围
+角色范围允许您具有与给定角色相同等级的访问权限，该角色通过命名空间过滤。
+
+* `role:<cluster-role name>:<namespace or * for all> -` 将范围限定为集群角色指定的规则，但仅在指定的命名空间中。
++
+[注意]
+====
+注意：这可防止升级访问权限。即使角色允许访问 secret、角色绑定和角色等资源，但此范围会拒绝访问这些资源。这有助于防止意外升级。许多人认为 edit 等角色并不是升级角色，但对于访问 secret 而言，这的确是升级角色。
+====
+
+* `role:<cluster-role name>:<namespace or * for all>:! -` 这与上例相似，但因为包含感叹号而使得此范围允许升级访问权限。

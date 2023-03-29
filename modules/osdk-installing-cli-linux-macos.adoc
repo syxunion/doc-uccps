@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-install.adoc
+// * operators/operator_sdk/osdk-installing-cli.adoc
+
+:ocp_ver: 4.10
+:osdk_ver: v1.16.0
+
+:_content-type: PROCEDURE
+[id="osdk-installing-cli-linux-macos_{context}"]
+= 安装 Operator SDK CLI
+
+您可以在 Linux 上安装 Uccps SDK CLI 工具。
+
+.先决条件
+
+* Go v1.16+
+* `docker` v17.03+、`podman` v1.9.3+ 或 `buildah` v1.7+
+
+.流程
+
+. 导航到 Uccps 镜像站点。
+
+. 从最新的 4.10 目录中，下载 Linux 的 tarball 的最新版本。
+
+. 解包存档：
++
+[source,terminal,subs="attributes+"]
+----
+$ tar xvf operator-sdk-{osdk_ver}-ocp-linux-x86_64.tar.gz
+----
+
+. 使文件可执行：
++
+[source,terminal]
+----
+$ chmod +x operator-sdk
+----
+
+. 将提取的 `operator-sdk` 二进制文件移到 `PATH` 中的一个目录中。
++
+[提示]
+====
+检查 `PATH`:
+
+[source,terminal]
+----
+$ echo $PATH
+----
+====
++
+[source,terminal]
+----
+$ sudo mv ./operator-sdk /usr/local/bin/operator-sdk
+----
+
+.验证
+
+* 安装 Operator SDK CLI 后，验证它是否可用：
++
+[source,terminal]
+----
+$ operator-sdk version
+----
++
+.输出示例
+[source,terminal,subs="attributes+"]
+----
+operator-sdk version: "{osdk_ver}-ocp", ...
+----
+
+:!ocp_ver:
+:!osdk_ver:

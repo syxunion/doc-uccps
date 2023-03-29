@@ -1,0 +1,74 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/tkn_cli/installing-tkn.adoc
+
+:_content-type: PROCEDURE
+[id="installing-tkn-on-linux-using-rpm"]
+
+= 使用 RPM 在 Linux 上安装 UnionTech Uccps Pipelines CLI（tkn）
+
+[role="_abstract"]
+对于 UnionTech OS Server 20(UOS20)版本 8，您可以使用 RPM 安装 UnionTech Uccps Pipelines CLI（tkn）。
+
+.先决条件
+
+* 您的统信帐户必须具有有效的 统信容器云管理平台 订阅。
+* 您在本地系统中有 root 或者 sudo 权限。
+
+.流程
+
+. 使用 UnionTech Subscription Manager 注册：
++
+[source,terminal]
+----
+# subscription-manager register
+----
+
+. 获取最新的订阅数据：
++
+[source,terminal]
+----
+# subscription-manager refresh
+----
+
+. 列出可用的订阅：
++
+[source,terminal]
+----
+# subscription-manager list --available --matches '*pipelines*'
+----
+
+. 在上一命令的输出中，找到 统信容器云管理平台 订阅的池 ID，并把订阅附加到注册的系统：
++
+[source,terminal]
+----
+# subscription-manager attach --pool=<pool_id>
+----
+
+. 启用 UnionTech Uccps Pipelines 所需的仓库：
++
+* Linux (x86_64, amd64)
++
+[source,terminal]
+----
+Linux (x86_64, amd64)
+# subscription-manager repos --enable="pipelines-1.7-for-rhel-8-x86_64-rpms"
+Linux on IBM Z and LinuxONE (s390x)
+# subscription-manager repos --enable="pipelines-1.7-for-rhel-8-s390x-rpms"
+Linux on IBM Power Systems (ppc64le)
+# subscription-manager repos --enable="pipelines-1.7-for-rhel-8-ppc64le-rpms"
+----
+
+. 安装 `openshift-pipelines-client` 软件包：
++
+[source,terminal]
+----
+# yum install openshift-pipelines-client
+----
+
+安装 CLI 后，就可以使用tkn命令：
+
+[source,terminal]
+----
+$ tkn version
+----

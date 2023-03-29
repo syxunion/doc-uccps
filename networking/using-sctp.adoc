@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="using-sctp"]
+= 在裸机集群中使用流控制传输协议 (SCTP)
+include::_attributes/common-attributes.adoc[]
+:context: using-sctp
+
+toc::[]
+
+作为集群管理员，您可以使用集群中的流控制传输协议 (SCTP)。
+
+include::modules/nw-sctp-about.adoc[leveloffset=+1]
+
+include::modules/nw-sctp-enabling.adoc[leveloffset=+1]
+
+include::modules/nw-sctp-verifying.adoc[leveloffset=+1]

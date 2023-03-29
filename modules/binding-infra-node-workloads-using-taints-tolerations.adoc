@@ -1,0 +1,106 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating-infrastructure-machinesets.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="binding-infra-node-workloads-using-taints-tolerations_{context}"]
+= 使用污点和容限绑定基础架构节点工作负载
+
+如果您有一个分配了 `infra` 和 `worker` 角色的 infra 节点，您必须配置该节点，以便不为其分配用户工作负载。
+
+[重要]
+====
+建议您保留为 infra 节点创建的双 `infra,worker` 标签，并使用污点和容限来管理用户工作负载调度到的节点。如果从节点中删除 `worker` 标签，您必须创建一个自定义池来管理它。没有自定义池的 MCO 不能识别具有 `master` 或 `worker` 以外的标签的节点。如果不存在选择自定义标签的自定义池，维护 `worker` 标签可允许默认 `worker` 机器配置池管理节点。`infra` 标签与集群通信，它不计算订阅总数。
+====
+
+.先决条件
+
+* 在 统信容器云管理平台 集群中配置额外的 `MachineSet` 对象。
+
+.流程
+
+. 向 infra 节点添加污点以防止在其上调度用户工作负载：
+
+.. 确定节点是否具有污点：
++
+[source,terminal]
+----
+$ oc describe nodes <node_name>
+----
++
+.输出示例
+[source,text]
+----
+oc describe node ci-ln-iyhx092-f76d1-nvdfm-worker-b-wln2l
+Name:               ci-ln-iyhx092-f76d1-nvdfm-worker-b-wln2l
+Roles:              worker
+ ...
+Taints:             node-role.kubernetes.io/infra:NoSchedule
+ ...
+----
++
+本例显示节点具有污点。您可以在下一步中继续向 pod 添加容限。
+
+.. 如果您还没有配置污点以防止在其上调度用户工作负载：
++ 
+[source,terminal]
+----
+$ oc adm taint nodes <node_name> <key>:<effect>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc adm taint nodes node1 node-role.kubernetes.io/infra:NoSchedule
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加污点：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    ...
+spec:
+  taints:
+    - key: node-role.kubernetes.io/infra
+      effect: NoSchedule
+  ...
+----
+====
++
+本例在 `node1` 上放置一个键为 `node-role.kubernetes.io/infra` 的污点，污点是 `NoSchedule`。具有 `NoSchedule` effect 的节点仅调度容许该污点的 pod，但允许现有 pod 继续调度到该节点上。
++
+[注意]
+====
+如果使用 descheduler，则违反了节点污点的 pod 可能会从集群驱除。
+====
+
+. 为要在 infra 节点上调度的 pod 配置添加容限，如路由器、registry 和监控工作负载。在 `Pod` 对象规格中添加以下代码：
++
+[source,yaml]
+----
+tolerations:
+  - effect: NoSchedule <1>
+    key: node-role.kubernetes.io/infra <2>
+    operator: Exists <3>
+----
+<1> 指定添加到节点的效果。
+<2> 指定添加到节点的键。
+<3> 指定 `Exists` Operator，以要求节点上存在一个带有键为 `node-role.kubernetes.io/infra` 的污点。
++
+此容忍度与 `oc adm taint` 命令创建的污点匹配。具有此容忍度的 pod 可以调度到 infra 节点上。
++
+[注意]
+====
+并不总是能够将通过 OLM 安装的 Operator 的 Pod 移到 infra 节点。移动 Operator Pod 的能力取决于每个 Operator 的配置。
+====
+
+. 使用调度程序将 pod 调度到 infra 节点。详情请参阅 _控制节点上的 pod 放置_ 的文档。

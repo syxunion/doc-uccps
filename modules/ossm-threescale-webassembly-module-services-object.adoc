@@ -1,0 +1,62 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-services-object_{context}"]
+= The 3scale WebAssembly module services object
+
+`services` 顶级对象指定由  `module` 的特定实例处理哪些服务标识符。
+
+由于帐户具有多个服务，您必须指定处理哪些服务。其余的配置会围绕如何配置服务。
+
+`services` 字段是必需的。它是必须至少包含一个服务的数组，才可使用。
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: threescale-wasm-auth
+spec:
+  config:
+    ...
+    services:
+    - id: "2555417834789"
+      token: service_token
+      authorities:
+        - "*.app"
+        - 0.0.0.0
+        - "0.0.0.0:8443"
+      credentials: <object>
+      mapping_rules: <object>
+    ...
+----
+
+`services`  数组中的每个元素代表 3scale 服务。
+
+.`services` 对象字段
+|===
+|Name |描述 |必需
+
+a|`ID`
+|此 3scale 服务的标识符，目前没有在别处引用。
+|是
+
+a|`token`
+a|此 token 可以在您的系统中的服务的代理配置中找到，也可以使用以下 curl 命令从系统检索它： 
+
+`curl \https://<system_host>/admin/api/services/<service_id>/proxy/configs/production/latest.json?access_token=<access_token>" \| jq '.proxy_config.content.backend_authentication_value`
+|是
+
+a|`authorities`
+|一个字符串数组，每个字符串代表要匹配的 URL 的颁发机构。这些字符串接受支持星号(*)加号(+)和问号(?)匹配器的 glob 模式。
+|是
+
+a|`credentials`
+|定义要查找和在哪里查找的凭据的对象。
+|是
+
+a|`mapping_rules`
+|代表要命中映射规则和 3scale 方法的一组对象。
+|是
+|===

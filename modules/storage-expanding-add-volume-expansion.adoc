@@ -1,0 +1,25 @@
+// Module included in the following assemblies
+//
+// * storage/expanding-persistent-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="add-volume-expansion_{context}"]
+= 启用卷扩展支持
+
+在扩展持久性卷前，`StorageClass` 对象必须将 `allowVolumeExpansion` 字段设置为 `true`。
+
+.流程
+
+* 编辑 `StorageClass` 对象并添加 `allowVolumeExpansion` 属性。以下示例演示了在存储类配置的底部添加这一行。
++
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+...
+parameters:
+  type: gp2
+reclaimPolicy: Delete
+allowVolumeExpansion: true <1>
+----
+<1> 将这个属性设置为 `true` 允许在创建后扩展 PVC。

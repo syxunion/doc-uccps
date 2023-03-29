@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="accessing-third-party-monitoring-uis-and-apis"]
+= 访问第三方监控 UI 和 API
+include::_attributes/common-attributes.adoc[]
+:context: accessing-third-party-monitoring-apis
+
+toc::[]
+
+[role="_abstract"]
+在 统信容器云管理平台 1.2 中，您无法访问以下监控组件的第三方 Web 浏览器用户界面(UI)：Alertmanager、Thanos Ruler 和 Thanos Querier。但是，您可以访问 Grafana 和 Prometheus 的 Web UI，虽然此访问已弃用，并计划在以后的 统信容器云管理平台 发行版本中删除。另外，您还可以从命令行界面(CLI)访问第三方监控组件的 Web 服务 API。
+
+// Accessing web UIs for third-party monitoring components
+include::modules/monitoring-accessing-third-party-monitoring-uis.adoc[leveloffset=+1]
+
+// Accessing service APIs for third-party monitoring components
+include::modules/monitoring-accessing-third-party-monitoring-web-service-apis.adoc[leveloffset=+1]
+
+
+[role="_additional-resources"]
+[id="additional-resources_accessing-third-party-monitoring-apis"]
+== 其他资源
+
+* xref:../monitoring/configuring-the-monitoring-stack.adoc#configuring_remote_write_storage_configuring-the-monitoring-stack[配置远程写入存储]
+* xref:../monitoring/managing-metrics.adoc#managing-metrics[管理指标]
+* xref:../monitoring/managing-alerts.adoc#managing-alerts[管理警报]

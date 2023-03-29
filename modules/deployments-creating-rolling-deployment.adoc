@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-creating-rolling-deployment_{context}"]
+= 创建滚动部署
+
+在 统信容器云管理平台 中，Rolling 部署是默认类型。您可以使用 CLI 创建滚动部署。
+
+.流程
+
+. 根据 docker.io 中找到的示例部署镜像创建一个应用程序：
++
+[source,terminal]
+----
+$ oc new-app utccp/deployment-example:latest
+----
+
+. 如果您安装了路由器，请通过路由（或直接使用服务 IP）提供应用程序。
++
+[source,terminal]
+----
+$ oc expose svc/deployment-example
+----
+
+. 通过 `deployment-example-<project>.apps.<cluster_name>.<router_domain>` 访问应用程序，验证您能否看到 `v1` 镜像。
+
+. 将 `部署配置` 扩展至三个副本：
++
+[source,terminal]
+----
+$ oc scale dc/deployment-example --replicas=3
+----
+. 导入v2镜像
++
+[source,terminal]
+----
+$ oc import-image  deployment-example:v2 --from=utccp/deployment-example:v2 --confirm
+----
+
+. 通过为示例的新版本标上 latest 标签（tag），自动触发新部署：
++
+[source,terminal]
+----
+$ oc tag deployment-example:v2 deployment-example:latest
+----
+
+. 在浏览器中刷新页面，直到您看到 v2 镜像。
+
+. 在使用 CLI 时，以下命令显示版本 1 上的 pod 数以及版本 2 上的数量。在 Web 控制台中，pod 逐渐添加到 v2 中并从 v1 中移除：
++
+[source,terminal]
+----
+$ oc describe dc deployment-example
+----
+
+在部署过程中，新复制控制器以递增方式扩展。新 pod 标记为 ready（通过就绪度检查）后，部署过程将继续。
+
+如果 pod 尚未就绪，该过程会中止，部署回滚到之前的版本。

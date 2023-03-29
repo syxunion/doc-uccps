@@ -1,0 +1,306 @@
+// Module included in the following assemblies:
+//
+// installing/installing_alibaba/installing-alibaba-network-customizations.adoc
+// * installing/installing_aws/installing_aws-customizations.adoc
+// * installing/installing_aws/installing_aws-network-customizations.adoc
+// * installing/installing_aws/installing_aws-private.adoc
+// * installing/installing_aws/installing_aws-vpc.adoc
+// * installing/installing_aws/installing_aws-china.adoc
+// * installing/installing_aws/installing-aws-secret-region.adoc
+// * installing/installing_aws/installing-aws-user-infra.adoc
+// * installing/installing_aws/installing-aws-government-region.adoc
+// * installing/installing_aws/installing-restricted-networks-aws-installer-provisioned.adoc
+// * installing/installing_aws/installing-restricted-networks-aws.adoc
+// * installing/installing_azure/installing-azure-customizations.adoc
+// * installing/installing_azure/installing-azure-network-customizations.adoc
+// * installing/installing_azure/installing-azure-government-region.adoc
+// * installing/installing_azure/installing-azure-private.adoc
+// * installing/installing_azure/installing-azure-vnet.adoc
+// * installing/installing_azure/installing-azure-user-infra.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-user-infra.adoc
+// * installing/installing_gcp/installing-gcp-customizations.adoc
+// * installing/installing_gcp/installing-gcp-network-customizations.adoc
+// * installing/installing_gcp/installing-gcp-private.adoc
+// * installing/installing_gcp/installing-gcp-vpc.adoc
+// * installing/installing_gcp/installing-gcp-user-infra.adoc
+// * installing/installing_gcp/installing-gcp-user-infra-vpc.adoc
+// * installing/installing_gcp/installing-restricted-networks-gcp.adoc
+// * installing/installing_gcp/installing-restricted-networks-gcp-installer-provisioned.adoc
+// * installing/installing_ibm_cloud_public/installing-ibm-cloud-customizations.adoc
+// * installing/installing_ibm_cloud_public/installing-ibm-cloud-network-customizations.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_openstack/installing-openstack-installer-custom.adoc
+// * installing/installing_openstack/installing-openstack-installer-kuryr.adoc
+// * installing/installing_openstack/installing-openstack-installer-sr-iov.adoc
+// * installing/installing_openstack/installing-openstack-installer-restricted.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-customizations.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-restricted-networks-installer-provisioned-vsphere.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z.adoc
+// * installing/installing_ibm_z/installing-ibm-z-kvm.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z-kvm.adoc
+// * installing/installing_ibm_power/installing-ibm-power.adoc
+// * installing/installing_ibm_power/installing-restricted-networks-ibm-power.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * networking/configuring-a-custom-pki.adoc
+// * installing/installing-rhv-restricted-network.adoc
+
+ifeval::["{context}" == "installing-aws-china-region"]
+:aws:
+:aws-china:
+endif::[]
+ifeval::["{context}" == "installing-aws-customizations"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-network-customizations"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-private"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-vpc"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-user-infra"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-government-region"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws-installer-provisioned"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-bare-metal"]
+:bare-metal:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-bare-metal"]
+:bare-metal:
+endif::[]
+ifeval::["{context}" == "installing-vsphere"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vsphere"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-network-customizations"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-installer-provisioned-customizations"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-installer-provisioned-network-customizations"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-installer-provisioned-vsphere"]
+:vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vmc-user-infra"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vmc-user-infra"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-network-customizations-user-infra"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-customizations"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-network-customizations"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vmc"]
+:vmc:
+endif::[]
+ifeval::["{context}" == "installing-openstack-installer-kuryr"]
+:kuryr:
+endif::[]
+ifeval::["{context}" == "installing-openstack-installer-restricted"]
+:kuryr:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="installation-configure-proxy_{context}"]
+= 在安装过程中配置集群范围的代理
+
+生产环境可能会拒绝直接访问互联网，而是提供 HTTP 或 HTTPS 代理。您可以通过在 `install-config.yaml` 文件中配置代理设置，将新的 统信容器云管理平台 集群配置为使用代理。
+
+ifdef::bare-metal[]
+[NOTE]
+====
+For bare metal installations, if you do not assign node IP addresses from the
+range that is specified in the `networking.machineNetwork[].cidr` field in the
+`install-config.yaml` file, you must include them in the `proxy.noProxy` field.
+====
+endif::bare-metal[]
+
+ifdef::kuryr[]
+[NOTE]
+====
+Kuryr installations default to HTTP proxies.
+====
+endif::kuryr[]
+
+.先决条件
+
+ifdef::kuryr[]
+
+* For Kuryr installations on restricted networks that use the `Proxy` object, the proxy must be able to reply to the router that the cluster uses. To add a static route for the proxy configuration, from a command line as the root user, enter:
++
+[source,terminal]
+----
+$ ip route add <cluster_network_cidr> via <installer_subnet_gateway>
+----
+
+* The restricted subnet must have a gateway that is defined and available to be linked to the `Router` resource that Kuryr creates.
+
+endif::kuryr[]
+* 您有一个现有的 install-config.yaml 文件。
+// TODO: xref (../../installing/install_config/configuring-firewall.adoc#configuring-firewall)
+* 您检查了集群需要访问的站点，并确定它们中的任何站点是否需要绕过代理。默认情况下，所有集群出口流量都经过代理，包括对托管云供应商 API 的调用。如果需要，您将在 `Proxy` 对象的 `spec.noProxy` 字段中添加站点来绕过代理。
++
+[注意]
+====
+`Proxy` 对象 `status.noProxy` 字段使用安装配置中的 `networking.machineNetwork[].cidr`、`networking.clusterNetwork[].cidr` 和 `networking.serviceNetwork[]` 字段的值填充。
+
+对于在 Amazon Web Services(AWS)、Google Cloud Platform(GCP)、Microsoft Azure 和 Uniontech UStack Platform上安装，`Proxy` 对象 `status.noProxy` 字段也会使用实例元数据端点填充(`169.254.169.254`)。
+====
+
+ifdef::aws[]
+* You have added the
+ifdef::aws-china[`ec2.<region>.amazonaws.com.cn`, ]
+ifndef::aws-china[`ec2.<region>.amazonaws.com`, ]
+`elasticloadbalancing.<region>.amazonaws.com`, and `s3.<region>.amazonaws.com` endpoints to your VPC endpoint. These endpoints are required to complete requests from the nodes to the AWS EC2 API. Because the proxy works on the container level, not the node level, you must route these requests to the AWS EC2 API through the AWS private network. Adding the public IP address of the EC2 API to your allowlist in your proxy server is not sufficient.
+endif::aws[]
+// TODO: xref installation-aws-user-infra-requirements.adoc#installation-aws-user-infra-other-infrastructure_{context} as a relative link
+
+.流程
+
+. 编辑 `install-config.yaml` 文件并添加代理设置。例如：
++
+[source,yaml]
+----
+apiVersion: v1
+baseDomain: my.domain.com
+proxy:
+  httpProxy: http://<username>:<pswd>@<ip>:<port> <1>
+  httpsProxy: https://<username>:<pswd>@<ip>:<port> <2>
+  noProxy: example.com <3>
+additionalTrustBundle: | <4>
+    -----BEGIN CERTIFICATE-----
+    <MY_TRUSTED_CA_CERT>
+    -----END CERTIFICATE-----
+...
+----
+<1> A用于创建集群外 HTTP 连接的代理 URL。URL 方案必须是 http。
+<2> 用于创建集群外 HTTPS 连接的代理 URL。
+<3> 要从代理中排除的目标域名、IP 地址或其他网络 CIDR 的逗号分隔列表。在域前面加 . 来仅匹配子域。例如： .y.com 匹配 x.y.com，但不匹配 y.com。使用 * 绕过所有目的地的代理。
+ifdef::vsphere,vmc[]
+You must include vCenter's IP address and the IP range that you use for its machines.
+endif::vsphere,vmc[]
+<4> 如果提供，安装程序会在 openshift-config 命名空间中生成名为 user-ca-bundle 的配置映射，其包含代理 HTTPS 连接所需的一个或多个额外 CA 证书。然后，Cluster Network Operator 会创建 trusted-ca-bundle 配置映射，将这些内容与 UnionTech OS Cloud  20（USwift）信任捆绑包合并， Proxy 对象的 trustedCA 字段中也会引用此配置映射。additionalTrustBundle 字段是必需的，除非代理的身份证书由来自 USwift 信任捆绑包的颁发机构签名。
++
+[注意]
+====
+安装程序不支持代理的 `readinessEndpoints` 字段。
+====
+
+. 保存该文件并在安装 统信容器云管理平台 时引用。
+
+安装程序会创建一个名为 `cluster` 的集群范围代理，该代理 使用 提供的 `install-config.yaml` 文件中的代理设置。如果没有提供代理设置，仍然会创建一个 `cluster` `Proxy` 对象，但它会有一个空 `spec`。
+
+[注意]
+====
+只支持名为 `cluster` 的 `Proxy` 对象，且无法创建额外的代理。
+====
+
+ifeval::["{context}" == "installing-aws-china-region"]
+:!aws:
+:!aws-china:
+endif::[]
+ifeval::["{context}" == "installing-aws-customizations"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-network-customizations"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-private"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-vpc"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-user-infra"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-aws-government-region"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws-installer-provisioned"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-bare-metal"]
+:!bare-metal:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-bare-metal"]
+:!bare-metal:
+endif::[]
+ifeval::["{context}" == "installing-vsphere"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vsphere"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-network-customizations"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-installer-provisioned-customizations"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vsphere-installer-provisioned-network-customizations"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-installer-provisioned-vsphere"]
+:!vsphere:
+endif::[]
+ifeval::["{context}" == "installing-vmc-user-infra"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vmc-user-infra"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-network-customizations-user-infra"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-customizations"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-vmc-network-customizations"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vmc"]
+:!vmc:
+endif::[]
+ifeval::["{context}" == "installing-openstack-installer-kuryr"]
+:!kuryr:
+endif::[]
+ifeval::["{context}" == "installing-openstack-installer-restricted"]
+:!kuryr:
+endif::[]

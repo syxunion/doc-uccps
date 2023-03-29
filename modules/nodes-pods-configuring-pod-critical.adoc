@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-configuring.adoc
+// * nodes/nodes-cluster-pods-configuring
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configuring-critical_{context}"]
+= 使用关键 pod 防止删除 pod
+
+有不少核心组件对于集群完全正常工作而言至关重要，但它们在常规集群节点而非主节点上运行。如果一个关键附加组件被驱除，集群可能会停止正常工作。
+
+标记为关键 (critical) 的 Pod 不允许被驱除。
+
+.流程
+
+使 pod 成为关键 pod：
+
+. 创建  `Pod` spec 或编辑现有的 pod，使其包含 `system-cluster-critical`  优先级类：
++
+[source,yaml]
+----
+spec:
+  template:
+    metadata:
+      name: critical-pod
+    priorityClassName: system-cluster-critical <1>
+----
+<1> 绝不可从节点驱除的 pod 的默认优先级类。
++
+此外，对于对集群而言很重要但可在必要时移除的pod，可以指定 `system-node-critical` 。
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----

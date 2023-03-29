@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/limit-ranges.adoc
+
+[id="nodes-cluster-limit-viewing_{context}"]
+= 查看限制
+
+您可以通过在 web 控制台中导航到项目的 *Quota* 页面来查看项目中定义的任何限制。
+
+您还可以使用 CLI 查看限制范围详情：
+
+. 获取项目中定义的 `LimitRange` 对象列表。例如，对于名为  *demoproject* 的项目：
++
+----
+$ oc get limits -n demoproject
+----
++
+----
+NAME              CREATED AT
+resource-limits   2020-07-15T17:14:23Z
+----
+
+. 描述您感兴趣的 `LimitRange` 对象，如 `resource-limits` 限制范围：
++
+----
+$ oc describe limits resource-limits -n demoproject
+----
++
+----
+Name:                           resource-limits
+Namespace:                      demoproject
+Type                            Resource                Min     Max     Default Request Default Limit   Max Limit/Request Ratio
+----                            --------                ---     ---     --------------- -------------   -----------------------
+Pod                             cpu                     200m    2       -               -               -
+Pod                             memory                  6Mi     1Gi     -               -               -
+Container                       cpu                     100m    2       200m            300m            10
+Container                       memory                  4Mi     1Gi     100Mi           200Mi           -
+openshift.io/Image              storage                 -       1Gi     -               -               -
+openshift.io/ImageStream        openshift.io/image      -       12      -               -               -
+openshift.io/ImageStream        openshift.io/image-tags -       10      -               -               -
+PersistentVolumeClaim           storage                 -       50Gi    -               -               -
+----
+

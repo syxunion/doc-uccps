@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-autoscaling-requests-and-limits-hpa_{context}"]
+= 关于请求和限制
+
+调度程序使用您为 pod 中容器指定的资源请求，来确定要将 pod 放置到哪个节点。kubelet 强制执行您为容器指定的资源限值，以确保容器不允许使用超过指定的限制。kubelet 还保留针对该容器使用的系统资源的请求数量。
+
+.如何使用资源指标？
+
+在 pod 规格中，您必须指定资源请求，如 CPU 和内存。HPA 使用此规范来确定资源利用率，然后扩展目标或缩减。
+
+例如，HPA 对象使用以下指标源：
+
+[source,yaml]
+----
+type: Resource
+resource:
+  name: cpu
+  target:
+    type: Utilization
+    averageUtilization: 60
+----
+
+在本例中，HPA 将 pod 的平均利用率保持在 scale 目标为 60%。使用率是当前资源使用量与 pod 请求的资源之间的比率。

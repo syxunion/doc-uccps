@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+[id="deployments-recreate-strategy_{context}"]
+= Recreate 策略
+
+Recreate（重新创建）策略具有基本的推出部署行为，并支持使用生命周期 hook 将代码注入到部署过程中。
+
+.recreate 策略定义示例
+[source,yaml]
+----
+strategy:
+  type: Recreate
+  recreateParams: <1>
+    pre: {} <2>
+    mid: {}
+    post: {}
+----
+
+<1> `recreateParams` 可选。
+<2> `pre`, `mid`, 和 `post` 是生命周期 hook。
+
+recreate 策略：
+
+. 执行任何 `pre` 生命周期 hook。
+. 将上一部署缩减到零。
+. 执行任何 `mid` 生命周期 hook。
+. 向上扩展新的部署。
+. 执行任何 `post` 生命周期 hook。
+
+[重要]
+====
+在扩展过程中，如果部署副本数大于一，则先对部署的第一副本进行就绪状态验证，然后再全面扩展部署。如果第一副本验证失败，部署将被视为失败。
+====
+
+*使用重新创建的部署:*
+
+- 需要在新代码启动前进行迁移或进行其他数据转换时。
+- 不支持同时运行应用程序代码的新旧版本时。
+- 当使用 RWO 卷时，不支持在多个副本间共享该卷。
+
+重新创建部署会导致停机，这是因为在短时间内没有运行应用程序实例。然而，旧代码和新代码不会被同时运行。

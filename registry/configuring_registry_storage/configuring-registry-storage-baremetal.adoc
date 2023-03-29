@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="configuring-registry-storage-baremetal"]
+= 为裸机配置 registry
+include::_attributes/common-attributes.adoc[]
+:context: configuring-registry-storage-baremetal
+
+toc::[]
+
+include::modules/registry-removed.adoc[leveloffset=+1]
+
+include::modules/registry-change-management-state.adoc[leveloffset=+1]
+
+include::modules/installation-registry-storage-config.adoc[leveloffset=+1]
+
+include::modules/registry-configuring-storage-baremetal.adoc[leveloffset=+1]
+
+include::modules/installation-registry-storage-non-production.adoc[leveloffset=+1]
+
+include::modules/installation-registry-storage-block-recreate-rollout-bare-metal.adoc[leveloffset=+1]

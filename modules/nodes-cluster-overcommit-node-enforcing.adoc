@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-overcommit-node-enforcing_{context}"]
+
+= 使用 CPU CFS 配额禁用或强制实施 CPU 限制
+
+默认情况下，节点使用 Linux 内核中的完全公平调度程序 (CFS) 配额支持来强制实施指定的 CPU 限制。
+
+如果禁用了 CPU 限制强制实施，了解其对节点的影响非常重要：
+
+* 如果容器有 CPU 请求，则请求仍由 Linux 内核中的 CFS 共享来实施。
+* 如果容器没有 CPU 请求，但没有 CPU 限制，则 CPU 请求默认为指定的 CPU 限值，并由 Linux 内核中的 CFS 共享强制。
+* 如果容器同时具有 CPU 请求和限制，则 CPU 请求由 Linux 内核中的 CFS 共享强制实施，且 CPU 限制不会对节点产生影响。
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` CRD 关联的标签。执行以下步骤之一：
++
+查看机器配置池：
+[source,terminal]
+----
+$ oc describe machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc  describe machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: "2022-11-16T15:34:25Z"
+  generation: 1
+  labels:
+    custom-kubelet: small-pods : "" <1>
+----
+<1> 如果添加了标签，它会出现在 labels 下。
++
+如果标签不存在，则添加一个键/值对：
+[source,terminal]
+----
+$ oc label machineconfigpool worker custom-kubelet=small-pods
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加标签：
+
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  labels:
+    custom-kubelet: small-pods
+  name: worker
+----
+====
+
+.流程
+
+. 为配置更改创建自定义资源 (CR)。
++
+.禁用 CPU 限制的示例配置
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: disable-cpu-units <1>
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/worker: "" <2>
+  kubeletConfig:
+    cpuCfsQuota: <3>
+      - "false"
+----
+<1> 为 CR 分配一个名称。
+<2> 指定要应用配置更改的标签。
+<3> 将 `cpuCfsQuota` 参数设置为 `false`.
+
+. Run the following command to create the CR:
++
+[source,terminal]
+----
+$ oc create -f <file_name>.yaml
+----

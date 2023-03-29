@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * storage/optimizing-storage.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="available-persistent-storage-options_{context}"]
+= 可用的持久性存储选项
+
+了解持久性存储选项，以便可以优化 统信容器云管理平台 环境。
+
+.Available storage options
+[cols="1,4,3",options="header"]
+|===
+| 存储类型 | 描述 | 示例
+
+|Block
+a|* 在操作系统 (OS) 中作为块设备
+* 适用于需要完全控制存储，并绕过文件系统在低层直接操作文件的应用程序
+* 也称为存储区域网络 (SAN)
+* 不可共享，这意味着，每次只有一个客户端可以挂载这种类型的端点
+| AWS EBS 和 VMware vSphere 支持在 统信容器云管理平台 中的原生动态持久性卷 (PV)置备 。
+// Ceph RBD, OpenStack Cinder, Azure Disk, GCE persistent disk
+
+|File
+a| * 在 OS 中作为要挂载的文件系统导出
+* 也称为网络附加存储（Network Attached Storage，NAS）
+* 取决于不同的协议、实现、厂商及范围，其并行性、延迟、文件锁定机制和其它功能可能会有很大不同。
+|UOS20 NFS、NetApp NFS ^[1]^ 和供应商 NFS
+// Azure File, AWS EFS
+
+| 对象
+a| * 通过 REST API 端点访问
+* 可配置用于 统信容器云管理平台 Registry
+* 应用程序必须在应用程序和（/或）容器中构建其驱动程序。
+| AWS S3
+// Aliyun OSS, Ceph Object Storage (RADOS Gateway)
+// Google Cloud Storage, Azure Blob Storage, OpenStack Swift
+|===
+[.small]
+--
+1. NetApp NFS 在使用 Trident 插件时支持动态 PV 置备。
+--
+
+[重要]
+====
+目前，统信容器云管理平台 1.2 不支持 CNS。
+====

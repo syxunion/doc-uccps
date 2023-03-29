@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="rhel-removing-rhcos_{context}"]
+= 可选：从集群中删除 Uswift 计算机器
+
+将 UnionTech OS Server 20(UOS20)计算机器添加到集群后，您可以选择性地删除 UnionTech OS Cloud 20(USwift)计算机器来释放资源。
+
+.先决条件
+
+* 您已将 RHEL 计算机器添加到集群中。
+
+.流程
+
+. 查看机器列表并记录 Uswift 计算机器的节点名称：
++
+[source,terminal]
+----
+$ oc get nodes -o wide
+----
+
+. 对于每一台 Uswift 计算机器，删除其节点：
+.. 通过运行 `oc adm cordon` 命令，将节点标记为不可调度：
++
+[source,terminal]
+----
+$ oc adm cordon <node_name> <1>
+----
+<1> 指定其中一台 Uswift 计算机器的节点名称。
+
+.. 清空节点中的所有 Pod：
++
+[source,terminal]
+----
+$ oc adm drain <node_name> --force --delete-emptydir-data --ignore-daemonsets <1>
+----
+<1> 指定您隔离的 Uswift 计算机器的节点名称。
+
+.. 删除节点：
++
+[source,terminal]
+----
+$ oc delete nodes <node_name> <1>
+----
+<1> 指定您清空的 Uswift 计算机器的节点名称。
+
+. 查看计算机器的列表，以确保仅保留 RHEL 节点：
++
+[source,terminal]
+----
+$ oc get nodes -o wide
+----
+
+. 从集群的计算机器的负载均衡器中删除 Uswift 机器。您可以删除虚拟机或重新制作 Uswift 计算机器物理硬件的镜像。

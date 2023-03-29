@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-csi-cloning"]
+= CSI 卷克隆
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-csi-cloning
+
+toc::[]
+
+卷克隆会复制现有的持久性卷，以帮助防止统信容器云管理平台中的数据丢失。此功能仅可用于受支持的 Container Storage Interface (CSI) 驱动程序。在置备 CSI 卷克隆前，您应该先熟悉持久性卷。
+
+include::modules/persistent-storage-csi-cloning-overview.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-cloning-provisioning.adoc[leveloffset=+1]

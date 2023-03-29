@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/nodes-secondary-scheduler-uninstalling.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-secondary-scheduler-remove-resources-console_{context}"]
+= 删除二级调度程序 Operator 资源
+
+另外，在为 UnionTech Uccps 卸载 Secondary Scheduler Operator 后，您可以从集群中移除其相关资源。
+
+.先决条件
+
+* 您可以使用 `cluster-admin` 权限访问集群。
+* 访问 统信容器云管理平台 web 控制台。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+
+. 删除由二级调度程序 Operator 安装的 CRD：
+.. 导航到 *Administration* -> *CustomResourceDefinitions*.
+.. 在 *Name* 字段中输入 `SecondaryScheduler` 来过滤 CRDs。
+.. 点击 *SecondaryScheduler* CRD {kebab} 旁边的 Options 菜单并选择 *Delete Custom Resource Definition*:
+
+. 删除 `openshift-secondary-scheduler-operator` 命名空间。
+.. 导航至 *Administration* -> *Namespaces*。
+.. 点击 *openshift-secondary-scheduler-operator* {kebab} 旁边的 Options 菜单，然后选择 *Delete Namespace*。
+.. 在确认对话框中，在字段中输入  `openshift-secondary-scheduler-operator` 然后单击 *Delete*。

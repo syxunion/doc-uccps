@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/what-deployments-are.adoc
+
+[id="deployments-kube-deployments_{context}"]
+= 部署
+
+Kubernetes 在 统信容器云管理平台 中提供了一流的原生 API 对象类型，名为 `Deployment`。`Deployment` 对象充当针对一个 统信容器云管理平台 `DeploymentConfig` 的后代。
+
+与 部署配置一样， `Deployment` 对象将应用程序特定组件的所需状态描述为 pod 模板。`Deployment` 创建副本集，用于编配 pod 生命周期。
+
+例如，以下部署定义会创建一个副本集来启动一个 `hello-utccp` pod:
+
+.Deployment 定义
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-openshift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-openshift
+  template:
+    metadata:
+      labels:
+        app: hello-openshift
+    spec:
+      containers:
+      - name: hello-openshift
+        image: openshift/hello-openshift:latest
+        ports:
+        - containerPort: 80
+----

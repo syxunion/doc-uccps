@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-overcommit-configure-nodes_{context}"]
+= 了解节点过量使用
+
+在过量使用的环境中，务必要正确配置节点，以提供最佳的系统行为。
+
+当节点启动时，它会确保为内存管理正确设置内核可微调标识。除非物理内存不足，否则内核应该永不会在内存分配时失败。
+
+为确保这一行为，统信容器云管理平台 通过将  `vm.overcommit_memory` 参数设置为 1 来覆盖默认操作系统设置，从而将内核配置为始终过量使用内存。
+
+统信容器云管理平台 还通过将 `vm.panic_on_oom` 参数设置为  `0` 将内核配置为不会在内存不足时崩溃。设置为 0 可告知内核在内存不足 (OOM) 情况下调用 oom_killer，以根据优先级终止进程
+
+您可以通过对节点运行以下命令来查看当前的设置：
+
+[source,terminal]
+----
+$ sysctl -a |grep commit
+----
+
+.Example output
+[source,terminal]
+----
+vm.overcommit_memory = 1
+----
+
+[source,terminal]
+----
+$ sysctl -a |grep panic
+----
+
+.输出示例
+[source,terminal]
+----
+vm.panic_on_oom = 0
+----
+
+[注意]
+====
+节点上应该已设置了上述标记，不需要进一步操作。
+====
+
+您还可以为每个节点执行以下配置：
+
+* 使用 CPU CFS 配额禁用或强制实施 CPU 限制
+
+* 为系统进程保留资源
+
+* 为不同的服务质量等级保留内存

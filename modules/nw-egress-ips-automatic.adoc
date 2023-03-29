@@ -1,0 +1,81 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/assigning-egress-ips.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-ips-automatic_{context}"]
+= 为一个命名空间启用自动分配出口 IP 地址
+
+在 统信容器云管理平台 中，可以为一个或多个节点上的特定命名空间启用自动分配出口 IP 地址。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccp CLI (`oc`).
+
+.流程
+
+. 使用以下 JSON，用出口 IP 地址更新 `NetNamespace` 资源：
++
+[source,terminal]
+----
+ $ oc patch netnamespace <project_name> --type=merge -p \
+  '{
+    "egressIPs": [
+      "<ip_address>"
+    ]
+  }'
+----
++
+--
+其中：
+
+`<project_name>`:: 指定项目的名称。
+`<ip_address>`:: 为 `egressIPs` 数组指定一个或多个出口 IP 地址。
+--
++
+例如，将 `project1` 分配给 IP 地址 `192.168.1.100`，将 `project2` 分配给 IP 地址 `192.168.1.101`：
++
+[source,terminal]
+----
+$ oc patch netnamespace project1 --type=merge -p \
+  '{"egressIPs": ["192.168.1.100"]}'
+$ oc patch netnamespace project2 --type=merge -p \
+  '{"egressIPs": ["192.168.1.101"]}'
+----
++
+[注意]
+====
+由于 OpenShift SDN 管理 `NetNamespace` 对象，因此只能通过修改现有的 `NetNamespace` 对象来进行更改。不要创建新的 `NetNamespace` 对象。
+====
+
+. 使用以下 JSON 设置每一主机的 `egressCIDRs` 参数，以指明哪些节点可以托管出口 IP 地址：
++
+[source,terminal]
+----
+$ oc patch hostsubnet <node_name> --type=merge -p \
+  '{
+    "egressCIDRs": [
+      "<ip_address_range>", "<ip_address_range>"
+    ]
+  }'
+----
++
+--
+其中：
+
+`<node_name>`:: 指定节点名称。
+`<ip_address_range>`:: 指定 CIDR 格式的 IP 地址范围。您可以为 `egressCIDRs` 阵列指定多个地址范围。
+--
++
+指定 CIDR 格式的 IP 地址范围。您可以为 egressCIDRs 阵列指定多个地址范围。
++
+[source,terminal]
+----
+$ oc patch hostsubnet node1 --type=merge -p \
+  '{"egressCIDRs": ["192.168.1.0/24"]}'
+$ oc patch hostsubnet node2 --type=merge -p \
+  '{"egressCIDRs": ["192.168.1.0/24"]}'
+----
++
+统信容器云管理平台 会自动以均衡的方式将特定的出口 IP 地址分配给可用的节点。在本例中，它会将出口 IP 地址 192.168.1.100 分配给 `node1`，并将出口 IP 地址 192.168.1.101 分配给 `node2`，或反之。

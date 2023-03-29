@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * machine_management/applying-autoscaling.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+// * nodes/nodes-about-autoscaling-nodes.adoc
+
+:_content-type: CONCEPT
+[id="cluster-autoscaler-about_{context}"]
+= 关于集群自动扩展
+
+集群自动扩展会调整 统信容器云管理平台 集群的大小，以满足其当前的部署需求。它使用 Kubernetes 样式的声明性参数来提供基础架构管理，而且这种管理不依赖于特定云提供商的对象。集群自动控制会在集群范围内有效，不与特定的命名空间相关联。
+
+当由于资源不足而无法在任何当前 worker 节点上调度 pod 时，或者在需要另一个节点来满足部署需求时，集群自动扩展会增加集群的大小。集群自动扩展不会将集群资源增加到超过您指定的限制。
+
+集群自动扩展会计算集群中所有节点上的内存、CPU 和 GPU，即使它不管理 control plane 节点。这些值不是单计算机导向型。它们是整个集群中所有资源的聚合。例如，如果您设置最大内存资源限制，集群自动扩展在计算当前内存用量时包括集群中的所有节点。然后，该计算用于确定集群自动扩展是否具有添加更多 worker 资源的容量。
+
+[重要]
+====
+确保您所创建的 `ClusterAutoscaler` 资源定义中的 `maxNodesTotal` 值足够大，足以满足计算集群中可能的机器总数。此值必须包含 control plane 机器的数量以及可扩展至的机器数量。
+====
+
+每隔 10 秒，集群自动扩展会检查集群中不需要哪些节点，并移除它们。如果满足以下条件，集群自动扩展会考虑要删除的节点：
+
+* 节点使用率低于集群的节点 利用率级别 阈值。节点使用率级别是请求的资源的总和，由分配给节点的资源划分。如果您没有在 `ClusterAutoscaler` 自定义资源中指定值，集群自动扩展会使用默认值 0.5，它对应于 `50%` 的利用率。
+* 集群自动扩展可以将节点上运行的所有 pod 移到其他节点。
+* 集群自动扩展没有缩减禁用注解。
+
+如果节点上存在以下类型的 pod，集群自动扩展不会删除该节点：
+
+* 具有限制性 pod 中断预算（PDB）的 Pod。
+* 默认不在节点上运行的 Kube 系统 Pod。
+* 没有 PDB 或 PDB 限制性太强的 Kube 系统 pod。
+* 不受控制器对象支持的 Pod,如部署、副本集或有状态集。
+* 具有本地存储的 Pod。
+* 因为缺乏资源、节点选择器或关联性不兼容或有匹配的反关联性等原因而无法移至其他位置的 Pod。
+* 具有 "cluster-autoscaler.kubernetes.io/safe-to-evict": "false" 注解的 Pod，除非同时也具有 "cluster-autoscaler.kubernetes.io/safe-to-evict": "true” 注解。
+
+例如，您可以将最大 CPU 限值设置为 64 个内核，并将集群自动扩展配置为每个创建具有 8 个内核的机器。如果您的集群从 30 个内核开始，集群自动扩展可最多添加具有 32 个内核的 4 个节点，共 62 个。
+
+如果配置集群自动扩展，则需要额外的使用限制：
+
+* 不要直接修改位于自动扩展节点组中的节点。同一节点组中的所有节点具有相同的容量和标签，并且运行相同的系统 Pod。
+* 指定适合您的 Pod 的请求。
+* 如果需要防止 Pod 被过快删除，请配置适当的 PDB。
+* 确认您的云提供商配额足够大，能够支持您配置的最大节点池。
+* 不要运行其他节点组自动扩展器，特别是云提供商提供的自动扩展器。
+
+pod 横向自动扩展（HPA）和集群自动扩展以不同的方式修改集群资源。HPA 根据当前的 CPU 负载更改部署或副本集的副本数。如果负载增加，HPA 会创建新的副本，不论集群可用的资源量如何。如果没有足够的资源，集群自动扩展会添加资源，以便 HPA 创建的 pod 可以运行。如果负载减少，HPA 会停止一些副本。如果此操作导致某些节点利用率低下或完全为空，集群自动扩展会删除不必要的节点。
+
+集群自动扩展会考虑 pod 优先级。如果集群没有足够的资源，则“Pod 优先级和抢占”功能可根据优先级调度 Pod，但集群自动扩展会确保集群具有运行所有 Pod 需要的资源。为满足这两个功能，集群自动扩展包含一个优先级截止函数。您可以使用此截止函数来调度“尽力而为”的 Pod，它们不会使集群自动扩展增加资源，而是仅在有可用备用资源时运行。
+
+优先级低于截止值的 Pod 不会导致集群扩展或阻止集群缩减。系统不会添加新节点来运行 Pod，并且可能会删除运行这些 Pod 的节点来释放资源。
+
+////
+Default priority cutoff is 0. It can be changed using `--expendable-pods-priority-cutoff` flag, but we discourage it. cluster autoscaler also doesn't trigger scale-up if an unschedulable Pod is already waiting for a lower priority Pod preemption.
+////

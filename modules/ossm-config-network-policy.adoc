@@ -1,0 +1,16 @@
+////
+This CONCEPT module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+:_content-type: CONCEPT
+[id="ossm-config-network-policy_{context}"]
+
+== Setting the correct network policy
+
+Service Mesh 在 Service Mesh control plane 和成员命名空间中创建网络策略，以允许它们之间的流量。在部署前，请考虑以下条件，以确保之前通过 统信容器云管理平台 路由公开的服务网格中的服务。
+
+* 进入服务网格的流量必须总是经过 ingress-gateway 才能使 Istio 正常工作。
+* 在不在任何服务网格中的独立命名空间中为服务网格部署服务。
+* 需要在服务网格列出的命名空间中部署的非 mesh 服务应该标记其 `maistra.io/expose-route: "true"`，这可以确保统信容器云管理平台的路由到这些服务仍可以正常工作。

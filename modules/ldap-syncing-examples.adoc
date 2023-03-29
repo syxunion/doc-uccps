@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+[id="ldap-syncing-examples_{context}"]
+= ldap-syncing-examples.adoc
+
+本节包含 RFC 2307、Active Directory 和增强 Active Directory 模式的示例。
+
+[注意]
+====
+这些示例假定所有用户都是其各自组的直接成员。具体而言，没有任何组的成员是其他组。如需有关如何同步嵌套组的信息，请参见嵌套成员资格同步示例。
+====
+

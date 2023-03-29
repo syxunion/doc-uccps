@@ -1,0 +1,24 @@
+// Module is included in the following assemblies:
+//
+// * /serverless/monitor/serverless-developer-metrics.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-monitoring-services-examining-metrics-dashboard_{context}"]
+= 在仪表板中检查服务的指标
+
+您可以使用专用的仪表板来按命名空间聚合队列代理指标，以检查指标。
+
+.先决条件
+
+* 已登陆到 统信容器云管理平台 控制台。
+* 安装了统信容器云管理平台无服务器和 Knative Serving。
+
+.流程
+
+. 在 Web 控制台中，进入到 *观察* -> *指标* 界面
+
+. 选择  `Knative User Services (Queue Proxy metrics)` 仪表板。
+
+. 选择与应用程序对应的 *Namespace*, *Configuration*, 和 *Revision* 
+
+. 观察视觉化的指标

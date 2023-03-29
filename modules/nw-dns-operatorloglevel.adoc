@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+// * networking/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-operatorloglevel_{context}"]
+= nw-dns-operatorloglevel.adoc
+
+集群管理员可以配置 Operator 日志级别来更快地跟踪 OpenShift DNS 问题。`operatorLogLevel` 的有效值为 `Normal`、`Debug` 和 `Trace`。Trace 具有更详细的信息。默认 `operatorlogLevel` 为 `Normal`。问题有七个日志记录级别： Trace、debug、info、warning、Error、Fatal 和 Panic。设置了日志级别后，具有该严重性级别或以上级别的所有内容都会记录为日志条目。
+
+* `operatorLogLevel: "Normal"` 设置 `logrus.SetLogLevel("Info")`.
+
+* `operatorLogLevel: "Debug"` 设置 `logrus.SetLogLevel("Debug")`.
+
+* `operatorLogLevel: "Trace"` 设置 `logrus.SetLogLevel("Trace")`.
+
+.流程
+
+* 要将 `operatorLogLevel` 设置为 `Debug`，请输入以下命令：
++
+[source,terminal]
+----
+$ oc patch dnses.operator.openshift.io/default -p '{"spec":{"operatorLogLevel":"Debug"}}' --type=merge
+----
+
+* 要将 `operatorLogLevel` 设置为 `Debug`，请输入以下命令：
++
+[source,terminal]
+----
+$ oc patch dnses.operator.openshift.io/default -p '{"spec":{"operatorLogLevel":"Trace"}}' --type=merge
+----

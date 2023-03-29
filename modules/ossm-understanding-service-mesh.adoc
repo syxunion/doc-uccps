@@ -1,0 +1,29 @@
+////
+Module included in the following assemblies:
+-service_mesh/v1x/ossm-architecture.adoc
+-service_mesh/v2x/ossm-architecture.adoc
+////
+
+:_content-type: CONCEPT
+[id="ossm-understanding-service-mesh_{context}"]
+= Understanding service mesh
+
+_服务网格_ 是一个微服务网络，它用于在一个分布式的微服务架构中构成应用程序，并提供不同微服务间的交互功能。 当{SMProductShortName}的规模和复杂性增大时，了解和管理它就会变得非常困难。
+
+{SMProductName} 基于开源link:https://istio.io/[Istio] 项目，它在不需要修改服务代码的情况下，为现有的分布式应用程序添加了一个透明的层。您可以在服务中添加对 {SMProductName} 的支持，方法是将一个特殊的sidecar 代理服务器部署到用于处理不同微服务之间的所有网络通讯的服务网格中。您可以使用{SMProductShortName} control plane 功能配置和管理using the {SMProductShortName}
+
+{SMProductName} 可让您轻松创建部署的服务网络，该网络提供：
+
+* 发现
+* 负载均衡
+* 服务到服务的验证
+* 故障恢复
+* 指标
+* 监控
+
+{SMProductName} 还提供更复杂的操作功能，其中包括：
+
+* A/B 侧事故
+* Canary 发行版本
+* Access control
+* 端到端的验证

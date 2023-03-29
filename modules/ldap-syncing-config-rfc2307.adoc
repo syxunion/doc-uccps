@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: CONCEPT
+[id="ldap-syncing-config-rfc2307_{context}"]
+= 关于 RFC 2307 配置文件
+
+RFC 2307 模式要求您提供用户和组条目的 LDAP 查询定义，以及在统信容器云管理平台内部记录中代表它们的属性。
+
+为明确起见，您在统信容器云管理平台中创建的组应尽可能将可分辨名称以外的属性用于面向用户或管理员的字段。例如，通过电子邮件标识统信容器云管理平台组的用户，并将该组的名称用作通用名称。以下配置文件创建了这些关系：
+
+[注意]
+====
+如果使用用户定义的名称映射，您的配置文件会有所不同。
+====
+
+.使用 RFC 2307 模式的 LDAP 同步配置：`rfc2307_config.yaml`
+[source,yaml]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://LDAP_SERVICE_IP:389 <1>
+insecure: false <2>
+rfc2307:
+    groupsQuery:
+        baseDN: "ou=groups,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+    groupUIDAttribute: dn <3>
+    groupNameAttributes: [ cn ] <4>
+    groupMembershipAttributes: [ member ] <5>
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+    userUIDAttribute: dn <6>
+    userNameAttributes: [ mail ] <7>
+    tolerateMemberNotFoundErrors: false
+    tolerateMemberOutOfScopeErrors: false
+----
+<1> 存储该组记录的 LDAP 服务器的 IP 地址和主机。
+<2> 为 false 时，安全 LDAP ldaps:// URL 使用 TLS 进行连接，并且不安全 LDAP ldap:// URL 会被升级到 TLS。为 true 时，不会对服务器进行 TLS 连接，您不能使用 ldaps:// URL。
+<3> 唯一标识 LDAP 服务器上组的属性。将 DN 用于 groupUIDAttribute 时，您无法指定 groupsQuery 过滤器。若要进行精细过滤，请使用白名单/黑名单方法。
+<4> 要用作组名称的属性。
+<5> 存储成员资格信息的组属性。
+<6> 唯一标识 LDAP 服务器上用户的属性。将 DN 用于 userUIDAttribute 时，您无法指定 usersQuery 过滤器。若要进行精细过滤，请使用白名单/黑名单方法。
+<7> 统信容器云管理平台 组记录中用作用户名称的属性。                                                                                         

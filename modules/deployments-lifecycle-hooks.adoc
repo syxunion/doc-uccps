@@ -1,0 +1,102 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-lifecycle-hooks_{context}"]
+= 生命周期 hook
+
+滚动和重新创建策略支持 生命周期 hook 或部署 hook，它允许在策略的预定义点将行为注入到部署过程中：
+
+.`pre` 生命周期 hook 示例
+[source,yaml]
+----
+pre:
+  failurePolicy: Abort
+  execNewPod: {} <1>
+----
+<1> `execNewPod` 是基于 pod 的生命周期 hook。
+
+每个 hook 都有一个 失败策略，定义在遇到 hook 失败时策略应执行的操作：
+
+[cols="2,8"]
+|===
+
+.^|`Abort`
+|如果 hook 失败，部署过程将被视为失败。
+
+.^|`Retry`
+|应重试 hook 执行过程，直到成功为止。
+
+.^|`Ignore`
+|所有 hook 失败都应忽略，部署应继续进行。
+|===
+
+Hook 具有特定类型的字段，用于描述如何执行 Hook。目前，基于 pod 的 hook 是唯一受支持的 hook 类型，通过 `execNewPod` 字段指定。
+
+[discrete]
+==== 基于 Pod 的生命周期 hook
+
+基于 Pod 的生命周期 hook 在来自 `部署配置` 模板的新 pod 中执行 hook 代码。
+
+以下简化的部署示例使用了滚动策略。为简明起见，省略了触发器和其他一些次要的细节：
+
+[source,yaml]
+----
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: frontend
+spec:
+  template:
+    metadata:
+      labels:
+        name: frontend
+    spec:
+      containers:
+        - name: helloworld
+          image: openshift/origin-ruby-sample
+  replicas: 5
+  selector:
+    name: frontend
+  strategy:
+    type: Rolling
+    rollingParams:
+      pre:
+        failurePolicy: Abort
+        execNewPod:
+          containerName: helloworld <1>
+          command: [ "/usr/bin/command", "arg1", "arg2" ] <2>
+          env: <3>
+            - name: CUSTOM_VAR1
+              value: custom_value1
+          volumes:
+            - data <4>
+----
+<1> `helloworld` 名称指代 `spec.template.spec.containers[0].name`。
+<2> 此 `command` 覆盖 `openshift/origin-ruby-sample` 镜像中定义的任何 `ENTRYPOINT`。
+<3> `env` 是 hook 容器的一组可选环境变量。
+<4> `volumes` 是 hook 容器的一组可选的卷引用。
+
+在本例中，将使用 `helloworld` 容器中的 `openshift/origin-ruby-sample` 镜像在新 pod 中执行 `pre` hook。hook pod 具有以下属性：
+
+* hook 命令是 `/usr/bin/command arg1 arg2`。
+* hook 容器包含 `CUSTOM_VAR1=custom_value1` 环境变量。
+* hook 失败策略是 `Abort`；即 hook 失败时部署过程也会失败。
+* hook pod 从 `部署配置` pod 继承 `data` 卷。
+
+[id="deployments-setting-lifecycle-hooks_{context}"]
+== 设置生命周期 hook
+
+您可以使用 CLI 为部署设置生命周期 hook 或部署 hook。
+
+.流程
+
+. 使用 `oc set deployment-hook` 命令设定您想要的 hook 类型：`--pre`、`--mid` 或 `--pos`t。例如，设置部署前 hook：
++
+[source,terminal]
+----
+$ oc set deployment-hook dc/frontend \
+    --pre -c helloworld -e CUSTOM_VAR1=custom_value1 \
+    --volumes data --failure-policy=abort -- /usr/bin/command arg1 arg2
+----

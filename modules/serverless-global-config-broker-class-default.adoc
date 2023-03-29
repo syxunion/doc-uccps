@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+//  * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-global-config-broker-class-default_{context}"]
+= 配置 default 代理类
+
+您可以使用 `config-br-defaults` 配置映射来指定 Knative Eventing 的 default 代理类设置。您可以为整个集群或一个或多个命名空间指定 default 代理类。目前，支持 `MTChannelBasedBroker` 和`Kafka` 代理类型。
+
+.先决条件
+
+* 在 {product-title} 上具有管理员权限。
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 如果要使用 Kafka 代理作为默认代理实现，还必须在集群中安装 `KnativeKafka` CR。
+
+.流程
+
+* 修改 `KnativeEventing` 自定义资源，以添加 `config-br-defaults` 配置映射的配置详情：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  defaultBrokerClass: Kafka <1>
+  config: <2>
+    config-br-defaults: <3>
+      default-br-config: |
+        clusterDefault: <4>
+          brokerClass: Kafka
+          apiVersion: v1
+          kind: ConfigMap
+          name: kafka-broker-config <5>
+          namespace: knative-eventing <6>
+        namespaceDefaults: <7>
+          my-namespace:
+            brokerClass: MTChannelBasedBroker
+            apiVersion: v1
+            kind: ConfigMap
+            name: config-br-default-channel <8>
+            namespace: knative-eventing <9>
+...
+----
+<1> Knative Eventing 的 default 代理类。
+<2> `spec.config`中，您可以指定您要为修改的配置添加的配置映射。
+<3> `config-br-defaults`  配置映射指定任何没有指定 `spec.config` 设置或代理类的代理的默认设置。
+<4> 集群范围的 default 代理类配置。在本例中，集群的 default 代理类实现是 `Kafka`.
+<5> `kafka-broker-config` 配置映射指定 Kafka 代理的默认设置。请参阅 "Additional resources" 部分的"配置 Kafka 代理设置"。
+<6> 存在 `kafka-broker-config`  配置映射的命名空间。
+<7> 命名空间范围的 default 代理类配置。在本例中， `my-namespace` 命名空间的 default 代理类实现是 `MTChannelBasedBroker`。您可以为多个命名空间指定 default 代理类实现。
+<8> `config-br-default-channel` 配置映射指定代理的默认后备频道。请参阅"Additional resources"部分的"配置默认代理支持频道"部分。
+<9> `config-br-default-channel` 配置映射所在的命名空间。
++
+[重要]
+====
+配置特定于命名空间的默认设置会覆盖任何集群范围的设置。
+====

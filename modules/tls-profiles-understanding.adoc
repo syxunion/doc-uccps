@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * security/tls-security-profiles.adoc
+
+:_content-type: CONCEPT
+[id="tls-profiles-understanding_{context}"]
+= 了解 TLS 安全配置集
+
+您可以使用 TLS（Transport Layer Security）安全配置集来定义各种 统信容器云管理平台 组件需要哪些 TLS 密码。统信容器云管理平台 TLS 安全配置集基于 Mozilla 推荐的配置。
+
+您可以为每个组件指定以下 TLS 安全配置集之一：
+
+.TLS 安全配置集
+[cols="1,2a",options="header"]
+|===
+|Profile
+|描述
+
+|`Old`
+|此配置集用于旧的客户端或库。该配置集基于旧的向后兼容性建议配置。
+
+Old 配置集要求最低 TLS 版本 1.0。
+
+[注意]
+====
+对于 `Ingress Controller`，最小 TLS 版本从 1.0 转换为 1.1。
+====
+
+|`Intermediate`
+|这个配置集是大多数客户端的建议配置。它是 Ingress Controller、kubelet 和 control plane 的默认 TLS 安全配置集。该配置集基于 Intermediate 兼容性推荐的配置。
+
+`Intermediate` 配置集需要最小 TLS 版本 1.2。
+
+|`Modern`
+|此配置集主要用于不需要向后兼容的现代客户端。这个配置集基于 Modern 兼容性推荐的配置。
+
+`Modern` 配置集需要最低 TLS 版本 1.3。
+
+|`Custom`
+|此配置集允许您定义要使用的 TLS 版本和密码。
+
+[警告]
+====
+使用 Custom 配置集时要谨慎，因为无效的配置可能会导致问题。
+====
+|===
+
+[注意]
+====
+当使用预定义的配置集类型时，有效的配置集配置可能会在发行版本之间有所改变。例如，使用在版本 X.Y.Z 中部署的 Intermediate 配置集指定了一个规格，升级到版本 X.Y.Z+1 可能会导致应用新的配置集配置，从而导致推出部署。
+====
+
+// TODO: Make sure all this is captured somewhere as necessary
+// [IMPORTANT]
+// ====
+// The HAProxy Ingress Controller image does not support TLS `1.3` and because the `Modern` profile requires TLS `1.3`, it is not supported. The Ingress Operator converts the `Modern` profile to `Intermediate`.
+//
+// The Ingress Operator also converts the TLS `1.0` of an `Old` or `Custom` profile to `1.1`, and TLS `1.3` of a `Custom` profile to `1.2`.
+// ====

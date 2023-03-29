@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+[id="adding-bare-metal-compute-user-infra"]
+= 在裸机中添加计算机器
+include::_attributes/common-attributes.adoc[]
+:context: adding-bare-metal-compute-user-infra
+
+toc::[]
+
+您可以在裸机上的 统信容器云管理平台 集群中添加更多计算机器。
+
+== 先决条件
+
+* 您在裸机上安装了集群。
+* 您有用来创建集群的安装介质和 UnionTech OS Cloud 20(USwift)镜像。如果您没有这些文件，需要按照安装过程的说明获得这些文件。
+* 如果 DHCP 服务器可用于用户置备的基础架构，您可以将额外计算机器的详情添加到您的 DHCP 服务器配置中。这包括每个机器的永久 IP 地址、DNS 服务器信息和主机名。
+* 您已更新了 DNS 配置，使其包含您要添加的每个计算机器的记录名称和 IP 地址。您已验证 DNS 查找和反向 DNS 查找正确解析。
+
+[重要]
+====
+如果您无法访问用于创建集群的 UnionTech OS Cloud 20(USwift)镜像，您可以使用较新版本的 UnionTech OS Cloud 20(USwift)镜像向 统信容器云管理平台 集群添加更多计算机器。具体步骤，请参阅升级到 Uccps 4.6+ 后向 UPI 集群添加新节点会失败。
+====
+
+[id="creating-rhcos-machines-bare-metal"]
+== 创建 UnionTech Enterprise Linux CoreOS (Uswift) 机器
+
+在将更多计算机器添加到在裸机基础架构上安装的集群之前，必须先创建 Uswift 机器供其使用。您可以使用 ISO 镜像或网络 PXE 引导来创建机器。
+
+[注意]
+====
+您必须使用安装集群的相同 ISO 镜像来部署集群中的所有新节点。建议您使用相同的 Ignition 配置文件。在运行工作负载前，节点会在第一次引导时自动升级自己。您可以在升级后或之后添加节点。
+====
+
+include::modules/machine-user-infra-machines-iso.adoc[leveloffset=+2]
+
+include::modules/machine-user-infra-machines-pxe.adoc[leveloffset=+2]
+
+include::modules/installation-approve-csrs.adoc[leveloffset=+1]

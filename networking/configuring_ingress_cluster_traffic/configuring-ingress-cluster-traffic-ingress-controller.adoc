@@ -1,0 +1,39 @@
+:_content-type: ASSEMBLY
+[id="configuring-ingress-cluster-traffic-ingress-controller"]
+= 使用 Ingress Controller 配置集群入口流量
+include::_attributes/common-attributes.adoc[]
+:context: configuring-ingress-cluster-traffic-ingress-controller
+
+toc::[]
+
+
+统信容器云管理平台 提供了从集群外部与集群中运行的服务进行通信的方法。此方法使用了 Ingress Controller。
+
+include::modules/nw-using-ingress-and-routes.adoc[leveloffset=+1]
+
+[注意]
+====
+这部分中的流程需要由集群管理员执行先决条件。
+====
+
+== 先决条件
+
+在开始以下流程前，管理员必须：
+
+* 设置集群联网环境的外部端口，使请求能够到达集群。
+
+* 确定至少有一个用户具有集群管理员角色。要将此角色添加到用户，请运行以下命令：
++
+----
+$ oc adm policy add-cluster-role-to-user cluster-admin username
+----
+
+* 有一个 统信容器云管理平台 集群，其至少有一个 master 和至少一个节点，并且集群外有一个对集群具有网络访问权限的系统。此流程假设外部系统与集群位于同一个子网。不同子网上外部系统所需要的额外联网不在本主题的讨论范围内。
+
+include::modules/nw-creating-project-and-service.adoc[leveloffset=+1]
+
+include::modules/nw-exposing-service.adoc[leveloffset=+1]
+
+include::modules/nw-ingress-sharding-route-labels.adoc[leveloffset=+1]
+
+include::modules/nw-ingress-sharding-namespace-labels.adoc[leveloffset=+1]

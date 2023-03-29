@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-vertical-autoscaler
+[id="nodes-pods-vpa"]
+= 使用垂直 pod 自动扩展自动调整 pod 资源级别
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+统信容器云管理平台 Vertical Pod Autoscaler Operator（VPA）会自动检查 pod 中容器的运行状况和当前的 CPU 和内存资源，并根据它所了解的用量值更新资源限值和请求。VPA 使用单独的自定义资源（CR）来更新与工作负载对象关联的所有 Pod，如 `Deployment`, `DeploymentConfig`, `StatefulSet`, `Job`, `DaemonSet`, `ReplicaSet`, 或 `ReplicationController`
+
+VPA 可帮助您了解 Pod 的最佳 CPU 和内存使用情况，并可以通过 pod 生命周期自动维护 pod 资源。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-pods-vertical-autoscaler-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-vertical-autoscaler-install.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-vertical-autoscaler-using-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-vertical-autoscaler-configuring.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-vertical-autoscaler-uninstall.adoc[leveloffset=+1]

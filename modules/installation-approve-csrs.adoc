@@ -1,0 +1,202 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_aws/installing-aws-user-infra.adoc
+// * installing/installing_azure/installing-azure-user-infra.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-user-infra.adoc
+// * installing/installing_gcp/installing-gcp-user-infra.adoc
+// * installing/installing_gcp/installing-gcp-restricted-networks.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_aws/installing-restricted-networks-aws.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+// * machine_management/user_provisioned/adding-aws-compute-user-infra.adoc
+// * machine_management/user_provisioned/adding-bare-metal-compute-user-infra.adoc
+// * machine_management/user_provisioned/adding-vsphere-compute-user-infra.adoc
+// * post_installation_configuration/node-tasks.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z.adoc
+// * installing/installing_ibm_z/installing-ibm-z-kvm.adoc
+// * installing/installing_ibm_z/installing-ibm-power.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-power.adoc
+
+
+ifeval::["{context}" == "installing-ibm-z"]
+:ibm-z:
+endif::[]
+ifeval::["{context}" == "installing-ibm-z-kvm"]
+:ibm-z-kvm:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="installation-approve-csrs_{context}"]
+= 批准机器的证书签名请求
+
+当您将机器添加到集群时，会为您添加的每台机器生成两个待处理证书签名请求(CSR)。您必须确认这些 CSR 已获得批准，或根据需要自行批准。必须首先批准客户端请求，然后批准服务器请求。
+
+.先决条件
+
+* 您已将机器添加到集群中。
+
+.流程
+
+. 确认集群可以识别这些机器：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      STATUS    ROLES   AGE  VERSION
+master-0  Ready     master  63m  v1.23.0
+master-1  Ready     master  63m  v1.23.0
+master-2  Ready     master  64m  v1.23.0
+----
++
+输出中列出了您创建的所有机器。
++
+[注意]
+====
+在有些 CSR 被批准前，前面的输出可能不包括计算节点（也称为 worker 节点）。
+====
+
+. 检查待处理的 CSR，并确保添加到集群中的每台机器都有 `Pending` 或 `Approved` 状态的客户端请求：
++
+ifndef::ibm-z,ibm-z-kvm[]
+[source,terminal]
+----
+$ oc get csr
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        AGE     REQUESTOR                                                                   CONDITION
+csr-8b2br   15m     system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+csr-8vnps   15m     system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+...
+----
++
+在本例中，两台机器加入集群。您可能会在列表中看到更多已批准的 CSR。
+endif::ibm-z,ibm-z-kvm[]
+ifdef::ibm-z,ibm-z-kvm[]
+[source,terminal]
+----
+$ oc get csr
+----
++
+[source,terminal]
+.Example output
+----
+NAME        AGE   REQUESTOR                                   CONDITION
+csr-mddf5   20m   system:node:master-01.example.com   Approved,Issued
+csr-z5rln   16m   system:node:worker-21.example.com   Approved,Issued
+----
+endif::ibm-z,ibm-z-kvm[]
+
+. 如果 CSR 没有获得批准，在您添加的机器的所有待处理 CSR 都处于 Pending 状态 后，请批准集群机器的 CSR：
++
+[注意]
+====
+由于 CSR 会自动轮转，因此请在将机器添加到集群后一小时内批准您的 CSR。如果没有在一小时内批准它们，证书将会轮转，每个节点会存在多个证书。您必须批准所有这些证书。批准客户端 CSR 后，Kubelet 为服务证书创建一个二级 CSR，这需要手动批准。然后，如果 Kubelet 请求具有相同参数的新证书，则后续提供证书续订请求由 machine-approver 自动批准。
+====
++
+[注意]
+====
+对于在未启用机器 API 的平台上运行的集群，如裸机和其他用户置备的基础架构，您必须实施一种方法来自动批准 kubelet 提供证书请求(CSR)。如果没有批准请求，则 oc exec、ocrsh 和 oc logs 命令将无法成功，因为 API 服务器连接到 kubelet 时需要服务证书。与 Kubelet 端点联系的任何操作都需要此证书批准。该方法必须监视新的 CSR，确认 CSR 由 `system: node` 或 `system:admin` 组中的 `node-bootstrapper` 服务帐户提交，并确认节点的身份。
+====
+
+** 要单独批准，请对每个有效的 CSR 运行以下命令：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+** 要批准所有待处理的 CSR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs --no-run-if-empty oc adm certificate approve
+----
++
+[注意]
+====
+在有些 CSR 被批准前，一些 Operator 可能无法使用。
+====
+
+. 现在，您的客户端请求已被批准，您必须查看添加到集群中的每台机器的服务器请求：
++
+[source,terminal]
+----
+$ oc get csr
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        AGE     REQUESTOR                                                                   CONDITION
+csr-bfd72   5m26s   system:node:ip-10-0-50-126.us-east-2.compute.internal                       Pending
+csr-c57lv   5m26s   system:node:ip-10-0-95-157.us-east-2.compute.internal                       Pending
+...
+----
+
+. 如果剩余的 CSR 没有被批准，且处于 `Pending` 状态，请批准集群机器的 CSR：
+
+** 要单独批准，请对每个有效的 CSR 运行以下命令：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+** 要批准所有待处理的 CSR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+----
+
+. 批准所有客户端和服务器 CSR 后，机器将 处于 Ready 状态。运行以下命令验证：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      STATUS    ROLES   AGE  VERSION
+master-0  Ready     master  73m  v1.23.0
+master-1  Ready     master  73m  v1.23.0
+master-2  Ready     master  74m  v1.23.0
+worker-0  Ready     worker  11m  v1.23.0
+worker-1  Ready     worker  11m  v1.23.0
+----
++
+[注意]
+====
+批准服务器 CSR 后可能需要几分钟时间让机器过渡到 `Ready` 状态。
+====
+
+.其他信息
+* 如需有关 CSR 的更多信息，请参阅证书签名请求。
+
+ifeval::["{context}" == "installing-ibm-z"]
+:!ibm-z:
+endif::[]
+ifeval::["{context}" == "installing-ibm-z-kvm"]
+:!ibm-z-kvm:
+endif::[]

@@ -1,0 +1,88 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring_samples_operator.adoc
+
+
+:_content-type: CONCEPT
+[id="samples-operator-overview_{context}"]
+= 了解 Cluster Samples Operator
+
+在安装过程中，Operator 会为自己创建默认配置对象，然后创建示例镜像流和模板，包括快速启动模板。
+
+[注意]
+====
+为便于从需要凭证的其他 registry 中导入镜像流,集群管理员可在镜像导入所需的 Uccps 命名空间中创建包含 Docker config.json 文件内容的额外 secret。
+====
+
+Cluster Samples Operator 配置是一个集群范围的资源，其部署包含在 `Uccps-cluster-samples-operator` 命名空间中。
+
+Cluster Samples Operator 的镜像包含关联的 统信容器云管理平台 发行版本的镜像流和模板定义。在创建或更新每个示例时，Cluster Sample Operator 包含一个注解（annotation），用于注明 统信容器云管理平台 的版本。Operator 使用此注解来确保每个示例与发行版本匹配。清单（inventory）以外的示例会与跳过的示例一样被忽略。对任何由 Operator 管理的示例进行的修改（版本注解被修改或删除），都将会被自动恢复。
+
+[注意]
+====
+Jenkins 镜像实际上自安装后便已是镜像有效负载的一部分，并直接标记（tag）到镜像流中。
+====
+
+Cluster Samples Operator 配置资源包含一个终结器（finalizer），它会在删除时清除以下内容：
+
+* Operator 管理的镜像流。
+* Operator 管理的模板。
+* Operator 生成的配置资源。
+* 集群状态资源。
+
+删除样本资源后，Samples Operator 会使用默认配置重新创建资源。
+
+[id="samples-operator-bootstrapped"]
+== Cluster Samples Operator 使用管理状态
+
+Cluster Samples Operator 默认配置为 `Managed`，或者配置了全局代理。在 `Managed` 状态下，Cluster Samples Operator 会主动管理其资源并保持组件的活跃状态，以便从 registry 中拉取示例镜像流和镜像，并确保安装了必要的示例模板。
+
+在某些情况下，Cluster Samples Operator 会将自身引导为 `Removed` 包括：
+
+* 如果 Cluster Samples Operator 在全新安装后初始启动时三分钟后仍无法访问 registry.redhat.io。
+* 如果 Cluster Samples Operator 检测到它位于 IPv6 网络中。
+* 镜像控制器配置参数 阻止使用默认镜像 registry 或通过 samplesRegistry 设置 指定的镜像 registry 创建镜像流。
+
+[注意]
+====
+对于 统信容器云管理平台，默认的镜像 registry 是 `registry.redhat.io`。
+====
+
+但是，如果 Cluster Samples Operator 还检测到 统信容器云管理平台 全局代理服务器已被配置，它将绕过这些检查。
+
+[重要]
+====
+registry.redhat.io目前不支持 IPv6 安装。Cluster Samples Operator 从 registry.redhat.io 中提取大多数示例镜像流和镜像。
+====
+
+[id="samples-operator-restricted-network-install"]
+=== 受限网络安装
+
+当无法访问 `registry.redhat.io` 时，当网络限制已存在时，`Boostrapping` 为 `Removed` 有助于进行受限网络安装。当网络访问受限时，Bootstrapping 为 Removed 可让集群管理员有更多时间决定是否需要样本，因为 Cluster Samples Operator 不提交当管理状态设置为 Removed 时示例镜像流导入失败的警报。当 Cluster Samples Operator 启动为 `Managed` 并尝试安装示例镜像流时，它会在安装失败时在初始安装后 2 小时启动警报。
+
+[id="samples-operator-restricted-network-install-with-access"]
+=== 使用初始网络访问受限网络安装
+
+当一个集群旨在作为受限网络或断开连接而安装的集群，如果其存在网络连接，则 Cluster Samples Operator 会从 `registry.redhat.io` 中安装内容，因为可以访问它。如果您希望 Cluster Samples Operator 仍然引导为 `Removed`，以便延迟样本安装，直到您决定了需要安装哪个样本、如何设置镜像等，请按照有关使用带有备用 registry 以及自定义节点（均在 additional resources 部分中链接）的 Samples Operator 的说明来覆盖 Cluster Samples Operator 默认配置，以便最初以 `Removed` 的形式出现。
+
+您必须将以下额外 YAML 文件放到由 `Uccps-install create manifest` 创建的 Uccps 目录中：
+
+.带有 `managementState: Removed` 的 Cluster Samples Operator YAML 文件示例：
+[source,yaml]
+----
+apiVersion: samples.operator.openshift.io/v1
+kind: Config
+metadata:
+  name: cluster
+spec:
+  architectures:
+  - x86_64
+  managementState: Removed
+----
+
+[id="samples-operator-retries"]
+== Cluster Samples Operator 跟踪和错误恢复镜像流导入
+
+在创建或更新示例镜像流后，Cluster Samples Operator 会监控每个镜像流标签镜像导入的进度。
+
+如果导入失败，`Cluster Samples Operator` 会通过镜像流镜像导入 API（与 oc import-image 命令使用的 API 相同）。重新尝试导入大约每 15 分钟进行一次，直到导入成功，或者 Cluster Samples Operator 的配置已更改为镜像流被添加到 `skippedImagestreams` 列表中，或者管理状态变为 `Removed`。

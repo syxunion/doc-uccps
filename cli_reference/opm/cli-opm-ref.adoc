@@ -1,0 +1,34 @@
+:_content-type: ASSEMBLY
+[id="cli-opm-ref"]
+= opm CLI 参考
+include::_attributes/common-attributes.adoc[]
+:context: cli-opm-ref
+
+toc::[]
+
+`opm` 命令行界面 (CLI) 是用于创建和维护 Operator 目录的工具。
+
+.`opm` CLI 语法
+[source,terminal]
+----
+$ opm <command> [<subcommand>] [<argument>] [<flags>]
+----
+
+.全局标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`--skip-tls`
+|在拉取捆绑包或索引时跳过容器镜像 registry 的 TLS 证书验证。
+
+|===
+
+:FeatureName: 基于 SQLite 的目录格式（包括相关的 CLI 命令）
+include::modules/deprecated-feature.adoc[]
+
+include::modules/opm-cli-ref-index.adoc[leveloffset=+1]
+include::modules/opm-cli-ref-init.adoc[leveloffset=+1]
+include::modules/opm-cli-ref-render.adoc[leveloffset=+1]
+include::modules/opm-cli-ref-validate.adoc[leveloffset=+1]
+include::modules/opm-cli-ref-serve.adoc[leveloffset=+1]

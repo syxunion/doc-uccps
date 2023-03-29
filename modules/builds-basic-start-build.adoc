@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-start-build_{context}"]
+= 启动构建
+
+您可以从当前项目中的现有构建配置手动启动新构建。
+
+.流程
+
+要手动启动构建，请输入以下命令：
+
+[source,terminal]
+----
+$ oc start-build <buildconfig_name>
+----

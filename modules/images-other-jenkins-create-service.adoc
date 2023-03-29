@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+:_content-type: PROCEDURE
+[id="images-other-jenkins-create-service_{context}"]
+= 从模板创建 Jenkins 服务
+
+模板提供参数字段来定义具有预定义默认值的所有环境变量。统信容器云管理平台 提供模板，以简化 Jenkins 服务的新建操作。在初始集群设置期间，您的集群管理员应在默认 `Uccps` 项目中注册 Jenkins 模板。
+
+提供的两个模板均定义了部署配置和服务。模板在不同的存储策略中会有所不同，存储策略决定 Pod 重启后是否保留 Jenkins 内容。
+
+[注意]
+====
+当 Pod 移到另一节点，或当对部署配置的更新触发了重新部署时，Pod 可能会重启。
+====
+
+* `jenkins-ephemeral` 使用临时存储。Pod 重启时，所有数据都会丢失。该模板仅适用于开发或测试。
+
+* `jenkins-persistent` 使用持久性卷（PV）存储。数据不会因 Pod 重启而丢失。
+
+要使用 PV 存储，集群管理员必须在 统信容器云管理平台 部署中定义一个 PV 池。
+
+选好所需模板后，您还必须对模板进行实例化，才能使用 Jenkins。
+
+.流程
+
+. 使用以下任一方法新建 Jenkins 应用程序：
+** 一个 PV:
++
+[source,terminal]
+----
+$ oc new-app jenkins-persistent
+----
+
+** 或 `emptyDir` 类型卷，其配置在 Pod 重启后不保留：
++
+[source,terminal]
+----
+$ oc new-app jenkins-ephemeral
+----
+
+使用这两个模板，您可以在它们上运行 `oc describe`，以查看可用于覆盖的所有参数。
+
+例如：
+
+[source,terminal]
+----
+$ oc describe jenkins-ephemeral
+----

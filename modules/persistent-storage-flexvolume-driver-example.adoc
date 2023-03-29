@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// storage/persistent_storage/persistent-storage-flexvolume.adoc
+
+[id="flexvolume-driver-example_{context}"]
+= FlexVolume 驱动程序示例
+
+FlexVolume 驱动程序的第一个命令行参数始终是一个操作名称。其他参数都针对于每个操作。大多数操作都使用 JSON 字符串作为参数。这个参数是一个完整的 JSON 字符串，而不是包括 JSON 数据的文件名称。
+
+FlexVolume 驱动程序包含：
+
+* 所有 `flexVolume.options`。
+* flexVolume 的一些选项带有 `kubernetes.io/` 前缀 ，如 `fsType` 和 `readwrite`。
+* 如果使用 secret，secret 的内容带有 `kubernetes.io/secret/` 前缀。
+
+.FlexVolume 驱动程序 JSON 输入示例
+
+[source,json]
+----
+{
+	"fooServer": "192.168.0.1:1234", <1>
+        "fooVolumeName": "bar",
+	"kubernetes.io/fsType": "ext4", <2>
+	"kubernetes.io/readwrite": "ro", <3>
+	"kubernetes.io/secret/<key name>": "<key value>", <4>
+	"kubernetes.io/secret/<another key name>": "<another key value>",
+}
+----
+<1> `flexVolume.options` 中的所有选项。
+<2> `flexVolume.fsType` 的值。
+<3> 基于 `f`lexVolume.readOnly` 的 `ro/rw`。
+<4> 由 `flexVolume.secretRef` 引用的 secret 的所有键及其值。
+
+统信容器云管理平台需要有关驱动程序标准输出的 JSON 数据。如果没有指定，输出会描述操作的结果。
+
+.FlexVolume 驱动程序默认输出示例
+
+[source,json]
+----
+{
+	"status": "<Success/Failure/Not supported>",
+	"message": "<Reason for success/failure>"
+}
+----
+
+驱动程序的退出代码应该为 `0`（成功），或 `1`（失败） 。
+
+操作应该是”幂等”的，这意味着挂载一个已被挂载的卷的结果是一个成功的操作。

@@ -1,0 +1,16 @@
+:_content-type: PROCEDURE
+[id="odc-editing-source-code-using-developer-perspective_{context}"]
+= 使用开发者视角编辑应用程序的源代码
+
+您可以使用 *开发者* 视角中的 *拓扑* 视图编辑应用程序的源代码。
+
+.流程
+
+* 在 *拓扑* 视图中，点击部署的应用程序右下角显示的 *编辑源代码* 图标，访问源代码并对其进行修改。
++
+[注意]
+====
+只有使用 *从Git导入*、*从目录* 和 *从Dockerfile* 选项创建了应用程序时，此功能才可用。
+====
++
+如果在集群中安装了 *Eclipse Che Operator*，则会创建一个 Che 工作区 (image:odc_che_workspace.png[title="Che Workspace"]) 并定向到工作区编辑源代码。如果没有安装，您将定向到托管您的源代码的 Git 存储库 (image:odc_git_repository.png[title="Git Repository"])

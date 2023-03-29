@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="verifying-connectivity-endpoint"]
+= 验证到端点的连接
+include::_attributes/common-attributes.adoc[]
+:context: verifying-connectivity-endpoint
+
+toc::[]
+
+Cluster Network Operator（CNO）运行一个控制器（连接检查控制器），用于在集群的资源间执行连接健康检查。通过查看健康检查的结果，您可以诊断连接问题或解决网络连接问题，将其作为您要调查的问题的原因。
+
+include::modules/nw-pod-network-connectivity-checks.adoc[leveloffset=+1]
+include::modules/nw-pod-network-connectivity-implementation.adoc[leveloffset=+1]
+include::modules/nw-pod-network-connectivity-check-object.adoc[leveloffset=+1]
+include::modules/nw-pod-network-connectivity-verify.adoc[leveloffset=+1]

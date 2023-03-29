@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="trigger-event-delivery-config_{context}"]
+= 为触发器配置事件交付顺序
+
+如果使用 Kafka 代理，您可以将事件的交付顺序从触发器配置为事件 sink。
+
+.先决条件
+
+* {ServerlessOperatorName}Knative Eventing 和 Knative Kafka 安装在 {product-title} 集群中。
+* Kafka 代理被启用在集群中使用，您也创建了一个 Kafka 代理。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 已安装 Uccps (`oc`) CLI.
+
+.流程
+
+. 创建或修改 `Trigger` 对象并设置 `kafka.eventing.knative.dev/delivery.order` 注解：
++
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: <trigger_name>
+  annotations:
+     kafka.eventing.knative.dev/delivery.order: ordered
+...
+----
++
+支持的消费者交付保证有：
++
+`未排序的`:: 不排序的消费者是一种非阻塞消费者，它能以未排序的方式提供消息，同时保持正确的偏移管理。
++
+`排序的`:: 一个订购的消费者是一个按分区阻止消费者，在提供分区的下一个消息前等待来自 CloudEvent 订阅者成功响应。
++
+默认排序保证是 `未排序的`.
+
+. 应用 `Trigger` 对象:
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

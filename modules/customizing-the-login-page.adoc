@@ -1,0 +1,77 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="customizing-the-login-page_{context}"]
+= 自定义登录页面
+
+使用自定义登录页面创建服务条款信息。如果您使用第三方登录提供程序（如 GitHub 或 Google)，在将用户信任并期望它重定向到认证提供程序之前，自定义登录页面也会很有用。您还可以在验证过程中显示自定义的错误页。
+
+[注意]
+====
+自定义错误模板仅限于使用重定向的身份提供程序（IDP），如请求标头和基于 OIDC 的操作。它对使用直接密码验证的 IDP（如 LDAP 和 HTPasswd）不起作用。
+====
+
+.先决条件
+
+* 您必须具有管理员特权。
+
+.流程
+
+. 运行以下命令来创建您可以修改的模板：
++
+[source,terminal]
+----
+$ oc adm create-login-template > login.html
+----
++
+[source,terminal]
+----
+$ oc adm create-provider-selection-template > providers.html
+----
++
+[source,terminal]
+----
+$ oc adm create-error-template > errors.html
+----
+
+. 创建 secret:
++
+[source,terminal]
+----
+$ oc create secret generic login-template --from-file=login.html -n openshift-config
+----
++
+[source,terminal]
+----
+$ oc create secret generic providers-template --from-file=providers.html -n openshift-config
+----
++
+[source,terminal]
+----
+$ oc create secret generic error-template --from-file=errors.html -n openshift-config
+----
+
+. 运行：
++
+[source,terminal]
+----
+$ oc edit oauths cluster
+----
+
+. 更新规格：
++
+[source,yaml]
+----
+spec:
+  templates:
+    error:
+        name: error-template
+    login:
+        name: login-template
+    providerSelection:
+        name: providers-template
+----
++
+运行 `oc explain oauths.spec.templates` 以了解选项。

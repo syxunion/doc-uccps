@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+:_content-type: CONCEPT
+[id="understanding-quick-starts_{context}"]
+= 了解快速开始
+
+快速开始是用户任务的指导教程。在 Web 控制台中，您可以在 *Help* 菜单下快速启动访问。它们在使用应用程序、Operator 或其他产品时特别有用。
+
+快速开始主要由任务和步骤组成。每个任务都有多个步骤，每个快速开始都有多个任务。例如：
+
+* 任务 1
+** 第 1 步 
+** 第 2  步
+** 第 3  步
+* 任务 2
+** 第 1  步
+** 第 2  步
+** 第 3  步
+* 任务 3
+** 第 1  步
+** 第 2  步
+** 第 3  步

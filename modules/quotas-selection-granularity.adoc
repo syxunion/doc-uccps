@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-across-multiple-projects.adoc
+
+[id="quotas-selection-granularity_{context}"]
+= 选择粒度
+
+由于在声明配额分配时会考虑锁定，因此通过多项目配额选择的活跃项目数量是一个重要因素。如果在单个多项目配额下选择超过 100 个项目，这可能会给这些项目中的 API 服务器响应造成不利影响。

@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="creating-cluster-monitoring-configmap_{context}"]
+= 创建集群监控配置映射
+
+要配置 统信容器云管理平台 核心监控组件，您必须在 `openshift-monitoring` 项目中创建 `cluster-monitoring-config` `ConfigMap` 对象
+
+[注意]
+====
+当您将更改保存到  `cluster-monitoring-config` `ConfigMap` 对象时，可能会重新部署 `openshift-monitoring` 项目中的部分或全部 Pod。有时重新部署这些组件需要花费一段时间。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 检查 `cluster-monitoring-config` `ConfigMap` 对象是否存在：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get configmap cluster-monitoring-config
+----
+
+. 如果 ConfigMap 对象不存在：
+.. 创建以下 YAML 清单。在本例中，该文件名为  `cluster-monitoring-config.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+----
++
+.. 应用配置以创建 `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc apply -f cluster-monitoring-config.yaml
+----

@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="creating-user-defined-workload-monitoring-configmap_{context}"]
+= 创建用户定义的工作负载监控配置映射
+
+要配置用于监控用户定义项目的组件，您必须在 openshift-user-workload-monitoring` 项目中创建 `user-workload-monitoring-config` `ConfigMap`
+
+[注意]
+====
+当您将更改保存到 `user-workload-monitoring-config` `ConfigMap` 象时，可能会重新部署 `openshift-user-workload-monitoring` 项目中的部分或全部 Pod。有时重新部署这些组件需要花费一段时间。在首次为用户定义的项目启用监控前，您可以创建和配置配置映射，以防止经常重新部署 pod。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps  CLI (`oc`).
+
+.流程
+
+. 检查 `user-workload-monitoring-config` `ConfigMap` 对象是否存在：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get configmap user-workload-monitoring-config
+----
+
+. 如果 `user-workload-monitoring-config` `ConfigMap` 对象不存在：
+.. 创建以下 *YAML* 清单。在本例中，该文件名为 `user-workload-monitoring-config.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+----
++
+.. 应用配置以创建 `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc apply -f user-workload-monitoring-config.yaml
+----
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====

@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: CONCEPT
+[id="ldap-syncing-config-activedir_{context}"]
+= 关于 Active Directory 配置文件
+
+Active Directory 模式要求您提供用户条目的 LDAP 查询定义，以及在内部统信容器云管理平台组记录中代表它们的属性。
+
+为明确起见，您在统信容器云管理平台中创建的组应尽可能将可分辨名称以外的属性用于面向用户或管理员的字段。例如，通过电子邮件标识统信容器云管理平台组的用户，但通过 LDAP 服务器上的组名称来定义组名称。以下配置文件创建了这些关系：
+
+.使用 Active Directory 模式的 LDAP 同步配置：`active_directory_config.yaml`
+[source,yaml]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://LDAP_SERVICE_IP:389
+activeDirectory:
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        filter: (objectclass=person)
+        pageSize: 0
+    userNameAttributes: [ mail ] <1>
+    groupMembershipAttributes: [ memberOf ] <2>
+----
+<1> 统信容器云管理平台 组记录中用作用户名称的属性。
+<2> 存储成员资格信息的用户属性。

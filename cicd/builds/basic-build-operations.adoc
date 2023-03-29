@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="basic-build-operations"]
+= 执行和配置基本构建
+include::_attributes/common-attributes.adoc[]
+:context: basic-build-operations
+
+toc::[]
+
+以下小节提供了有关基本构建操作的说明，包括启动和取消构建、编辑 `BuildConfig`、删除 `BuildConfig`、查看构建详情以及访问构建日志。
+
+include::modules/builds-basic-start-build.adoc[leveloffset=+1]
+include::modules/builds-basic-start-re-run.adoc[leveloffset=+2]
+include::modules/builds-basic-start-logs.adoc[leveloffset=+2]
+include::modules/builds-basic-start-environment-variable.adoc[leveloffset=+2]
+include::modules/builds-basic-start-source.adoc[leveloffset=+2]
+include::modules/builds-basic-cancel-build.adoc[leveloffset=+1]
+include::modules/builds-basic-cancel-multiple.adoc[leveloffset=+2]
+include::modules/builds-basic-cancel-all.adoc[leveloffset=+2]
+include::modules/builds-basic-cancel-all-state.adoc[leveloffset=+2]
+include::modules/builds-basic-edit-buildconfig.adoc[leveloffset=+1]
+include::modules/builds-basic-delete-buildconfig.adoc[leveloffset=+1]
+include::modules/builds-basic-view-build-details.adoc[leveloffset=+1]
+include::modules/builds-basic-access-build-logs.adoc[leveloffset=+1]
+include::modules/builds-basic-access-buildconfig-logs.adoc[leveloffset=+2]
+include::modules/builds-basic-access-buildconfig-version-logs.adoc[leveloffset=+2]
+include::modules/builds-basic-access-build-verbosity.adoc[leveloffset=+2]

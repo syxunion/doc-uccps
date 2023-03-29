@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing-groups.adoc
+
+[id="ldap-syncing-running_{context}"]
+= 运行 LDAP 同步
+
+创建了同步配置文件后，您可以开始同步。统信容器云管理平台 允许管理员与同一服务器进行多种不同类型的同步。
+

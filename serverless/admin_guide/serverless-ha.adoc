@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="serverless-ha"]
+= 高可用性
+:context: serverless-ha
+
+toc::[]
+
+高可用性 (HA) 是 Kubernetes API 的标准功能，有助于确保在出现中断时 API 保持正常运行。在 HA 部署中，如果活跃控制器崩溃或被删除，另一个控制器就可以使用。此控制器会接管处理由现在不可用的控制器提供服务的 API。
+
+Uccps Serverless 中的 HA 可通过领导选举机制获得，该机制会在安装 Knative Serving 和 Eventing control plane 后默认启用。在使用领导选举 HA 模式时，控制器实例在需要前应该已在集群内调度并运行。这些控制器实例争用共享资源，即领导选举锁定。在任何给定时间可以访问领导选举机制锁定资源的控制器实例被称为领导 (leader) 。
+
+include::modules/serverless-config-replicas-serving.adoc[leveloffset=+1]
+include::modules/serverless-config-replicas-eventing.adoc[leveloffset=+1]
+include::modules/serverless-config-replicas-kafka.adoc[leveloffset=+1]

@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+ifeval::["{context}" == "nodes-descheduler"]
+:nodes:
+endif::[]
+
+ifeval::["{context}" == "virt-enabling-descheduler-evictions"]
+:virt:
+endif::[]
+
+:_content-type: REFERENCE
+[id="nodes-descheduler-profiles_{context}"]
+= Descheduler 配置集
+ifdef::nodes[]
+以下 descheduler 配置集可用：
+
+`AffinityAndTaints`:: 此配置集驱除违反了 pod 间的反关联性、节点关联性和节点污点的 pod。
++
+它启用了以下策略：
++
+* `RemovePodsViolatingInterPodAntiAffinity`: 删除违反了 pod 间的反关联性的 pod。
+* `RemovePodsViolatingNodeAffinity`: 移除违反了节点关联性的 pod。
+* `RemovePodsViolatingNodeTaints`: 移除违反了节点上的 `NoSchedule` 污点的 pod。
++
+移除具有节点关联性类型 `requiredDuringSchedulingIgnoredDuringExecution` 的 pod。
+
+`TopologyAndDuplicates`:: 此配置集会驱除 pod 以努力在节点间平均分配类似的 pod 或相同拓扑域的 pod。
++
+它启用了以下策略：
++
+* `RemovePodsViolatingTopologySpreadConstraint`: 找到未平衡的拓扑域，并在 DoNotSchedule 约束被违反时尝试从较大的 pod 驱除 pod。
+* `RemoveDuplicates`: 确保只有一个 pod 与同一节点上运行的副本集、复制控制器、部署或作业相关联。如果存在多个重复的 pod，则这些重复的 pod 会被驱除以更好地在集群中的 pod 分布。
+
+`LifecycleAndUtilization`:: 此配置集驱除长时间运行的 pod，并平衡节点之间的资源使用情况。
++
+它启用了以下策略：
++
+* `RemovePodsHavingTooManyRestarts`: 删除容器重启了多次的 pod。
++
+在所有容器（包括初始容器）中被重启的总数超过 100 次的 Pod 。
+
+* `LowNodeUtilization`: 查找使用率不足的节点，并在可能的情况下从其他过度使用的节点中驱除 pod，以希望这些被驱除的 pod 可以在使用率低的节点上被重新创建。
++
+如果节点的用量低于 20%（CPU、内存和 pod 的数量）,则该节点将被视为使用率不足。
++
+如果节点的用量超过 50%（CPU、内存和 pod 的数量）,则该节点将被视为过量使用。
+
+* `PodLifeTime`: 驱除太老的 pod。
++
+默认情况下，会删除超过 24 小时的 pod。您可以自定义 pod 生命周期值。
+
+`SoftTopologyAndDuplicates`:: 这个配置集与 `TopologyAndDuplicates` 相同，不同之处在于具有软拓扑约束的 pod（如 whenUnsatisfiable: ScheduleAnyway ）也被视为驱除。
++
+[注意]
+====
+不要同时启用 `SoftTopologyAndDuplicates` 和 `TopologyAndDuplicates` 。启用两者会导致冲突。
+====
+
+`EvictPodsWithLocalStorage`:: 此配置集允许具有本地存储的 pod 有资格被驱除。
+
+`EvictPodsWithPVC`:: 此配置集允许带有持久性卷声明的 pod 有资格驱除。
+endif::nodes[]

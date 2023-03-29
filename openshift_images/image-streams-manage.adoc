@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="managing-image-streams"]
+= 管理镜像流
+include::_attributes/common-attributes.adoc[]
+:context: image-streams-managing
+
+toc::[]
+
+镜像流提供了一种方式来持续创建和更新容器镜像。随着镜像改进，标签可用于分配新版本号并跟踪变化。本文档描述了对镜像流的管理方式。
+
+include::modules/images-imagestream-use.adoc[leveloffset=+1]
+include::modules/images-imagestream-configure.adoc[leveloffset=+1]
+include::modules/images-using-imagestream-images.adoc[leveloffset=+1]
+include::modules/images-using-imagestream-tags.adoc[leveloffset=+1]
+include::modules/images-using-imagestream-change-triggers.adoc[leveloffset=+1]
+include::modules/images-imagestream-mapping.adoc[leveloffset=+1]
+
+== 使用镜像流
+
+以下小节介绍了如何使用镜像流和镜像流标签。
+
+include::modules/images-getting-info-about-imagestreams.adoc[leveloffset=+2]
+include::modules/images-imagestream-adding-tags.adoc[leveloffset=+2]
+include::modules/images-imagestream-external-image-tags.adoc[leveloffset=+2]
+include::modules/images-imagestream-update-tag.adoc[leveloffset=+2]
+include::modules/images-imagestream-remove-tag.adoc[leveloffset=+2]
+
+如需有关 Cluster Samples Operator 如何处理已弃用的镜像流标签的更多信息，请参阅 xref:../openshift_images/configuring-samples-operator.adoc#images-samples-operator-deprecated-image-stream_configuring-samples-operator[从 Cluster Samples Operator 中删除已弃用的镜像流标签]。
+
+include::modules/images-imagestream-import.adoc[leveloffset=+2]
+
+include::modules/images-imagestream-import-images-private-registry.adoc[leveloffset=+1]
+include::modules/images-allow-pods-to-reference-images-from-secure-registries.adoc[leveloffset=+2]

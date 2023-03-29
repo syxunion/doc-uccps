@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "openshift-sdn-viewing-egress-firewall"]
+:kind: EgressNetworkPolicy
+:res: egressnetworkpolicy
+:cni: OpenShift SDN
+endif::[]
+ifeval::["{context}" == "viewing-egress-firewall-ovn"]
+:kind: EgressFirewall
+:res: egressfirewall
+:cni: OVN-Kubernetes
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-egressnetworkpolicy-view_{context}"]
+= 查看 EgressNetworkPolicy 对象
+
+您可以查看集群中的 EgressNetworkPolicy 对象。
+
+.先决条件
+
+* 使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商插件的集群。
+* 安装 OpenShift 命令行界面 (CLI)，通常称为 oc。
+* 您必须登录集群。
+
+.流程
+
+. 可选： 要查看集群中定义的 EgressNetworkPolicy 对象的名称，请输入以下命令：
++
+[source,terminal,subs="attributes"]
+----
+$ oc get {res} --all-namespaces
+----
+
+. 要检查策略，请输入以下命令。将 `<policy_name>` 替换为要检查的策略名称。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc describe {res} <policy_name>
+----
++
+[source,terminal]
+.输出示例
+----
+Name:		default
+Namespace:	project1
+Created:	20 minutes ago
+Labels:		<none>
+Annotations:	<none>
+Rule:		Allow to 1.2.3.0/24
+Rule:		Allow to www.example.com
+Rule:		Deny to 0.0.0.0/0
+----
+
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::res[]
+:!res:
+endif::[]
+ifdef::cni[]
+:!cni:
+endif::[]

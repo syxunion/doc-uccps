@@ -1,0 +1,37 @@
+// Module included in the following assemblies
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="available-plug-ins_{context}"]
+= 可用的动态部署插件
+
+统信容器云管理平台提供了以下置备程序插件，用于使用集群配置的供应商 API 创建新存储资源的动态部署：
+
+
+[options="header",cols="1,1,1"]
+|===
+
+|存储类型
+|Provisioner 插件名称
+|备注
+
+|UnionTech UStack Platform（有栈）Cinder
+|`kubernetes.io/cinder`
+|
+
+|UStack Manila Container Storage Interface (CSI)
+|`manila.csi.openstack.org`
+|安装后, OpenStack Manila CSI Driver Operator 和 ManilaDriver 会自动为所有可用 Manila 共享类型创建动态置备所需的存储类
+
+|VMware vSphere
+|`kubernetes.io/vsphere-volume`
+|
+
+
+|===
+
+[重要]
+====
+任何选择的置备程序插件还需要根据相关文档为相关的云、主机或者第三方供应商配置。
+====

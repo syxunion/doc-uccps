@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * operators/admin/olm-deleting-operators-from-a-cluster.adoc
+// * serverless/install/removing-openshift-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="olm-deleting-operator-from-a-cluster-using-cli_{context}"]
+= 使用 CLI 从集群中删除 Operator
+
+集群管理员可以使用 CLI 从所选命名空间中删除已安装的 Operator。
+
+.先决条件
+
+- 使用具有 `cluster-admin` 权限的账户访问 {product-title} 集群。
+- `oc` 命令已在工作站上安装
+
+.流程
+
+. 通过 `currentCSV` 字段检查已订阅 Operator 的当前版本 （如`jaeger`) 
++
+[source,terminal]
+----
+$ oc get subscription jaeger -n openshift-operators -o yaml | grep currentCSV
+----
++
+.输出示例
+[source,terminal]
+----
+  currentCSV: jaeger-operator.v1.8.2
+----
+
+. 删除订阅 (如 `jaeger`):
++
+[source,terminal]
+----
+$ oc delete subscription jaeger -n openshift-operators
+----
++
+.输出示例
+[source,terminal]
+----
+subscription.operators.coreos.com "jaeger" deleted
+----
+
+. 使用上一步中的 `currentCSV` 值来删除目标命名空间中相应 Operator 的 CSV：
++
+[source,terminal]
+----
+$ oc delete clusterserviceversion jaeger-operator.v1.8.2 -n openshift-operators
+----
++
+.输出示例
+[source,terminal]
+----
+clusterserviceversion.operators.coreos.com "jaeger-operator.v1.8.2" deleted
+----

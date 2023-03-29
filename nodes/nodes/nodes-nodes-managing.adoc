@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-managing"]
+= 管理节点
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-managing
+
+toc::[]
+
+
+统信容器云管理平台 使用 KubeletConfig 自定义资源（CR）来管理节点的配置。通过创建 KubeletConfig 对象的实例，会创建一个受管机器配置来覆盖节点上的设置。
+
+[注意]
+====
+*不支持为更改配置而登录远程机器。*
+====
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-managing-about.adoc[leveloffset=+1]
+include::modules/nodes-nodes-working-master-schedulable.adoc[leveloffset=+1]
+include::modules/nodes-nodes-working-setting-booleans.adoc[leveloffset=+1]
+include::modules/nodes-nodes-kernel-arguments.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-swap-memory.adoc[leveloffset=+1]
+include::modules/nodes-control-plane-osp-migrating.adoc[leveloffset=+1]
+

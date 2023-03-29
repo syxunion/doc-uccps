@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/deploying-egress-router-http-redirection.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-router-http-proxy-mode_{context}"]
+= 以 HTTP 代理模式部署出口路由器 pod
+
+在 _HTTP 代理模式_ 中，出口路由器 pod 作为一个 HTTP 代理在端口 `8080` 上运行。这个模式只适用于连接到基于 HTTP 或基于 HTTPS 服务的客户端，但通常需要较少的更改就可以使客户端 pod 正常工作。很多程序可以通过设置环境变量来使用 HTTP 代理服务器。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建出口路由器 pod。
+
+. 为确保其他 pod 可以查找出口路由器 pod 的 IP 地址，请创建一个服务指向出口路由器 pod，如下例所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-1
+spec:
+  ports:
+  - name: http-proxy
+    port: 8080 <1>
+  type: ClusterIP
+  selector:
+    name: egress-1
+----
+<1> 确定 `http` 端口被设置为 8080。
+
+. 要将客户端 pod（不是出口代理 Pod）配置为使用 HTTP 代理，设置 `http_proxy` 或 `https_proxy` 变量：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-1
+  labels:
+    name: app-1
+spec:
+  containers:
+    env:
+    - name: http_proxy
+      value: http://egress-1:8080/
+    - name: https_proxy
+      value: http://egress-1:8080/
+    ...
+----
++
+[注意]
+====
+不需要在所有设置中使用 `http _proxy` 和 `https_proxy` 环境变量。如果以上内容没有创建可以正常工作设置，请查阅 pod 中运行的工具或软件的文档。
+====

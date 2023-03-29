@@ -1,0 +1,114 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="modifying-retention-time-for-prometheus-metrics-data_{context}"]
+= 修改 Prometheus 指标数据的保留时间
+
+默认情况下，统信容器云管理平台 监控堆栈将 Prometheus 数据的保留时间配置为 15 天。您可以修改保留时间来更改将在多久后删除数据。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑 `ConfigMap` 对象：
+** *要修改用于监控统信容器云管理平台 核心项目的 Prometheus 实例的保留时间*:
+.. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 将保留时间配置放添加到 `data/config.yaml` 下：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      retention: <time_specification>
+----
++
+将  `<time_specification>` 替换为一个数字，后面紧跟 `ms` (毫秒), `s` (秒), `m` (分钟), `h` (小时), `d` (天), `w` (星期), or `y` (年).
++
+以下示例将监控 统信容器云管理平台 核心组件的 Prometheus 实例的保留时间设置为 24 小时：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      retention: *24h*
+----
+
+** *要为监控用户定义的项目的 Prometheus 实例修改保留时间*：
+.. 在 `openshift-user-workload-monitoring` 项目中编辑 `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 将保留时间配置放添加到 `data/config.yaml` 下：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      retention: <time_specification>
+----
++
+将  `<time_specification>` 替换为一个数字，后面紧跟 `ms` (毫秒), `s` (秒), `m` (分钟), `h` (小时), `d` (天), `w` (星期), or `y` (年).
++
+以下示例针对监控用户定义的项目的 Prometheus 实例，将保留时间设置为 24 小时：
++
+[source,yaml,subs=quotes]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      retention: *24h*
+----
+
+. 保存文件以使改变生效。受新配置影响的 Pod 会自动重启。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

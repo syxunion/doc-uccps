@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-scaling-manually_{context}"]
+= 手动扩展
+
+除了回滚外，您还可以通过手动缩放来对副本数量进行细致的控制。
+
+[注意]
+====
+也可以使用 `oc autoscale` 命令自动扩展 Pod。
+====
+
+.流程
+
+. 要手动扩展 `部署配置`，请使用 `oc scale` 命令。例如，以下命令将 `frontend` `部署配置` 中的副本设置为 `3`。
++
+[source,terminal]
+----
+$ oc scale dc frontend --replicas=3
+----
++
+副本数量最终会传播到 `部署配置` `frontend` 配置的部署的预期和当前状态。

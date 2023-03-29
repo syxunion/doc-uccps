@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-cluster-admin-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-event-source-admin-web-console_{context}"]
+= 使用 管理员 视角创建事件源
+
+Knative 事件源可以是生成或导入云事件的任何 Kubernetes 对象，并将这些事件转发到另一个端点，称为接收器（sink）。事件源对于开发对事件做出反应的分布式系统至关重要。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+
+* 您已登录到 Web 控制台，且处于 管理员 视角。
+
+* 具有集群管理员 {product-title} 的权限。
+
+.流程
+
+. 在 {product-title} 控制台的 *管理员*  视角中，导航到 *Serverless* -> *Eventing*.
+. 在  *创建* 列表中，选择  *事件源* 。您将被定向到 *事件源* 页面。
+. 选择您要创建的事件源类型。

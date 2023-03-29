@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="expiring-silences_{context}"]
+= 使静默到期
+
+您可以让静默到期。让静默到期会永久停用这一静默。
+
+.流程
+
+在 *Administrator* 视角中使静默到期：
+
+. 导航到 *Observe* -> *Alerting* -> *Silences* 页面。
+
+. 针对您想要修改的静默，选择最后一列中的 {kebab} ，然后选择 *Expire silence*。
++
+另外，您还可以在静默的 *Silence Details* 页面中选择 *Actions* -> *Expire Silence* 
+
+要在 *Developer* 视角中使静默到期：
+
+. 导航到 *Observe* -> *<project_name>* -> *Alerts* 页面。
+
+. 选择警报名称左侧的 *>* 来展开警报的详情。选择展开视图中的警报名称以打开警报的 *Alert Details* 页面。
+
+. 在该页面的 *Silenced By* 部分中选择静默名称，以导航到该静默的 *Silence Details* 页面。
+
+. 选择静默的名称以导航到其 *Silence Details* 页面。
+
+. 在静默的 *Silence Details* 页面中选择 *Actions* -> *Expire Silence*

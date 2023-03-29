@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-getting-started.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-deploy-func-kn_{context}"]
+= Deploying functions
+
+您可以使用 `kn func deploy` 命令将功能部署到集群中，作为 Knative 服务。如果已经部署了目标功能，则会使用推送到容器镜像 registry 的新容器镜像进行更新，并更新 Knative 服务。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 已安装 Knative (`kn`) CLI。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 您必须已创建并初始化要部署的功能。
+
+.流程
+
+* 部署功能：
++
+[source,terminal]
+----
+$ kn func deploy [-n <namespace> -p <path> -i <image>]
+----
++
+.输出示例
+[source,terminal]
+----
+Function deployed at: http://func.example.com
+----
+** 如果没有指定 `namespace` ，则该函数部署到当前命名空间中。
+** 此函数从当前目录中部署，除非指定了 `path` 
+** Knative 服务名称派生自项目名称，无法使用此命令进行更改。

@@ -1,0 +1,129 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-rfc2307-user-defined-error_{context}"]
+= 使用 RFC 2307 及用户定义的容错来同步组
+
+默认情况下，如果要同步的组包含其条目在成员查询中定义范围之外的成员，组同步会失败并显示以下错误：
+
+----
+Error determining LDAP group membership for "<group>": membership lookup for user "<user>" in group "<group>" failed because of "search for entry with dn="<user-dn>" would search outside of the base dn specified (dn="<base-dn>")".
+----
+
+这通常表示 `usersQuery` 字段中的 `baseDN` 配置错误。不过，如果 `baseDN` 有意不含有组中的部分成员，那么设置 `tolerateMemberOutOfScopeErrors: true` 可以让组同步继续进行。范围之外的成员将被忽略。
+
+同样，当组同步过程未能找到某个组的某一成员时，它会彻底失败并显示错误：
+
+----
+Error determining LDAP group membership for "<group>": membership lookup for user "<user>" in group "<group>" failed because of "search for entry with base dn="<user-dn>" refers to a non-existent entry".
+Error determining LDAP group membership for "<group>": membership lookup for user "<user>" in group "<group>" failed because of "search for entry with base dn="<user-dn>" and filter "<filter>" did not return any results".
+----
+
+这通常表示 `usersQuery` 字段配置错误。不过，如果组中包含已知缺失的成员条目，那么设置 `tolerateMemberNotFoundErrors: true` 可以让组同步继续进行。有问题的成员将被忽略。
+
+[警告]
+====
+为 LDAP 组同步启用容错会导致同步过程忽略有问题的成员条目。如果 LDAP 组同步配置不正确，这可能会导致同步的统信容器云管理平台组中缺少成员。
+====
+
+.使用 RFC 2307 模式并且组成员资格有问题的 LDAP 条目：`rfc2307_problematic_users.ldif`
+[source,ldif]
+----
+  dn: ou=users,dc=example,dc=com
+  objectClass: organizationalUnit
+  ou: users
+  dn: cn=Jane,ou=users,dc=example,dc=com
+  objectClass: person
+  objectClass: organizationalPerson
+  objectClass: inetOrgPerson
+  cn: Jane
+  sn: Smith
+  displayName: Jane Smith
+  mail: jane.smith@example.com
+  dn: cn=Jim,ou=users,dc=example,dc=com
+  objectClass: person
+  objectClass: organizationalPerson
+  objectClass: inetOrgPerson
+  cn: Jim
+  sn: Adams
+  displayName: Jim Adams
+  mail: jim.adams@example.com
+  dn: ou=groups,dc=example,dc=com
+  objectClass: organizationalUnit
+  ou: groups
+  dn: cn=admins,ou=groups,dc=example,dc=com
+  objectClass: groupOfNames
+  cn: admins
+  owner: cn=admin,dc=example,dc=com
+  description: System Administrators
+  member: cn=Jane,ou=users,dc=example,dc=com
+  member: cn=Jim,ou=users,dc=example,dc=com
+  member: cn=INVALID,ou=users,dc=example,dc=com <1>
+  member: cn=Jim,ou=OUTOFSCOPE,dc=example,dc=com <2>
+----
+<1> LDAP 服务器上不存在的成员。
+<2> 可能存在，但不在同步任务的用户查询的 baseDN 下的成员。
+
+要容许以上示例中的错误，您必须在同步配置文件中添加以下内容：
+
+.使用 RFC 2307 模式且容许错误的 LDAP 同步配置：`rfc2307_config_tolerating.yaml`
+[source,yaml]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://LDAP_SERVICE_IP:389
+rfc2307:
+    groupsQuery:
+        baseDN: "ou=groups,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+    groupUIDAttribute: dn
+    groupNameAttributes: [ cn ]
+    groupMembershipAttributes: [ member ]
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+    userUIDAttribute: dn <1>
+    userNameAttributes: [ mail ]
+    tolerateMemberNotFoundErrors: true <2>
+    tolerateMemberOutOfScopeErrors: true <3>
+----
+<1> 唯一标识 LDAP 服务器上用户的属性。将 DN 用于 `userUIDAttribute` 时，您无法指定usersQuery 过滤器。若要进行精细过滤，请使用白名单/黑名单方法。
+<2> 为 `true` 时，同步任务容许找不到部分成员的组，并且找不到 LDAP 条目的成员将被忽略。如果找不到组成员，同步任务的默认行为将失败。
+<3> 为 `true` 时，同步任务容许其部分成员在 usersQuery 基本 DN 中给定用户范围之外的组，并且不在成员查询范围的成员将被忽略。如果组中某个成员超出范围，则同步任务的默认行为将失败。
+
+.先决条件
+
+* 创建配置文件。
+
+.流程
+
+* 使用 `rfc2307_config_tolerating.yaml` 文件运行同步：
++
+[source,terminal]
+----
+$ oc adm groups sync --sync-config=rfc2307_config_tolerating.yaml --confirm
+----
++
+统信容器云管理平台 创建以下组记录作为上述同步操作的结果：
++
+.使用 `rfc2307_config.yaml` 文件创建的统信容器云管理平台组
+[source,yaml]
+----
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  annotations:
+    openshift.io/ldap.sync-time: 2015-10-13T10:08:38-0400
+    openshift.io/ldap.uid: cn=admins,ou=groups,dc=example,dc=com
+    openshift.io/ldap.url: LDAP_SERVER_IP:389
+  creationTimestamp:
+  name: admins
+users: <1>
+- jane.smith@example.com
+- jim.adams@example.com
+----
+<1> 属于组的成员的用户，根据同步文件指定。缺少查询遇到容许错误的成员。

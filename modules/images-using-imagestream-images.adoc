@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+[id="images-using-imagestream-images_{context}"]
+= 镜像流镜像
+
+从镜像流内部到特定镜像 ID 的镜像流镜像点。
+
+镜像流镜像允许您从标记了镜像的特定镜像流中检索有关镜像的元数据。
+
+每当您将镜像导入或标记到镜像流时，统信容器云管理平台 中会自动创建镜像流镜像对象。您不必在用于创建镜像流的任何镜像流定义中显式定义镜像流镜像对象。
+
+镜像流镜像包含来自存储库的镜像流名称和镜像 ID，用 `@` 符号分隔：
+
+----
+<image-stream-name>@<image-id>
+----
+
+要引用 ImageStream 对象示例中的镜像，镜像流镜像如下所示：
+
+----
+origin-ruby-sample@sha256:47463d94eb5c049b2d23b03a9530bf944f8f967a0fe79147dd6b9135bf7dd13d
+----

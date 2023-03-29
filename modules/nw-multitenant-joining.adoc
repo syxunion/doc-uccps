@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+// * networking/multitenant-isolation.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multitenant-joining_{context}"]
+= 接合项目
+
+您可以接合两个或多个项目，以允许不同项目中的 Pod 和服务间的网络流量。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 您必须作为 `cluster-admin` 角色用户登录集群。
+
+.流程
+
+. 使用以下命令，将项目接合到现有项目网络中：
++
+[source,terminal]
+----
+$ oc adm pod-network join-projects --to=<project1> <project2> <project3>
+----
++
+另外，除了指定具体的项目名称，也可以使用 `--selector=<project_selector>` 选项来基于关联标签指定项目。
+
+. 可选：运行以下命令来查看您接合在一起的 Pod 网络：
++
+[source,terminal]
+----
+$ oc get netnamespaces
+----
++
+在 *NETID* 列中，同一 Pod 网络中的项目具有相同的网络 ID。

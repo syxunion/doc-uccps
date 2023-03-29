@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-nfs-provisioning_{context}"]
+= 置备
+
+当存储可以被挂载为统信容器云管理平台中的卷之前，它必须已存在于底层的存储系统中。要置备 NFS 卷，则需要一个 NFS 服务器和导出路径列表。
+
+.流程
+
+. 为 PV 创建对象定义：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001 <1>
+spec:
+  capacity:
+    storage: 5Gi <2>
+  accessModes:
+  - ReadWriteOnce <3>
+  nfs: <4>
+    path: /tmp <5>
+    server: 172.17.0.2 <6>
+  persistentVolumeReclaimPolicy: Retain <7>
+----
+<1> 卷的名称。这是各个 `oc <command> pod` 命令中的 PV 标识。
+<2> 为这个卷分配的存储量。
+<3> 虽然这看上去象是设置对卷的访问控制，但它实际上被用作标签并用来将 PVC 与 PV 匹配。当前，还不能基于 `accessModes` 强制访问规则。
+<4> 使用的卷类型，在这个示例里是 nfs 插件。
+<5> NFS 服务器导出的路径。
+<6> NFS 服务器的主机名或 IP 地址。
+<7> PV 的 reclaim 策略。它决定了在卷被释放后会发生什么。
++
+[注意]
+====
+每个 NFS 卷都必须由集群中的所有可调度节点挂载。
+====
+
+. 确定创建了 PV：
++
+[source,terminal]
+----
+$ oc get pv
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     LABELS    CAPACITY     ACCESSMODES   STATUS      CLAIM  REASON    AGE
+pv0001   <none>    5Gi          RWO           Available                    31s
+----
+
+. 创建绑定至新 PV 的持久性卷声明：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-claim1
+spec:
+  accessModes:
+    - ReadWriteOnce <1>
+  resources:
+    requests:
+      storage: 5Gi <2>
+  volumeName: pv0001
+  storageClassName: ""
+----
+<1> 访问模式不强制实施安全性，而是作为标签来将 PV 与 PVC 匹配。
+<2> 此声明会寻找提供 *5Gi* 或更高容量的 PV。
+
+. 确认创建了持久卷声明：
++
+[source,terminal]
+----
+$ oc get pvc
+----
++
+.输出示例
+[source,terminal]
+----
+NAME         STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-claim1   Bound    pv0001   5Gi        RWO                           2m
+----

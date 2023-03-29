@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/opm/cli-opm-ref.adoc
+
+[id="opm-cli-ref-render_{context}"]
+= render
+
+从提供的索引镜像、捆绑包镜像和 SQLite 数据库文件生成声明性配置 blob。
+
+.命令语法
+[source,terminal]
+----
+$ opm render <index_image | bundle_image | sqlite_file> [<flags>]
+----
+
+.`render` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-o`, `--output` (string)
+|输出格式： `json`（默认值）或 `yaml`。
+
+|===

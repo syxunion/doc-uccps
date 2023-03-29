@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+[id="nodes-containers-volumes-cli_{context}"]
+= 使用 统信容器云管理平台 CLI 操作卷
+
+您可以使用 CLI 命令 `oc set volume` ，为任何使用 pod 模板的对象（如复制控制器或部署配置）添加和移除卷和卷挂载。您还可以列出 pod 中的卷，或列出使用 pod 模板的任何对象。
+
+`oc set volume` 命令使用以下通用语法：
+
+[source,terminal]
+----
+$ oc set volume <object_selection> <operation> <mandatory_parameters> <options>
+----
+
+
+对象选择::
+在 `oc set volume` 命令中为 `object_selection` 参数指定以下内容之一：
+
+[id="vol-object-selection_{context}"]
+.对象选择
+[cols="3a*",options="header"]
+|===
+
+|语法 |描述 |示例
+
+|`_<object_type>_ _<name>_`
+|选择类型为 `_<object_type>_` 的 `_<name>_`
+|`deploymentConfig registry`
+
+|`_<object_type>_/_<name>_`
+|选择类型为  `_<object_type>_` 的 `_<name>_` of type.
+|`deploymentConfig/registry`
+
+|`_<object_type>_`
+`--selector=_<object_label_selector>_`
+|选择与给定标签选择器匹配且类型为 `_<object_type>_` 的资源
+selector.
+|`deploymentConfig`
+`--selector="name=registry"`
+
+|`_<object_type>_ --all`
+|选择类型为 `_<object_type>_` 的所有资源。
+|`deploymentConfig --all`
+
+|`-f` 或
+`--filename=_<file_name>_`
+|用于编辑资源的文件名、目录或文件 URL。
+|`-f registry-deployment-config.json`
+|===
+
+
+操作::
+为 `oc set volume` 命令中的 `operation` 参数指定 `--add` 或 `--remove`。
+
+必要参数::
+所有必需的参数都特定于所选操作，并在后续小节中阐述。
+
+选项::
+所有选项都特定于所选操作，并在后续小节中讨论。

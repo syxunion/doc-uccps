@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="odc-editing-applications"]
+= 编辑应用程序
+include::_attributes/common-attributes.adoc[]
+:context: odc-editing-applications
+
+toc::[]
+
+您可以使用 *拓扑* 视图编辑您创建的应用程序的配置和源代码。
+
+== 先决条件
+
+* 已 登陆到 web 控制台并切换到开发者 视角。
+* 在项目中拥有适当的角色和权限，可在 统信容器云管理平台 中创建并修改应用程序。
+* 您已使用 开发者 视角在 统信容器云管理平台 上创建并部署了应用程序。
+
+include::modules/odc-editing-source-code-using-developer-perspective.adoc[leveloffset=+1]
+
+include::modules/odc-editing-application-configuration-using-developer-perspective.adoc[leveloffset=+1]

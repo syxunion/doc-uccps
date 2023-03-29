@@ -1,0 +1,95 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-vsphere.adoc
+
+:_content-type: PROCEDURE
+[id="vsphere-static-provisioning_{context}"]
+= 静态置备 VMware vSphere 卷
+
+要静态置备 VMware vSphere 卷，您必须创建虚拟机磁盘供持久性卷框架引用。
+
+.先决条件
+
+* 当存储可以被挂载为统信容器云管理平台中的卷之前，它必须已存在于底层的存储系统中。
+
+.流程
+
+. 创建虚拟机磁盘。在静态置备 VMware vSphere 卷前，必须手动创建虚拟机磁盘 (VMDK)。可使用以下任一方法：
+
+  * 使用 `vmkfstools` 创建。通过 Secure Shel (SSH) 访问 ESX，然后使用以下命令创建 VMDK 卷：
++
+[source,terminal]
+----
+$ vmkfstools -c <size> /vmfs/volumes/<datastore-name>/volumes/<disk-name>.vmdk
+----
+
+  * 使用 `vmware-diskmanager` 创建：
++
+[source,terminal]
+----
+$ shell vmware-vdiskmanager -c -t 0 -s <size> -a lsilogic <disk-name>.vmdk
+----
+
+. 创建引用 VMDK 的持久性卷。创建包含 `PersistentVolume` 对象定义的 `pv1.yaml` 文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1 <1>
+spec:
+  capacity:
+    storage: 1Gi <2>
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  vsphereVolume: <3>
+    volumePath: "[datastore1] volumes/myDisk"  <4>
+    fsType: ext4  <5>
+----
+<1> 卷的名称。持久性卷声明或 pod 识别它的名称。
+<2> 为这个卷分配的存储量。
+<3> 使用的卷类型，`vsphereVolume` 表示 vSphere 卷。此标签用于将 vSphere VMDK 卷挂载到 Pod 中。卸载卷时会保留卷内容。卷类型支持 VMFS 和 VSAN 数据存储。
+<4> 要使用的现有 VMDK 卷。如果使用 `vmkfstools`，在卷定义中数据存储名称必须放在方括号 [] 内，如前面所示。
+<5> 要挂载的文件系统类型。例如： ext4、xfs 或者其他文件系统。
++
+[重要]
+====
+在格式化并置备卷后更改 fsType 参数的值可能会导致数据丢失和 pod 故障。
+====
+
+. 从文件创建 `PersistentVolume` 对象：
++
+[source,terminal]
+----
+$ oc create -f pv1.yaml
+----
+
+. 创建一个映射到您在上一步中创建的持久性卷声明。创建包含 `PersistentVolumeClaim` 对象定义的 `pvc1.yaml` 文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1 <1>
+spec:
+  accessModes:
+    - ReadWriteOnce <2>
+  resources:
+   requests:
+     storage: "1Gi" <3>
+  volumeName: pv1 <4>
+----
+<1> 代表持久性卷声明的唯一名称。
+<2> 持久性卷声明的访问模式。使用 ReadWriteOnce 时，单个节点可以通过读写权限挂载这个卷。
+<3> 持久性卷声明的大小。
+<4> 现有持久性卷的名称。
+
+. 从文件创建 `PersistentVolumeClaim` 对象：
++
+[source,terminal]
+----
+$ oc create -f pvc1.yaml
+----

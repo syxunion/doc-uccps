@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * registry/accessing-the-registry.adoc
+
+:_content-type: PROCEDURE
+[id="registry-accessing-metrics_{context}"]
+= 访问registry的指标数据（metrics）
+
+Uccp Container Registry 为 Prometheus metrics 提供了一个端点。Prometheus是一个独立的开源系统监视和警报工具包。
+
+metrics 可以通过registry端点的 */extensions/v2/metrics* 路径获得。
+
+// Recommended link to extended registry configuration assembly.
+
+.流程
+
+您可以通过两种方式访问指标数据：运行指标数据查询或使用集群角色。
+
+*指标数据查询*
+
+. 运行指标查询，例如：
++
+[source,terminal]
+----
+$ curl --insecure -s -u <user>:<secret> \ <1>
+    https://image-registry.openshift-image-registry.svc:5000/extensions/v2/metrics | grep imageregistry | head -n 20
+----
++
+.输出示例
+[source,terminal]
+----
+# HELP imageregistry_build_info A metric with a constant '1' value labeled by major, minor, git commit & git version from which the image registry was built.
+# TYPE imageregistry_build_info gauge
+imageregistry_build_info{gitCommit="9f72191",gitVersion="v3.11.0+9f72191-135-dirty",major="3",minor="11+"} 1
+# HELP imageregistry_digest_cache_requests_total Total number of requests without scope to the digest cache.
+# TYPE imageregistry_digest_cache_requests_total counter
+imageregistry_digest_cache_requests_total{type="Hit"} 5
+imageregistry_digest_cache_requests_total{type="Miss"} 24
+# HELP imageregistry_digest_cache_scoped_requests_total Total number of scoped requests to the digest cache.
+# TYPE imageregistry_digest_cache_scoped_requests_total counter
+imageregistry_digest_cache_scoped_requests_total{type="Hit"} 33
+imageregistry_digest_cache_scoped_requests_total{type="Miss"} 44
+# HELP imageregistry_http_in_flight_requests A gauge of requests currently being served by the registry.
+# TYPE imageregistry_http_in_flight_requests gauge
+imageregistry_http_in_flight_requests 1
+# HELP imageregistry_http_request_duration_seconds A histogram of latencies for requests to the registry.
+# TYPE imageregistry_http_request_duration_seconds summary
+imageregistry_http_request_duration_seconds{method="get",quantile="0.5"} 0.01296087
+imageregistry_http_request_duration_seconds{method="get",quantile="0.9"} 0.014847248
+imageregistry_http_request_duration_seconds{method="get",quantile="0.99"} 0.015981195
+imageregistry_http_request_duration_seconds_sum{method="get"} 12.260727916000022
+----
+<1> `<user>` 可以是任意的，但 `<secret>` 必须与 registry 配置中指定的值匹配。
+
+*集群角色*
+
+. 如果还没有一个访问指标的集群角色，创建一个集群角色：
++
+[source,terminal]
+----
+$ cat <<EOF | oc create -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-scraper
+rules:
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - registry/metrics
+  verbs:
+  - get
+EOF
+----
+
+. 将此角色添加到用户，运行以下命令：
++
+[source,terminal]
+----
+$ oc adm policy add-cluster-role-to-user prometheus-scraper <username>
+----
+
+. 使用集群角色访问指标数据。配置文件中与指标数据相关的部分应如下所示：
++
+[source,yaml]
+----
+openshift:
+  version: 1.0
+  metrics:
+    enabled: true
+...
+----

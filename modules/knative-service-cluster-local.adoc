@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-configuring-routes.adoc
+
+:_content-type: PROCEDURE
+[id="knative-service-cluster-local_{context}"]
+= 将集群可用性设置为集群本地
+
+默认情况下，Knative 服务会发布到一个公共 IP 地址。被发布到一个公共 IP 地址意味着 Knative 服务是公共应用程序，并有一个公开访问的 URL。
+
+可以从集群以外访问公开的 URL。但是，开发人员可能需要构建后端服务，这些服务只能从集群内部访问（称为 私有服务 ）。开发人员可以使用 `networking.knative.dev/visibility=cluster-local` 标签标记集群中的各个服务，使其私有。
+
+[IMPORTANT]
+====
+对于 Uccps Serverless 1.15.0 及以上更新的版本 `serving.knative.dev/visibility` 标签不再可用。您必须更新现有服务来改用 `networking.knative.dev/visibility` 标签。
+====
+// remove note for 4.10, OSD
+
+.先决条件
+
+* 在集群中安装了    {ServerlessOperatorName} 和 Knative Serving。
+* 您已创建了 Knative 服务。
+
+.流程
+
+* 通过添加 `networking.knative.dev/visibility=cluster-local` 标签来设置服务的可见性：
++
+[source,terminal]
+----
+$ oc label ksvc <service_name> networking.knative.dev/visibility=cluster-local
+----
+
+.验证
+
+* 输入以下命令并查看输出结果，检查您的服务的 URL 是否现在格式为 `\http://<service_name>.<namespace>.svc.cluster.local`
++
+[source,termina]
+----
+$ oc get ksvc
+----
++
+.输出示例
+[source,terminal]
+----
+NAME            URL                                                                         LATESTCREATED     LATESTREADY       READY   REASON
+hello           http://hello.default.svc.cluster.local                                      hello-tx2g7       hello-tx2g7       True
+----

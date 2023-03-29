@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+// * service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+
+:_content-type: CONCEPT
+[id="ossm-sidecar-injection-env-var_{context}"]
+= Setting proxy environment variables through annotations
+
+Envoy sidecar 代理的配置由 `ServiceMeshControlPlane` 管理。
+
+您可以通过在 `injection-template.yaml` 文件中的部署中添加 pod 注解来为应用程序设置 sidecar 代理的环境变量。环境变量注入 sidecar。
+
+.injection-template.yaml 示例
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: resource
+  template:
+    metadata:
+      annotations:
+        sidecar.maistra.io/proxyEnv: "{ \"maistra_test_env\": \"env_value\", \"maistra_test_env_2\": \"env_value_2\" }"
+----
+
+[WARNING]
+====
+在创建自己的自定义资源时，您绝不应包含  `maistra.io/` 标签和注解。这些标签和注解表示资源由 Operator 生成和管理。如果您在创建自己的资源时从 Operator 生成的资源复制内容，请不要包含以 `maistra.io/` 开头的标签或注解。在下一个协调过程中，Operator 将覆盖或删除这些标签或注解的资源。
+====

@@ -1,0 +1,84 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-cinder.adoc
+
+[id="persistent-storage-csi-cinder_{context}"]
+= 使 OpenStack Cinder CSI 成为默认存储类
+
+OpenStack Cinder CSI 驱动程序使用 `cinder.csi.openstack.org` 参数键来支持动态置备。
+
+要在统信容器云管理平台中启用 OpenStack Cinder CSI 置备，建议您使用 `standard-csi` 覆盖默认的树内存储类。另外，您可以创建持久性卷声明（PVC），并将存储类指定为 "standard-csi"。
+
+在统信容器云管理平台中，默认存储类引用树内 Cinder 驱动程序。但是，启用了 CSI 自动迁移 后，使用默认存储类创建的卷实际上使用 CSI 驱动程序。
+
+.推荐的步骤
+使用以下步骤通过覆盖默认的树内存储类来应用 `standard-csi` 存储类。
+
+. 列出存储类：
++
+[source,terminal]
+--
+$ oc get storageclass
+--
++
+[source,terminal]
+.输出示例
+--
+NAME                   PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+standard(default)      cinder.csi.openstack.org   Delete          WaitForFirstConsumer   true                   46h
+standard-csi           kubernetes.io/cinder       Delete          WaitForFirstConsumer   true                   46h
+--
+
+. 对于默认存储类，将注解 `storageclass.kubernetes.io/is-default-class` 的值改为 `false`，如下例所示：
++
+[source,terminal]
+--
+$ oc patch storageclass standard -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+--
+
+. 通过添加或修改注解 `storageclass.kubernetes.io/is-default-class=true`来使另一个存储类作为默认设置。
++
+[source,terminal]
+--
+$ oc patch storageclass standard-csi -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+--
+
+. 验证 PVC 现在默认引用 CSI 存储类：
++
+[source,terminal]
+--
+$ oc get storageclass
+--
++
+[source,terminal]
+.输出示例
+--
+NAME                   PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+standard               kubernetes.io/cinder       Delete          WaitForFirstConsumer   true                   46h
+standard-csi(default)  cinder.csi.openstack.org   Delete          WaitForFirstConsumer   true                   46h
+--
+
+. 可选： 您可以定义一个新的 PVC 而无需指定存储类：
++
+[source,yaml]
+--
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cinder-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+--
++
+没有指定特定存储类的 PVC 会使用默认存储类自动置备。
++
+. 可选： 配置了新文件后，在集群中创建该文件：
++
+[source,terminal]
+--
+$ oc create -f cinder-claim.yaml
+--

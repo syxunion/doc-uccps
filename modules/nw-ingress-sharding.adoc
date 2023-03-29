@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-ingress-controller.adoc
+// * ingress-operator.adoc
+
+[id="nw-ingress-sharding_{context}"]
+= Ingress Controller 分片
+
+Ingress Controller 或路由器是网络流量进入集群的主要机制，因此对它们的需求可能非常大。作为集群管理员，您可以对路由进行分片，以达到以下目的：
+
+* 在 Ingress Controller 或路由器与一些路由之间实现平衡，由此加快对变更的响应。
+* 分配特定的路由，使其具有不同于其它路由的可靠性保证。
+* 允许特定的 Ingress Controller 定义不同的策略。
+* 只允许特定的路由使用其他功能。
+* 在不同的地址上公开不同的路由，例如使内部和外部用户能够看到不同的路由。
+
+Ingress Controller 可以使用路由标签或命名空间标签作为分片方法。

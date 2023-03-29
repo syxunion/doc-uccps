@@ -1,0 +1,161 @@
+// Module included in the following assemblies:
+//
+// * monitoring/troubleshooting-monitoring-issues.adoc
+// * support/troubleshooting/investigating-monitoring-issues.adoc
+
+:_content-type: PROCEDURE
+[id="investigating-why-user-defined-metrics-are-unavailable_{context}"]
+= 检查为什么用户定义的指标不可用
+
+通过 `ServiceMonitor` 资源，您可以确定如何使用用户定义的项目中的服务公开的指标。如果您创建了 `ServiceMonitor` 资源，但无法在 Metrics UI 中看到任何对应的指标，请按该流程中所述的步骤操作。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps  CLI (`oc`).
+* 您已为用户定义的工作负载启用并配置了监控。
+* 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 您已创建了 `ServiceMonitor` 资源。
+
+.流程
+
+. 在服务和 `ServiceMonitor` 资源配置中 *检查对应的标签是否匹配h*。
+.. 获取服务中定义的标签。以下示例在 `ns1` 项目中查询 `prometheus-example-app` 服务：
++
+[source,terminal]
+----
+$ oc -n ns1 get service prometheus-example-app -o yaml
+----
++
+.输出示例
+[source,terminal]
+----
+  labels:
+    app: prometheus-example-app
+----
++
+.. 检查 `ServiceMonitor` 资源配置中的 `matchLabels` `app` 标签是否与上一步中的标签输出匹配：
++
+[source,terminal]
+----
+$ oc -n ns1 get servicemonitor prometheus-example-monitor -o yaml
+----
++
+.输出示例
+----
+spec:
+  endpoints:
+  - interval: 30s
+    port: web
+    scheme: http
+  selector:
+    matchLabels:
+      app: prometheus-example-app
+----
++
+[注意]
+====
+您可以作为具有项目查看权限的开发者检查服务和 `ServiceMonitor` 资源标签。
+====
+
+. 在 `openshift-user-workload-monitoring` 项目中 *检查 Prometheus Operator 的日志* 。
+.. 列出 `openshift-user-workload-monitoring` 项目中的 Pod：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get pods
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                   READY   STATUS    RESTARTS   AGE
+prometheus-operator-776fcbbd56-2nbfm   2/2     Running   0          132m
+prometheus-user-workload-0             5/5     Running   1          132m
+prometheus-user-workload-1             5/5     Running   1          132m
+thanos-ruler-user-workload-0           3/3     Running   0          132m
+thanos-ruler-user-workload-1           3/3     Running   0          132m
+----
++
+.. 从 `prometheus-operator` Pod 中的 `prometheus-operator` 容器获取日志。在以下示例中，Pod 名为 `prometheus-operator-776fcbbd56-2nbfm`:
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring logs prometheus-operator-776fcbbd56-2nbfm -c prometheus-operator
+----
++
+如果服务监控器出现问题，日志可能包含类似本例的错误：
++
+[source,terminal]
+----
+level=warn ts=2020-08-10T11:48:20.906739623Z caller=operator.go:1829 component=prometheusoperator msg="skipping servicemonitor" error="it accesses file system via bearer token file which Prometheus specification prohibits" servicemonitor=eagle/eagle namespace=openshift-user-workload-monitoring prometheus=user-workload
+----
+
+. 直接在 Prometheus UI 中 *查看项目的目标状态* 。
+.. 建立端口转发到 `openshift-user-workload-monitoring`  项目中的 Prometheus 实例：
++
+[source,terminal]
+----
+$ oc port-forward -n openshift-user-workload-monitoring pod/prometheus-user-workload-0 9090
+----
++
+.. 在 Web 浏览器中打开 http://localhost:9090/targets ，并在 Prometheus UI 中直接查看项目的目标状态。检查与目标相关的错误消息。
+
+. 在 `openshift-user-workload-monitoring` 项目中 *为 Prometheus Operator 配置 debug 级别的日志记录* 。
+.. 在 `openshift-user-workload-monitoring` 项目中编辑  `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
++
+.. 在 `data/config.yaml` 下为 `prometheusOperator` 添加 `logLevel: debug`，将日志级别设置为 `debug`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheusOperator:
+      logLevel: debug
+----
++
+.. 保存文件以使改变生效。
++
+[注意]
+====
+在应用日志级别更改时，openshift-user-workload-monitoring 项目中的 prometheus-operator 会自动重启。
+====
++
+.. 确认  `debug` 日志级别已应用到 `openshift-user-workload-monitoring` 项目中的 `prometheus-operator` 部署：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get deploy prometheus-operator -o yaml |  grep "log-level"
+----
++
+.输出示例
+[source,terminal]
+----
+        - --log-level=debug
+----
++
+Debug 级别日志记录将显示 Prometheus Operator 发出的所有调用。
++
+.. 检查 `prometheus-operator`  Pod 是否正在运行：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get pods
+----
++
+[注意]
+====
+如果配置映射中包含了一个未识别的 Prometheus Operator loglevel 值，则 prometheus-operator Pod 可能无法成功重启。
+====
++
+.. 查看 debug 日志，以了解 Prometheus Operator 是否在使用 `ServiceMonitor` 资源。查看日志中的其他相关错误。

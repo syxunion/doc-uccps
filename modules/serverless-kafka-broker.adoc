@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-using-brokers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kafka-broker_{context}"]
+= Creating a Kafka broker by using YAML
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述应用程序，并以可重复的方式描述应用程序。要使用 YAML 创建 Kafka 代理，您必须创建一个 YAML 文件来定义 `Broker`  对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* {ServerlessOperatorName},Knative Eventing 和 `KnativeKafka` 自定义资源已安装在  {product-title} 集群中。
+
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+* 已安装  Uccps CLI (`oc`).
+
+.流程
+
+. 创建一个基于 Kafka 的代理作为 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  annotations:
+    eventing.knative.dev/broker.class: Kafka <1>
+  name: example-kafka-broker
+spec:
+  config:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kafka-broker-config <2>
+    namespace: knative-eventing
+----
+<1> 代理类。如果没有指定，代理使用由集群管理员配置的默认类。要使用 Kafka 代理，这个值必须是 `Kafka`。
+<2> Knative Kafka 代理的默认配置映射。当集群管理员在集群中启用 Kafka 代理功能时，会创建此配置映射。
+
+. 应用基于 Kafka 的代理 YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

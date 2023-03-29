@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-image-change-trigger-identification_{context}"]
+= 识别构建的镜像更改触发器
+
+作为开发人员，如果您有镜像更改触发器，您可以识别启动了上一次构建的镜像更改。这对于调试或故障排除构建非常有用。
+
+.`BuildConfig` 示例
+[source,yaml]
+----
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: bc-ict-example
+  namespace: bc-ict-example-namespace
+spec:
+
+# ...
+
+  triggers:
+  - imageChange:
+      from:
+        kind: ImageStreamTag
+        name: input:latest
+        namespace: bc-ict-example-namespace
+  - imageChange:
+      from:
+        kind: ImageStreamTag
+        name: input2:latest
+        namespace: bc-ict-example-namespace
+    type: ImageChange
+status:
+  imageChangeTriggers:
+  - from:
+      name: input:latest
+      namespace: bc-ict-example-namespace
+    lastTriggerTime: "2021-06-30T13:47:53Z"
+    lastTriggeredImageID: image-registry.openshift-image-registry.svc:5000/bc-ict-example-namespace/input@sha256:0f88ffbeb9d25525720bfa3524cb1bf0908b7f791057cf1acfae917b11266a69
+  - from:
+      name: input2:latest
+      namespace: bc-ict-example-namespace
+    lastTriggeredImageID:  image-registry.openshift-image-registry.svc:5000/bc-ict-example-namespace/input2@sha256:0f88ffbeb9d25525720bfa3524cb2ce0908b7f791057cf1acfae917b11266a69
+
+  lastVersion: 1
+----
+
+[注意]
+====
+本例省略了与镜像更改触发器无关的元素。
+====
+
+.先决条件
+
+* 您已配置了多个镜像更改触发器。这些触发器已触发一个或多个构建。
+
+.流程
+
+. 在 `buildConfig.status.imageChangeTriggers` 中，标识具有最新时间戳的 `lastTriggerTime`。
++
+这个 `ImageChangeTriggerStatus`
+
+
+ 然后使用该构建中的' name '和' namespace '在' buildConfig.spec.triggers '中找到相应的镜像更改触发器。
+
+. 在 `UnderimageChangeTriggers` 下，比较时间戳以标识最新的
+
+.镜像更改触发器
+
+在构建配置中，`buildConfig.spec.triggers` 是构建触发器策略 `BuildTriggerPolicy` 的数组。
+
+每个 `BuildTriggerPolicy` 都有 `type` 字段和指针字段。每个指针字段对应于 type 字段允许的值之一。因此，您只能将 `BuildTriggerPolicy` 设置为一个指针字段。
+
+对于镜像更改触发器，`type` 的值为 `ImageChange`。然后，`imageChange` 字段是指向 `ImageChangeTrigger` 对象的指针，其具有以下字段：
+
+* `lastTriggeredImageID`: 此字段在 统信容器云管理平台 4.8 中已弃用，并将在以后的发行版本中被忽略。它包含从此 `BuildConfig` 触发最后一次构建时的 `ImageStreamTag` 的已解析镜像引用。
+* `paused`: 您可以使用此字段（示例中未显示）暂时禁用此特定镜像更改触发器。
+* `from`: 您使用此字段引用驱动此镜像更改触发器的 ImageStreamTag。其类型是核心 Kubernetes 类型 OwnerReference。
+
+`from` 字段有以下备注字段：
+** `kind`: 对于镜像更改触发器，唯一支持的值是 `ImageStreamTag`
+** `namespace`: 您可以使用此字段指定 `ImageStreamTag` 的命名空间。
+** `name`: 您可以使用此字段指定 `ImageStreamTag`。
+
+.镜像更改触发器状态
+
+在构建配置中，`buildConfig.status.imageChangeTriggers` 是 `ImageChangeTriggerStatus` 元素的数组。每个 `ImageChangeTriggerStatus` 元素都包含上例中所示的 `from`、`lastTriggeredImageID` 和 `lastTriggerTime` 元素。
+
+具有最新 `lastTriggerTime` 的 `ImageChangeTriggerStatus` 触发了最新的构建。您可以使用其 `name` 和 `namespace` 来识别触发构建的 `buildConfig.spec.triggers` 中的镜像更改触发器。
+
+带有最新时间戳的 `lastTriggerTime` 表示最后一个构建的 `ImageChangeTriggerStatus`。此 `ImageChangeTriggerStatus` 的`name` 和 `namespace` 与触发构建的 `buildConfig.spec.triggers` 中的镜像更改触发器相同。
+
+[role="_additional-resources"]
+.其他资源
+
+* link:http://docs.docker.com/v1.7/reference/api/hub_registry_spec/#docker-registry-1-0[v1 容器 registry]

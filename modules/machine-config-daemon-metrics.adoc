@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/nodes-nodes-machine-config-daemon-metrics.adoc
+
+[id="machine-config-daemon-metrics_{context}"]
+= 机器配置守护进程指标
+
+从 统信容器云管理平台 4.3 开始，Machine Config Daemon 提供了一组指标。这些指标可以使用 Prometheus Cluster Monitoring 来访问。
+
+下表介绍了这些指标。
+
+[注意]
+====
+在 *Name* 和 *Description* 栏中带有 * 标记的指标数据代表了可能会造成性能问题的严重错误。这些问题可能会阻止更新和升级操作。
+====
+
+[注意]
+====
+虽然有些条目包含获取特定日志的命令，但最完整的日志数据可以通过 `oc adm must-gather` 命令获得。
+====
+
+[cols="1,1,2,2", options="header"]
+.MCO 指标
+|===
+|名称
+|格式
+|描述
+|节点
+
+
+|`mcd_host_os_and_version`
+|`[]string{"os", "version"}`
+|显示运行 MCD 的操作系统，如 Uswift 或 RHEL。如果是 Uswift，则会提供版本信息。
+|
+
+
+|`mcd_drain_err*`
+|`{"drain_time", "err"}`
+|在排空失败时出现的错误。 *
+|虽然排空可能需要多次尝试方可成功，但最终失败的排空会操作会阻止更新进行。drain_time 指标显示排空操作所用的时间，这可帮助进行故障排除。
+
+如需进一步调查，请运行以下命令查看日志：
+
+`$ oc logs -f -n openshift-machine-config-operator machine-config-daemon-<hash> -c machine-config-daemon`
+
+|`mcd_pivot_err*`
+|`[]string{"err", "node", "pivot_target"}`
+|pivot 过程中遇到的日志错误。 *
+|pivot 错误可能会导致 OS 升级无法进行。
+
+要进行进一步调查，请运行这个命令访问该节点并查看其所有日志：
+
+`$ oc debug node/<node> -- chroot /host journalctl -u pivot.service`
+
+或者，可以运行这个命令只查看来自 `machine-config-daemon` 容器中的日志 ：
+
+`$ oc logs -f -n openshift-machine-config-operator machine-config-daemon-<hash> -c machine-config-daemon`
+
+|`mcd_state`
+|`[]string{"state", "reason"}`
+|指定节点的Machine Config Daemon 状态。可能的状态是 "Done", "Working", 和 "Degraded". 如果是 "Degraded" ，则会包括原因。
+|如需进一步调查，请运行以下命令查看日志：
+
+`$ oc logs -f -n openshift-machine-config-operator machine-config-daemon-<hash> -c machine-config-daemon`
+
+|`mcd_kubelet_state*`
+|`[]string{"err"}`
+|日志 kubelet 健康失败。  *
+|这应该为空，故障计数为 0。如果失败数超过 2，则代表超过了阈值。这表示 kubelet 健康可能存在问题。
+
+要进行进一步调查，请运行这个命令访问该节点并查看其所有日志：
+
+`$ oc debug node/<node> -- chroot /host journalctl -u kubelet`
+
+|`mcd_reboot_err*`
+|`[]string{"message", "err", "node"}`
+|重启失败以及相应错误的日志。 *
+|这应该为空，代表重启成功。
+
+如需进一步调查，请运行以下命令查看日志：
+
+`$ oc logs -f -n openshift-machine-config-operator machine-config-daemon-<hash> -c machine-config-daemon`
+
+|`mcd_update_state`
+|`[]string{"config", "err"}`
+|记录配置更新的成功或失败以及相应的错误。
+|预期的值为 `rendered-master/rendered-worker-XXXX`。如果更新失败，则会出现错误。
+
+如需进一步调查，请运行以下命令查看日志：
+
+`$ oc logs -f -n openshift-machine-config-operator machine-config-daemon-<hash> -c machine-config-daemon`
+|===

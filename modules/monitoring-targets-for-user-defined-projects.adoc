@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * monitoring/monitoring-overview.adoc
+
+:_content-type: CONCEPT
+[id="monitoring-targets-for-user-defined-projects_{context}"]
+= 用户定义的项目的监控目标
+
+为用户定义的项目启用监控后，您可以监控：
+
+* 通过用户定义的项目中的服务端点提供的指标。
+* 在用户定义的项目中运行的 Pod。

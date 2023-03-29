@@ -1,0 +1,38 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="dist-tracing-sidecar-automatic_{context}"]
+= 自动注入 sidecar
+
+统信容器云管理平台分布式追踪 Operator 可以将 Jaeger Agent sidecar 注入部署工作负载。要启用 sidecar 自动注入，将  `sidecar.jaegertracing.io/inject` 注解设置为字符串 true，或设置为由运行 `$ oc get jaegers`返回的分布式追踪平台实例名称。当您指定 true 时，与部署相同的命名空间只能有一个分布式追踪平台实例。否则，Operator 无法决定要使用的分布式追踪平台实例。部署中的特定分布式追踪平台实例名称的优先级高于其命名空间中应用的 true。
+
+以下片段演示了一个简单的应用程序，它将注入一个 sidecar，代理指向同一命名空间中可用的单个分布式追踪平台实例：
+
+.自动 sidecar 注入示例
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true" # <1>
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: acme/myapp:myversion
+----
+
+<1> 设置为 true 或 Jaeger 实例名称。
+
+当 sidecar 被注入后，可以在 `localhost` 上的默认位置访问代理。

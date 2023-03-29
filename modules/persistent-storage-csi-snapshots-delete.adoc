@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-csi-snapshots-delete_{context}"]
+= 删除卷快照
+
+您可以配置统信容器云管理平台如何删除卷快照。
+
+.流程
+
+. 指定 `VolumeSnapshotClass` 对象中所需的删除策略，如下例所示：
++
+.volumesnapshotclass.yaml
+[source,yaml]
+----
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: csi-hostpath-snap
+driver: hostpath.csi.k8s.io
+deletionPolicy: Delete <1>
+----
+<1> 当删除卷快照时，如果设置了 `Delete` 值，则底层快照会与 `VolumeSnapshotContent` 对象一起删除。如果设置了 `Retain` 值，则基本快照和 `VolumeSnapshotContent` 对象仍保留。
+  +
+如果设置了 `Retain` 值，且在不删除对应的 `VolumeSnapshotContent`对象的情况下删除了 `VolumeSnapshot` 对象，则内容会保留。快照本身也保留在存储后端中。
+
+. 输入以下命令删除卷快照：
+
++
+[source,terminal]
+----
+$ oc delete volumesnapshot <volumesnapshot_name>
+----
++
+.输出示例
+[source, terminal]
+----
+volumesnapshot.snapshot.storage.k8s.io "mysnapshot" deleted
+----
+. 如果删除策略被设置为 `Retain`，请输入以下命令删除卷快照内容：
++
+[source,terminal]
+----
+$ oc delete volumesnapshotcontent <volumesnapshotcontent_name>
+----
++
+. 可选：如果 `VolumeSnapshot` 对象没有成功删除，请输入以下命令删除左侧资源的所有终结程序，以便删除操作可以继续进行：
++
+[重要]
+====
+如果您确信不存在来自持久性卷声明或卷快照内容到 `VolumeSnapshot` 对象的引用时，才删除终结器。即使使用了 `--force` 选项，在删除所有终结器前，删除操作也不会删除快照对象。
+====
++
+[source,terminal]
+----
+$ oc patch -n $PROJECT volumesnapshot/$NAME --type=merge -p '{"metadata": {"finalizers":null}}'
+----
++
+.输出示例
+[source, terminal]
+----
+volumesnapshotclass.snapshot.storage.k8s.io "csi-ocs-rbd-snapclass" deleted
+----
++
+删除终结器并删除卷快照。

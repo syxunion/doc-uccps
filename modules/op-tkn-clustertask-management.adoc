@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-clustertask-management-commands_{context}"]
+= ClusterTask 管理命令
+
+== clustertask
+管理 ClusterTasks。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn clustertask --help
+----
+
+== clustertask delete
+删除集群中的 ClusterTask 资源。
+
+.示例： 删除 `mytask1` 和 `mytask2` ClusterTasks
+[source,terminal]
+----
+$ tkn clustertask delete mytask1 mytask2
+----
+
+== clustertask describe
+描述 ClusterTask。
+
+.示例： 描述 `mytask` ClusterTask
+[source,terminal]
+----
+$ tkn clustertask describe mytask1
+----
+
+== clustertask list
+列出 ClusterTasks。
+
+.示例： 列出 ClusterTasks
+[source,terminal]
+----
+$ tkn clustertask list
+----
+== clustertask start
+启动 ClusterTasks。
+
+.示例： 启动 `mytask` ClusterTask
+[source,terminal]
+----
+$ tkn clustertask start mytask
+----

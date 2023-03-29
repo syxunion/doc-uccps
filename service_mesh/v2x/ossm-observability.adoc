@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="ossm-observability"]
+= Metrics, logs, and traces
+include::_attributes/common-attributes.adoc[]
+:context: observability
+
+toc::[]
+
+O将应用程序添加到网格后，您可以观察通过应用程序的数据流。如果您没有安装自己的应用程序，可以通过安装 xref:../../service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc#ossm-tutorial-bookinfo-overview_ossm-create-mesh[Bookinfo 示例应用程序]来了解 统信容器云管理平台服务网格 中的可观察性如何工作。
+
+include::modules/ossm-observability-addresses.adoc[leveloffset=+1]
+
+include::modules/ossm-kiali-accessing-console.adoc[leveloffset=+1]
+
+include::modules/ossm-observability-visual.adoc[leveloffset=+1]
+
+include::modules/ossm-kiali-viewing-logs.adoc[leveloffset=+2]
+
+include::modules/ossm-kiali-viewing-metrics.adoc[leveloffset=+2]
+
+include::modules/ossm-distr-tracing.adoc[leveloffset=+1]
+
+include::modules/ossm-config-external-jaeger.adoc[leveloffset=+2]
+
+include::modules/ossm-config-sampling.adoc[leveloffset=+2]
+
+include::modules/ossm-jaeger-accessing-console.adoc[leveloffset=+1]
+
+include::modules/ossm-access-grafana.adoc[leveloffset=+1]
+
+include::modules/ossm-access-prometheus.adoc[leveloffset=+1]

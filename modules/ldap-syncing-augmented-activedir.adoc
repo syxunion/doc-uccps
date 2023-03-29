@@ -1,0 +1,91 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-augmented-activedir_{context}"]
+= 使用增强 Active Directory 模式同步组
+
+在增强 Active Directory 模式中，用户（Jane 和 Jim）和组都作为第一类条目存在于 `LDAP` 服务器中，组成员资格则存储在用户的属性中。以下 ldif 片段定义了这个模式的用户和组：
+
+.使用增强 Active Directory 模式的 LDAP 条目： `increaseded_active_directory.ldif`
+[source,ldif]
+----
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+ou: users
+
+dn: cn=Jane,ou=users,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: testPerson
+cn: Jane
+sn: Smith
+displayName: Jane Smith
+mail: jane.smith@example.com
+memberOf: cn=admins,ou=groups,dc=example,dc=com <1>
+
+dn: cn=Jim,ou=users,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: testPerson
+cn: Jim
+sn: Adams
+displayName: Jim Adams
+mail: jim.adams@example.com
+memberOf: cn=admins,ou=groups,dc=example,dc=com
+
+dn: ou=groups,dc=example,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=admins,ou=groups,dc=example,dc=com <2>
+objectClass: groupOfNames
+cn: admins
+owner: cn=admin,dc=example,dc=com
+description: System Administrators
+member: cn=Jane,ou=users,dc=example,dc=com
+member: cn=Jim,ou=users,dc=example,dc=com
+----
+<1> 用户的组成员资格列为用户的属性。
+<2> 组是在 LDAP 服务器上的第一类条目。
+
+.先决条件
+
+* 创建配置文件。
+
+.流程
+
+* 使用 `augmented_active_directory_config.yaml` 文件运行同步：
++
+[source,terminal]
+----
+$ oc adm groups sync --sync-config=augmented_active_directory_config.yaml --confirm
+----
++
+统信容器云管理平台 创建以下组记录作为上述同步操作的结果：
++
+.使用 `augmented_active_directory_config.yaml` 文件创建的统信容器云管理平台组
+
+[source,yaml]
+----
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  annotations:
+    openshift.io/ldap.sync-time: 2015-10-13T10:08:38-0400 <1>
+    openshift.io/ldap.uid: cn=admins,ou=groups,dc=example,dc=com <2>
+    openshift.io/ldap.url: LDAP_SERVER_IP:389 <3>
+  creationTimestamp:
+  name: admins <4>
+users: <5>
+- jane.smith@example.com
+- jim.adams@example.com
+----
+<1> 此统信容器云管理平台组与 LDAP 服务器最后一次同步的时间，采用 ISO 6801 格式。
+<2> LDAP 服务器上组的唯一标识符。
+<3> 存储该组记录的 LDAP 服务器的 IP 地址和主机。
+<4> 根据同步文件指定的组的名称。
+<5> 属于组的成员的用户，名称由同步文件指定。

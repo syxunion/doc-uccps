@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * machine_management/deploying-machine-health-checks.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="machine-health-checks-creating_{context}"]
+= 创建 MachineHealthCheck 资源
+
+您可以为集群中的所有 `MachineSet` 创建 `MachineHealthCheck` 资源。您不应该创建针对 control plane 机器的 `MachineHealthCheck` 资源。
+
+.先决条件
+
+* 安装 `oc` 命令行界面。
+
+.流程
+
+. 创建一个 `healthcheck.yml` 文件，其中包含您的机器健康检查的定义。
+
+. 将 `healthcheck.yml` 文件应用到您的集群：
++
+[source,terminal]
+----
+$ oc apply -f healthcheck.yml
+----

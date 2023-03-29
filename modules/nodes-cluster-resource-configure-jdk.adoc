@@ -1,0 +1,77 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-configure.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-resource-configure-jdk_{context}"]
+= 了解 统信容器云管理平台 的 OpenJDK 设置
+
+默认的 OpenJDK 设置在容器化环境中效果不佳。因此在容器中运行 OpenJDK 时，务必要提供一些额外的 Java 内存设置。
+
+JVM 内存布局比较复杂，并且视版本而异，因此本文不做详细讨论。但作为在容器中运行 OpenJDK 的起点，至少以下三个于内存相关的任务非常重要：
+
+. 覆盖 JVM 最大堆大小。
+
+. 在可能的情况下，促使 JVM 向操作系统释放未使用的内存。
+
+. 确保正确配置了容器中的所有 JVM 进程。
+
+优化容器中运行的 JVM 工作负载已超出本文讨论范畴，并且可能涉及设置多个额外的 JVM 选项。
+
+[id="nodes-cluster-resource-configure-jdk-heap_{context}"]
+== 了解如何覆盖 JVM 最大堆大小
+
+对于许多 Java 工作负载，JVM 堆是最大的内存用户。目前，OpenJDK 默认允许将计算节点最多 1/4 (1/-XX:MaxRAMFraction) 的内存用于该堆，不论 OpenJDK 是否在容器内运行。因此，务必要覆盖此行为，特别是设置了容器内存限制时。
+
+达成以上目标至少有两种方式：
+
+. 如果设置了容器内存限制，并且 JVM 支持那些实验性选项，请设置 `-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap`.
++
+[注意]
+====
+`UseCGroupMemoryLimitForHeap`  选项已在 JDK 11 中删除。使用 `-XX:+UseContainerSupport` 替代。
+====
++
+这会将 `-XX:MaxRAM` 设置为容器内存限制，并将最大堆大小 (`-XX:MaxHeapSize` / `-Xmx`) 设置为 1/`-XX:MaxRAMFraction` (默认为 1/4).
+
+. 直接覆盖 `-XX:MaxRAM`, `-XX:MaxHeapSize` 或 `-Xmx`。
++
+这个选项涉及对值进行硬编码，但也有允许计算安全裕度的好处。
+
+[id="nodes-cluster-resource-configure-jdk-unused_{context}"]
+== 了解如何促使 JVM 向操作系统释放未用的内存
+
+默认情况下，OpenJDK 不会主动向操作系统退还未用的内存。这可能适合许多容器化的 Java 工作负载，但也有明显的例外，例如额外活跃进程与容器内 JVM 共存的工作负载，这些额外进程是原生或附加的 JVM，或者这两者的组合。
+
+统信容器云管理平台 Jenkins maven slave 镜像使用以下 JVM 参数来促使 JVM 向操作系统释放未使用的内存：
+
+[source,terminal]
+----
+-XX:+UseParallelGC
+-XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4
+-XX:AdaptiveSizePolicyWeight=90.
+----
+
+这些参数旨在当分配的内存超过 110％ 使用中内存时  (`-XX:MaxHeapFreeRatio`) 将堆内存返还给操作系统，这将在垃圾回收器上最多花费 20% 的 CPU 时间 (`-XX:GCTimeRatio`)。应用程序堆分配一定不会小于初始堆分配 (overridden by `-XX:InitialHeapSize` / `-Xms` 覆盖)。调节 Java 在 Uccps 中的内存占用（第 1 部分）、调节 Java 在 Uccps 中的内存占用（第 2 部分）以及 OpenJDK 和容器提供了其他的详细信息。
+
+[id="nodes-cluster-resource-configure-jdk-proc_{context}"]
+== 了解如何确保正确配置容器中的所有 JVM 进程
+
+如果多个 JVM 在同一容器中运行，则必须保证它们的配置都正确无误。如果有许多工作负载，需要为每个 JVM 分配一个内存预算百分比，留出较大的额外安全裕度。
+
+许多 Java 工具使用不同的环境变量 (`JAVA_OPTS`, `GRADLE_OPTS`, `MAVEN_OPTS` 等) 来配置它们的 JVM，或许难以确保将正确的设置传递给正确的 JVM。
+
+OpenJDK 始终尊重 `JAVA_TOOL_OPTIONS` 环境变量，在 `JAVA_TOOL_OPTIONS` 中指定的值会被 JVM 命令行中指定的其他选项覆盖。默认情况下，为确保在 slave 镜像中运行的所有 JVM 工作负载都默认使用这些选项，统信容器云管理平台 Jenkins maven slave 镜像将进行以下设置：
+
+[source,terminal]
+----
+JAVA_TOOL_OPTIONS="-XX:+UnlockExperimentalVMOptions
+-XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true"
+----
+
+[注意]
+====
+`UseCGroupMemoryLimitForHeap` 选项已在 JDK 11 中删除。使用 `-XX:+UseContainerSupport` 替代。
+====
+
+这不能保证不需要额外选项，只是用作一个实用的起点。

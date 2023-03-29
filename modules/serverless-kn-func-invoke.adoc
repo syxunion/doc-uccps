@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-getting-started.adoc
+// * serverless/cli_tools/kn-func-ref.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kn-func-invoke_{context}"]
+= 使用测试事件调用部署的功能
+
+您可以使用 `kn func invoke`  CLI 命令发送测试请求，在本地或  {product-title} 集群中调用功能。您可以使用这个命令来测试功能是否正常工作并且能够正确接收事件。本地调用函数可用于在功能开发期间进行快速测试。在测试与生产环境更接近的测试时，在集群中调用函数非常有用。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 已安装 Knative  (`kn`) CLI.
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在  {product-title} 中创建应用程序和其他工作负载。
+* 您必须已部署了要调用的功能。
+
+.流程
+
+* 调用函数：
++
+[source,terminal]
+----
+$ kn func invoke
+----
+** `kn func invoke` 命令仅在当前运行本地容器镜像时或在集群中部署功能时才有效。
+** `kn func invoke` 命令默认在本地目录上执行，并假定此目录是一个功能项目。

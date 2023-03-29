@@ -1,0 +1,28 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-working"]
+= 操作节点
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-working
+
+toc::[]
+
+作为管理员，您可以执行若干任务来提高集群的效率。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-nodes-working-evacuating.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-working-updating.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-working-marking.adoc[leveloffset=+1]
+
+== 删除节点
+
+include::modules/nodes-nodes-working-deleting.adoc[leveloffset=+2]
+
+include::modules/nodes-nodes-working-deleting-bare-metal.adoc[leveloffset=+2]
+

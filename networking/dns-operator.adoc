@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="dns-operator"]
+= 统信容器云管理平台 中的 DNS Operator
+include::_attributes/common-attributes.adoc[]
+:context: dns-operator
+
+toc::[]
+
+DNS Operator 部署并管理 CoreDNS，以为 pod 提供名称解析服务。它在 统信容器云管理平台 中启用了基于 DNS 的 Kubernetes 服务发现。
+
+include::modules/nw-dns-operator.adoc[leveloffset=+1]
+
+include::modules/nw-dns-operator-managementState.adoc[leveloffset=+1]
+
+include::modules/nw-controlling-dns-pod-placement.adoc[leveloffset=+1]
+
+include::modules/nw-dns-view.adoc[leveloffset=+1]
+
+include::modules/nw-dns-forward.adoc[leveloffset=+1]
+
+include::modules/nw-dns-operator-status.adoc[leveloffset=+1]
+
+include::modules/nw-dns-operator-logs.adoc[leveloffset=+1]
+
+include::modules/nw-dns-loglevel.adoc[leveloffset=+1]
+
+include::modules/nw-dns-operatorloglevel.adoc[leveloffset=+1]

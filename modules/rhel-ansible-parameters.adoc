@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="rhel-ansible-parameters_{context}"]
+= Ansible hosts 文件的必要参数
+
+在将 UnionTech OS Server 20(UOS20) 计算机器添加到集群之前，必须在 Ansible hosts 文件中定义以下参数。
+
+[cols="1,2,2",options="header"]
+|===
+|参数 |描述 |值
+
+|`ansible_user`
+|能够以免密码方式进行 SSH 身份验证的 SSH 用户。如果使用基于 SSH 密钥的身份验证，则必须使用 SSH 代理来管理密钥。
+|系统上的用户名。默认值为 `root`。
+
+|`ansible_become`
+|如果 `ansible_user` 的值不是 root，您必须将 `ansible_become` 设置为 True，并且您指定为 `ansible_user` 的用户必须配置有免密码 sudo 访问权限。
+|`True`. 如果值不是 `True`，请不要指定和定义此参数。
+
+|`openshift_kubeconfig_path`
+|指定包含集群的 `kubeconfig` 文件的本地目录的路径和文件名。
+|配置文件的路径和名称。
+
+|===

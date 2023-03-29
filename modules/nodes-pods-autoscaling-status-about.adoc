@@ -1,0 +1,97 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-autoscaling-status-about_{context}"]
+
+= 使用 CLI 了解 pod 横向自动扩展状态条件
+
+您可以使用设置的状态条件来判断 pod 横向自动扩展 (HPA) 是否能够缩放，以及目前是否受到某种方式的限制。
+
+HPA 状态条件可通过 `v2` 版本的自动扩展 API 使用。
+
+HPA 可以通过下列状态条件给予响应：
+
+* `AbleToScale` 条件指示 HPA 是否能够获取和更新指标，以及是否有任何与退避相关的条件阻碍了缩放。
+** `True` 条件表示允许缩放。
+** `False` 条件表示因为指定原因不允许缩放。
+
+* `ScalingActive` 条件指示 HPA 是否已启用（例如，目标的副本数不为零），并且可以计算所需的指标。
+** `True` 条件表示指标工作正常。
+** `False` 条件通常表示获取指标时出现问题。
+
+* `ScalingLimited` 条件表示所需的规模由 pod 横向自动扩展限定最大或最小限制。
+** `True` 条件表示您需要提高或降低最小或最大副本数才能进行缩放。
+** `False` 条件表示允许请求的缩放。
++
+[source,terminal]
+----
+$ oc describe hpa cm-test
+----
++
+.输出示例
+[source,text]
+----
+Name:                           cm-test
+Namespace:                      prom
+Labels:                         <none>
+Annotations:                    <none>
+CreationTimestamp:              Fri, 16 Jun 2017 18:09:22 +0000
+Reference:                      ReplicationController/cm-test
+Metrics:                        ( current / target )
+  "http_requests" on pods:      66m / 500m
+Min replicas:                   1
+Max replicas:                   4
+ReplicationController pods:     1 current / 1 desired
+Conditions: <1>
+  Type              Status    Reason              Message
+  ----              ------    ------              -------
+  AbleToScale       True      ReadyForNewScale    the last scale time was sufficiently old as to warrant a new scale
+  ScalingActive     True      ValidMetricFound    the HPA was able to successfully calculate a replica count from pods metric http_request
+  ScalingLimited    False     DesiredWithinRange  the desired replica count is within the acceptable range
+Events:
+----
+<1> pod 横向自动扩展状态消息。
+
+// The above output and bullets from https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#appendix-horizontal-pod-autoscaler-status-conditions
+
+下例中是一个无法缩放的 pod：
+
+.输出示例
+[source,text]
+----
+Conditions:
+  Type         Status  Reason          Message
+  ----         ------  ------          -------
+  AbleToScale  False   FailedGetScale  the HPA controller was unable to get the target's current scale: no matches for kind "ReplicationController" in group "apps"
+Events:
+  Type     Reason          Age               From                       Message
+  ----     ------          ----              ----                       -------
+  Warning  FailedGetScale  6s (x3 over 36s)  horizontal-pod-autoscaler  no matches for kind "ReplicationController" in group "apps"
+----
+
+下例中是一个无法获得缩放所需指标的 pod：
+
+.输出示例
+[source,text]
+----
+Conditions:
+  Type                  Status    Reason                    Message
+  ----                  ------    ------                    -------
+  AbleToScale           True     SucceededGetScale          the HPA controller was able to get the target's current scale
+  ScalingActive         False    FailedGetResourceMetric    the HPA was unable to compute the replica count: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+----
+
+下例中是一个请求的自动缩放低于所需下限的 pod：
+
+.输出示例
+[source,text]
+----
+Conditions:
+  Type              Status    Reason              Message
+  ----              ------    ------              -------
+  AbleToScale       True      ReadyForNewScale    the last scale time was sufficiently old as to warrant a new scale
+  ScalingActive     True      ValidMetricFound    the HPA was able to successfully calculate a replica count from pods metric http_request
+  ScalingLimited    False     DesiredWithinRange  the desired replica count is within the acceptable range
+----

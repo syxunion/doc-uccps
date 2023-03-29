@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/secondary_scheduler/nodes-secondary-scheduler-configuring.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-secondary-scheduler-configuring-console_{context}"]
+= 部署二级调度程序
+
+安装 Secondary Scheduler Operator 后，您可以部署二级调度程序。
+
+.Prerequisities
+
+* 您可以使用 `cluster-admin` 权限访问集群。
+* 访问 统信容器云管理平台 web 控制台。
+* 安装了 Secondary Scheduler Operator for UnionTech Uccps。
+
+.流程
+
+. 登陆到 统信容器云管理平台 Web 控制台。
+. 创建配置映射来保存辅助调度程序的配置。
+.. 导航到 *工作负载* -> *配置映射*.
+.. 点 *创建配置映射*.
+.. 在 YAML 编辑器中，输入包含所需 `KubeSchedulerConfiguration`  配置的配置映射定义。例如：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "secondary-scheduler-config"                  <1>
+  namespace: "openshift-secondary-scheduler-operator" <2>
+data:
+  "config.yaml": |
+    apiVersion: kubescheduler.config.k8s.io/v1beta3
+    kind: KubeSchedulerConfiguration                  <3>
+    leaderElection:
+      leaderElect: false
+    profiles:
+      - schedulerName: secondary-scheduler            <4>
+        plugins:                                      <5>
+          score:
+            disabled:
+              - name: NodeResourcesBalancedAllocation
+              - name: NodeResourcesLeastAllocated
+----
+<1> 配置映射的名称。在创建 `SecondaryScheduler` CR 时，这在 *调度程序配置* 字段中使用。
+<2> 配置映射必须在  `openshift-secondary-scheduler-operator` 命名空间中创建。
+<3> 辅助调度程序的 `KubeSchedulerConfiguration` 资源。如需更多信息，请参阅 Kubernetes API 文档中的 KubeSchedulerConfiguration。
+<4> 次要调度程序的名称。将 spec.schedulerName 字段设置为这个值的 Pod 会被使用此次要调度程序调度。
+<5> 为次要调度程序启用或禁用插件。如需列表默认调度插件，请参阅 Kubernetes 文档中的 调度插件。
+
+.. 点 *Create*.
+
+. 创建 `SecondaryScheduler` CR:
+.. 导航到 *Operators* -> *Installed Operators*.
+.. 为 UnionTech Uccps 选择 *Secondary Scheduler Operator*。
+.. 选择  *Secondary Scheduler* 选项卡，然后点击 *Create SecondaryScheduler*.
+.. *Name* 字段默认为  `cluster`; 不要更改这个名称; 
+.. *Scheduler Config* 字段默认为 `secondary-scheduler-config`。 确保这个值与此流程前面创建的配置映射的名称匹配。
+.. 在 *Scheduler Image* 字段中，输入自定义调度程序的镜像名称。
++
+[重要]
+====
+统信不直接支持自定义辅助调度程序的功能。
+====
+
+.. 点 *Create*.

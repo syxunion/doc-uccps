@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/using-node-tuning-operator.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="supported-tuned-daemon-plug-ins_{context}"]
+= 支持的 TuneD 守护进程插件
+
+在使用 Tuned CR 的 profile: 部分中定义的自定义配置集时，以下 TuneD 插件都受到支持，但 `[main]`  部分除外：
+
+* audio
+* cpu
+* disk
+* eeepc_she
+* modules
+* mounts
+* net
+* scheduler
+* scsi_host
+* selinux
+* sysctl
+* sysfs
+* usb
+* video
+* vm
+* bootloader
+
+其中一些插件提供了不受支持的动态性能优化功能。目前不支持以下 TuneD 插件：
+
+* script
+* systemd
+
+如需更多信息，请参阅 Available TuneD Plug-ins 和 Getting Started with TuneD 。

@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+// * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-configuring-application_{context}"]
+= 为 统信容器云管理平台 配置应用程序
+
+要让您的应用程序与 统信容器云管理平台 中运行的 PostgreSQL 数据库服务通信，必须编辑 `config/database.yml` 中的 `default` 部分，以便在创建数据库服务时使用环境变量，稍后会对这些变量进行定义。
+
+.流程
+
+* 使用预定义的变量按照以下方式编辑 `config/database.yml` 中的 `default` 部分：
++
+.`config/database YAML` 文件示例
+[source,eruby]
+----
+<% user = ENV.key?("POSTGRESQL_ADMIN_PASSWORD") ? "root" : ENV["POSTGRESQL_USER"] %>
+<% password = ENV.key?("POSTGRESQL_ADMIN_PASSWORD") ? ENV["POSTGRESQL_ADMIN_PASSWORD"] : ENV["POSTGRESQL_PASSWORD"] %>
+<% db_service = ENV.fetch("DATABASE_SERVICE_NAME","").upcase %>
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV["POSTGRESQL_MAX_CONNECTIONS"] || 5 %>
+  username: <%= user %>
+  password: <%= password %>
+  host: <%= ENV["#{db_service}_SERVICE_HOST"] %>
+  port: <%= ENV["#{db_service}_SERVICE_PORT"] %>
+  database: <%= ENV["POSTGRESQL_DATABASE"] %>
+----

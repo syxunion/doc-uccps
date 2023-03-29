@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using_images/using-images-source-to-image.adoc
+
+:_content-type: CONCEPT
+[id="images-s2i-build-process-overview_{context}"]
+= Source-to-image 构建过程概述
+
+Source-to-Image（S2I）通过将源代码注入准备要运行的源代码的容器来生成可随时运行的镜像。它执行以下步骤：
+
+. 运行 `FROM <builder image>` 命令
+. 将源代码复制到构建器镜像中定义的位置
+. 在构建器镜像中运行 assemble 脚本
+. 将构建器镜像中的 run 脚本设置为默认命令
+
+然后，Buildah 会创建容器镜像。

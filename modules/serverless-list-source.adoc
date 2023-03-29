@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-listing-event-sources.adoc
+
+:_content-type: REFERENCE
+[id="serverless-list-source_{context}"]
+= 使用 Knative CLI 列出可用事件源
+
+使用 Knative (kn) CLI 提供了简化和直观的用户界面，用来查看集群中的现有事件源。您可以使用  `kn source list` 命令列出现有的事件源。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 已安装 Knative Knative (`kn`) CLI.
+
+.流程
+
+. 列出终端中的现有事件源：
++
+[source,terminal]
+----
+$ kn source list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME   TYPE              RESOURCE                               SINK         READY
+a1     ApiServerSource   apiserversources.sources.knative.dev   ksvc:eshow2   True
+b1     SinkBinding       sinkbindings.sources.knative.dev       ksvc:eshow3   False
+p1     PingSource        pingsources.sources.knative.dev        ksvc:eshow1   True
+----
+
+. 可选： 您可以使用 `--type`  标志来只列出特定类型的事件源：
++
+[source,terminal]
+----
+$ kn source list --type <event_source_type>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn source list --type PingSource
+----
++
+.输出示例
+[source,terminal]
+----
+NAME   TYPE              RESOURCE                               SINK         READY
+p1     PingSource        pingsources.sources.knative.dev        ksvc:eshow1   True
+----

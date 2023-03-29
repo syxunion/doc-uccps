@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+:_content-type: PROCEDURE
+[id="contributing-quick-starts_{context}"]
+= 快速开始
+
+统信容器云管理平台 引入了由 `ConsoleQuickStart` 对象定义的快速启动自定义资源。operator 和管理员可以使用此资源来快速使用集群。
+
+.先决条件
+
+* 您必须具有集群管理员特权。
+
+.流程
+
+. 要创建新快速启动，请运行：
++
+[source,yaml]
+----
+$ oc get -o yaml consolequickstart spring-with-s2i > my-quick-start.yaml
+----
+
+. 运行：
++
+[source,yaml]
+----
+$ oc create -f my-quick-start.yaml
+----
+
+. 根据本文档中介绍的指南更新 YAML 文件。
+
+. 保存您的编辑。
+
+[id="viewing-quick-start-api-documentation_{context}"]
+== 查看快速启动 API 文档
+
+.流程
+
+* 要查看快速启动 API 文档，请运行：
++
+[source,terminal]
+----
+$ oc explain consolequickstarts
+----
+
+运行 `oc explain -h` 以了解有关 `oc explain` 使用的更多信息。

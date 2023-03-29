@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ovn-kubernetes.adoc
+
+[id="nw-ovn-kubernetes-limitations_{context}"]
+= OVN-Kubernetes 限制
+
+OVN-Kubernetes Container Network Interface(CNI)集群网络供应商有以下限制：
+
+* OVN-Kubernetes 不支持将 Kubernetes 服务的内部流量策略设置为 `local`。当您添加类型为 ClusterIP、LoadBalancer、NodePort 或使用外部 IP 的服务时，这个限制可能会影响到应用程序的网络通信。
+
+// The foll limitation is also recorded in the installation section.
+* 对于为双栈网络配置的集群，IPv4 和 IPv6 流量都必须使用与默认网关相同的网络接口。如果不满足此要求，则 ovnkube-node 守护进程集中的主机上的容器集进入 CrashLoopBackOff 状态。如果您使用类似 oc get pod -n openshift-ovn-kubernetes -l app=ovnkube-node -o yaml 的命令显示 pod，则 status 字段包含更多有关默认网关的消息，如以下输出所示：
++
+[source,terminal]
+----
+I1006 16:09:50.985852   60651 helper_linux.go:73] Found default gateway interface br-ex 192.168.127.1
+I1006 16:09:50.985923   60651 helper_linux.go:73] Found default gateway interface ens4 fe80::5054:ff:febe:bcd4
+F1006 16:09:50.985939   60651 ovnkube.go:130] multiple gateway interfaces detected: br-ex ens4
+----
++
+唯一的解析是重新配置主机网络，以便两个 IP 系列都针对默认网关使用相同的网络接口。
+

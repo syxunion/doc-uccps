@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+// * openshift_images/tagging-images
+
+:_content-type: PROCEDURE
+[id="images-referencing-images-imagestreams_{context}"]
+= 引用镜像流中的镜像
+
+您可以通过以下引用类型，使用标签来引用镜像流中的镜像。
+
+.镜像流引用类型
+[width="50%",options="header"]
+|===
+|引用类型 |描述
+
+|`ImageStreamTag`
+|`ImageStreamTag`  用于引用或检索给定镜像流和标签的镜像。
+
+|`ImageStreamImage`
+|`ImageStreamImage` 用于引用或检索给定镜像流和镜像 `sha` ID 的镜像。
+
+|`DockerImage`
+|`DockerImage` 用于引用或检索给定外部 `registry` 的镜像。其名称使用标准 Docker 拉取（pull）规格。
+|===
+
+查看镜像流定义示例时，您可能会发现它们包含 `ImageStreamTag` 的定义以及对 `DockerImage` 的引用，但与 `ImageStreamImage` 无关。
+
+这是因为当您将镜像导入或标记到镜像流时，统信容器云管理平台 中会自动创建 `ImageStreamImage` 对象。您不必在用于创建镜像流的任何镜像流定义中显式定义 `ImageStreamImage` 对象。
+
+.流程
+
+* 要引用给定镜像流和标签的镜像，请使用 `ImageStreamTag`:
++
+----
+<image_stream_name>:<tag>
+----
+
+* 要引用给定镜像流的镜像和镜像 `sha` ID，请使用 `ImageStreamImage`：
++
+----
+<image_stream_name>@<id>
+----
++
+`<id>` 是针对特定镜像的不可变标识符，也称摘要。
+
+* 要引用或检索给定外部 registry 的镜像，请使用 `DockerImage`:
++
+----
+openshift/ruby-20-centos7:2.0
+----
++
+[注意]
+====
+如果未指定标签，则会假定使用 `latest` 标签。
+====
++
+此外，您还可引用第三方 registry：
++
+----
+registry.redhat.io/rhel7:latest
+----
++
+或者带有摘要的镜像：
++
+----
+centos/ruby-22-centos7@sha256:3a335d7d8a452970c5b4054ad7118ff134b3a6b50a2bb6d0c07c746e8986b28e
+----

@@ -1,0 +1,36 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-nodejs-functions.adoc
+
+:_content-type: REFERENCE
+[id="serverless-nodejs-template_{context}"]
+= Node.js 功能模板结构
+
+使用 Knative  (`kn`) CLI 创建 Node.js 功能时，项目目录类似于典型的 Node.js 项目。唯一的例外是额外的 `func.yaml` 文件，用于配置函数。
+
+`http` 和 `event` 触发器功能具有相同的模板结构：
+
+.模板结构
+[source,terminal]
+----
+.
+├── func.yaml <1>
+├── index.js <2>
+├── package.json <3>
+├── README.md
+└── test <4>
+    ├── integration.js
+    └── unit.js
+----
+<1> `func.yaml` 配置文件用于决定镜像名称和 registry。
+<2> 您的项目必须包含可导出单一功能的 `index.js` 文件。
+<3> 您不限于模板 `package.json` 文件中提供的依赖项。您可以添加其他依赖项，如在任何其他 Node.js 项目中一样。
++
+.添加 npm 依赖项示例
+[source,terminal]
+----
+npm install --save opossum
+----
++
+为部署构建项目时，这些依赖项将包含在创建的运行时容器镜像中。
+<4> 集成和单元测试脚本作为功能模板的一部分提供。

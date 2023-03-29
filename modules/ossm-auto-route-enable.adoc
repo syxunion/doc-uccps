@@ -1,0 +1,32 @@
+// Module is included in the following assemblies:
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+//
+:_content-type: REFERENCE
+[id="ossm-auto-route-enable_{context}"]
+= Disabling automatic route creation
+
+默认情况下， `ServiceMeshControlPlane` 资源会自动将 Istio 网关资源与 OpenShift 路由同步。禁用自动路由创建功能，如果您有特殊情况或更喜欢手动控制路由，您可以更灵活地控制路由。
+
+[id="disabling-automatic-route-creation-specific-cases_{context}"]
+== Disabling automatic route creation for specific cases
+
+如果要禁用特定 Istio 网关的 Uccps 路由，您必须将注解 `maistra.io/manageRoute: false` 添加到网关元数据定义中。 {SMProductName}  将忽略带有这个注解的 Istio 网关，同时保持对其他 Istio 网关的管理。
+
+[id="disabling-automatic-route-creation-all-cases_{context}"]
+== Disabling automatic route creation for all cases
+
+您可以为网格中的所有网关禁用 Uccps 路由的自动管理。
+
+通过将 `ServiceMeshControlPlane` 字段 `gateways.openshiftRoute.enabled` 设置为 `false` 来禁用 Istio 网关和 Uccps 路由之间的集成。例如，查看以下资源片断。
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1alpha1
+kind: ServiceMeshControlPlane
+metadata:
+  namespace: istio-system
+spec:
+  gateways:
+    openshiftRoute:
+      enabled: false
+----

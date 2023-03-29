@@ -1,0 +1,20 @@
+ifeval::["{context}" == "updating-restricted-network-cluster"]
+:restricted:
+endif::[]
+
+[id="cli-installing-cli-web-console_{context}"]
+= 使用 Web 控制台安装 Uccps CLI
+
+您可以安装 Uccps CLI(oc)来通过 Web 控制台与 统信容器云管理平台 进行交互。您可以在 Linux、Windows 或 macOS 上安装 oc。
+
+[重要]
+====
+如果安装了旧版本的 `oc`，则无法使用 统信容器云管理平台 1.2 中的所有命令。下载并安装新版本的 `oc`。
+ifdef::restricted[]
+If you are upgrading a cluster in a restricted network, install the `oc` version that you plan to upgrade to.
+endif::restricted[]
+====
+
+ifeval::["{context}" == "updating-restricted-network-cluster"]
+:!restricted:
+endif::[]

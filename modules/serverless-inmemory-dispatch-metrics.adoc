@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-inmemory-dispatch-metrics_{context}"]
+= InMemoryChannel 分配程序指标
+
+您可以使用以下指标调试 `InMemoryChannel` 频道，查看它们的运行方式，并查看频道正在分配哪些事件。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`event_count`
+|`InMemoryChannel` 频道发送的事件数量。
+|计数
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `response_code`, `response_code_class`, `trigger_name`, `unique_name`
+|整数 (无单位)
+
+|`event_dispatch_latencies`
+|从 `InMemoryChannel` 频道分配事件的时间。
+|Histogram
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `response_code`, `response_code_class`, `trigger_name`, `unique_name`
+|Milliseconds
+|===

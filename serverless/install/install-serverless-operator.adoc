@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="install-serverless-operator"]
+＝ 安装 {ServerlessOperatorName}
+:context: install-serverless-operator
+
+toc::[]
+
+安装 {ServerlessOperatorName} 后，您就可以在  {product-title} 集群中安装和使用 Knative Serving、Knative Eventing 和 Knative Kafka。 {ServerlessOperatorName} 管理集群的 Knative 自定义资源定义 (CRD) ，并可让您在不直接为每个组件修改单个配置映射的情况下配置它们。
+
+// OCP specific docs
+ifdef::openshift-enterprise[]
+[id="install-serverless-operator-before-you-begin"]
+== 开始前
+
+在安装 {ServerlessProductName}  前，请阅读以下有关支持的配置和先决条件的信息。
+
+* {ServerlessProductName} 支持在受限网络环境中安装。
+
+* {ServerlessProductName} 目前无法在单个集群的多租户配置中使用。
+
+include::modules/serverless-cluster-sizing-req.adoc[leveloffset=+2]
+
+[id="install-serverless-operator-scaling-with-machinesets"]
+=== 使用机器集扩展集群
+
+您可以使用 {product-title} `MachineSet` API 手动将集群扩展至所需大小。最低要求通常意味着，您需要将一个默认机器集进行扩展，增加两个额外的机器。请参阅手动扩展机器集。
+
+include::modules/serverless-cluster-sizing-req-additional.adoc[leveloffset=+3]
+
+
+// universal install doc
+include::modules/serverless-install-web-console.adoc[leveloffset=+1]
+
+[IMPORTANT]
+====
+如果要在 OpenShift Serverless 中使用 Red Hat OpenShift distributed tracing，则必须在安装 Knative Serving 或 Knative Eventing 前安装和配置 Red Hat OpenShift distributed tracing.
+====
+
+include::modules/serverless-install-cli.adoc[leveloffset=+1]

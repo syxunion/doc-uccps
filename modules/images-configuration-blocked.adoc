@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-blocked_{context}"]
+= 阻塞特定的 registry
+
+您可以通过编辑 `image.config.openshift.io/cluster` 自定义资源（CR）来阻止任何 registry 以及 registry 中的单独存储库。统信容器云管理平台 会将对此 CR 的更改应用到集群中的所有节点。
+
+在拉取或推送镜像时，容器运行时会搜索 `image.config.openshift.io/cluster` CR 的 registrySources 参数中列出的 registry。如果您在 `blockedRegistries` 参数下创建了 registry 列表，则容器运行时不会搜索这些 registry。允许所有其他 registry。
+
+[警告]
+====
+为防止 pod 失败，请不要将 `registry.redhat.io` 和 `quay.io`  添加到 `blockedRegistries` 列表中，因为环境中有效负载镜像需要它们。
+====
+
+.流程
+
+. 编辑 `image.config.openshift.io/cluster` CR:
++
+[source,terminal]
+----
+$ oc edit image.config.openshift.io/cluster
+----
++
+以下是一个带有块列表的 `image.config.openshift.io/cluster` 示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Image
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2019-05-17T13:44:26Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "8302"
+  selfLink: /apis/config.openshift.io/v1/images/cluster
+  uid: e34555da-78a9-11e9-b92b-06d6c7da38dc
+spec:
+  registrySources: <1>
+    blockedRegistries: <2>
+    - untrusted.com
+    - reg1.io/myrepo/myapp:latest
+status:
+  internalRegistryHostname: image-registry.openshift-image-registry.svc:5000
+----
+<1> 包含用于决定容器运行时在访问构建和 pod 的镜像时应如何处理个别 registry 的配置。它不包含内部集群 registry 的配置。
+<2> 指定 registry，并可选择性地指定 registry 中的存储库，以使它们不应该用于镜像拉取（pull）和推送（push）操作。允许所有其他 registry。
++
+[注意]
+====
+可以设置 `blockedRegistries` 或 `allowedRegistries` ，但不能同时设置这两个 registry。
+====
++
+Machine Config Operator（MCO）会监控 `image.config.openshift.io/cluster` 资源以了解对 registry 的任何更改。当 MCO 检测到更改时，它会排空节点，应用更改，并对节点进行 uncordon 处理。节点返回 Ready 状态后，在每个节点上的 `/etc/containers/registries.conf` 文件中会显示对被阻断的 registry 的更改。
+
+. 要检查 registry 是否已添加到策略文件中，请在节点上使用以下命令：
++
+[source,terminal]
+----
+$ cat /host/etc/containers/registries.conf
+----
++
+以下示例显示，在进行镜像拉取和推送时，不使用 untrusted.com：
++
+.输出示例
+[source,terminal]
+----
+unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+
+[[registry]]
+  prefix = ""
+  location = "untrusted.com"
+  blocked = true
+----

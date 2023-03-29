@@ -1,0 +1,51 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-config-sampling_{context}"]
+= Adjusting the sampling rate
+
+trace 是服务网格中服务间的执行路径。一个 trace 由一个或多个范围组成。span 是具有名称、开始时间和持续时间的逻辑工作单元。抽样率决定了 trace 的持久性频率。
+
+Envoy 代理抽样率默认设置为服务网格中 trace 的 100%。高抽样率会消耗集群资源和性能，但在调试问题时很有用。在生产环境中部署 统信容器云管理平台服务网格 前，请将值设置为较小的 trace 部分。例如，将 `spec.tracing.sampling` 设置为 `100` 来示例 trace 的 1%。
+
+将 Envoy 代理抽样率配置为代表 0.01% 增量的扩展整数。
+
+在基本安装中， `spec.tracing.sampling` 设置为 `10000`，这代表 100% 的 trace 采样。例如：
+
+* 将值设置为 10 个 trace 的 0.1% 样本。
+* 将值设为 500 个样本 5% 的 trace.
+
+[NOTE]
+====
+Envoy 代理抽样率适用于 Service Mesh 可用的应用程序，并使用 Envoy 代理。这个抽样率决定了 Envoy 代理收集并跟踪的数据量。
+
+Jaeger 远程抽样率适用于 Service Mesh 外部的应用程序，不要使用 Envoy 代理，如数据库。这种抽样率决定了分布式追踪系统收集和存储的数据量。如需更多信息，请参阅分布式追踪配置选项。
+====
+
+.流程
+
+. 在 {product-title} 控制台中，点击 *Operators* -> *安装的 Operators*.
+
+. 点 *Project* 菜单并选择安装 control plane 的项目，如 *istio-system*.
+
+. 点 {SMProductName} Operator 在 *Istio Service Mesh Control Plane* 列中，点 `ServiceMeshControlPlane` 资源的名称，例如 `basic`。
+
+. 要调整抽样率，请为 `spec.tracing.sampling` 设置不同的值。
++
+.. 点 *YAML* 标签。
++
+.. 为 `ServiceMeshControlPlane` 资源中的 `spec.tracing.sampling` 设置值。在以下示例中，将它设置为 `100`。
++
+.Jaeger 抽样示例
+[source,yaml]
+----
+spec:
+  tracing:
+    sampling: 100
+----
++
+.. 点 *保存*.
+
+. 点 *重新加载* 来验证 `ServiceMeshControlPlane` 资源已被正确配置。

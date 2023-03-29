@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-affinity.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-node-affinity-configuring-preferred_{context}"]
+= 配置首选的节点关联性规则
+
+偏好规则指定在满足规则时调度程序会尝试强制执行规则，但不保证一定能强制执行成功。
+
+.流程
+
+以下步骤演示了一个简单的配置，此配置会创建一个节点，以及调度程序尝试放置到该节点上的 pod。
+
+. 使用 `oc label node` 命令给节点添加标签：
++
+[source,terminal]
+----
+$ oc label node node1 e2e-az-name=e2e-az3
+----
+
+. 在 `Pod` spec, 中，使用 `nodeAffinity` 小节来配置 `preferredDuringSchedulingIgnoredDuringExecution` 参数：
++
+.. 为节点指定一个权重，值为 1 到 100 的数字。优先选择权重最高的节点。
++
+.. 指定必须满足的键和值。如果希望新 pod 调度到您编辑的节点上，请使用与节点中标签相同的 key 和 value 参数：
++
+[source,yaml]
+----
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: e2e-az-name
+            operator: In
+            values:
+            - e2e-az3
+----
++
+.. 指定一个 operator。运算符可以是 `In`, `NotIn`, `Exists`, `DoesNotExist`, `Lt`, 或 `Gt`. 例如，使用运算符 In 来要求节点上存在该标签：
+
+. 创建 pod.
++
+[source,terminal]
+----
+$ oc create -f e2e-az3.yaml
+----

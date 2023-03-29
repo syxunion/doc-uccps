@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-event-sinks.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-connect-sink-source-odc_{context}"]
+= 使用 开发者 视角将事件源连接到接收器（sink）
+
+当使用 {product-title} 控制台创建事件源时，您可以指定事件从该源发送到的接收器。sink 可以是任何可寻址或可调用的资源，可以从其他资源接收传入的事件。
+
+.先决条件
+
+* {ServerlessOperatorName} 、Knative Serving 和 Knative Eventing 已在 {product-title} 集群中安装。
+* 已登陆到 web 控制台，且处于 *开发者视角*
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在  {product-title}  中创建应用程序和其他工作负载。
+* 您已创建了 sink，如 Knative 服务、频道或代理。
+
+.流程
+
+. 进入 *+添加* -> *事件源* 并选择您要创建的事件源类型，创建任何类型的事件源。
+
+. 在 *创建时间源*  表单视图的 *Sink* 部分，在 *资源* 列表中选择您的接收器。
+
+. 点 *创建*.
+
+.验证
+
+您可以通过查看 *拓扑* 页面来验证事件源是否已创建并连接到 sink。
+
+. 在 *开发者视角* 中，导航到  *拓扑*
+
+. 查看事件源并点连接的接收器查看右侧面板中的接收器详情。

@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/configuring-cli.adoc
+
+:_content-type: PROCEDURE
+[id="cli-enabling-tab-completion_{context}"]
+= Enabling tab completion for Bash
+
+在安装oc CLI工具后，可以启用 tab 自动完成功能，以便在按 Tab 键时自动完成oc命令或显示建议选项。
+
+.先决条件
+
+* 已安装oc CLI工具。
+* 已安装软件包 `bash-completion。
+
+.流程
+
+. 以下过程为 Bash 启用 tab 自动完成功能。
+. 将Bash完成代码保存到一个文件中。
++
+[source,terminal]
+----
+$ oc completion bash > oc_bash_completion
+----
+
+. 将文件复制到 `/etc/bash_completion.d/`:
++
+[source,terminal]
+----
+$ sudo cp oc_bash_completion /etc/bash_completion.d/
+----
++
+您也可以将文件保存到一个本地目录，并从您的 `.bashrc` 文件中 source 这个文件。
+
+开新终端时 tab 自动完成功能将被启用。

@@ -1,0 +1,7 @@
+// Module included in the following assemblies:
+// * openshift_images/create-images.adoc
+
+[id="images-create-guidelines_{context}"]
+= 学习容器最佳实践
+
+在创建 统信容器云管理平台 上运行的容器镜像时，镜像创建者需考虑诸多最佳实践，以确保为镜像的使用者提供良好体验。镜像原则上不可变且应按原样使用，所以请遵守以下准则，以确保您的镜像高度可用，且易于在 统信容器云管理平台 上使用。

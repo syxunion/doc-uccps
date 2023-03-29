@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * disaster_recovery/scenario-2-restoring-cluster-state.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+[id="dr-scenario-cluster-state-issues_{context}"]
+= 恢复持久性存储状态的问题和解决方法
+
+如果您的统信容器云管理平台集群使用任何形式的持久性存储，集群的状态通常存储在 etcd 外部。它可能是在 pod 中运行的 `Elasticsearc` 集群，或者在 `StatefulSet` 对象中运行的数据库。从 etcd 备份中恢复时，还会恢复统信容器云管理平台中工作负载的状态。但是，如果 etcd 快照是旧的，其状态可能无效或过期。
+
+[重要]
+====
+持久性卷（PV）的内容绝不会属于 etcd 快照的一部分。从 etcd 快照恢复统信容器云管理平台集群时，非关键工作负载可能会访问关键数据，反之亦然。
+====
+
+以下是生成过时状态的一些示例情况：
+
+* MySQL 数据库在由 PV 对象支持的 pod 中运行。从 etcd 快照恢复统信容器云管理平台不会使卷恢复到存储供应商上，且不会生成正在运行的 MySQL pod，尽管 pod 会重复尝试启动。您必须通过在存储供应商中恢复卷，然后编辑 PV 以指向新卷来手动恢复这个 pod。
+
+* Pod P1 使用卷 A，它附加到节点 X。如果另一个 pod 在节点 Y 上使用相同的卷，则执行 etcd 恢复时，pod P1 可能无法正确启动，因为卷仍然被附加到节点 Y。统信容器云管理平台并不知道附加，且不会自动分离它。发生这种情况时，卷必须从节点 Y 手动分离，以便卷可以在节点 X 上附加，然后 pod P1 才可以启动。
+
+* 在执行 etcd 快照后，云供应商或存储供应商凭证会被更新。这会导致任何依赖于这些凭证的 CSI 驱动程序或 Operator 无法正常工作。您可能需要手动更新这些驱动程序或 Operator 所需的凭证。
+
+* 在生成 etcd 快照后，会从统信容器云管理平台节点中删除或重命名设备。Local Storage Operator 会为从 /dev/disk/by-id 或 /dev 目录中管理的每个 PV 创建符号链接。这种情况可能会导致本地 PV 引用不再存在的设备。
++
+要解决这个问题，管理员必须：
+
+. 手动删除带有无效设备的 PV。
+. 从对应节点中删除符号链接。
+. 删除 `LocalVolume` 或 `LocalVolumeSet` 对象 (请参阅 _Storage_ -> _Configuring persistent storage_ -> _Persistent storage using local volumes_ -> _Deleting the Local Storage Operator Resources_).

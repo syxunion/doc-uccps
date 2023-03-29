@@ -1,0 +1,126 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/attaching-pod.adoc
+// * networking/hardware_networks/add-pod.adoc
+
+ifeval::["{context}" == "configuring-sr-iov"]
+:sriov:
+endif::[]
+
+ifeval::["{product-version}" == "4.3"]
+:bz:
+endif::[]
+ifeval::["{product-version}" == "4.4"]
+:bz:
+endif::[]
+ifeval::["{product-version}" == "4.5"]
+:bz:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-multus-add-pod_{context}"]
+= 将 pod 添加到额外网络
+
+您可以将 pod 添加到额外网络。pod 继续通过默认网络发送与集群相关的普通网络流量。
+
+创建 pod 时会附加额外网络。但是，如果 pod 已存在，您无法为其附加额外网络。
+
+pod 必须与额外网络处于相同的命名空间。
+
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 登录到集群。
+
+.流程
+
+. 为 Pod 对象添加注解。只能使用以下注解格式之一：
+
+.. 要在没有自定义的情况下附加额外网络，请使用以下格式添加注解。将 `<network>` 替换为要与 pod 关联的额外网络的名称：
++
+[source,yaml]
+----
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: <network>[,<network>,...] <1>
+----
+<1> 要指定多个额外网络，请使用逗号分隔各个网络。逗号之间不可包括空格。如果您多次指定同一额外网络，则该 pod 会将多个网络接口附加到该网络。
+
+.. 要通过自定义来附加额外网络，请添加具有以下格式的注解：
++
+[source,yaml]
+----
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: |-
+      [
+        {
+          "name": "<network>", <1>
+          "namespace": "<namespace>", <2>
+          "default-route": ["<default-route>"] <3>
+        }
+      ]
+----
+<1> 指定 `NetworkAttachmentDefinition` 对象定义的额外网络的名称。
+<2> 指定定义 `NetworkAttachmentDefinition` 对象的命名空间。
+<3> 可选：为默认路由指定覆盖，如 `192.168.17.1`。
+
+. 运行以下命令来创建 pod。将 `<name>` 替换为 pod 的名称。
++
+[source,terminal]
+----
+$ oc create -f <name>.yaml
+----
+
+. 可选： 要确认 `Pod` CR 中是否存在注解，请输入以下命令将 `<name>` 替换为 pod 的名称。
++
+[source,terminal]
+----
+$ oc get pod <name> -o yaml
+----
++
+在以下示例中，`example-pod` pod 附加到 `net1` 额外网络：
++
+[source,terminal]
+----
+$ oc get pod example-pod -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: macvlan-bridge
+    k8s.v1.cni.cncf.io/networks-status: |- <1>
+      [{
+          "name": "openshift-sdn",
+          "interface": "eth0",
+          "ips": [
+              "10.128.2.14"
+          ],
+          "default": true,
+          "dns": {}
+      },{
+          "name": "macvlan-bridge",
+          "interface": "net1",
+          "ips": [
+              "20.2.2.100"
+          ],
+          "mac": "22:2f:60:a5:f8:00",
+          "dns": {}
+      }]
+  name: example-pod
+  namespace: default
+spec:
+  ...
+status:
+  ...
+----
+<1> `k8s.v1.cni.cncf.io/networks-status` 参数是对象的 JSON 数组。每个对象描述附加到 pod 的额外网络的状态。注解值保存为纯文本值。
+
+ifeval::["{context}" == "configuring-sr-iov"]
+:!sriov:
+endif::[]
+
+ifdef::bz[]
+:!bz:
+endif::bz[]

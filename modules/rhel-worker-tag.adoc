@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+
+
+:_content-type: PROCEDURE
+[id="rhel-worker-tag_{context}"]
+= 将 RHEL worker 节点标记为拥有或共享
+
+集群使用 `kubernetes.io/cluster/<clusterid>,Value=(owned|shared)` 标签的值来决定与 AWS 集群相关的资源的生命周期。
+
+* 如果在销毁集群时该资源应该被销毁，则应该添加 `owned` 标签值。
+* 如果在集群销毁后资源仍然存在，则应添加 `shared` 标签值。此标记表示集群使用了此资源，但对该资源有单独的拥有者。
+
+.流程
+
+* 使用 RHEL 计算机器时，RHEL worker 实例必须标记为 `kubernetes.io/cluster/<clusterid>=owned` 或 `kubernetes.io/cluster/<cluster-id>=shared`。
+
+[注意]
+====
+不要使用 `kubernetes.io/cluster/<name>,Value=<clusterid>` 标签标记所有现有的安全组，否则 Elastic Load Balancing（ELB）将无法创建负载均衡器。
+====

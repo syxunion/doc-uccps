@@ -1,0 +1,61 @@
+[id="overview-of-authentication-authorization"]
+= 身份验证和授权概述
+include::_attributes/common-attributes.adoc[]
+:context: overview-of-authentication-authorization
+
+toc::[]
+
+
+[id="authentication-overview"]
+== 关于统信容器云管理平台中的身份验证
+为了控制对统信容器云管理平台集群的访问，集群管理员可以配置 xref:../authentication/understanding-authentication.adoc#understanding-authentication[user authentication] ，并确保只有批准的用户访问集群。
+
+要与统信容器云管理平台集群交互，用户必须首先以某种方式向统信容器云管理平台API 进行身份验证。您可以通过向统信容器云管理平台API 的请求中 xref:../authentication/understanding-authentication.adoc#rbac-api-authentication_understanding-authentication[提供 OAuth 访问令牌或 X.509 客户端证书] 进行验证。
+
+[注意]
+====
+如果您没有提供有效的访问令牌或证书，则您的请求会未经身份验证，您会收到 HTTP 401 错误。
+====
+管理员可以通过以下任务配置身份验证：
+
+* 配置身份提供程序：您可以在统信容器云管理平台中定义任何支持的身份提供程序，并将其添加到集群中。
+* xref:../authentication/configuring-internal-oauth.adoc#configuring-internal-oauth[配置内部 OAuth 服务器]: 统信容器云管理平台 control plane 包含内置的 OAuth 服务器，用于决定用户身份来自配置的身份提供程序并创建访问令牌。您可以配置令牌持续时间和不活跃超时，并自定义内部 OAuth 服务器 URL。
++
+[注意]
+====
+用户可以 xref:../authentication/managing-oauth-access-tokens.adoc#managing-oauth-access-tokens[查看和管理归其拥有的 OAuth 令牌].
+====
+* 注册 OAuth 客户端：统信容器云管理平台 包括几个 xref:../authentication/configuring-oauth-clients.adoc#oauth-default-clients_configuring-oauth-clients[默认 OAuth 客户端]。 您可以 xref:../authentication/configuring-oauth-clients.adoc#oauth-register-additional-client_configuring-oauth-clients[注册和配置其他 OAuth 客户端]。
++
+[注意]
+====
+当用户为 OAuth 令牌发送请求时，必须指定接收和使用令牌的默认或自定义 OAuth 客户端。
+====
+
+* 使用 xref:../authentication/managing_cloud_provider_credentials/about-cloud-credential-operator.adoc#about-cloud-credential-operator[Cloud Credentials Operator]: 管理云供应商凭证：集群组件使用云供应商凭证来获取执行集群相关任务所需的权限。
+* 模拟系统管理员用户：您可以通过 xref:../authentication/impersonating-system-admin.adoc#impersonating-system-admin[模拟系统管理员用户] 来授予用户集群管理员权限。
+
+[id="authorization-overview"]
+== 关于统信容器云管理平台中的授权
+授权涉及确定用户是否有权限来执行请求的操作。
+
+管理员可以定义权限，并使用 xref:../authentication/using-rbac.adoc#authorization-overview_using-rbac[RBAC objects, such as rules, roles, and bindings] 将它们分配给用户。要了解授权在统信容器云管理平台中的工作方式，请参阅 xref:../authentication/using-rbac.adoc#evaluating-authorization_using-rbac[评估授权]。
+
+您还可以通过 xref:../authentication/using-rbac.adoc#rbac-projects-namespaces_using-rbac[项目和命名空间] 来控制对统信容器云管理平台集群的访问。
+
+除了控制用户对集群的访问外，您还可以控制 Pod 可以执行的操作，以及它可使用 xref:../authentication/managing-security-context-constraints.adoc#managing-pod-security-policies[安全性上下文约束(SCC)] 访问的资源。
+
+您可以通过以下任务管理统信容器云管理平台的授权：
+
+* 查看 xref:../authentication/using-rbac.adoc#viewing-local-roles_using-rbac[本地] 和 xref:../authentication/using-rbac.adoc#viewing-cluster-roles_using-rbac[集群] 角色和绑定.
+* 创建 xref:../authentication/using-rbac.adoc#creating-local-role_using-rbac[本地角色] 并将其分配给用户或组。
+* 创建集群角色并将其分配给用户或组：统信容器云管理平台 包括了一组 xref:../authentication/using-rbac.adoc#default-roles_using-rbac[默认的集群角色]。 您可以创建额外的 xref:../authentication/using-rbac.adoc#creating-cluster-role_using-rbac[集群角色] 并 xref:../authentication/using-rbac.adoc#adding-roles_using-rbac[将它们添加到用户或组中]。
+* 创建 cluster-admin 用户：默认情况下，您的集群只有一个集群管理员，名为 kubeadmin。您可以 xref:../authentication/using-rbac.adoc#creating-cluster-admin_using-rbac[创建另一个集群管理员] 。在创建集群管理员前，请确定您配置了身份提供程序。
++
+[注意]
+====
+在创建了 cluster admin 用户后， xref:../authentication/remove-kubeadmin.adoc#removing-kubeadmin_removing-kubeadmin[删除现有的 kubeadmin 用户] 来提高集群安全性。
+====
+* 创建服务帐户： xref:../authentication/understanding-and-creating-service-accounts.adoc#service-accounts-overview_understanding-service-accounts[服务帐户]为控制 API 访问提供了灵活的方式，而无需共享常规用户的凭证。用户可以 xref:../authentication/understanding-and-creating-service-accounts.adoc#service-accounts-managing_understanding-service-accounts[创建] 并 xref:../authentication/using-service-accounts-in-applications.adoc#service-accounts-using-credentials-externally_using-service-accounts[在应用中使用服务帐户] ，也可以作为 xref:../authentication/using-service-accounts-as-oauth-client.adoc#using-service-accounts-as-oauth-client[OAuth 客户端]。
+* xref:../authentication/tokens-scoping.adoc#tokens-scoping[有范围令牌]:有范围令牌是一种令牌，指定只能执行特定操作的特定用户。您可以创建有范围令牌，将某些权限委派给其他用户或服务帐户。
+* 同步 LDAP 组： 您可以通过将存储在 LDAP 服务器中的组与统信容器云管理平台用户组同步，以从一个单一的地方管理用户组。

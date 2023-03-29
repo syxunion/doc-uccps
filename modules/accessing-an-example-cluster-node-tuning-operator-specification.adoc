@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/using-node-tuning-operator.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="accessing-an-example-node-tuning-operator-specification_{context}"]
+= 访问 Node Tuning Operator 示例规格
+
+使用此流程来访问 Node Tuning Operator 的示例规格。
+
+.流程
+
+ . 运行：
++
+[source,terminal]
+----
+$ oc get Tuned/default -o yaml -n openshift-cluster-node-tuning-operator
+----
+
+默认 CR 旨在为 统信容器云管理平台 平台提供标准的节点级性能优化，它只能被修改来设置 Operator Management 状态。Operator 将覆盖对默认 CR 的任何其他自定义更改。若进行自定义性能优化，请创建自己的 Tuned CR。新创建的 CR 将与默认的 CR 合并，并基于节点或 pod 标识和配置文件优先级对节点应用自定义调整。
+
+[警告]
+====
+虽然在某些情况下，对 pod 标识的支持可以作为自动交付所需调整的一个便捷方式，但我们不鼓励使用这种方法，特别是在大型集群中。默认 Tuned CR 并不带有 pod 标识匹配。如果创建了带有 pod 标识匹配的自定义配置集，则该功能将在此时启用。在以后的 Node Tuning Operator 版本中可能会弃用 pod 标识功能。
+====

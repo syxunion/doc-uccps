@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// applications/application-health
+
+[id="odc-monitoring-application-health-using-developer-perspective"]
+= 使用开发者视角监控应用程序的健康状态
+
+您可以使用 *开发者* 视角为容器添加三类健康探测，以确保应用程序健康：
+
+* 使用就绪（Readiness）探测检查容器是否准备好处理请求。
+* 使用存活（Liveness）探测检查容器是否在运行。
+* 使用启动（Startup）探测检查容器内的应用程序是否已启动。
+
+在创建和部署应用程序时，或部署应用程序后，可以添加健康检查。

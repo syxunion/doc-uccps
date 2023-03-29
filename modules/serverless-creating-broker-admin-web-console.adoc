@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-cluster-admin-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-broker-admin-web-console_{context}"]
+= 使用 管理员 视角创建代理
+
+include::snippets/serverless-brokers-intro.adoc[]
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+
+* 您已登录到 Web 控制台，且处于 *管理员* 视角。
+
+* 具有集群管理员 {product-title} 的权限。
+
+.流程
+
+. 在 {product-title}  Web 控制台的  *管理员* 视角中，导航到 *Serverless* -> *Eventing*.
+. 在 *创建* 列表中，选择 *代理*。您将进入 *创建 代理* 页面。
+. 可选：修改代理的 YAML 配置。
+. 点 *创建*

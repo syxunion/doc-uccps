@@ -1,0 +1,34 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-csi-cinder"]
+= OpenStack Cinder CSI Driver Operator
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-csi-cinder
+
+toc::[]
+
+== 概述
+
+统信容器云管理平台可以使用 OpenStack Cinder 的 Container Storage Interface（CSI）驱动程序置备持久性卷（PV）。
+
+在使用 Container Storage Interface（CSI）Operator 和驱动器时，请先熟悉持久性存储和配置 CSI 卷。
+
+要创建挂载到 OpenStack Cinder 存储资产中的 CSI 置备 PV，统信容器云管理平台在 `openshift-cluster-csi-drivers` 命名空间中安装 OpenStack Cinder CSI Driver Operator 和 OpenStack Cinder CSI 驱动程序。
+
+* _OpenStack Cinder CSI Driver Operator_  提供了一个 CSI 存储类，可用于创建 PVC。
+
+* _OpenStack Cinder CSI driver_ 允许您创建并挂载 OpenStack Cinder PV。
+
+对于 统信容器云管理平台，可以从 OpenStack Cinder in-tree 自动迁移到 CSI 驱动程序。启用迁移后，使用现有 in-tree 插件置备的卷将自动迁移为使用 OpenStack Cinder CSI 驱动程序。
+
+include::modules/persistent-storage-csi-about.adoc[leveloffset=+1]
+
+[重要]
+====
+统信容器云管理平台默认使用 in-tree（非 CSI）插件来置备 Cinder 存储。
+
+在以后的统信容器云管理平台版本中，计划使用现有树内插件置备的卷迁移到对应的 CSI 驱动程序。CSI 自动迁移应该可以无缝进行。迁移不会改变您使用所有现有 API 对象的方式，如持久性卷、持久性卷声明和存储类。有关迁移的更多信息，请参阅 CSI 自动迁移。
+
+完全迁移后，未来的统信容器云管理平台版本将最终删除树内插件。
+====
+
+include::modules/persistent-storage-csi-cinder-storage-class.adoc[leveloffset=+1]

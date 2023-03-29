@@ -1,0 +1,145 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-autoscaling-creating-cpu_{context}"]
+= 使用 CLI 根据 CPU 使用率创建 pod 横向自动扩展
+
+使用 统信容器云管理平台 CLI，您可以创建一个 pod 横向自动扩展(HPA)来自动扩展现有的 `Deployment`, `DeploymentConfig`, `ReplicaSet`, `ReplicationController`, 或 `StatefulSet`  对象。HPA 扩展与该对象关联的 pod，以维护您指定的 CPU 用量。
+
+[注意]
+====
+除非需要特定功能或由其他对象提供的行为，否则建议使用 `Deployment` 对象或 `ReplicaSet` 对象。
+====
+
+HPA 会在最小和最大数量之间增加和减少副本数，以保持所有 pod 的指定 CPU 使用率。
+
+为 CPU 使用率自动扩展时，您可以使用 `oc autoscale` 命令，并指定要在任意给定时间运行的 pod 的最小和最大数量，以及 pod 的目标平均 CPU 使用率。如果未指定最小值，则 统信容器云管理平台 服务器会为 pod 赋予一个默认值。
+
+要自动缩放特定 CPU 值，创建一个带有目标 CPU 和 pod 限制的  `HorizontalPodAutoscaler` 对象。
+
+.先决条件
+
+要使用 pod 横向自动扩展，您的集群管理员必须已经正确配置了集群指标。您可以使用 `oc describe PodMetrics <pod-name>` 命令来判断是否已配置了指标。如果配置了指标，输出类似于以下示例，其中 Usage 下列出了 Cpu 和 Memory。
+
+[source,terminal]
+----
+$ oc describe PodMetrics openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+----
+
+.输出示例
+[source,text,options="nowrap"]
+----
+Name:         openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+Namespace:    openshift-kube-scheduler
+Labels:       <none>
+Annotations:  <none>
+API Version:  metrics.k8s.io/v1beta1
+Containers:
+  Name:  wait-for-host-port
+  Usage:
+    Memory:  0
+  Name:      scheduler
+  Usage:
+    Cpu:     8m
+    Memory:  45440Ki
+Kind:        PodMetrics
+Metadata:
+  Creation Timestamp:  2019-05-23T18:47:56Z
+  Self Link:           /apis/metrics.k8s.io/v1beta1/namespaces/openshift-kube-scheduler/pods/openshift-kube-scheduler-ip-10-0-135-131.ec2.internal
+Timestamp:             2019-05-23T18:47:56Z
+Window:                1m0s
+Events:                <none>
+----
+
+.流程
+
+为 CPU 使用率创建 pod 横向自动扩展
+
+. 执行以下步骤之一：
+
+** 要根据 CPU 使用率百分比来缩放，请为现有对象创建一个 `HorizontalPodAutoscaler` 对象：
++
+[source,terminal]
+----
+$ oc autoscale <object_type>/<name> \// <1>
+  --min <number> \// <2>
+  --max <number> \// <3>
+  --cpu-percent=<percent> <4>
+----
++
+<1> 指定要自动扩展的对象类型和名称。对象必须存在，并需要是 `Deployment`, `DeploymentConfig`/`dc`, `ReplicaSet`/`rs`, `ReplicationController`/`rc`, 或 `StatefulSet`.
+<2> 另外，还可以指定缩减时的最小副本数量。
+<3> 指定扩展时的最大副本数量。
+<4> 指定所有 pod 的目标平均 CPU 使用率（以请求 CPU 的百分比表示）。如果未指定或为负数，则会使用默认的自动缩放策略。
++
+例如，以下命令显示 `image-registry` `Deployment`  对象的自动扩展。初始部署需要 3 个 pod。HPA 对象将最小值增加到 5。如果 pod 的 CPU 用量达到 75%，pod 将增加到 7:
++
+[source,terminal]
+----
+$ oc autoscale deployment/image-registry --min=5 --max=7 --cpu-percent=75
+----
+
+** 要扩展特定 CPU 值，请为现有对象创建类似如下的 YAML 文件：
++
+.. 创建一个类似以下示例的 YAML 文件：
++
+[source,yaml,options="nowrap"]
+----
+apiVersion: autoscaling/v2 <1>
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cpu-autoscale <2>
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1 <3>
+    kind: Deployment <4>
+    name: example <5>
+  minReplicas: 1 <6>
+  maxReplicas: 10 <7>
+  metrics: <8>
+  - type: Resource
+    resource:
+      name: cpu <9>
+      target:
+        type: AverageValue <10>
+        averageValue: 500m <11>
+----
+<1> 使用 `autoscaling/v2` API.
+<2> 指定此 pod 横向自动扩展对象的名称。
+<3> 指定要缩放对象的 API 版本。
+* 对于 `Deployment`, `ReplicaSet`, `Statefulset` 对象使用 `apps/v1`.
+* 对于 `ReplicationController`,使用 `v1`.
+* 对于 `DeploymentConfig` 使用 `apps.openshift.io/v1`.
+<4> 指定对象类型。对象需要是 `Deployment`, `DeploymentConfig`/`dc`, `ReplicaSet`/`rs`, `ReplicationController`/`rc`, 或 `StatefulSet`.
+<5> 指定要缩放的对象名称。对象必须存在。
+<6> 指定缩减时的最小副本数量。
+<7> 指定扩展时的最大副本数量。
+<8> 对于内存使用率，使用 metrics 参数。
+<9> 为 CPU 使用率指定 `cpu` 。
+<10> 设置为 `AverageValue`.
+<11> 使用目标 CPU 值设置为 `averageValue` 。
+
+.. 创建 Pod 横向自动扩展：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+. 验证 pod 横向自动扩展是否已创建：
++
+[source,terminal]
+----
+$ oc get hpa cpu-autoscale
+----
++
+.输出示例
+[source,terminal]
+----
+NAME            REFERENCE            TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+cpu-autoscale   Deployment/example   173m/500m       1         10        1          20m
+----
+

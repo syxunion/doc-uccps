@@ -1,0 +1,25 @@
+// Module included in the following assemblies
+//
+// * /serverless/functions/serverless-developing-nodejs-functions.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-testing-nodejs-functions_{context}"]
+= 测试 Node.js 功能
+
+Node.js 功能可以在您的计算机上本地测试。在使用 `kn func create` 创建功能时创建的默认项目中，有一个 *test* 文件夹，其中包含一些简单的单元和集成测试。
+
+.先决条件
+
+* 在集群中安装了统信容器云管理平台无服务器和 Knative Serving。
+* 已安装 Knative (`kn`) CLI.
+* 已使用 `kn func create` 创建功能。
+
+.流程
+
+. 导航到您的功能的 *test* 文件夹。
+. 运行测试：
++
+[source,terminal]
+----
+$ npm test
+----

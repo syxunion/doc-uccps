@@ -1,0 +1,13 @@
+// Text snippet included in the following modules and assemblies:
+//
+// * /serverless/develop/serverless-using-brokers.adoc
+// * /serverless/develop/serverless-triggers.adoc
+// * /modules/serverless-creating-broker-admin-web-console.adoc
+// * /modules/serverless-creating-trigger-admin-web-console.adoc
+// * /serverless/discover/serverless-brokers.adoc
+
+:_content-type: SNIPPET
+
+代理可与触发器结合使用，用于将事件源发送到事件 sink。事件从事件源发送到代理，作为 HTTP POST 请求。事件进入代理后，可使用触发器根据 CloudEvent 属性 进行过滤，并作为 HTTP POST 请求发送到事件 sink。
+
+image::serverless-event-broker-workflow.png[Broker event delivery overview]

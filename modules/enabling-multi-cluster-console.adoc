@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * assemblies/web-console.adoc
+
+:_content-type: PROCEDURE
+[id="enable-multi-cluster-console_{context}"]
+= 在 web 控制台中启用多集群
+
+:FeatureName: 多集群控制台
+include::snippets/technology-preview.adoc[leveloffset=+1]
+//
+
+.先决条件
+* 集群必须使用最新版本的 统信容器云管理平台。
+* 您必须安装了 UnionTech Advanced Cluster Management(ACM)for Kubernetes 2.5 或安装了 multiculster 引擎(MCE)Operator。
+* 您必须具有管理员特权。
+
+[警告]
+====
+不要在生产环境集群中设置此功能门。应用功能门后，您将无法升级集群，且无法撤消。
+====
+
+.流程
+
+. 集群必须使用最新版本的 统信容器云管理平台。
+
+. 在管理员视角中启用 ACM，方法是从 *Administration* -> *Cluster Settings* -> *Configuration* -> *Console* `console.operator.openshift.io` -> *Console Plugins* 点 *Enable* for `acm`.
+
+. 此时会出现一个弹出窗口，通知您更新此控制台插件的启用将在更新控制台后提示您刷新控制台。选择" 启用 "，然后单击" *保存* "。
+
+. 启用 `acm` 后，为 `mce` 控制台插件重复前面两个步骤。
+
+. 在您启用后，将显示一个显示 web 控制台更新的弹出窗口。在弹出窗口中，单击 *Refresh the web* 控制台 以更新。
++
+[Note]
+====
+如果您单击 *刷新 Web* 控制台时，您可能会看到弹出窗口 刷新 Web 控制台 两次。
+====
+
+** *local-cluster* 和 *All Clusters* 现在可在导航部分的视角上方可见。
+
+. 通过从 *Administration* -> *Cluster Settings* -> *Configuration* -> *FeatureGate* 中选择功能门，并按照如下所示编辑 YAML 模板：
++
+[source,yaml]
+
+----
+spec:
+    featureSet: TechPreviewNoUpgrade
+----
+
+. 点 *Save* 为所有集群启用多集群控制台。
++
+[重要]
+====
+保存后，这个功能会被启用且无法撤消。
+====

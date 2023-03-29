@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="nodes-scheduler-profiles"]
+= 使用调度程序配置集调度 pod
+include::_attributes/common-attributes.adoc[]
+:context: nodes-scheduler-profiles
+
+toc::[]
+
+您可以将 统信容器云管理平台 配置为使用调度配置集将 pod 调度到集群内的节点上。
+
+// About scheduler profiles
+include::modules/nodes-scheduler-profiles-about.adoc[leveloffset=+1]
+
+// Configuring a scheduler profile
+include::modules/nodes-scheduler-profiles-configuring.adoc[leveloffset=+1]

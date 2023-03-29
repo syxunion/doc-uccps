@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-port-forwarding.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-port-forwarding-about_{context}"]
+= 了解端口转发
+
+您可以使用 CLI 将一个或多个本地端口转发到 pod。这样，您可以在本地侦听一个指定或随机端口，并且与 pod 中的指定端口来回转发数据。
+
+CLI 中内置了端口转发支持：
+
+[source,terminal]
+----
+$ oc port-forward <pod> [<local_port>:]<remote_port> [...[<local_port_n>:]<remote_port_n>]
+----
+
+CLI 侦听用户指定的本地端口，并通过以下协议进行转发。
+
+可使用以下格式来指定端口：
+
+[horizontal]
+`5000`:: 客户端在本地侦听端口 5000，并转发到 pod 中的 5000。
+pod.
+`6000:5000`:: 客户端在本地侦听端口 6000，并转发到 pod 中的 5000。
+the pod.
+`:5000` or `0:5000`:: 客户端选择本地的一个空闲端口，并转发到 pod 中的 5000 。
+in the pod.
+
+统信容器云管理平台 处理来自客户端的端口转发请求。在收到请求后，统信容器云管理平台 会升级响应并等待客户端创建端口转发流。当 统信容器云管理平台 收到新流时，它会在流和 pod 端口之间复制数据。
+
+从架构上看，有不同的选项可用于转发到 pod 端口。支持的 统信容器云管理平台 实施会直接调用节点主机上的 `nsenter` 来进入 pod 的网络命名空间，然后调用 `socat` 在流和 pod 端口之间复制数据。不过，自定义实施中可能会包括运行一个 _helper_ pod，然后运行 `nsenter`` 和 `socat`，从而不需要在主机上安装这些二进制代码。
+

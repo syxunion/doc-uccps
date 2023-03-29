@@ -1,0 +1,63 @@
+////
+This PROCEDURE module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-tutorial-bookinfo-removing_{context}"]
+= Removing the Bookinfo application
+
+按照以下步骤删除 Bookinfo 应用程序。
+
+.先决条件
+
+* 安装了 统信容器云管理平台。
+* 安装了 统信容器云管理平台 2.1。
+* 访问 OpenShift CLI（oc）。
+
+[id="ossm-delete-bookinfo-project_{context}"]
+== Delete the Bookinfo project
+
+.流程
+
+. 登陆到 {product-title} web 控制台。
+
+. 点 *主页* -> *项目*。
+
+. 点 `bookinfo` 菜单 {kebab}, 然后点  *删除项目*。
+
+. 在确认对话框中输入`bookinfo` ，然后点 *删除*。
++
+** 另外，您可以使用 CLI 运行这个命令来创建  `bookinfo`  项目。
++
+[source,terminal]
+----
+$ oc delete project bookinfo
+----
+
+[id="ossm-remove-bookinfo-smmr_{context}"]
+== Remove the Bookinfo project from the {SMProductShortName} member roll
+
+.流程
+
+. 登陆到 {product-title} web 控制台。
+
+. 点 *Operators* -> *安装的 Operators*。
+
+. 点 *项目* 菜单，从列表中选 `istio-system` 。
+
+. 为 *{SMProductName}* Operator 在 *Provided APIS* 下点 *Istio Service Mesh Member Roll* 链接。
+
+. 点 `ServiceMeshMemberRoll` 菜单 {kebab} 并选择 *Edit Service Mesh Member Roll*。
+
+. 编辑默认的 Service Mesh Member Roll YAML 并从 *members* 列表中删除 `bookinfo` 。
++
+** 另外，您可以使用 CLI 运行这个命令从 `ServiceMeshMemberRoll` 中删除 `bookinfo` 项目。在本例中， `istio-system` 是  {SMProductShortName} 项目的名称。
++
+[source,terminal]
+----
+$ oc -n istio-system patch --type='json' smmr default -p '[{"op": "remove", "path": "/spec/members", "value":["'"bookinfo"'"]}]'
+----
+
+. 点 *保存* 更新 Service Mesh Member Roll.

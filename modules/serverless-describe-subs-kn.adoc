@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-subs.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-describe-subs-kn_{context}"]
+= 使用 Knative CLI 描述订阅
+
+您可以使用 `kn subscription describe` 命令在终端中使用 Knative (kn) 打印有关订阅的信息。使用 Knative CLI 描述订阅可提供比直接查看 YAML 文件更精简且直观的用户界面。
+
+.先决条件
+
+* 已安装 Knative (`kn`) CLI.
+* 您已在集群中创建了订阅。
+
+.流程
+
+* 描述订阅：
++
+[source,terminal]
+----
+$ kn subscription describe <subscription_name>
+----
++
+.输出示例
+[source,terminal]
+----
+Name:            my-subscription
+Namespace:       default
+Annotations:     messaging.knative.dev/creator=openshift-user, messaging.knative.dev/lastModifier=min ...
+Age:             43s
+Channel:         Channel:my-channel (messaging.knative.dev/v1)
+Subscriber:
+  URI:           http://edisplay.default.example.com
+Reply:
+  Name:          default
+  Resource:      Broker (eventing.knative.dev/v1)
+DeadLetterSink:
+  Name:          my-sink
+  Resource:      Service (serving.knative.dev/v1)
+
+Conditions:
+  OK TYPE                  AGE REASON
+  ++ Ready                 43s
+  ++ AddedToChannel        43s
+  ++ ChannelReady          43s
+  ++ ReferencesResolved    43s
+----

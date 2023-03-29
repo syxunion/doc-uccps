@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="installation-osp-configuring-api-floating-ip_{context}"]
+= 使用浮动 IP 地址配置应用程序访问
+
+安装 统信容器云管理平台 后，请配置 UnionTech OpenStack Platform (RHOSP) 以允许应用程序网络流量。
+
+[注意]
+====
+如果您在 `install-config.yaml` 文件中为 `platform.openstack.apiFloatingIP` 和 `platform.openstack.ingressFloatingIP` 提供了值，或为 `inventory.yaml` playbook 中的 `os_api_fip` 和 `os_ingress_fip` 提供了值，在安装过程中不需要执行此步骤。已设置浮动 IP 地址。
+====
+
+.先决条件
+
+* 必须已安装 统信容器云管理平台 集群
+* 启用浮动 IP 地址，如 RHOSP 安装文档中的 统信容器云管理平台 所述。
+
+.流程
+
+在安装 统信容器云管理平台 集群后，将浮动 IP 地址附加到入口端口：
+
+. 显示端口：
++
+[source,terminal]
+----
+$ openstack port show <cluster_name>-<cluster_ID>-ingress-port
+----
+
+. 将端口附加到 IP 地址：
++
+[source,terminal]
+----
+$ openstack floating ip set --port <ingress_port_ID> <apps_FIP>
+----
+
+. 在您的 DNS 文件中，为 `*apps`. 添加一条通配符 `A` 记录。
++
+[source,dns]
+----
+*.apps.<cluster_name>.<base_domain>  IN  A  <apps_FIP>
+----
+
+[注意]
+====
+如果您不控制 DNS 服务器，但希望为非生产用途启用应用程序访问，您可以将这些主机名添加到 `/etc/hosts`：
+
+[source,dns]
+----
+<apps_FIP> console-openshift-console.apps.<cluster name>.<base domain>
+<apps_FIP> integrated-oauth-server-openshift-authentication.apps.<cluster name>.<base domain>
+<apps_FIP> oauth-openshift.apps.<cluster name>.<base domain>
+<apps_FIP> prometheus-k8s-openshift-monitoring.apps.<cluster name>.<base domain>
+<apps_FIP> grafana-openshift-monitoring.apps.<cluster name>.<base domain>
+<apps_FIP> <app name>.apps.<cluster name>.<base domain>
+----
+====

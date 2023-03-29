@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-kafka-developer.adoc
+
+:_content-type: CONCEPT
+[id="serverless-kafka-delivery-retries_{context}"]
+= Kafka 事件交付和重试
+
+在事件驱动的架构中使用 Kafka 组件会提供"至少一次"事件交付。这意味着，会在收到返回代码值前重试操作。这使您的应用对丢失的事件更具弹性，但可能会导致发送重复的事件。
+
+对于 Kafka 事件源，默认会尝试发送事件的固定次数。对于 Kafka 频道，只有在 Kafka 频道 Delivery 规格中配置了它们时才会进行重试。

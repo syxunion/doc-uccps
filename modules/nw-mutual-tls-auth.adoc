@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * ingress/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id=nw-mutual-tls-auth_{context}]
+= 配置 mutual TLS 身份验证
+
+您可以通过设置 spec.clientTLS 值，将 Ingress Controller 配置为启用 mutual TLS (mTLS) 身份验证。clientTLS 值将 Ingress Controller 配置为验证客户端证书。此配置包括设置 clientCA 值，这是对配置映射的引用。配置映射包含 PEM 编码的 CA 证书捆绑包，用于验证客户端的证书。另外，您还可以配置证书主题过滤器列表。
+
+如果 clientCA 值指定 X509v3 证书撤销列表 (CRL) 分发点，Ingress Operator 会下载 CRL 并配置 Ingress Controller 来确认它。不提供有效证书的请求将被拒绝。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+. 创建 `openshift-config` 命名空间中的配置映射：
++
+[source,terminal]
+----
+$ oc create configmap router-ca-certs-default --from-file=ca-bundle.pem=client-ca.crt -n openshift-config
+----
++
+[注意]
+====
+配置映射数据键必须是 `ca-bundle.pem`，数据值必须是 PEM 格式的 CA 证书。
+====
+
+. 编辑 `openshift-ingress-operator` 项目中的 `IngressController` 资源：
++
+[source,terminal]
+----
+$ oc edit IngressController default -n openshift-ingress-operator
+----
+
+. 添加 spec.clientTLS 字段和子字段来配置 mutual TLS：
++
+.指定过滤模式的 `clientTLS` 配置集的 `IngressController` CR 示例
+[source,yaml]
+----
+  apiVersion: operator.openshift.io/v1
+  kind: IngressController
+  metadata:
+    name: default
+    namespace: openshift-ingress-operator
+  spec:
+    clientTLS:
+      clientCertificatePolicy: Required
+      clientCA:
+        name: router-ca-certs-default
+      allowedSubjectPatterns:
+      - "^/CN=example.com/ST=NC/C=US/O=Security/OU=OpenShift$"
+----

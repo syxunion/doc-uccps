@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+
+[id="rhel-compute-requirements_{context}"]
+= UOS 计算节点的系统要求
+
+统信容器云管理平台 环境中的 UnionTech OS Server 20(UOS20)计算机器主机必须满足以下最低硬件规格和系统级别要求：
+
+* 您的统信帐户必须具有有效的 统信容器云管理平台 订阅。如果没有，请与您的销售代表联系以了解更多信息。
+
+* 生产环境必须提供能支持您的预期工作负载的计算机器。作为集群管理员，您必须计算预期的工作负载，再加上大约 10% 的开销。对于生产环境，请分配足够的资源，以防止节点主机故障影响您的最大容量。
+* 所有系统都必须满足以下硬件要求：
+** 物理或虚拟系统，或在公有或私有 IaaS 上运行的实例。
+** 基础操作系统：使用 "Minimal" 安装选项的 RHEL 8.4 或 8.5。
++
+[重要]
+====
+不支持将 RHEL 7 计算机器添加到 统信容器云管理平台 集群。
+
+如果您有在以前的 统信容器云管理平台 版本中支持的 RHEL 7 计算机器，则无法将其升级到 RHEL 8。您必须部署新的 RHEL 8 主机，并且应该删除旧的 RHEL 7 主机。如需更多信息，请参阅"删除节点"部分。
+
+有关 统信容器云管理平台 中已弃用或删除的主要功能的最新列表，请参阅 统信容器云管理平台 发行注记中已弃用和删除的功能部分。
+====
+** 如果以 FIPS 模式部署 统信容器云管理平台，则需要在 RHEL 机器上启用 FIPS，然后才能引导它。请参阅 RHEL 8 文档中的启用 FIPS 模式安装 RHEL 8 系统。
+
+[重要]
+====
+只有在 `x86_64` 架构的 统信容器云管理平台 部署中才支持使用 FIPS 验证的/Modules in Process 加密库。
+====
+** NetworkManager 1.0 或更高版本。
+** 1 vCPU.
+** 最小 8 GB RAM.
+** 最小 15 GB 硬盘空间，用于包含 `/var/` 的文件系统。
+** 最小 1 GB 硬盘空间，用于包含 `/usr/local/bin/` 的文件系统。
+** 最小 1 GB 硬盘空间，用于包含其临时目录的文件系统。临时系统目录根据 Python 标准库中 tempfile 模块中定义的规则确定。
+* 每个系统都必须满足您的系统提供商的任何其他要求。例如，如果在 VMware vSphere 上安装了集群，必须根据其存储准则配置磁盘，而且必须设置 `disk.enableUUID=true` 属性。
+
+* 每个系统都必须能够使用 DNS 可解析的主机名访问集群的 API 端点。任何现有的网络安全访问控制都必须允许系统访问集群的 API 服务端点。

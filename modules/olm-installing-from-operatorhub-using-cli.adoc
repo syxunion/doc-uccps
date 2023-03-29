@@ -1,0 +1,162 @@
+// Module included in the following assemblies:
+//
+// * operators/user/olm-installing-operators-in-namespace.adoc
+// * operators/admin/olm-adding-operators-to-cluster.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+//
+// Module watched for changes by Ecosystem Catalog team:
+// https://projects.engineering.redhat.com/projects/RHEC/summary
+
+ifeval::["{context}" == "olm-installing-operators-in-namespace"]
+:olm-user:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="olm-installing-operator-from-operatorhub-using-cli_{context}"]
+= 使用 CLI 从 OperatorHub 安装
+
+您可以使用 CLI 从 OperatorHub 安装 Operator，而不必使用 统信容器云管理平台 Web 控制台。使用 `oc` 命令来创建或更新一个 `订阅` 对象。
+
+.先决条件
+
+ifndef::olm-user[]
+- 使用具有 `cluster-admin` 权限的账户访问 统信容器云管理平台 集群。
+endif::[]
+
+ifdef::olm-user[]
+- 使用具有 Operator 安装权限的帐户访问 统信容器云管理平台 集群。
+endif::[]
+
+- 在您的本地系统安装 `oc` 命令。
+
+.流程
+
+. 查看 OperatorHub 中集群可用的 Operator 列表：
++
+[source,terminal]
+----
+$ oc get packagemanifests -n openshift-marketplace
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                               CATALOG               AGE
+3scale-operator                    Red Hat Operators     91m
+advanced-cluster-management        Red Hat Operators     91m
+amq7-cert-manager                  Red Hat Operators     91m
+...
+couchbase-enterprise-certified     Certified Operators   91m
+crunchy-postgres-operator          Certified Operators   91m
+mongodb-enterprise                 Certified Operators   91m
+...
+etcd                               Community Operators   91m
+jaeger                             Community Operators   91m
+kubefed                            Community Operators   91m
+...
+----
++
+记录下所需 Operator 的目录。
+
+. 检查所需 Operator，以验证其支持的安装模式和可用频道：
++
+[source,terminal]
+----
+$ oc describe packagemanifests <operator_name> -n openshift-marketplace
+----
+
+. 一个 Operator 组（由 `OperatorGroup` 对象定义），在其中选择目标命名空间，在其中为与 Operator 组相同的命名空间中的所有 Operator 生成所需的 RBAC 访问权限。
++
+订阅 Operator 的命名空间必须具有与 Operator 的安装模式相匹配的 Operator 组，可采用 `AllNamespaces` 模式，也可采用 `SingleNamespace` 模式。如果您要使用 `AllNamespaces` 安装 Operator，则 `openshift-operators` 命名空间已有适当的 Operator 组。
++
+如果要安装的 Operator 采用 `SingleNamespace` 模式，而您没有适当的 Operator 组，则必须创建一个。
++
+[注意]
+====
+在选择 `SingleNamespace` 模式时，该流程的 Web 控制台版本会在后台自动为您处理 `OperatorGroup` 和 `Subscription` 对象的创建。
+====
+
+.. 创建 `OperatorGroup` 对象 YAML 文件，如 `operatorgroup.yaml`：
++
+.`OperatorGroup` 对象示例
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: <operatorgroup_name>
+  namespace: <namespace>
+spec:
+  targetNamespaces:
+  - <namespace>
+----
+
+.. 创建 `OperatorGroup` 对象：
++
+[source,terminal]
+----
+$ oc apply -f operatorgroup.yaml
+----
+
+. 创建一个 `Subscription` 对象 YAML 文件，以便为 Operator 订阅一个命名空间，如 `sub.yaml`：
++
+.`Subscription` 对象示例
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: <subscription_name>
+  namespace: openshift-operators <1>
+spec:
+  channel: <channel_name> <2>
+  name: <operator_name> <3>
+  source: redhat-operators <4>
+  sourceNamespace: openshift-marketplace <5>
+  config:
+    env: <6>
+    - name: ARGS
+      value: "-v=10"
+    envFrom: <7>
+    - secretRef:
+        name: license-secret
+    volumes: <8>
+    - name: <volume_name>
+      configMap:
+        name: <configmap_name>
+    volumeMounts: <9>
+    - mountPath: <directory_name>
+      name: <volume_name>
+    tolerations: <10>
+    - operator: "Exists"
+    resources: <11>
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    nodeSelector: <12>
+      foo: bar
+----
+<1> 对于 `AllNamespaces` 安装模式的使用，指定 `openshift-operators` 命名空间。否则，为 `SingleNamespace` 安装模式使用指定相关单一命名空间。
+<2> 要订阅的频道的名称。
+<3> 要订阅的 Operator 的名称。
+<4> 提供 Operator 的目录源的名称。
+<5> 目录源的命名空间。将 `openshift-marketplace` 用于默认的 OperatorHub 目录源。
+<6> `env` 参数定义必须存在于由 OLM 创建的 pod 中所有容器中的环境变量列表。
+<7> `envFrom` 参数定义要在容器中填充环境变量的源列表。
+<8> `volumes` 参数定义 OLM 创建的 pod 上必须存在的卷列表。
+<9> `volumeMounts` 参数定义由 OLM 创建的 pod 中必须存在的 `VolumeMounts` 列表。如果 `volumeMount` 引用不存在的 卷，OLM 无法部署 Operator。
+<10> `tolerations` 参数为 OLM 创建的 pod 定义 `Tolerations` 列表。
+<11> `resources` 参数为 OLM 创建的 pod 中所有容器定义资源限制。
+<12> `nodeSelector` 参数为 OLM 创建的 pod 定义 `NodeSelector`。
+
+. 创建 `Subscription` 对象：
++
+[source,terminal]
+----
+$ oc apply -f sub.yaml
+----
++
+此时，OLM 已了解所选的 Operator。Operator 的集群服务版本（CSV）应出现在目标命名空间中，由 Operator 提供的 API 应可用于创建。

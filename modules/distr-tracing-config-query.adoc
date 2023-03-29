@@ -1,0 +1,67 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-query_{context}"]
+= 查询配置选项
+
+Query 是一个从存储中检索 trace 并托管用户界面来显示它们的服务。
+
+.{JaegerName} Operator 用来定义 Query 的参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+
+|spec:
+  query:
+    replicas:
+|指定要创建的 Query 副本数。
+|整数，如 `2`
+|
+|===
+
+
+.传递给 Query 的配置参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+
+|spec:
+  query:
+    options: {}
+|定义 Query 服务的配置选项。
+|
+|
+
+|options:
+  log-level:
+|Query 的日志记录级别。
+|可能的值有： `debug`, `info`, `warn`, `error`, `fatal`, `panic`.
+|
+
+|options:
+  query:
+    base-path:
+|所有 jaeger-query HTTP 路由的基本路径都可设置为非 root 值，例如，/jaeger 将导致所有 UI URL 以 /jaeger 开头。当在反向代理后面运行 Jaeger-query 时，这很有用。
+|/<path>
+|
+|===
+
+.示例 Query 配置
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: "Jaeger"
+metadata:
+  name: "my-jaeger"
+spec:
+  strategy: allInOne
+  allInOne:
+    options:
+      log-level: debug
+      query:
+        base-path: /jaeger
+----

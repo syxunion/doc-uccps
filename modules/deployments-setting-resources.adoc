@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-setting-resources_{context}"]
+= 设置部署资源
+
+部署由节点上消耗资源（内存、CPU 和临时存储）的 pod 完成。默认情况下，pod 消耗无限的节点资源。但是，如果某个项目指定了默认容器限值，则 pod 消耗的资源会被限制在这些限值范围内。
+
+[注意]
+====
+部署的最小内存限值为 12MB。如果容器因为一个 `Cannot allocate memory` pod 事件启动失败，这代表内存限制太低。增加或删除内存限制。删除限制可让 pod 消耗无限的节点资源。
+====
+
+您还可以在部署策略中指定资源限值来限制资源使用。部署资源可用于 recreate、rolling 或 custom 部署策略。
+
+.流程
+
+. 在以下示例中，`resources`、`cpu`、`memory` 和 `ephemeral-storage` 中每一个都是可选的：
++
+[source,yaml]
+----
+type: "Recreate"
+resources:
+  limits:
+    cpu: "100m" <1>
+    memory: "256Mi" <2>
+    ephemeral-storage: "1Gi" <3>
+----
+<1> `cpu` 以 CPU 单元数为单位：`100m` 表示 0.1 个 CPU 单元（100 * 1e-3）。
+<2> `memory` 以字节为单位：`256Mi` 表示 268435456 字节 (256 * 2 ^ 20)。
+<3> `ephemeral-storage` 以字节为单位：`1Gi` 表示 1073741824 字节 (2 ^ 30)。
++
+不过，如果您的项目定义了配额，则需要以下两项之一：
++
+--
+- 设定了显式 `requests` 的 `resources` 部分：
++
+[source,yaml]
+----
+  type: "Recreate"
+  resources:
+    requests: <1>
+      cpu: "100m"
+      memory: "256Mi"
+      ephemeral-storage: "1Gi"
+----
+<1> `requests` 对象包含与配额中资源列表对应的资源列表。
+
+- 您项目中定义的限值范围，其中 `LimitRange` 对象中的默认值应用到部署过程中创建的 pod。
+--
++
+要设置部署资源，请选择以上选项之一。否则，部署 pod 创建失败，显示无法满足配额要求。

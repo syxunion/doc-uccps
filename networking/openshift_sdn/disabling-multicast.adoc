@@ -1,0 +1,10 @@
+:_content-type: ASSEMBLY
+[id="disabling-multicast"]
+= 为项目禁用多播
+include::_attributes/common-attributes.adoc[]
+:context: openshift-sdn-disabling-multicast
+
+toc::[]
+
+include::modules/nw-disabling-multicast.adoc[leveloffset=+1]
+

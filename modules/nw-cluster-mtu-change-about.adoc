@@ -1,0 +1,81 @@
+// Module included in the following assemblies:
+//
+// * networking/changing-cluster-network-mtu.adoc
+
+:_content-type: CONCEPT
+[id="nw-cluster-mtu-change-about_{context}"]
+= 关于集群 MTU
+
+在安装集群网络的最大传输单元(MTU)期间，会根据集群中节点的主网络接口的 MTU 自动检测到。您通常不需要覆盖检测到的 MTU。
+
+您可能希望因为以下原因更改集群网络的 MTU：
+
+* 集群安装过程中检测到的 MTU 不正确
+* 集群基础架构现在需要不同的 MTU，如添加需要不同 MTU 的节点来获得最佳性能
+
+您只能针对 OVN-Kubernetes 和 OpenShift SDN 集群网络供应商更改集群 MTU。
+
+// https://github.com/openshift/enhancements/blob/master/enhancements/network/allow-mtu-changes.md
+[id="service-interruption-considerations_{context}"]
+== 服务中断注意事项
+
+当您为集群启动 MTU 更改时，以下效果可能会影响服务可用性：
+
+* 当您为集群启动 MTU 更改时，以下效果可能会影响服务可用性：
+
+* 当您为集群启动 MTU 更改时，以下效果可能会影响服务可用性：
+
+[id="mtu-value-selection_{context}"]
+== MTU 值选择
+
+在规划 MTU 迁移时，需要考虑两个相关但不同的 MTU 值。
+
+* *Hardware MTU*: 此 MTU 值根据您的网络基础架构的具体设置。
+* *Cluster network MTU*: 此 MTU 值始终小于您的硬件 MTU，以考虑集群网络覆盖开销。具体开销由集群网络供应商决定：
+** *OVN-Kubernetes*: `100` 字节
+** *OpenShift SDN*: `50` 字节
+
+如果您的集群为不同的节点需要不同的 MTU 值，则必须从集群中任何节点所使用的最低 MTU 值中减去集群网络供应商的开销值。例如，如果集群中的某些节点的 MTU 为 `9001`，而某些节点的 MTU 为 `1500`，则必须将此值设置为 `1400`。
+
+[id="how-the-migration-process-works_{context}"]
+== 迁移过程如何工作
+
+下表对迁移过程进行了概述，它分为操作中的用户发起的步骤，以及在响应过程中迁移过程要执行的操作。
+
+.集群 MTU 的实时迁移
+[cols="1a,1a",options="header"]
+|===
+
+|用户发起的步骤|Uccp 活动
+
+|
+在 Cluster Network Operator 配置中设置以下值：
+
+- `spec.migration.mtu.machine.to`
+- `spec.migration.mtu.network.from`
+- `spec.migration.mtu.network.to`
+
+|
+*Cluster Network Operator (CNO)*: 确认每个字段都设置为有效的值。
+
+- 如果硬件的 MTU 没有改变，则 `mtu.machine.to` 必须设置为新硬件 MTU 或当前的硬件 MTU。这个值是临时的，被用作迁移过程的一部分。如果您指定了与现有硬件 MTU 值不同的硬件 MTU，您必须手动将 MTU 配置为持久，如机器配置、DHCP 设置或 Linux 内核命令行。
+- `mtu.network.from` 字段必须等于 `network.status.clusterNetworkMTU` 字段，这是集群网络的当前 MTU。
+- `mtu.network.to` 字段必须设置为目标集群网络 MTU，且必须小于硬件 MTU，以允许集群网络供应商的覆盖开销。对于 OVN-Kubernetes，开销为 `100` 字节，OpenShift SDN 的开销为 `50` 字节。
+
+如果提供的值有效，CNO 会生成一个新的临时配置，它将集群网络集的 MTU 设置为 `mtu.network.to` 字段的值。
+
+*Machine Config Operator (MCO)*: 执行集群中每个节点的滚动重启。
+
+|重新配置集群中节点的主网络接口 MTU。您可以使用各种方法完成此操作，包括：
+
+- 使用 MTU 更改部署新的 NetworkManager 连接配置集
+- 通过 DHCP 服务器设置更改 MTU
+- 通过引导参数更改 MTU
+|N/A
+
+|在集群网络供应商的 CNO 配置中设置 `mtu` 值，并将 `spec.migration` 设置为 `null`。
+
+|
+*Machine Config Operator (MCO)*: 使用新的 MTU 配置执行集群中每个节点的滚动重启。
+
+|===

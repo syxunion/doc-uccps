@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/tkn_cli/op-tkn-references.adoc
+
+[id="op-tkn-pipeline-management_{context}"]
+= Pipelines 管理命令
+
+== pipeline
+管理管道。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn pipeline --help
+----
+
+== pipeline delete
+
+删除管道。
+
+.示例：从命名空间中删除 `mypipeline` 管道
+[source,terminal]
+----
+$ tkn pipeline delete mypipeline -n myspace
+----
+
+== pipeline describe
+描述管道。
+
+.示例：描述 `mypipeline` 管道
+[source,terminal]
+----
+$ tkn pipeline describe mypipeline
+----
+
+== pipeline list
+显示管道列表。
+
+.示例：显示管道列表
+[source,terminal]
+-----
+$ tkn pipeline list
+-----
+
+== pipeline logs
+显示特定管道的日志。
+
+.示例：将 `mypipeline` 管道的 live 日志流
+[source,terminal]
+----
+$ tkn pipeline logs -f mypipeline
+----
+
+== pipeline start
+启动管道。
+
+.示例：启动 `mypipeline` 管道
+[source,terminal]
+----
+$ tkn pipeline start mypipeline
+----

@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * machine_management/manually-scaling-machineset.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+// * windows_containers/scheduling-windows-workloads.adoc
+
+:_content-type: PROCEDURE
+[id="machineset-manually-scaling_{context}"]
+= 手动扩展机器集
+
+要在机器集中添加或删除机器实例，您可以手动扩展机器集。
+
+这个指南与全自动的、安装程序置备的基础架构安装相关。自定义的、用户置备的基础架构安装没有机器集。
+
+.先决条件
+
+* 安装 统信容器云管理平台 集群和 `oc` 命令行。
+* 以具有 `cluster-admin` 权限的用户身份登录 `oc`。
+
+.流程
+
+. 查看集群中的机器集：
++
+[source,terminal]
+----
+$ oc get machinesets -n openshift-machine-api
+----
++
+机器集以 `<clusterid>-worker-<aws-region-az>` 的形式列出。
+
+. 查看集群中的机器：
++
+[source,terminal]
+----
+$ oc get machine -n openshift-machine-api
+----
+
+. 在您要删除的机器上设置注解：
++
+[source,terminal]
+----
+$ oc annotate machine/<machine_name> -n openshift-machine-api machine.openshift.io/cluster-api-delete-machine="true"
+----
+
+. cordon 并排空您要删除的节点：
++
+[source,terminal]
+----
+$ oc adm cordon <node_name>
+$ oc adm drain <node_name>
+----
+
+. 扩展机器集：
++
+[source,terminal]
+----
+$ oc scale --replicas=2 machineset <machineset> -n openshift-machine-api
+----
++
+或者：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来扩展机器集：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  replicas: 2
+----
+====
++
+您可以扩展或缩减机器集。需要过几分钟以后新机器才可用。
+
+.验证
+
+* 验证删除预期的机器：
++
+[source,terminal]
+----
+$ oc get machines
+----

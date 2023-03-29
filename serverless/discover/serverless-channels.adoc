@@ -1,0 +1,46 @@
+:_content-type: ASSEMBLY
+[id="serverless-channels"]
+= 频道和订阅
+include::_attributes/common-attributes.adoc[]
+:context: serverless-channels
+
+toc::[]
+
+include::snippets/serverless-channels-intro.adoc[]
+
+创建 `Channel` 对象后，根据默认频道实现，一个经过更改的准入 Webhook 会为 `Channel` 对象添加一组  `spec.channelTemplate` 属性。例如，对于 `InMemoryChannel` 默认实现， `Channel`  对象如下所示：
+
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1
+kind: Channel
+metadata:
+  name: example-channel
+  namespace: default
+spec:
+  channelTemplate:
+    apiVersion: messaging.knative.dev/v1
+    kind: InMemoryChannel
+----
+
+然后，频道控制器将根据这个 `spec.channelTemplate` 配置创建后备频道实例。
+
+[注意]
+====
+创建后，`spec.channelTemplate`  属性将无法更改，因为它们由默认频道机制设置，而不是由用户设置。
+====
+
+当此机制与上例搭配使用时，会创建两个对象：一个通用的后备频道和一个 `InMemoryChannel` 频道。如果您使用不同的默认频道实现，使用特定于您的实现的频道替换  `InMemoryChannel` 。例如，在 Knative Kafka 中，创建 `KafkaChannel` 频道。
+
+后备频道充当将订阅复制到用户创建的频道对象的代理，并设置用户创建的频道对象状态来反映后备频道的状态。
+
+[id="serverless-channels-implementations"]
+== 频道实现类型
+
+`InMemoryChannel` 和 `KafkaChannel` 频道实现可用于 {ServerlessProductName} 进行开发。
+
+以下是  `InMemoryChannel` 类型频道的限制：
+
+* 事件没有持久性。如果 Pod 停机，则 Pod 上的事件将会丢失。
+* `InMemoryChannel` 频道没有实现事件排序，因此同时接收到的两个事件可能会以任何顺序传送给订阅者。
+* 如果订阅者拒绝某个事件，则不会默认重新发送尝试。您可以通过修改 `Subscription` 对象中的 `delivery` 规格来配置重新发送尝试。

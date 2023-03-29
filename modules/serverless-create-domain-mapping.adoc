@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * serverless/security/serverless-custom-domains.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-domain-mapping_{context}"]
+= 创建自定义域映射
+
+您可以通过将您自己的自定义域名映射到 Knative 服务来自定义 Knative 服务域。要将自定义域名映射到自定义资源（CR），您必须创建一个映射到可寻址目标 CR 的 `DomainMapping`  CR，如 Knative 服务或 Knative 路由。
+
+.先决条件
+
+* 在集群中安装了统信容器云管理平台无服务器和 Knative Serving。
+* 安装 Uccps  CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在统信容器云管理平台中创建应用程序和其他工作负载。
+* 您已创建了 Knative 服务，并控制要映射到该服务的自定义域。
++
+[注意]
+====
+您的自定义域必须指向统信容器云管理平台集群的 IP 地址。
+====
+
+.流程
+
+. 在与您要映射的目标 CR 相同的命名空间中创建一个包含  `DomainMapping` CR 的 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+ name: <domain_name> <1>
+ namespace: <namespace> <2>
+spec:
+ ref:
+   name: <target_name> <3>
+   kind: <target_type> <4>
+   apiVersion: serving.knative.dev/v1
+----
+<1> 要映射到目标 CR 的自定义域名。
+<2> `DomainMapping`  CR 和目标 CR 的命名空间。
+<3> 映射到自定义域的目标 CR 名称。
+<4> 映射到自定义域的 CR 类型。
++
+.服务域映射示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+ name: example-domain
+ namespace: default
+spec:
+ ref:
+   name: example-service
+   kind: Service
+   apiVersion: serving.knative.dev/v1
+----
++
+.路由域映射示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+ name: example-domain
+ namespace: default
+spec:
+ ref:
+   name: example-route
+   kind: Route
+   apiVersion: serving.knative.dev/v1
+----
+
+. 将 `DomainMapping` CR 应用为 YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

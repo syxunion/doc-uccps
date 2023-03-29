@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="deploying-machine-health-checks"]
+= 部署机器健康检查
+include::_attributes/common-attributes.adoc[]
+:context: deploying-machine-health-checks
+
+toc::[]
+
+您可以配置和部署机器健康检查，以自动修复机器池中损坏的机器。
+
+include::modules/machine-user-provisioned-limitations.adoc[leveloffset=+1]
+
+include::modules/machine-health-checks-about.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关您可以在 `MachineHealthCheck` CR 中定义的节点状况的更多信息，请参阅 xref:../nodes/nodes/nodes-nodes-viewing.html#nodes-nodes-viewing-listing_nodes-nodes-viewing[关于列出集群中的所有节点]。
+
+* 有关短路的更多信息，请参阅 Short-circuiting 机器健康检查补救。
+
+include::modules/machine-health-checks-resource.adoc[leveloffset=+1]
+
+////
+[role="_additional-resources"]
+.Additional resources
+////
+
+include::modules/machine-health-checks-creating.adoc[leveloffset=+1]
+
+您可以配置和部署机器健康检查，以检测并修复不健康的裸机节点。
+
+include::modules/mgmt-power-remediation-baremetal-about.adoc[leveloffset=+1]

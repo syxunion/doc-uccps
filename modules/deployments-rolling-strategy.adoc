@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+[id="deployments-rolling-strategy_{context}"]
+= Rolling 策略
+
+滚动部署会逐渐将应用程序旧版本实例替换为应用程序的新版本实例。如果 `部署配置` 上没有指定任何策略，则滚动策略是默认的部署策略。
+
+在缩减旧组件前，滚动部署通常会 等待新 pod 变为 `ready`。如果发生严重问题，可以中止 Rolling 部署。
+
+*使用滚动部署：*
+
+- 希望在应用程序更新过程中不需要停机时。
+- 应用程序同时支持运行旧代码和新代码时。
+
+滚动部署意味着您同时运行旧版和新版本的代码。这通常需要您的应用程序可以处理 N-1 兼容性。
+
+.滚动策略定义示例
+[source,yaml]
+----
+strategy:
+  type: Rolling
+  rollingParams:
+    updatePeriodSeconds: 1 <1>
+    intervalSeconds: 1 <2>
+    timeoutSeconds: 120 <3>
+    maxSurge: "20%" <4>
+    maxUnavailable: "10%" <5>
+    pre: {} <6>
+    post: {}
+----
+<1> 各个 pod 更新之间等待的时间。如果未指定，则默认值为 `1`。
+<2> 更新后轮询部署状态之间等待的时间。如果未指定，则默认值为 `1`。
+<3> 放弃前等待扩展事件的时间。可选，默认值为 `600`。这里的放弃表示自动回滚到以前的完整部署。
+<4> `maxSurge` 是可选的；如果未指定，则默认为 `25％`。请参考以下流程中的信息。
+<5> `maxUnavailable` 是可选的；如果未指定，则默认为`25％` 。请参考以下流程中的信息。
+<6> `pre` 和 `post` 都是生命周期 hook。
+
+滚动策略：
+
+. 执行任何 `pre` 生命周期 hook。
+. 根据数量扩展新的复制控制器。
+. 根据最大不可用数，缩减旧的复制控制器。
+. 重复这个扩展，直到新的复制控制器达到所需的副本数，并且旧的复制控制器已缩减为零。
+. 执行任何 `post` 生命周期 hook。
+
+[重要]
+====
+在缩减时，滚动策略会等待 pod 准备就绪，以便它能决定进一步缩放是否会影响到可用性。如果扩展 pod 永不就绪，部署过程将最终超时并导致部署失败。
+====
+
+`maxUnavailable` 参数是在更新过程中不可用的 pod 的最大数量。`maxSurge` 参数是原始 pod 数量之上最多可以调度的 pod 数量。这两个参数可以设定为百分比（如 `10％`）或绝对值（如 `2`）。两者的默认值都是 `25％`。
+
+这些参数允许对部署的可用性和速度进行调优。例如：
+
+- `maxUnavailable*=0` 和 `maxSurge*=20%` 可确保在更新和快速扩展过程中保持全部容量。
+- `maxUnavailable*=10％` 和 `maxSurge*=0` 在执行更新时不使用额外容量（原位更新）。
+- `maxUnavailable*=10％` 和 `maxSurge*=10％` 可以快速缩放，可能会有一些容量损失。
+
+一般而言，如果您想要快速推出部署，请使用 `maxSurge`。如果您需要考虑资源配额并可以接受资源部分不可用的情况，则可使用 `maxUnavailable`。

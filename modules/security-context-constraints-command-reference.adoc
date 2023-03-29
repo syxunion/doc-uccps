@@ -1,0 +1,126 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-security-context-constraints.adoc
+
+[id="security-context-constraints-command-reference_{context}"]
+= 安全性上下文约束命令参考
+
+您可以使用 Uccp CLI (oc) 将实例中的安全性上下文约束 (SCC) 作为常规 API 对象进行管理。
+
+[NOTE]
+====
+您必须具有 `cluster-admin` 特权才能管理 SCC。
+====
+
+
+[id="listing-security-context-constraints_{context}"]
+== 列出安全性上下文约束
+
+获取当前的 SCC 列表：
+
+[source,terminal]
+----
+$ oc get scc
+----
+
+.输出示例
+[source,terminal]
+----
+NAME               PRIV    CAPS   SELINUX     RUNASUSER          FSGROUP     SUPGROUP    PRIORITY   READONLYROOTFS   VOLUMES
+anyuid             false   []     MustRunAs   RunAsAny           RunAsAny    RunAsAny    10         false            [configMap downwardAPI emptyDir persistentVolumeClaim projected secret]
+hostaccess         false   []     MustRunAs   MustRunAsRange     MustRunAs   RunAsAny    <none>     false            [configMap downwardAPI emptyDir hostPath persistentVolumeClaim projected secret]
+hostmount-anyuid   false   []     MustRunAs   RunAsAny           RunAsAny    RunAsAny    <none>     false            [configMap downwardAPI emptyDir hostPath nfs persistentVolumeClaim projected secret]
+hostnetwork        false   []     MustRunAs   MustRunAsRange     MustRunAs   MustRunAs   <none>     false            [configMap downwardAPI emptyDir persistentVolumeClaim projected secret]
+node-exporter      false   []     RunAsAny    RunAsAny           RunAsAny    RunAsAny    <none>     false            [*]
+nonroot            false   []     MustRunAs   MustRunAsNonRoot   RunAsAny    RunAsAny    <none>     false            [configMap downwardAPI emptyDir persistentVolumeClaim projected secret]
+privileged         true    [*]    RunAsAny    RunAsAny           RunAsAny    RunAsAny    <none>     false            [*]
+restricted         false   []     MustRunAs   MustRunAsRange     MustRunAs   RunAsAny    <none>     false            [configMap downwardAPI emptyDir persistentVolumeClaim projected secret]
+----
+
+[id="examining-a-security-context-constraints-object_{context}"]
+== 检查安全性上下文约束
+
+您可以查看特定 SCC 的信息，包括这个 SCC 应用到哪些用户、服务帐户和组。
+
+例如，检查 `restricted` SCC：
+
+[source,terminal]
+----
+$ oc describe scc restricted
+----
+
+.输出示例
+[source,terminal]
+----
+Name:					restricted
+Priority:				<none>
+Access:
+  Users:				<none> <1>
+  Groups:				system:authenticated <2>
+Settings:
+  Allow Privileged:			false
+  Default Add Capabilities:		<none>
+  Required Drop Capabilities:		KILL,MKNOD,SYS_CHROOT,SETUID,SETGID
+  Allowed Capabilities:			<none>
+  Allowed Seccomp Profiles:		<none>
+  Allowed Volume Types:			configMap,downwardAPI,emptyDir,persistentVolumeClaim,projected,secret
+  Allow Host Network:			false
+  Allow Host Ports:			false
+  Allow Host PID:			false
+  Allow Host IPC:			false
+  Read Only Root Filesystem:		false
+  Run As User Strategy: MustRunAsRange
+    UID:				<none>
+    UID Range Min:			<none>
+    UID Range Max:			<none>
+  SELinux Context Strategy: MustRunAs
+    User:				<none>
+    Role:				<none>
+    Type:				<none>
+    Level:				<none>
+  FSGroup Strategy: MustRunAs
+    Ranges:				<none>
+  Supplemental Groups Strategy: RunAsAny
+    Ranges:				<none>
+----
+<1> 列出 SCC 应用到的用户和服务帐户。
+<2> 列出 SCC 应用到的组。
+
+[注意]
+====
+要在升级过程中保留自定义 SCC，请不要编辑默认 SCC 的设置。
+//other than priority, users, groups, labels, and annotations.
+====
+
+[id="deleting-security-context-constraints_{context}"]
+== Deleting security context constraints
+
+删除安全性上下文约束
+
+[source,terminal]
+----
+$ oc delete scc <scc_name>
+----
+
+[注意]
+====
+如果删除了某一默认 SCC，重启集群时会重新生成该 SCC。
+====
+
+[id="updating-security-context-constraints_{context}"]
+
+== 更新安全性上下文约束
+
+更新现有的 SCC：
+
+[source,terminal]
+----
+$ oc edit scc <scc_name>
+----
+
+[注意]
+====
+要在升级过程中保留自定义 SCC，请不要编辑默认 SCC 的设置。
+//other than priority, users, groups, labels, and annotations.
+====
+

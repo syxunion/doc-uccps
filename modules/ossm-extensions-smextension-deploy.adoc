@@ -1,0 +1,43 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-smextensions-deploy_{context}"]
+= Deploying `ServiceMeshExtension` resources
+
+您可以使用 `ServiceMeshExtension` 资源启用 {SMProductName} 扩展。在本例中， `istio-system` 是  {SMProductShortName} 项目的名称。
+
+
+有关使用 Rust SDK 构建的完整示例，请看标题附加过滤器。这是一个简单的过滤器，它会将一个或多个标头附加到 HTTP 响应中，其名称和值从扩展的 config 字段中获取。请参阅以下代码片段中的示例配置。
+
+.流程
+
+. 创建以下示例资源：
++
+.ServiceMeshExtension 资源 extension.yaml 示例
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: header-append
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      app: httpbin
+  config:
+    first-header: some-value
+    another-header: another-value
+  image: quay.io/maistra-dev/header-append-filter:2.1
+  phase: PostAuthZ
+  priority: 100
+----
+
+. 使用以下命令应用 `extension.yaml` 文件：
++
+[source,terminal]
+----
+$ oc apply -f <extension>.yaml
+----

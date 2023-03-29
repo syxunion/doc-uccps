@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id='installing-odo']
+= 安装 odo
+include::_attributes/common-attributes.adoc[]
+:context: installing-odo
+
+toc::[]
+
+// The following section describes how to install `{odo-title}` on different platforms using the CLI or the Visual Studio Code (VS Code) IDE.
+
+您可以通过下载二进制文件，在 Linux、Windows 或 macOS 上安装 odo CLI。您还可以安装 Uccps VS Code 扩展，它使用 odo 和 oc 二进制文件与 统信容器云管理平台 集群交互。对于 UnionTech OS Server 20(UOS20)，您可以使用 RPM 安装 odo CLI。
+
+[注意]
+====
+目前，`odo` 不支持在限制的网络环境中安装。
+====
+
+// You can also find the URL to the latest binaries from the {product-title} web console by clicking the *?* icon in the upper-right corner and selecting *Command Line Tools*
+
+include::modules/developer-cli-odo-installing-odo-on-linux.adoc[leveloffset=+1]

@@ -1,0 +1,85 @@
+// Module included in the following assemblies:
+//
+// * installing/install_config/installing-customizing.adoc
+// * installing/installing_aws/installing-restricted-networks-aws.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_gcp/installing-restricted-networks-gcp.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+
+ifeval::["{context}" == "installing-restricted-networks-bare-metal"]
+:restricted:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vsphere"]
+:restricted:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="installation-special-config-chrony_{context}"]
+= 配置 chrony 时间服务
+
+您
+ifdef::restricted[必需]
+ifndef::restricted[可以]
+通过修改 `chrony .conf` 文件的内容，并将这些内容作为机器配置传递给节点，从而设置 chrony 时间服务(chronyd)使用的时间服务器和相关设置。
+
+.流程
+
+. 创建一个 Butane 配置，包括 `chrony.conf` 文件的内容。例如，要在 worker 节点上配置 chrony，请创建一个 `99-worker-chrony.bu` 文件。
++
+[注意]
+====
+如需有关 Butane 的信息，请参阅"使用 Butane 创建机器配置"。
+====
++
+[source,yaml]
+----
+variant: openshift
+version: 4.10.0
+metadata:
+  name: 99-worker-chrony <1>
+  labels:
+    machineconfiguration.openshift.io/role: worker <1>
+storage:
+  files:
+  - path: /etc/chrony.conf
+    mode: 0644 <2>
+    overwrite: true
+    contents:
+      inline: |
+        pool 0.rhel.pool.ntp.org iburst <3>
+        driftfile /var/lib/chrony/drift
+        makestep 1.0 3
+        rtcsync
+        logdir /var/log/chrony
+----
+<1> 在 control plane 节点上，在这两个位置中将 `master` 替换为 `worker`。
+<2> 为机器配置文件的 `mode` 字段指定数值模式。在创建文件并应用更改后，模式 将转换为十进制值。您可以使用 `oc get mc <mc-name> -o yaml` 命令来检查 YAML 文件。
+<3> 指定任何有效的、可访问的时间源，如 DHCP 服务器提供的源。或者，您可以指定以下 NTP 服务器：
+ifndef::restricted[`1.rhel.pool.ntp.org`, `2.rhel.pool.ntp.org`, or `3.rhel.pool.ntp.org`.]
+
+. 使用 Butane 生成 `MachineConfig` 对象文件 `99-worker-chrony.yaml`，其中包含要交付至节点的配置：
++
+[source,terminal]
+----
+$ butane 99-worker-chrony.bu -o 99-worker-chrony.yaml
+----
+
+. 使用以下两种方式之一应用配置：
++
+* 如果集群还没有运行，在生成清单文件后，将 `MachineConfig` 对象文件添加到 `<installation_directory>/openshift` 目录中，然后继续创建集群。
++
+* 如果集群已在运行，请应用该文件：
++
+[source,terminal]
+----
+$ oc apply -f ./99-worker-chrony.yaml
+----
+
+ifeval::["{context}" == "installing-restricted-networks-bare-metal"]
+:!restricted:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-vsphere"]
+:!restricted:
+endif::[]

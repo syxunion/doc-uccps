@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * builds/advanced-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-setting-maximum-duration_{context}"]
+= 设置最长持续时间
+
+定义 `BuildConfig` 对象时，您可以通过设置 `completionDeadlineSeconds` 字段来定义其最长持续时间。以秒为单位指定，默认情况下不设置。若未设置，则不强制执行最长持续时间。
+
+最长持续时间从构建 Pod 调度到系统中的时间开始计算，并且定义它在多久时间内处于活跃状态，这包括拉取构建器镜像所需的时间。达到指定的超时后，统信容器云管理平台 将终止构建。
+
+.流程
+
+* 要设置最长持续时间，请在 `BuildConfig` 中指定 `completionDeadlineSeconds`。下例显示了 `BuildConfig` 的部分内容，它指定了值为 30 分钟的 `completionDeadlineSeconds` 字段：
++
+[source,yaml]
+----
+spec:
+  completionDeadlineSeconds: 1800
+----
+
+[注意]
+====
+Pipeline 策略选项不支持此设置。
+====

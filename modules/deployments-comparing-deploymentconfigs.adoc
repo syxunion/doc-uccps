@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/what-deployments-are.adoc
+
+[id="deployments-comparing-deploymentconfigs_{context}"]
+= 部署和部署配置的比较
+
+统信容器云管理平台 支持 Kubernetes `Deployment` 对象和 统信容器云管理平台 提供的 `部署配置`，但建议您使用 `Deployment` 对象，除非您需要 `部署配置` 提供的特定功能或行为。
+
+以下部分详细阐述两种对象之间的区别，以进一步协助您决定使用哪一种类型。
+
+[id="deployments-design_{context}"]
+== 设计
+
+`Deployment` 和 `部署配置` 之间的一个重要区别是为推出（rollout）过程所选择的 CAP theorem 属性。`部署配置` 以一致性为先，而 `Deployments` 对象优先于可用性。
+
+对于 `部署配置`，如果运行一个部署器 pod 的节点停机，它不会被替换掉。流程会等待节点重新在线或被手动删除。手动删除节点也会删除对应的 pod。这意味着您无法删除 pod 来取消推出部署，因为 kubelet 负责删除相关联的 pod。
+
+但是，部署推出由控制器管理器驱动。控制器管理器在 master 上运行高可用性模式，并使用群首选举算法提高可用性与一致性相比的价值。在故障期间，其他 master 有可能同时对同一部署做出反应，但这个问题会在故障发生后很快进行调节。
+
+[id="delpoymentconfigs-specific-features_{context}"]
+== 部署配置相关的功能
+
+[discrete]
+==== 自动回滚
+
+目前，在出现故障时，部署不支持自动回滚到上次成功部署的副本集。
+
+[discrete]
+==== 触发器
+
+部署有一个隐式配置更改触发器，每次更改部署的 Pod 模板都会自动触发新的推出部署。如果您不想在 Pod 模板更改时进行新的推出部署，请暂停部署：
+
+[source,terminal]
+----
+$ oc rollout pause deployments/<name>
+----
+
+[discrete]
+==== 生命周期 hooks
+
+Deployment 尚不支持任何生命周期 hook。
+
+[discrete]
+==== 自定义策略
+
+部署尚不支持用户指定的自定义部署策略。
+
+[id="delpoyments-specific-features_{context}"]
+== 针对部署的功能
+
+[discrete]
+==== 滚动
+
+`Deployment` 的部署过程是由控制器循环推动的，这与使用部署器 Pod 进行每次新推出部署的 `DeploymentConfig` 相反。这意味着 `Deployment` 对象可以拥有尽可能多的活跃副本集，最终部署控制器将缩减所有旧副本集，并扩展最新的副本集。
+
+`部署配置` 最多可以有一个部署器 pod 运行，否则多个部署器在试图扩展其认为是最新的复制控制器时会导致冲突。因此，任何时间点上只能有两个复制控制器处于活跃状态。最终，这会转化为 Deployment 能够更快地进行推出部署。
+
+[discrete]
+==== 按比例扩展
+
+因为部署控制器是部署所拥有的新旧副本集的大小的唯一来源，所以它可以扩展正在进行的推出部署。额外副本会根据每个副本集的大小按比例分发。
+
+当一个推出部署（rollout）正在进行时无法扩展部署，因为控制器会遇到部署器进程中有关新 ReplicationController 大小的问题。
+
+[discrete]
+==== 中途暂停推出部署
+
+Deployment 可以在任何时间暂停，这意味着可以暂停正在进行的推出部署。另一方面，当前还无法暂停部署器 Pod。因此，如果您尝试在推出部署进行期间暂停部署，则部署器进程不受影响，它会继续运行直到完成为止。

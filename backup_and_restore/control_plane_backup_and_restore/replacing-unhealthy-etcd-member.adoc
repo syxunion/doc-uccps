@@ -1,0 +1,47 @@
+:_content-type: ASSEMBLY
+[id="replacing-unhealthy-etcd-member"]
+= 替换不健康的 etcd 成员
+include::_attributes/common-attributes.adoc[]
+:context: replacing-unhealthy-etcd-member
+
+toc::[]
+
+本小节描述了替换一个不健康 etcd 成员的过程。
+
+此过程取决于 etcd 成员不健康的原因，如机器没有运行，或节点未就绪，或 etcd pod 处于 crashlooping 状态。
+
+[注意]
+====
+如果您丢失了大多数控制平面主机，并导致 etcd 仲裁丢失，则必须遵循灾难恢复流程 xref:../../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-2-restoring-cluster-state.adoc#dr-restoring-cluster-state[恢复到以前的集群状态] ，而不是这个过程。
+
+如果控制平面证书在被替换的成员中无效，则必须遵循从 xref:../../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-3-expired-certs.adoc#dr-recovering-expired-certs[已过期控制平面证书] 中恢复的步骤，而不是此过程。
+
+如果控制平面节点丢失并且创建了一个新节点，etcd 集群 Operator 将处理生成新 TLS 证书并将节点添加为 etcd 成员。
+====
+
+== 先决条件
+
+* 在替换不健康的 etcd 成员前需要进行 xref:../../backup_and_restore/control_plane_backup_and_restore/backing-up-etcd.adoc#backing-up-etcd-data_backup-etcd[etcd 备份]。
+
+// Identifying an unhealthy etcd member
+include::modules/restore-identify-unhealthy-etcd-member.adoc[leveloffset=+1]
+
+// Determining the state of the unhealthy etcd member
+include::modules/restore-determine-state-etcd-member.adoc[leveloffset=+1]
+
+== 替换不健康的 etcd 成员
+
+根据不健康的 etcd 成员的状态，使用以下一个流程：
+
+* xref:../../backup_and_restore/control_plane_backup_and_restore/replacing-unhealthy-etcd-member.adoc#restore-replace-stopped-etcd-member_replacing-unhealthy-etcd-member[替换机器没有运行或节点未就绪的不健康 etcd 成员]
+* xref:../../backup_and_restore/control_plane_backup_and_restore/replacing-unhealthy-etcd-member.adoc#restore-replace-crashlooping-etcd-member_replacing-unhealthy-etcd-member[替换其 etcd Pod 处于 crashlooping 状态的不健康 etcd 成员]
+
+
+// Replacing an unhealthy etcd member whose machine is not running or whose node is not ready
+include::modules/restore-replace-stopped-etcd-member.adoc[leveloffset=+2]
+
+// Replacing an unhealthy etcd member whose etcd pod is crashlooping
+include::modules/restore-replace-crashlooping-etcd-member.adoc[leveloffset=+2]
+
+
+

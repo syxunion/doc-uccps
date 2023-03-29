@@ -1,0 +1,81 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: PROCEDURE
+
+[id="ossm-routing-virtual-services_{context}"]
+= Using VirtualServices
+
+您可以使用虚拟服务通过 {SMProductName} 将请求动态路由到微服务的不同版本。使用虚拟服务，您可以：
+
+* 通过单一虚拟服务处理多个应用程序服务。如果网格使用 Kubernetes，您可以配置虚拟服务来处理特定命名空间中的所有服务。通过虚拟服务，您可以将单体式应用转变为由具有无缝消费者体验的不同微服务组成的服务。
+* 配置流量规则与网关相结合，以控制入口和出口流量。
+
+[id="ossm-routing-vs_{context}"]
+== Configuring VirtualServices
+
+使用虚拟服务将请求路由到服务网格中的服务。每个虚拟服务由一组路由规则组成，并按顺序应用。 {SMProductName} 会将每个给定给虚拟服务的请求与网格内的特定实际目的地匹配。
+
+如果没有虚拟服务， {SMProductName} 会在所有服务实例间使用 round-robin 负载均衡分配流量。使用虚拟服务时，您可以指定一个或多个主机名的流量行为。虚拟服务的路由规则告知 {SMProductName} 如何将虚拟服务的流量发送到适当的目的地。路由目的地可以是同一服务版本，也可以是完全不同的服务。
+
+.流程
+
+. 使用以下示例创建 YAML 文件，根据用户连接到应用程序的不同版本将请求路由到 Bookinfo 示例应用程序服务的不同版本。
++
+.VirtualService.yaml 示例
+[source,YAML]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+----
+
+. 运行以下命令以应用 `VirtualService.yaml`，其中 `VirtualService.yaml`  是文件的路径。
++
+[source,terminal]
+----
+$ oc apply -f <VirtualService.yaml>
+----
+
+== VirtualService configuration reference
+
+//Need a sentence or two here
+
+[options="header"]
+[cols="l, a"]
+|===
+|参数 |描述
+|spec:
+  hosts:
+| 字段列出了路由规则应用到的虚拟服务的目标地址。这是用于向服务发送请求的地址。虚拟服务主机名可以是解析为完全限定域名的 IP 地址、DNS 名称或简短名称。
+
+|spec:
+  http:
+  - match:
+|`http` 部分包含虚拟服务的路由规则，这些规则描述路由 HTTP/1.1、HTTP2 和 gRPC 流量与 hosts 字段中指定的目的地的匹配条件和操作。路由规则由您希望流量到达的目的地以及任何指定的匹配条件组成。示例中的第一个路由规则有一个以 match 字段开头的条件。在这个示例中，这个路由适用于来自用户 `jason` 的所有请求。添加 `headers`, `end-user`, 和 `exact` 项来选择适当的请求。
+
+|spec:
+  http:
+  - match:
+    - destination:
+|route 部分的 `destination` 字段指定与这个条件匹配的流量的实际目的地。与虚拟服务的主机不同，目的地的主机必须是 {SMProductName} 服务  registry 中存在的真实目的地。这可以是带有代理的网格服务，或使用 service 条目添加的一个非网格服务。在本例中，主机名是一个 Kubernetes 服务名称：
+|===

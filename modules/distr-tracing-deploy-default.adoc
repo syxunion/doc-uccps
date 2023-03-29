@@ -1,0 +1,116 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+
+:_content-type: PROCEDURE
+[id="distr-tracing-deploy-default_{context}"]
+= 从 Web 控制台部署分布式追踪默认策略
+
+自定义资源定义(CRD)定义部署 统信容器云管理平台分布式追踪实例时使用的配置。默认 CR 名为`jaeger-all-in-one-inmemory` ，它配置为使用最少资源，以确保您可以在默认的统信容器云管理平台安装中成功安装它。您可以使用此默认配置创建使用 AllInOne 部署策略的 统信容器云管理平台分布式追踪平台实例，或者您可以定义自己的自定义资源文件。
+
+[注意]
+====
+内存存储不是持久性的。如果 Jaeger pod 关闭、重启或被替换，您的 trace 数据将会丢失。对于持久性存储，您必须使用 production 或 streaming 策略，这些策略使用 Elasticsearch 作为默认存储。
+====
+
+.先决条件
+
+* 已安装 统信容器云管理平台分布式追踪扩展组件。
+* 您已查看了如何自定义部署的说明。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台web 控制台。
+
+. 创建一个新项目，如 `tracing-system`.
++
+[注意]
+====
+如果作为 Service Mesh 的一部分安装，则需要在与  `ServiceMeshControlPlane`  资源相同的命名空间中安装分布式追踪资源，如 `istio-system`.
+====
++
+.. 浏览至 *主页* -> *项目*.
+
+.. Click *创建项目*.
+
+.. 在 *名称* 字段中输入 `tracing-system`
+
+.. ④　点击 *创建*。
+
+. 导航到  *Operators* -> *安装的 Operators*.
+
+. 如有必要，从 *项目* 菜单中选择 `tracing-system`。您可能需要等待一些时间，让 Operator 复制到新项目中。
+
+. 5.点 *统信容器云管理平台分布式追踪扩展组件*。在 *详情* 标签页中的 *提供的 APIs* 下，Operator 提供了一个单个链接。
+
+. 6.在 *Jaeger* 下，点 *创建实例*。
+
+. 7.在 *创建Jaeger* 页面上，要使用默认值进行安装，请点击 *创建* 来创建分布式追踪平台实例。
+
+. 在 *Jaegers* 页面上，点击分布式追踪平台实例的名称，如 `jaeger-all-in-one-inmemory`.
+
+. 9.在 *Jaeger* 详情 页面上，点击 *资源* 选项卡，点击 jaeger-all-in-one-inmemory 部署。等待 pod 的状态变为"Running"再继续操作。
+
+
+[id="distr-tracing-deploy-default-cli_{context}"]
+== 通过 CLI 部署分布式追踪默认策略
+
+按照以下步骤从命令行创建分布式追踪平台实例。
+
+.先决条件
+
+* 已安装并验证 统信容器云管理平台分布式追踪平台 Operator。
+* 您已查看了如何自定义部署的说明。
+* 您可以访问与统信容器云管理平台版本匹配的 Uccps CLI (`oc`)
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台CLI。
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:8443
+----
+
+. 创建一个名为 `tracing-system` 的新项目。
++
+[source,terminal]
+----
+$ oc new-project tracing-system
+----
+
+. 创建一个名为 `jaeger.yaml` 的自定义资源文件，其中包含以下文本：
++
+.示例 Jaeger-all-in-one.yaml
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-all-in-one-inmemory
+----
+
+. 运行以下命令来部署分布式追踪平台：
++
+[source,terminal]
+----
+$ oc create -n tracing-system -f jaeger.yaml
+----
+
+. 在安装过程中运行以下命令来监控 pod 的进度：
++
+[source,terminal]
+----
+$ oc get pods -n tracing-system -w
+----
++
+安装过程完成后，您应该看到类似以下示例的输出：
++
+[source,terminal]
+----
+NAME                                         READY   STATUS    RESTARTS   AGE
+jaeger-all-in-one-inmemory-cdff7897b-qhfdx   2/2     Running   0          24s
+----

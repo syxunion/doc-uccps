@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+//
+// * machine_management/modifying-machineset.adoc
+// * scalability_and_performance/recommended-cluster-scaling-practices.adoc
+
+:_content-type: PROCEDURE
+[id="machineset-modifying_{context}"]
+= 修改机器集
+
+要更改机器集，编辑 `MachineSet`  YAML。然后，通过删除每台机器或将机器设置为 `0` 个副本来删除与机器设置关联的所有机器。然后，将副本数量调回所需的数量。您对机器集所做的更改不会影响现有的机器。
+
+如果您需要在不进行其他更改的情况下扩展机器集，则不需要删除机器。
+
+[注意]
+====
+默认情况下，统信容器云管理平台 路由器 Pod 部署在 worker 上。由于路由器需要访问某些集群资源（包括 Web 控制台），除非先重新放置了路由器 Pod，否则请不要将 worker 机器集扩展为 `0`。
+====
+
+.先决条件
+
+* 安装 统信容器云管理平台 集群和 `oc` 命令行。
+* 以具有 `cluster-admin` 权限的用户身份登录 `oc`。
+
+.流程
+
+. 编辑机器集：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
+
+. 将机器缩减为 0:
++
+[source,terminal]
+----
+$ oc scale --replicas=0 machineset <machineset> -n openshift-machine-api
+----
++
+或者：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来扩展机器集：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  replicas: 0
+----
+====
++
+等待机器被删除。
+
+. 根据需要扩展机器设置：
++
+[source,terminal]
+----
+$ oc scale --replicas=2 machineset <machineset> -n openshift-machine-api
+----
++
+或者：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来扩展机器集：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  replicas: 2
+----
+====
++
+等待机器启动。新机器包含您对机器集所做的更改。

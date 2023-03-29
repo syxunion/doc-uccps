@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-groups_{context}"]
+= 修剪组
+
+要修剪来自外部提供程序的组记录，管理员可以运行以下命令：
+
+[source,terminal]
+----
+$ oc adm prune groups \
+    --sync-config=path/to/sync/config [<options>]
+----
+
+.`oc adm prune groups` 标记
+[cols="4,8",options="header"]
+|===
+
+|选项 |描述
+
+.^|`--confirm`
+|指明应该执行修剪，而不是空运行。
+
+.^|`--blacklist`
+|指向组黑名单文件的路径。
+
+.^|`--whitelist`
+|指向组白名单文件的路径。
+
+.^|`--sync-config`
+|指向同步配置文件的路径。
+|===
+
+.流程
+
+. 要查看 prune 命令删除的组，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm prune groups --sync-config=ldap-sync-config.yaml
+----
+
+. 要执行修剪操作，请添加 `--confirm` 标志：
++
+[source,terminal]
+----
+$ oc adm prune groups --sync-config=ldap-sync-config.yaml --confirm
+----
+
+////
+Needs "Additional resources" links when converted:
+
+//Future xref:../install_config/syncing_groups_with_ldap.adoc#configuring-ldap-sync[Configuring LDAP Sync]
+//Future xref:../install_config/syncing_groups_with_ldap.adoc#overview[Syncing Groups With LDAP]
+////

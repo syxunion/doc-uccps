@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-quickstart_{context}"]
+= 快速启动模板
+
+快速启动模板是 统信容器云管理平台 上运行的应用程序的基本示例。Quickstarts 提供多种语言和框架，并在模板中定义，模板由一组服务、构建配置和部署配置组成。该模板引用了构建和部署应用程序所需的镜像和源存储库。
+
+要探索快速启动，请从模板创建应用程序。您的管理员必须已在 统信容器云管理平台 集群中安装了这些模板，在这种情况下，您只需从 web 控制台中选择即可。
+
+快速开始引用包含应用源代码的源存储库。要自定义 Quickstart，请分叉存储库，并在从模板创建应用程序时，用分叉的存储库替换默认的源存储库名称。这将导致使用您的源代码而非所提供的示例源来执行构建。然后，您可以更新源存储库中的代码，并启动新的构建来查看反映在所部署的应用程序中的更改。
+
+[id="templates-quickstart-web-framework_{context}"]
+== Web 框架快速启动模板
+
+这些快速启动模板提供了指定框架和语言的基本应用程序：
+
+* CakePHP: 包含 MySQL 数据库的 PHP web 框架
+* Dancer: MySQL 数据库的 Perl Web 框架
+* Django: PostgreSQL 数据库的 Python web 框架
+* NodeJS: 包含 MongoDB 数据库的 NodeJS web 应用程序
+* Rails: Ruby web 框架（包括 PostgreSQL 数据库）
+
+
+
+//* CakePHP: a PHP web framework (includes a MySQL database)
+//** link:https://github.com/openshift/origin/tree/master/examples/quickstarts/cakephp-mysql.json[Template definition]
+//** link:https://github.com/sclorg/cakephp-ex[Source repository]
+//* Dancer: a Perl web framework (includes a MySQL database)
+//** link:https://github.com/openshift/origin/tree/master/examples/quickstarts/dancer-mysql.json[Template definition]
+//** link:https://github.com/sclorg/dancer-ex[Source repository]
+//* Django: a Python web framework (includes a PostgreSQL database)
+//** link:https://github.com/openshift/origin/tree/master/examples/quickstarts/django-postgresql.json[Template definition]
+//** link:https://github.com/sclorg/django-ex[Source repository]
+//* NodeJS: a NodeJS web application (includes a MongoDB database)
+//** link:https://github.com/openshift/origin/tree/master/examples/quickstarts/nodejs-mongodb.json[Template definition]
+//** link:https://github.com/sclorg/nodejs-ex[Source repository]
+//* Rails: a Ruby web framework (includes a PostgreSQL database)
+//** link:https://github.com/openshift/origin/tree/master/examples/quickstarts/rails-postgresql.json[Template definition]
+//** link:https://github.com/sclorg/rails-ex[Source repository]

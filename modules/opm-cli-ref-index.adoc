@@ -1,0 +1,219 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/opm/cli-opm-ref.adoc
+
+[id="opm-cli-ref-index_{context}"]
+= index
+
+从预先存在的 Operator 捆绑包生成 Operator 索引容器镜像。
+
+.命令语法
+[source,terminal]
+----
+$ opm index <subcommand> [<flags>]
+----
+
+.`index` 子命令
+[options="header",cols="1,3"]
+|===
+|子命令 |描述
+
+|`add`
+|将 Operator 捆绑包添加到索引中。
+
+|`prune`
+|修剪除指定软件包以外的所有索引。
+
+|`prune-stranded`
+|修剪没有与特定镜像关联的分级捆绑包索引。
+
+|`rm`
+|从索引中删除整个 Operator。
+
+|===
+
+[id="opm-cli-ref-index-add_{context}"]
+== add
+
+将 Operator 捆绑包添加到索引中。
+
+.命令语法
+[source,terminal]
+----
+$ opm index add [<flags>]
+----
+
+.`index add` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-i`, `--binary-image`
+|on-image `opm` 命令的容器镜像
+
+|`-u`, `--build-tool` (string)
+|构建容器镜像的工具： `podman` （默认值）或 `docker`。覆盖 `--container-tool` 标志的一部分。
+
+|`-b`, `--bundles` (strings)
+|要添加的捆绑包的逗号分隔列表。
+
+|`-c`, `--container-tool` (string)
+|与容器镜像交互的工具，如保存和构建：`docker` 或 `podman`。
+
+|`-f`, `--from-index` (string)
+|要添加到的上一个索引。
+
+|`--generate`
+|如果启用，则仅创建 Dockerfile 并将其保存到本地磁盘。
+
+|`--mode` (string)
+|图形更新模式，用来定义通频道图形如何被更新： replaces（默认值）、`semver`  或  `semver-skippatch`
+
+|`-d`, `--out-dockerfile` (string)
+|可选：如果生成 Dockerfile，请指定一个文件名。
+
+|`--permissive`
+|允许 registry 加载错误。
+
+|`-p`, `--pull-tool` (string)
+|拉取容器镜像的工具： `none` （默认值）、`docker` 或 `podman`。覆盖 `--container-tool` 标志的一部分。
+
+|`-t`, `--tag` (string)
+|正在构建的容器镜像的自定义标签。
+
+|===
+
+[id="opm-cli-ref-index-prune_{context}"]
+== prune
+
+修剪除指定软件包以外的所有索引。
+
+.命令语法
+[source,terminal]
+----
+$ opm index prune [<flags>]
+----
+
+.`index prune`  标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-i`, `--binary-image`
+|on-image  `opm` 命令的容器镜像
+
+|`-c`, `--container-tool` (string)
+|与容器镜像交互的工具，如保存和构建：`docker` 或  `podman`。
+
+|`-f`, `--from-index` (string)
+|到修剪的索引。
+
+|`--generate`
+|如果启用，则仅创建 Dockerfile 并将其保存到本地磁盘。
+
+|`-d`, `--out-dockerfile` (string)
+|可选：如果生成 Dockerfile，请指定一个文件名。
+
+|`-p`, `--packages` (strings)
+|要保留的软件包用逗号隔开。
+
+|`--permissive`
+|允许 registry 加载错误。
+
+|`-t`, `--tag` (string)
+|正在构建的容器镜像的自定义标签。
+
+|===
+
+[id="opm-cli-ref-index-prune-stranded_{context}"]
+== prune-stranded
+
+修剪没有与特定镜像关联的分级捆绑包索引。
+
+.命令语法
+[source,terminal]
+----
+$ opm index prune-stranded [<flags>]
+----
+
+.`index prune-stranded` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-i`, `--binary-image`
+|on-image `opm` 命令的容器镜像
+
+|`-c`, `--container-tool` (string)
+|与容器镜像交互的工具，如保存和构建：`docker` 或 `podman`。
+
+|`-f`, `--from-index` (string)
+|到修剪的索引。
+
+|`--generate`
+|如果启用，则仅创建 Dockerfile 并将其保存到本地磁盘。
+
+|`-d`, `--out-dockerfile` (string)
+|可选：如果生成 Dockerfile，请指定一个文件名。
+
+|`-p`, `--packages` (strings)
+|要保留的软件包用逗号隔开。
+
+|`--permissive`
+|允许 registry 加载错误。
+
+|`-t`, `--tag` (string)
+|正在构建的容器镜像的自定义标签。
+
+|===
+
+[id="opm-cli-ref-index-rm_{context}"]
+== rm
+
+从索引中删除整个 Operator。
+
+.命令语法
+[source,terminal]
+----
+$ opm index rm [<flags>]
+----
+
+.`index rm` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-i`, `--binary-image`
+|on-image `opm` 命令的容器镜像
+
+|`-u`, `--build-tool` (string)
+|构建容器镜像的工具： `podman` （默认值）或 `docke`r。覆盖 `--container-tool` 标志的一部分。
+
+|`-c`, `--container-tool` (string)
+|与容器镜像交互的工具，如保存和构建：`docker` 或 `podman`。
+
+|`-f`, `--from-index` (string)
+|从中删除的以前索引。
+
+|`--generate`
+|如果启用，则仅创建 Dockerfile 并将其保存到本地磁盘。
+
+|`-o`, `--operators` (strings)
+|要删除的用逗号分开的 Operator 列表。
+
+|`-d`, `--out-dockerfile` (string)
+|可选：如果生成 Dockerfile，请指定一个文件名。
+
+|`-p`, `--packages` (strings)
+|要保留的软件包用逗号隔开。
+
+|`--permissive`
+|允许 registry 加载错误。
+
+|`-p`, `--pull-tool` (string)
+|拉取容器镜像的工具： `none` （默认值）、`docker` 或 `podman`。覆盖 `--container-tool `标志的一部分。
+
+|`-t`, `--tag` (string)
+|正在构建的容器镜像的自定义标签。
+
+|===

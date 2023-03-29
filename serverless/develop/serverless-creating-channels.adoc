@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="serverless-creating-channels"]
+= 创建频道
+include::_attributes/common-attributes.adoc[]
+:context: serverless-creating-channels
+
+toc::[]
+
+include::snippets/serverless-channels-intro.adoc[]
+
+include::modules/serverless-create-channel-odc.adoc[leveloffset=+1]
+include::modules/serverless-create-channel-kn.adoc[leveloffset=+1]
+include::modules/serverless-create-default-channel-yaml.adoc[leveloffset=+1]
+include::modules/serverless-create-kafka-channel-yaml.adoc[leveloffset=+1]
+

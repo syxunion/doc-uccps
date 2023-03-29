@@ -1,0 +1,100 @@
+:_content-type: REFERENCE
+[id="odo-create_{context}"]
+= odo create
+
+
+`odo` 使用 devfile 来存储组件的配置，并描述组件的资源，如存储和服务。_odo create_ 命令生成这个文件。
+
+== 创建组件
+
+要为现有项目创建 _devfile_，请运行 `odo create` 命令，使用组件的名称和类型（例如 `nodejs` 或 `go`）：
+
+[source,terminal]
+----
+odo create nodejs mynodejs
+----
+
+在示例中，`nodejs` 是组件的类型，`mynodejs` 是 `odo` 为您创建的组件的名称。
+
+[注意]
+====
+如需所有支持的组件类型列表，请运行 `odo catalog list components` 命令。
+====
+
+如果您的源代码存在于当前目录之外，可以使用 `--context` 标志来指定路径。例如，如果 nodejs 组件的源位于相对于当前工作目录的名为 `node-backend` 的文件夹，则运行以下命令：
+
+[source,terminal]
+----
+odo create nodejs mynodejs --context ./node-backend
+----
+
+`--context` 标志支持相对和绝对路径。
+
+要指定部署组件的项目或应用程序，请使用 `--project` 和 `--app` 标志。例如，要在 `backend` 项目中创建一个部分 `myapp` 应用程序的组件，请运行以下命令：
+
+[source,terminal]
+----
+odo create nodejs --app myapp --project backend
+----
+
+[注意]
+====
+如果没有指定这些标志，它们将默认为活跃的应用和项目。
+====
+
+== Starter （初学者）项目
+
+如果您没有现有的源代码，但希望快速设置并运行，请使用初学者项目来试验 devfile 和组件。要使用初学者项目，在 `odo create` 命令中添加 `--starter` 标志。
+
+要获取组件类型的可用启动程序项目列表，请运行 `odo catalog describe component` 命令。例如，若要获取 nodejs 组件类型的所有可用入门项目，请运行以下命令：
+
+[source,terminal]
+----
+odo catalog describe component nodejs
+----
+
+然后，在 `odo create` 命令中使用 `--starter` 标志指定所需的项目：
+
+[source,terminal]
+----
+odo create nodejs --starter nodejs-starter
+----
+
+这将下载与所选组件类型对应的示例模板，在本例中为 `nodejs`。模板已下载到您的当前目录中，或附加到 `--context` 标志指定的位置。如果初学者项目有自己的 devfile，则会保留此 devfile。
+
+== 使用现有的 devfile
+
+如果要从现有 devfile 创建新组件，您可以使用 `--devfile` 标志指定 devfile 的路径。例如，要基于 GitHub 中的 devfile 创建名为 mynodejs 的组件，请使用以下命令：
+
+[source,terminal]
+----
+odo create mynodejs --devfile https://raw.githubusercontent.com/odo-devfiles/registry/master/devfiles/nodejs/devfile.yaml
+----
+
+== 互动创建
+
+您还可以以互动方式运行 `odo create` 命令，以引导您按照创建组件所需的步骤进行指导：
+
+[source,terminal,subs="verbatim,quotes"]
+----
+$ odo create
+
+? Which devfile component type do you wish to create *go*
+? What do you wish to name the new devfile component *go-api*
+? What project do you want the devfile component to be created in *default*
+Devfile Object Validation
+ ✓  Checking devfile existence [164258ns]
+ ✓  Creating a devfile component from registry: DefaultDevfileRegistry [246051ns]
+Validation
+ ✓  Validating if devfile name is correct [92255ns]
+? Do you want to download a starter project *Yes*
+
+Starter Project
+ ✓  Downloading starter project go-starter from https://github.com/devfile-samples/devfile-stack-go.git [429ms]
+
+Please use `odo push` command to create the component with source deployed
+----
+
+系统将提示您选择组件类型、名称和项目。您还可以选择是否下载初学者项目。完成后，在工作目录中创建一个新的 `devfile.yaml` 文件。
+
+要将这些资源部署到集群中，请运行 `odo push` 命令。

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-ovirt.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="ovirt-csi-driver-storage-class_{context}"]
+ifeval::["{context}" == "post-install-storage-configuration"]
+= UnionTech Virtualization (RHV) 对象定义
+endif::[]
+ifeval::["{context}" == "persistent-storage-csi-ovirt"]
+= {rh-virtualization-first} CSI driver storage class
+endif::[]
+
+
+统信容器云管理平台 创建了一个名为 ovirt-csi-sc 的 StorageClass 类型的默认对象，用于创建动态置备的持久性卷。
+
+要为不同的配置创建额外的存储类，请使用以下示例 YAML 描述的 StorageClass 对象创建并保存文件：
+
+.ovirt-storageclass.yaml
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: <storage_class_name>  <1>
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "<boolean>"  <2>
+provisioner: csi.ovirt.org
+allowVolumeExpansion: <boolean> <3>
+reclaimPolicy: Delete <4>
+volumeBindingMode: Immediate <5>
+parameters:
+  storageDomainName: <rhv-storage-domain-name> <6>
+  thinProvisioning: "<boolean>"  <7>
+  csi.storage.k8s.io/fstype: <file_system_type> <8>
+----
+<1> 存储类的名称。
+<2> 如果存储类是集群中的默认存储类，则设置为 `false`。如果设置为 `true`，现有的默认存储类必须被编辑并设置为 `false`。
+<3> `true` 启用动态卷扩展，`false` 会阻止它。建议使用 `true`。
+<4> 此存储类的动态置备持久性卷会使用此重新声明策略创建。这个默认策略是 `Delete`。
+<5> 指明如何置备和绑定 `PersistentVolumeClaim`。如果没有设置，则使用 `VolumeBindingImmediate`。此字段仅由启用 `VolumeScheduling` 功能的服务器应用。
+<6> 要使用的 RHV 存储域名。
+<7> 如果为 `true`，则置备磁盘。如果为 `false`，则预先分配磁盘。建议精简置备。
+<8> 可选：要创建的文件系统类型。可能的值： `ext4`（默认）或 `xfs`。

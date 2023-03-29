@@ -1,0 +1,221 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-selector.adoc
+
+:_content-type: CONCEPT
+[id="nodes-scheduler-node-selectors-about_{context}"]
+= 关于节点选择器
+
+您可以使用节点上的 pod 和标签上的节点选择器来控制 pod 的调度位置。使用节点选择器时，统信容器云管理平台 会将 pod 调度到包含匹配标签的节点。
+
+您可以使用节点选择器将特定的 pod 放置到特定的节点上，集群范围节点选择器将新 pod 放置到集群中的任何特定节点上，以及项目节点选择器，将新 pod 放置到特定的节点上。
+
+例如，作为集群管理员，您可以创建一个基础架构，应用程序开发人员可以通过在创建的每个 pod 中包括节点选择器，将 pod 部署到最接近其地理位置的节点。在本例中，集群由五个数据中心组成，分布在两个区域。在美国，将节点标记为 `us-east`, `us-central`, 或 `us-west`。在亚太地区（APAC），将节点标记为 `apac-east` 或 `apac-west`。开发人员可在其创建的 pod 中添加节点选择器，以确保 pod 调度到这些节点上。
+
+如果 Pod 对象包含节点选择器，但没有节点具有匹配的标签，则不会调度 pod。
+
+[重要]
+====
+如果您在同一 pod 配置中使用节点选择器和节点关联性，则以下规则控制 pod 放置到节点上：
+
+* 如果同时配置了 `nodeSelector` 和 `nodeAffinity`，则必须满足这两个条件时 pod 才能调度到候选节点。
+
+* 如果您指定了多个与 `nodeAffinity` 类型关联的 `nodeSelectorTerms` ，那么其中一个 `nodeSelectorTerms` 满足时 pod 就能调度到节点上。
+
+* 如果您指定了多个与 `nodeSelectorTerms` 关联的 `matchExpressions` ，那么只有所有 `matchExpressions` 都满足时 pod 才能调度到节点上。
+====
+
+特定 pod 和节点上的节点选择器::
++
+您可以使用节点选择器和标签控制特定 pod 调度到哪些节点上。
++
+要使用节点选择器和标签，首先标记节点以避免 pod 被取消调度，然后将节点选择器添加到 pod。
++
+[注意]
+====
+您不能直接将节点选择器添加到现有调度的 pod 中。您必须标记控制 pod 的对象，如部署配置。
+====
++
+例如，以下 `Node` 对象具有 `region: east` 标签：
++
+.带有标识的 Node 对象示例
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: ip-10-0-131-14.ec2.internal
+  selfLink: /api/v1/nodes/ip-10-0-131-14.ec2.internal
+  uid: 7bc2580a-8b8e-11e9-8e01-021ab4174c74
+  resourceVersion: '478704'
+  creationTimestamp: '2019-06-10T14:46:08Z'
+  labels:
+    kubernetes.io/os: linux
+    failure-domain.beta.kubernetes.io/zone: us-east-1a
+    node.openshift.io/os_version: '4.5'
+    node-role.kubernetes.io/worker: ''
+    failure-domain.beta.kubernetes.io/region: us-east-1
+    node.openshift.io/os_id: rhcos
+    beta.kubernetes.io/instance-type: m4.large
+    kubernetes.io/hostname: ip-10-0-131-14
+    beta.kubernetes.io/arch: amd64
+    region: east <1>
+----
+<1> 与 pod 节点选择器匹配的标签。
++
+pod 具有 `type: user-node,region: east` 节点选择器：
++
+.使用节点选择器的 Pod 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+
+....
+
+spec:
+  nodeSelector: <1>
+    region: east
+    type: user-node
+----
+<1> 与节点标签匹配的节点选择器。
++
+使用示例 pod 规格创建 pod 时，它可以调度到示例节点上。
+
+默认集群范围节点选择器::
++
+使用默认集群范围节点选择器时，如果您在集群中创建 pod,统信容器云管理平台 会将默认节点选择器添加到 pod，并将该 pod 调度到具有匹配标签的节点。
++
+例如，以下 Scheduler 对象具有默认的集群范围的 region=east 和 type=user-node 节点选择器：
++
+.Scheduler Operator 自定义资源示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  name: cluster
+...
+
+spec:
+  defaultNodeSelector: type=user-node,region=east
+...
+----
++
+集群中的节点具有 `type=user-node,region=east` 标签：
++
+.Node 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Node
+metadata:
+  name: ci-ln-qg1il3k-f76d1-hlmhl-worker-b-df2s4
+...
+  labels:
+    region: east
+    type: user-node
+...
+----
++
+.使用节点选择器的 Pod 对象示例
+[source,terminal]
+----
+apiVersion: v1
+kind: Pod
+...
+
+spec:
+  nodeSelector:
+    region: east
+...
+----
++
+当您使用示例集群中的 pod spec 创建 pod 时，该 pod 会使用集群范围节点选择器创建，并调度到标记的节点：
++
+[source,terminal]
+.在标记的节点上带有 pod 的 pod 列表示例
+----
+NAME     READY   STATUS    RESTARTS   AGE   IP           NODE                                       NOMINATED NODE   READINESS GATES
+pod-s1   1/1     Running   0          20s   10.131.2.6   ci-ln-qg1il3k-f76d1-hlmhl-worker-b-df2s4   <none>           <none>
+----
++
+[注意]
+====
+如果您在其中创建 pod 的项目具有项目节点选择器，则该选择器优先于集群范围节点选择器。如果 pod 没有项目节点选择器，则 pod 不会被创建或调度。
+====
+
+[id="project-node-selectors_{context}"]
+项目节点选择器::
++
+使用项目节点选择器时，如果您在此项目中创建 pod,统信容器云管理平台 会将节点选择器添加到 pod，并将 pod 调度到具有匹配标签的节点。如果存在集群范围默认节点选择器，则以项目节点选择器为准。
++
+例如，以下项目具有 `region=east` 节点选择器：
++
+.Namespace 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: east-region
+  annotations:
+    openshift.io/node-selector: "region=east"
+...
+----
++
+以下节点具有 `type=user-node,region=east` 标签：
++
+.Node 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Node
+metadata:
+  name: ci-ln-qg1il3k-f76d1-hlmhl-worker-b-df2s4
+...
+  labels:
+    region: east
+    type: user-node
+...
+----
++
+当您使用本例项目中的示例 pod 规格创建 pod 时，pod 会使用项目节点选择器创建，并调度到标记的节点：
++
+.Pod 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: east-region
+...
+spec:
+  nodeSelector:
+    region: east
+    type: user-node
+...
+----
++
+[source,terminal]
+.E在标记的节点上带有 pod 的 pod 列表示例
+----
+NAME     READY   STATUS    RESTARTS   AGE   IP           NODE                                       NOMINATED NODE   READINESS GATES
+pod-s1   1/1     Running   0          20s   10.131.2.6   ci-ln-qg1il3k-f76d1-hlmhl-worker-b-df2s4   <none>           <none>
+----
++
+如果 pod 包含不同的节点选择器，则项目中的 pod 不会被创建或调度。例如，如果您将以下 Pod 部署到示例项目中，则不会创建它：
++
+.带有无效节点选择器的 Pod 对象示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+...
+
+spec:
+  nodeSelector:
+    region: west
+
+....
+----

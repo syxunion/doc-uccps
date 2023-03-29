@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+//* authentication/identity_providers/configuring-htpasswd-identity-provider.adoc
+//* authentication/identity_providers/configuring-oidc-identity-provider.adoc
+
+:_content-type: PROCEDURE
+[id="identity-provider-configuring-using-the-web-console_{context}"]
+= 使用 web 控制台配置身份提供程序
+
+通过 web 控制台而非 CLI 配置身份提供程序 (IDP)。
+
+.先决条件
+
+* 您必须以集群管理员身份登录到 web 控制台。
+
+.流程
+
+. 导航至 *主页* -> *集群设置*.
+. 在 *配置* 选项卡下, 单击 *OAuth*.
+. 在 *Identity Providers* 部分中，从 *Add* 下拉菜单中选择您的身份提供程序。
+
+[注意]
+====
+您可以通过 web 控制台来指定多个 IDP，而不会覆盖现有的 IDP。
+====

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="monitoring-disabling-the-local-alertmanager_{context}"]
+= 禁用本地 Alertmanager
+
+在 统信容器云管理平台 监控堆栈的 openshift-monitoring 项目中默认启用从 Prometheus 实例路由警报的本地 Alertmanager。
+
+如果您不需要本地 Alertmanager，可以通过在 `openshift-monitoring` 项目中配置 `cluster-monitoring-config` 配置映射来禁用它。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已创建了 `cluster-monitoring-config` 配置映射。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` 配置映射：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+. 在 `data/config.yaml` 下为 alertmanagerMain 组件添加 `enabled: false`：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    alertmanagerMain:
+      enabled: false
+----
+
+. 保存文件以使改变生效。应用更改时，Alertmanager 实例会自动禁用。
+

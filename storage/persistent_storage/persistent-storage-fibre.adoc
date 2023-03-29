@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-fibre"]
+= 使用 Fibre Channel 持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-fibre
+
+toc::[]
+
+统信容器云管理平台支持 Fibre Channel，它允许您使用 Fibre Channel 卷为统信容器云管理平台集群提供持久性存储。我们假设您对 Kubernetes 和 Fibre Channel 有一定的了解。
+
+Kubernetes 持久性卷框架允许管理员提供带有持久性存储的集群，并使用户可以在不了解底层存储架构的情况下请求这些资源。持久性卷不与某个特定项目或命名空间相关联，它们可以在统信容器云管理平台集群间共享。持久性卷声明是针对某个项目或者命名空间的，相应的用户可请求它。
+
+[重要]
+====
+存储的高可用性功能由底层的存储架构提供。
+====
+
+include::modules/persistent-storage-fibre-provisioning.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-fibre-disk-quotas.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-fibre-volume-security.adoc[leveloffset=+2]

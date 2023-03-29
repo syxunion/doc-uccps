@@ -1,0 +1,491 @@
+:_content-type: REFERENCE
+[id="odo-link_{context}"]
+= odo link
+
+
+`odo link` 命令帮助将 `odo` 组件链接到由 Operator 支持的服务或另一个 `odo` 组件。它通过使用 Service Binding Operator 来达到此目的。目前，odo 使用 Service Binding 库，而不是 Operator 本身来实现所需的功能。
+
+////
+In this document we will cover various options to create link between a component & a service, and a component & another component. The steps in this document are going to be based on the https://github.com/dharmit/odo-quickstart/[odo quickstart project] that we covered in link:/docs/getting-started/quickstart[Quickstart guide]. The outputs mentioned in this document are based on commands executed on link:/docs/getting-started/cluster-setup/kubernetes[minikube cluster].
+
+This document assumes that you know how to link:/docs/command-reference/create[create components] and link:/docs/command-reference/service[services]. It also assumes that you have cloned the https://github.com/dharmit/odo-quickstart/[odo quickstart project]. Terminology used in this document:
+
+* _quickstart project_: git clone of the odo quickstart project having below directory structure:
++
+[,shell]
+----
+  $ tree -L 1
+  .
+  ├── backend
+  ├── frontend
+  ├── postgrescluster.yaml
+  ├── quickstart.code-workspace
+  └── README.md
+
+  2 directories, 3 files
+----
+
+* _backend component_: `backend` directory in above tree structure
+* _frontend component_: `frontend` directory in above tree structure
+* _Postgres service_: Operator backed service created from _backend component_ using the `odo service create --from-file ../postgrescluster.yaml` command.
+////
+
+== 各种链接选项
+
+`odo` 提供了不同的选项，用来将组件链接到 Operator 支持的服务或另一个 `odo` 组件。无论您将组件链接到服务还是另一个组件，都可以使用这些选项（或标志）。
+
+=== 默认行为
+
+默认情况下，`odo link` 命令在组件目录中创建一个名为 `kubernetes/` 的目录，并在其中存储有关服务和链接的信息（YAML 清单）。当使用 `odo push` 时，`odo` 会将这些清单与 Kubernetes 集群上的资源状态进行比较，并决定是否需要创建、修改或销毁资源以匹配用户指定的内容。
+
+=== `--inlined` 标记
+
+如果在 `odo link` 命令中指定 `--inlined` 标志，`odo` 会将 devfile.yaml 中的链接信息存储在组件目录中，而不是在 `kubernetes/` 目录下创建一个文件。`--inlined` 标记的行为与 `odo link` 和 `odo service` create 命令相似。如果您希望在一个 `devfile.yaml` 中存储的所有内容，则此标志很有用。您必须记住在每个 `odo link` 和 `odo service create` 命令中使用 `--inlined` 标志。
+
+=== `--map` 标记
+
+有时，除了默认可用的组件外，您可能还想向组件添加更多绑定信息。例如，如果您将组件链接到服务，并希望从服务的 spec 中绑定一些信息（用于规格的缩写），您可以使用 `--map` 标志。请注意，`odo` 不会针对所链接的服务或组件的 spec 进行任何验证。只有在您熟悉 Kubernetes YAML 清单时，才建议使用这个标志。
+
+=== `--bind-as-files` 标记
+
+对于目前讨论的所有链接选项，`odo` 会将绑定信息作为环境变量注入组件。如果您想要将这些信息挂载为文件，您可以使用 `--bind-as-files` 标志。这可让 odo 将绑定信息作为文件注入到组件的 Pod 中的 `/bindings` 位置。与环境变量方案相比，当您使用 `--bind-as-files` 时，文件会以键命名，并且这些键的值存储为这些文件的内容。
+
+== 例子
+
+=== 默认 `odo link`
+
+在以下示例中，后端组件使用默认的 `odo link` 命令与 PostgreSQL 服务相关联。对于后端组件，请确定您的组件和服务被推送到集群：
+
+[source,terminal]
+----
+$ odo list
+----
+
+.输出示例
+[source,terminal]
+----
+APP     NAME        PROJECT       TYPE       STATE      MANAGED BY ODO
+app     backend     myproject     spring     Pushed     Yes
+----
+
+[source,terminal]
+----
+$ odo service list
+----
+
+.输出示例
+[source,terminal]
+----
+NAME                      MANAGED BY ODO     STATE      AGE
+PostgresCluster/hippo     Yes (backend)      Pushed     59m41s
+----
+
+现在，运行 `odo link` 将后端组件与 `PostgreSQL` 服务链接：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo
+----
+
+
+.输出示例
+[source,terminal]
+----
+ ✓  Successfully created link between component "backend" and service "PostgresCluster/hippo"
+
+To apply the link, please use `odo push`
+----
+
+然后，运行 `odo push` 在 `Kubernetes` 集群中实际创建链接。
+
+在 `odo push` 成功后，您会看到几个结果：
+
+. 当您打开由 backend 组件部署的应用程序的 URL 时，它会显示数据库中的 `todo` 列表。例如，在 `odo url list` 命令的输出中，会列出 `todos` 的路径：
++
+[source,terminal]
+----
+$ odo url list
+----
++
+.输出示例
+[source,terminal]
+----
+Found the following URLs for component backend
+NAME         STATE      URL                                       PORT     SECURE     KIND
+8080-tcp     Pushed     http://8080-tcp.192.168.39.112.nip.io     8080     false      ingress
+----
++
+URL 的正确路径为 http://8080-tcp.192.168.39.112.nip.io/api/v1/todos。确切的 URL 取决于您的设置。另请注意，除非添加一些，否则数据库中也没有 `todos`，因此 URL 可能会只显示空的 JSON 对象。
+
+. 您可以查看与 Postgres 服务注入后端组件相关的绑定信息。默认情况下，此绑定信息作为环境变量注入。您可以在后端组件的目录中使用 odo describe 命令检查它：
++
+[source,terminal]
+----
+$  odo describe
+----
++
+.输出示例：
+[source,terminal]
+----
+Component Name: backend
+Type: spring
+Environment Variables:
+  · PROJECTS_ROOT=/projects
+  · PROJECT_SOURCE=/projects
+  · DEBUG_PORT=5858
+Storage:
+  · m2 of size 3Gi mounted to /home/user/.m2
+URLs:
+  · http://8080-tcp.192.168.39.112.nip.io exposed via 8080
+Linked Services:
+  · PostgresCluster/hippo
+    Environment Variables:
+    · POSTGRESCLUSTER_PGBOUNCER-EMPTY
+    · POSTGRESCLUSTER_PGBOUNCER.INI
+    · POSTGRESCLUSTER_ROOT.CRT
+    · POSTGRESCLUSTER_VERIFIER
+    · POSTGRESCLUSTER_ID_ECDSA
+    · POSTGRESCLUSTER_PGBOUNCER-VERIFIER
+    · POSTGRESCLUSTER_TLS.CRT
+    · POSTGRESCLUSTER_PGBOUNCER-URI
+    · POSTGRESCLUSTER_PATRONI.CRT-COMBINED
+    · POSTGRESCLUSTER_USER
+    · pgImage
+    · pgVersion
+    · POSTGRESCLUSTER_CLUSTERIP
+    · POSTGRESCLUSTER_HOST
+    · POSTGRESCLUSTER_PGBACKREST_REPO.CONF
+    · POSTGRESCLUSTER_PGBOUNCER-USERS.TXT
+    · POSTGRESCLUSTER_SSH_CONFIG
+    · POSTGRESCLUSTER_TLS.KEY
+    · POSTGRESCLUSTER_CONFIG-HASH
+    · POSTGRESCLUSTER_PASSWORD
+    · POSTGRESCLUSTER_PATRONI.CA-ROOTS
+    · POSTGRESCLUSTER_DBNAME
+    · POSTGRESCLUSTER_PGBOUNCER-PASSWORD
+    · POSTGRESCLUSTER_SSHD_CONFIG
+    · POSTGRESCLUSTER_PGBOUNCER-FRONTEND.KEY
+    · POSTGRESCLUSTER_PGBACKREST_INSTANCE.CONF
+    · POSTGRESCLUSTER_PGBOUNCER-FRONTEND.CA-ROOTS
+    · POSTGRESCLUSTER_PGBOUNCER-HOST
+    · POSTGRESCLUSTER_PORT
+    · POSTGRESCLUSTER_ROOT.KEY
+    · POSTGRESCLUSTER_SSH_KNOWN_HOSTS
+    · POSTGRESCLUSTER_URI
+    · POSTGRESCLUSTER_PATRONI.YAML
+    · POSTGRESCLUSTER_DNS.CRT
+    · POSTGRESCLUSTER_DNS.KEY
+    · POSTGRESCLUSTER_ID_ECDSA.PUB
+    · POSTGRESCLUSTER_PGBOUNCER-FRONTEND.CRT
+    · POSTGRESCLUSTER_PGBOUNCER-PORT
+    · POSTGRESCLUSTER_CA.CRT
+----
++
+其中一些变量在后端组件的 `src/main/resources/application.properties` 文件中使用，以便 Java Spring Boot 应用程序可以连接到 PostgreSQL 数据库服务。
+
+. 最后，`odo` 在后端组件的目录中创建一个名为 `kubernetes/` 的目录，其中包含以下文件：
++
+[source,terminal]
+----
+$ ls kubernetes
+odo-service-backend-postgrescluster-hippo.yaml  odo-service-hippo.yaml
+----
++
+这些文件包含两个资源的信息（YAML 清单）：
+
+.. `odo-service-hippo.yaml` - 使用 `odo service create --from-file ../postgrescluster.yaml` 命令创建的 Postgres 服务。
+.. `odo-service-backend-postgrescluster-hippo.yaml` - 使用 `odo link` 命令创建的链接。
+
+=== 使用带有 --inlined 标记的 odo 链接
+
+在 `odo link` 命令中使用 `--inlined` 标志与没有标志的 odo link 命令的效果相同，在注入绑定信息中。但是，通常的差异是，在上述情况下，`kubernetes/` 目录下有两个清单文件，一个用于 Postgres 服务，另一个用于后端组件和该服务之间的链接。但是，当您传递 `--inlined` 标志时，odo 不会在 `kubernetes/` 目录下创建一个文件来存储 YAML 清单，而是将其内联存储在 `devfile.yaml` 文件中。
+
+要查看此信息，请首先从 PostgreSQL 服务中取消链接组件：
+
+[source,terminal]
+----
+$ odo unlink PostgresCluster/hippo
+----
+
+.输出示例：
+[source,terminal]
+----
+ ✓  Successfully unlinked component "backend" from service "PostgresCluster/hippo"
+
+To apply the changes, please use `odo push`
+----
+
+要在集群中取消链接它们，请运行 `odo push`。现在，如果您检查 `kubernetes/` 目录，则只看到一个文件：
+
+[source,terminal]
+----
+$ ls kubernetes
+odo-service-hippo.yaml
+----
+
+接下来，使用 `--inlined` 标志来创建链接：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo --inlined
+----
+
+.输出示例：
+[source,terminal]
+----
+ ✓  Successfully created link between component "backend" and service "PostgresCluster/hippo"
+
+To apply the link, please use `odo push`
+----
+
+您需要运行 `odo push` 以便在集群中创建链接，如省略 `--inlined` 标志的步骤。`odo` 将配置存储在 `devfile.yaml` 中。在这个文件中，您可以看到类似如下的条目：
+
+[source,yaml]
+----
+ kubernetes:
+    inlined: |
+      apiVersion: binding.operators.coreos.com/v1alpha1
+      kind: ServiceBinding
+      metadata:
+        creationTimestamp: null
+        name: backend-postgrescluster-hippo
+      spec:
+        application:
+          group: apps
+          name: backend-app
+          resource: deployments
+          version: v1
+        bindAsFiles: false
+        detectBindingResources: true
+        services:
+        - group: postgres-operator.crunchydata.com
+          id: hippo
+          kind: PostgresCluster
+          name: hippo
+          version: v1beta1
+      status:
+        secret: ""
+  name: backend-postgrescluster-hippo
+----
+
+现在，如果您运行 `odo unlink PostgresCluster/hippo`，`odo` 会首先从 `devfile.yaml` 中删除链接信息，然后后续 `odo push` 将从集群中删除链接。
+
+=== 自定义绑定
+
+`odo link` 接受标记 `--map`，它可以将自定义绑定信息注入组件。此类绑定信息将从您链接到您的组件的资源清单中获取。例如，在后端组件和 PostgreSQL 服务的上下文中，您可以将 PostgreSQL 服务的清单 `postgrescluster.yaml` 文件中的信息注入后端组件。
+
+如果 `PostgresCluster` 服务的名称是 `hippo` （或者 `odo service list` 的输出，如果您的 PostgresCluster 服务被命名），当您需要将 YAML 定义中的 postgresVersion 值注入后端组件时，请运行以下命令：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo --map pgVersion='{{ .hippo.spec.postgresVersion }}'
+----
+
+请注意，如果 Postgres 服务的名称与 `hippo` 不同，则必须在上述命令中指定在 `pgVersion` 的值代替 `.hippo` 的位置。
+
+在链接操作后，照常运行 `odo push`。在成功完成推送操作后，您可以从后端组件目录中运行以下命令，以验证是否正确注入自定义映射：
+
+[source,terminal]
+----
+$ odo exec -- env | grep pgVersion
+----
+
+.输出示例：
+[source,terminal]
+----
+pgVersion=13
+----
+
+因为您可能希望注入多个自定义绑定信息，`odo link` 接受映射的多个键值对。唯一约束应将它们指定为 `--map <key>=<value>`。例如，如果还想将 PostgreSQL 镜像信息与版本一起注入，您可以运行：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo --map pgVersion='{{ .hippo.spec.postgresVersion }}' --map pgImage='{{ .hippo.spec.image }}'
+----
+
+然后运行 `odo push`。要验证两个映射是否已正确注入的映射，请运行以下命令：
+
+[source,terminal]
+----
+$ odo exec -- env | grep -e "pgVersion\|pgImage"
+----
+
+.输出示例：
+[source,terminal]
+----
+pgVersion=13
+pgImage=registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.4-0
+----
+
+==== 使用内联还是不使用？
+
+您可以接受默认行为，`odo link` 为 `kubernetes/` 目录下的链接生成清单文件。另外，如果您想将所有内容存储在单个 `devfile.yaml` 文件中，您可以使用 `--inlined` 标志。
+
+== 将绑定作为文件绑定
+
+odo link 提供的另一个有用标志是 `--bind-as-files`。当传递此标记时，绑定信息不会作为环境变量注入组件的 Pod 中，而是作为文件系统挂载。
+
+确保后端组件和 PostgreSQL 服务之间没有现有链接。您可以通过在后端组件的目录中运行 `odo describe` 来检查输出是否类似以下内容：
+
+[source,terminal]
+----
+Linked Services:
+ · PostgresCluster/hippo
+----
+
+使用以下命令从组件中取消链接该服务：
+
+[source,terminal]
+----
+$ odo unlink PostgresCluster/hippo
+$ odo push
+----
+
+== --bind-as-files examples
+
+=== 使用默认 odo 链接
+
+默认情况下，`odo` 在 `kubernetes/` 目录下创建清单文件来存储链接信息。使用以下命令链接后端组件和 PostgreSQL 服务：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo --bind-as-files
+$ odo push
+----
+
+.`odo describe` 输出示例：
+[source,terminal]
+----
+$ odo describe
+
+Component Name: backend
+Type: spring
+Environment Variables:
+ · PROJECTS_ROOT=/projects
+ · PROJECT_SOURCE=/projects
+ · DEBUG_PORT=5858
+ · SERVICE_BINDING_ROOT=/bindings
+ · SERVICE_BINDING_ROOT=/bindings
+Storage:
+ · m2 of size 3Gi mounted to /home/user/.m2
+URLs:
+ · http://8080-tcp.192.168.39.112.nip.io exposed via 8080
+Linked Services:
+ · PostgresCluster/hippo
+   Files:
+    · /bindings/backend-postgrescluster-hippo/pgbackrest_instance.conf
+    · /bindings/backend-postgrescluster-hippo/user
+    · /bindings/backend-postgrescluster-hippo/ssh_known_hosts
+    · /bindings/backend-postgrescluster-hippo/clusterIP
+    · /bindings/backend-postgrescluster-hippo/password
+    · /bindings/backend-postgrescluster-hippo/patroni.yaml
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-frontend.crt
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-host
+    · /bindings/backend-postgrescluster-hippo/root.key
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-frontend.key
+    · /bindings/backend-postgrescluster-hippo/pgbouncer.ini
+    · /bindings/backend-postgrescluster-hippo/uri
+    · /bindings/backend-postgrescluster-hippo/config-hash
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-empty
+    · /bindings/backend-postgrescluster-hippo/port
+    · /bindings/backend-postgrescluster-hippo/dns.crt
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-uri
+    · /bindings/backend-postgrescluster-hippo/root.crt
+    · /bindings/backend-postgrescluster-hippo/ssh_config
+    · /bindings/backend-postgrescluster-hippo/dns.key
+    · /bindings/backend-postgrescluster-hippo/host
+    · /bindings/backend-postgrescluster-hippo/patroni.crt-combined
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-frontend.ca-roots
+    · /bindings/backend-postgrescluster-hippo/tls.key
+    · /bindings/backend-postgrescluster-hippo/verifier
+    · /bindings/backend-postgrescluster-hippo/ca.crt
+    · /bindings/backend-postgrescluster-hippo/dbname
+    · /bindings/backend-postgrescluster-hippo/patroni.ca-roots
+    · /bindings/backend-postgrescluster-hippo/pgbackrest_repo.conf
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-port
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-verifier
+    · /bindings/backend-postgrescluster-hippo/id_ecdsa
+    · /bindings/backend-postgrescluster-hippo/id_ecdsa.pub
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-password
+    · /bindings/backend-postgrescluster-hippo/pgbouncer-users.txt
+    · /bindings/backend-postgrescluster-hippo/sshd_config
+    · /bindings/backend-postgrescluster-hippo/tls.crt
+----
+
+之前的 `odo describe` 输出中的 `key=value` 格式是一个环境变量，现在作为一个文件被挂载。使用 `cat`` 命令查看其中的一些文件的内容：
+
+.示例命令：
+[source,terminal]
+----
+$ odo exec -- cat /bindings/backend-postgrescluster-hippo/password
+----
+
+.输出示例：
+[source,terminal]
+----
+q({JC:jn^mm/Bw}eu+j.GX{k
+----
+
+.示例命令：
+[source,terminal]
+----
+$ odo exec -- cat /bindings/backend-postgrescluster-hippo/user
+----
+
+.输出示例：
+[source,terminal]
+----
+hippo
+----
+
+.示例命令：
+[source,terminal]
+----
+$ odo exec -- cat /bindings/backend-postgrescluster-hippo/clusterIP
+----
+
+.输出示例：
+[source,terminal]
+----
+10.101.78.56
+----
+
+=== 使用 `--inlined`
+
+使用 `--bind-as-files` 和 `--inlined` 的结果与使用 `odo link --inlined` 类似。链接的清单存储在 `devfile.yaml` 中，而不是存储在 kubernetes/ 目录中的单独文件中。除此之外，`odo describe` 输出的内容与之前的输出相同。
+
+=== 自定义绑定
+
+当在将后端组件与 PostgreSQL 服务链接时传递自定义绑定时，这些自定义绑定不会作为环境变量注入，而是作为文件挂载。例如：
+
+[source,terminal]
+----
+$ odo link PostgresCluster/hippo --map pgVersion='{{ .hippo.spec.postgresVersion }}' --map pgImage='{{ .hippo.spec.image }}' --bind-as-files
+$ odo push
+----
+
+这些自定义绑定作为文件挂载，而不是作为环境变量注入。要验证是否可以正常工作，请运行以下命令：
+
+.示例命令：
+[source,terminal]
+----
+$ odo exec -- cat /bindings/backend-postgrescluster-hippo/pgVersion
+----
+
+.输出示例：
+[source,terminal]
+----
+13
+----
+
+.示例命令：
+[source,terminal]
+----
+$ odo exec -- cat /bindings/backend-postgrescluster-hippo/pgImage
+----
+
+.输出示例：
+[source,terminal]
+----
+registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.4-0
+----

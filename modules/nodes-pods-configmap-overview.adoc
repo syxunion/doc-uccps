@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * authentication/configmaps.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-configmap-overview_{context}"]
+= 了解配置映射
+
+许多应用程序需要使用配置文件、命令行参数和环境变量的某些组合来进行配置。在 统信容器云管理平台 中，这些配置工件与镜像内容分离，以便使容器化应用程序可以移植。
+
+`ConfigMap` 对象提供了将容器注入到配置数据的机制，同时保持容器与 统信容器云管理平台 无关。配置映射可用于存储细粒度信息（如个别属性）或粗粒度信息（如完整配置文件或 JSON blob）。
+
+`ConfigMap` 对象包含配置数据的键值对，这些数据可在 Pod 中消耗或用于存储控制器等系统组件的配置数据。例如：
+
+.`ConfigMap` 对象定义
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  creationTimestamp: 2016-02-18T19:14:38Z
+  name: example-config
+  namespace: default
+data: <1>
+  example.property.1: hello
+  example.property.2: world
+  example.property.file: |-
+    property.1=value-1
+    property.2=value-2
+    property.3=value-3
+binaryData:
+  bar: L3Jvb3QvMTAw <2>
+----
+<1> 包含配置数据。
+<2> 指向含有非 UTF8 数据的文件，如二进制 Java 密钥存储文件。以 Base64 格式输入文件数据。
+
+[注意]
+====
+从二进制文件（如镜像）创建配置映射时，您可以使用 `binaryData` 字段。
+====
+
+可以在 Pod 中以各种方式消耗配置数据。配置映射可用于：
+
+* 在容器中填充环境变量值
+* 设置容器中的命令行参数
+* 填充卷中的配置文件
+
+用户和系统组件可以在配置映射中存储配置数据。
+
+配置映射与 secret 类似，但设计为能更加便捷地支持与不含敏感信息的字符串配合。
+
+[discrete]
+== 配置映射限制
+
+*在 pod 中可以消耗它的内容前，必须创建配置映射。*
+
+可以编写控制器来容许缺少的配置数据。根据具体情况使用配置映射来参考各个组件。
+
+*`ConfigMap` 对象驻留在一个项目中。*
+
+它们只能被同一项目中的 pod 引用。
+
+*Kubelet 只支持为它从 API 服务器获取的 pod 使用配置映射。*
+
+这包括使用 CLI 创建或间接从复制控制器创建的 pod。它不包括通过 统信容器云管理平台 节点的`--manifest-url` 标记、`--config 标记` ，或通过 REST API 创建的 pod，因为这些不是创建 pod 的通用方法。

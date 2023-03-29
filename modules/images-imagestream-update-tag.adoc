@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+:_content-type: PROCEDURE
+[id="images-imagestream-update-tag_{context}"]
+= 更新镜像流标签
+
+您可以更新标签以反映镜像流中的另一标签。
+
+.流程
+
+* 更新标签：
++
+[source,terminal]
+----
+$ oc tag <image-name:tag> <image-name:latest>
+----
++
+例如，以下命令更新了 `latest` 标签，以反映镜像流中的 `3.6` 标签：
++
+[source,terminal]
+----
+$ oc tag python:3.6 python:latest
+----
++
+.输出示例
+[source,terminal]
+----
+Tag python:latest set to python@sha256:438208801c4806548460b27bd1fbcb7bb188273d13871ab43f.
+----

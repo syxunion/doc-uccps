@@ -1,0 +1,162 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-affinity.adoc
+
+[id="nodes-scheduler-pod-affinity-example_{context}"]
+= pod 关联性和反关联性规则示例
+
+以下示例演示了 pod 关联性和 pod 反关联性。
+
+[id="nodes-scheduler-pod-affinity-example-affinity_{context}"]
+== Pod 关联性
+
+以下示例演示了具有匹配标签和标签选择器的 pod 的 pod 关联性。
+
+* pod *team4* 具有标签 team:4。
++
+[source,terminal]
+----
+$ cat team4.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: team4
+  labels:
+     team: "4"
+spec:
+  containers:
+  - name: ocp
+    image: docker.io/ocpqe/hello-pod
+----
+
+* pod *team4a* 在 `podAffinity` 下具有标签选择器 `team:4` 
++
+[source,yaml]
+----
+$ cat pod-team4a.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: team4a
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: team
+            operator: In
+            values:
+            - "4"
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: pod-affinity
+    image: docker.io/ocpqe/hello-pod
+----
+
+* *team4a* 调度到与 *team4* pod 相同的节点上。
+
+[id="nodes-scheduler-pod-affinity-example-antiaffinity_{context}"]
+== Pod 反关联性
+
+以下示例演示了具有匹配标签和标签选择器的 pod 的 pod 反关联性。
+
+* pod *pod-s1* 具有标签 `security:s1`.
++
+[source,terminal]
+----
+cat pod-s1.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s1
+  labels:
+    security: s1
+spec:
+  containers:
+  - name: ocp
+    image: docker.io/ocpqe/hello-pod
+----
+
+* pod *pod-s2* 在 podAntiAffinity 下具有标签选择器 `security:s1`
++
+[source,yaml]
+----
+cat pod-s2.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s2
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - s1
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: pod-antiaffinity
+    image: docker.io/ocpqe/hello-pod
+----
+
+* pod *pod-s2* 无法调度到与 `pod-s1` 相同的节点上。
+
+[id="nodes-scheduler-pod-affinity-example-no-labels_{context}"]
+== 无匹配标签的 Pod 反关联性
+
+以下示例演示了在没有匹配标签和标签选择器时的 pod 的 pod 关联性。
+
+* pod *pod-s1* 具有标签 `security:s1`.
++
+[source,terminal]
+----
+$ cat pod-s1.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s1
+  labels:
+    security: s1
+spec:
+  containers:
+  - name: ocp
+    image: docker.io/ocpqe/hello-pod
+----
+
+* pod *pod-s2* 具有标签 `security:s2`.
++
+[source,terminal]
+----
+$ cat pod-s2.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-s2
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - s2
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: pod-affinity
+    image: docker.io/ocpqe/hello-pod
+----
+
+* 除非节点上具有带 security:s2 标签的 pod，否则不会调度 pod-s2。如果没有具有该标签的其他 pod，新 pod 会保持在待处理状态：
++
+.输出示例
+[source,terminal]
+----
+NAME      READY     STATUS    RESTARTS   AGE       IP        NODE
+pod-s2    0/1       Pending   0          32s       <none>
+----

@@ -1,0 +1,62 @@
+:_content-type: ASSEMBLY
+[id="images-other-jenkins"]
+= 配置 Jenkins 镜像
+include::_attributes/common-attributes.adoc[]
+:context: images-other-jenkins
+
+toc::[]
+
+统信容器云管理平台 为运行 Jenkins 提供容器镜像。此镜像提供 Jenkins 服务器实例，可用于为连续测试、集成和交付设置基本流程。
+
+该镜像基于 UnionTech Universal Base Images（UBI）。
+
+统信容器云管理平台 遵从 Jenkins 的 LTS 的发行版本。统信容器云管理平台 提供一个包含 Jenkins 2.x 的镜像。
+
+统信容器云管理平台 Jenkins 镜像在 Quay.io 或 registry.redhat.io 上提供。
+
+例如：
+
+[source,terminal]
+----
+$ podman pull registry.redhat.io/openshift4/ose-jenkins:<v4.3.0>
+----
+
+要使用这些镜像，您可直接从这些 registry 访问镜像或将其推送（push）到 统信容器云管理平台 容器镜像 registry 中。另外，您还可在容器镜像 registry 或外部位置创建一个指向镜像的镜像流。然后，统信容器云管理平台 资源便可引用镜像流。
+
+但为方便起见,统信容器云管理平台 会在 Uccps 命名空间中为核心 Jenkins 镜像以及针对 统信容器云管理平台 与 Jenkins 集成提供的示例代理镜像提供镜像流。
+
+[id="images-other-jenkins-config-customization_{context}"]
+== 配置和自定义
+
+您可采用两种方式管理 Jenkins 身份验证：
+
+* 由 统信容器云管理平台 Login 插件提供的 统信容器云管理平台 OAuth 身份验证。
+* 由 Jenkins 提供的标准身份验证。
+
+include::modules/images-other-jenkins-oauth-auth.adoc[leveloffset=+2]
+
+include::modules/images-other-jenkins-auth.adoc[leveloffset=+2]
+
+include::modules/images-other-jenkins-env-var.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-cross-project.adoc[leveloffset=+1]
+
+[id="images-other-jenkins-cross-volume-mount_{context}"]
+== Jenkins 跨卷挂载点
+
+可使用挂载卷运行 Jenkins 镜像，以便为配置启用持久性存储：
+
+* `/var/lib/jenkins` 是 Jenkins 存储配置文件的数据目录，包括任务定义。
+
+include::modules/images-other-jenkins-customize-s2i.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-config-kubernetes.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-permissions.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-create-service.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-kubernetes-plugin.adoc[leveloffset=+1]
+
+include::modules/images-other-jenkins-memory.adoc[leveloffset=+1]
+

@@ -1,0 +1,76 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/nodes-nodes-working.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-control-plane-osp-migrating_{context}"]
+= 将 control plane 节点从一个 RHOSP 主机迁移到另一个 RHOSP 主机
+
+您可以运行将 control plane 节点从一个 UnionTech OpenStack Platform(RHOSP)节点移至另一个脚本。
+
+.先决条件
+
+* 环境变量 OS_CLOUD 是指在 clouds.yaml 文件中具有管理凭证的云条目。
+* 环境变量 KUBECONFIG 是指包含管理 统信容器云管理平台 凭证的配置。
+
+.流程
+
+* 在命令行中运行以下命令：
+
+[source,bash]
+----
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [ $# -lt 1 ]; then
+	echo "Usage: '$0 node_name'"
+	exit 64
+fi
+
+# Check for admin OpenStack credentials
+openstack server list --all-projects >/dev/null || { >&2 echo "The script needs OpenStack admin credentials. Exiting"; exit 77; }
+
+# Check for admin OpenShift credentials
+oc adm top node >/dev/null || { >&2 echo "The script needs OpenShift admin credentials. Exiting"; exit 77; }
+
+set -x
+
+declare -r node_name="$1"
+declare server_id
+server_id="$(openstack server list --all-projects -f value -c ID -c Name | grep "$node_name" | cut -d' ' -f1)"
+readonly server_id
+
+# Drain the node
+oc adm cordon "$node_name"
+oc adm drain "$node_name" --delete-emptydir-data --ignore-daemonsets --force
+
+# Power off the server
+oc debug "node/${node_name}" -- chroot /host shutdown -h 1
+
+# Verify the server is shut off
+until openstack server show "$server_id" -f value -c status | grep -q 'SHUTOFF'; do sleep 5; done
+
+# Migrate the node
+openstack server migrate --wait "$server_id"
+
+# Resize the VM
+openstack server resize confirm "$server_id"
+
+# Wait for the resize confirm to finish
+until openstack server show "$server_id" -f value -c status | grep -q 'SHUTOFF'; do sleep 5; done
+
+# Restart the VM
+openstack server start "$server_id"
+
+# Wait for the node to show up as Ready:
+until oc get node "$node_name" | grep -q "^${node_name}[[:space:]]\+Ready"; do sleep 5; done
+
+# Uncordon the node
+oc adm uncordon "$node_name"
+
+# Wait for cluster operators to stabilize
+until oc get co -o go-template='statuses: {{ range .items }}{{ range .status.conditions }}{{ if eq .type "Degraded" }}{{ if ne .status "False" }}DEGRADED{{ end }}{{ else if eq .type "Progressing"}}{{ if ne .status "False" }}PROGRESSING{{ end }}{{ else if eq .type "Available"}}{{ if ne .status "True" }}NOTAVAILABLE{{ end }}{{ end }}{{ end }}{{ end }}' | grep -qv '\(DEGRADED\|PROGRESSING\|NOTAVAILABLE\)'; do sleep 5; done
+----
+
+如果脚本完成，control plane 机器将迁移到一个新的 RHOSP 节点。

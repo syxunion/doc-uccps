@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-pipeline-resource-management_{context}"]
+= Pipeline 资源管理命令
+
+== resource
+管理管道资源。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn resource -h
+----
+
+== resource create
+创建一个 Pipeline 资源。
+
+.示例： 在命名空间中创建一个 Pipeline 资源
+[source,terminal]
+----
+$ tkn resource create -n myspace
+----
+这是一个交互式命令，它要求输入资源名称、资源类型以及基于资源类型的值。
+
+== resource delete
+删除 Pipeline 资源。
+
+.示例：从命名空间中删除 `myresource` Pipeline 资源
+[source,terminal]
+----
+$ tkn resource delete myresource -n myspace
+----
+
+== resource describe
+描述管道资源。
+
+.示例：描述 `myresource` Pipeline 资源
+[source,terminal]
+----
+$ tkn resource describe myresource -n myspace
+----
+== resource list
+列出管道资源。
+
+.示例： 列出命名空间中的所有管道资源
+[source,terminal]
+----
+$ tkn resource list -n myspace
+----

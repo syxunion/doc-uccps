@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+// * understanding-networking.adoc
+
+
+[id="nw-ne-openshift-dns_{context}"]
+= 统信容器云管理平台 DNS
+
+如果您运行多个服务，比如使用多个 pod 的前端和后端服务，则要为用户名和服务 IP 等创建环境变量，使前端 pod 可以跟后端服务通信。如果删除并重新创建服务，可以为该服务分配一个新的 IP 地址，而且需要重新创建前端 pod 来获取服务 IP 环境变量的更新值。另外，必须在任何前端 pod 之前创建后端服务，以确保正确生成服务 IP，并将它作为环境变量提供给前端 pod。
+
+因此，统信容器云管理平台 具有一个内置 DNS，以便服务 DNS 以及服务 IP/端口能够访问这些服务。

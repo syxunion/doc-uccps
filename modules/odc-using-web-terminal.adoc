@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// web_console/odc-about-web-terminal.adoc
+
+[id="odc-using-web-terminal_{context}"]
+= 使用 web 终端
+
+安装 Web Terminal Operator 后，您可以使用 Web 终端，如下所示：
+
+. 要启动 web 终端，请点击控制台右上角的命令行终端图标( odc wto icon )。在 *Command line terminal* 窗格中会显示 web 终端实例。此实例使用您的凭证自动登录。
+. 从 *Project* 下拉列表中选择创建 DevWorkspace CR 的 项目。默认情况下会选择当前项目。
++
+[注意]
+====
+* 只有在不存在 `DevWorkspace` CR 时才会创建 DevWorkspace CR。
+* `openshift-terminal` 项目是集群管理员使用的默认项目。它们没有选择其他项目的选项。
+====
++
+. 点 *Start* 使用所选项目初始化 Web 终端。
+
+初始化 web 终端后，您可以在 web 终端中使用预安装的 CLI 工具，如 `oc`、`kubectl`、`odo`、`kn` 、`tkn`、`helm`、`kubens` 和 `kubectx`。

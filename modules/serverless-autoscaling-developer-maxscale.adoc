@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-autoscaling-developer.adoc
+
+:_content-type: REFERENCE
+[id="serverless-autoscaling-developer-maxscale_{context}"]
+= 最大扩展范围
+
+可提供应用程序的副本数量由  `max-scale`  注解决定。如果没有设置 `max-scale` 注解，则创建的副本数没有上限。
+
+.带有`max-scale` 注解的 service spec 示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/max-scale: "10"
+...
+----

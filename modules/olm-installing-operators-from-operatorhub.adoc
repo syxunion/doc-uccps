@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * operators/user/olm-installing-operators-in-namespace.adoc
+// * operators/admin/olm-adding-operators-to-cluster.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+//
+// Module watched for changes by Ecosystem Catalog team:
+// https://projects.engineering.redhat.com/projects/RHEC/summary
+
+ifeval::["{context}" == "olm-installing-operators-in-namespace"]
+:olm-user:
+endif::[]
+
+:_content-type: CONCEPT
+[id="olm-installing-operators-from-operatorhub_{context}"]
+= 关于使用 OperatorHub 安装 Operator
+
+OperatorHub 是一个发现 Operator 的用户界面，它与 Operator Lifecycle Manager（OLM）一起工作，后者在集群中安装和管理 Operator。
+
+ifndef::olm-user[]
+作为集群管理员，您可以使用 统信容器云管理平台 Web 控制台或 CLI 安装来自 OperatorHub 的 Operator。将 Operator 订阅到一个或多个命名空间，供集群上的开发人员使用。
+endif::[]
+
+ifdef::olm-user[]
+作为具有适当权限的用户，您可以使用 统信容器云管理平台 Web 控制台或 CLI 从 OperatorHub 安装 Operator。
+endif::[]
+
+安装过程中，您必须为 Operator 确定以下初始设置：
+
+ifndef::olm-user[]
+ifdef::openshift-enterprise,openshift-webscale,openshift-origin[]
+安装模式:: 选择 *All namespaces on the cluster (default)* 将 Operator 安装至所有命名空间；或选择单个命名空间（如果可用），仅在选定命名空间中安装 Operator。本例选择 *All namespaces* …​ 使 Operator 可供所有用户和项目使用。
+endif::[]
+endif::[]
+ifdef::olm-user[]
+安装魔兽:: 选择要在其中安装Operator的特定名称空间。
+endif::[]
+
+更新频道:: 如果某个 Operator 可通过多个频道获得，则可任选您想要订阅的频道。例如，要通过 *stable* 频道部署（如果可用），则从列表中选择这个选项。
+
+批准策略:: 您可以选择自动或者手动更新。
++
+如果选择自动更新某个已安装的 Operator，则当所选频道中有该 Operator 的新版本时，Operator Lifecycle Manager（OLM）将自动升级 Operator 的运行实例，而无需人为干预。
++
+如果选择手动更新，则当有新版 Operator 可用时，OLM 会创建更新请求。作为集群管理员，您必须手动批准该更新请求，才可将 Operator 更新至新版本。

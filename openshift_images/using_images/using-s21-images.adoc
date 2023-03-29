@@ -1,0 +1,41 @@
+:_content-type: ASSEMBLY
+[id="using-s21-images"]
+= Source-to-image
+include::_attributes/common-attributes.adoc[]
+:context: using-s21-images
+
+toc::[]
+
+您可以将 UnionTech Software Collections 镜像用作依赖特定运行时环境（如 Node.js、Perl 或 Python）的应用程序的基础。您可以使用 UnionTech Java Source-to-Image for Uccps 文档作为使用 Java 的运行时环境的参考。其中一些运行时基础镜像的特殊版本称为 Source-to-Image (S2I) 镜像。使用 S2I 镜像时，您可以将代码插入到可随时运行该代码的基础镜像环境中。
+
+S2I 镜像包括：
+
+* .NET
+* Java
+* Go
+* Node.js
+* Perl
+* PHP
+* Python
+* Ruby
+
+您可以按照以下流程直接从 统信容器云管理平台 Web 控制台使用 S2I 镜像：
+
+. 使用您的登录凭证登录到 统信容器云管理平台 web 控制台。统信容器云管理平台 Web 控制台的默认视图是 *Administrator* 视角。
+. 使用视角切换功能把它切换到 *Developer* 视角。
+. 在 *+Add* 视图中，从列表中选择现有项目，或者使用 *Project* 下拉列表创建新项目。
+. 在 *Developer Catalog* 中选择 *All services*。
+. 选择类型 *Builder Images*，然后查看可用的 S2I 镜像。
+
+S2I 镜像也可以通过配置 Cluster Samples Operator 获得。
+
+include::modules/images-s2i-build-process-overview.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+[id="additional-resources_using-s21-images"]
+== 其他资源
+
+* 有关使用 Cluster Samples Operator 的说明，请参阅 xref:../../openshift_images/configuring-samples-operator.adoc#configuring-samples-operator[配置 Cluster Samples Operator]。
+* 如需有关 S2I 构建的更多信息，请参阅 xref:../../cicd/builds/build-strategies.adoc#builds-strategy-s2i-build_build-strategies[S2I 构建的构建策略文档]。
+* 有关使用 S2I 创建镜像的概述，请参阅 xref:../../openshift_images/create-images.adoc#images-create-s2i_create-images[使用 Source-to-image 从源代码创建镜像]。
+* 有关测试 S2I 镜像的概述，请参阅 xref:../../openshift_images/create-images.adoc#images-test-s2i_create-images[关于测试 S2I 镜像。]

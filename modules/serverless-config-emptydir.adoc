@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: REFERENCE
+[id="serverless-config-emptydir_{context}"]
+= 配置 EmptyDir 扩展
+// should probably be a procedure doc, but this is out of scope for the abstracts PR
+
+`emptyDir` 卷是创建 pod 时创建的空卷，用来提供临时工作磁盘空间。当为其创建 pod 被删除时， `emptyDir` 卷会被删除。
+
+`kubernetes.podspec-volumes-emptydir` 扩展控制 `emptyDir` 卷是否与 Knative Serving 搭配使用。要使用 `emptyDir` 卷启用，您必须修改 `KnativeServing` 自定义资源 (CR) 使其包含以下 YAML：
+
+.KnativeServing CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    features:
+      kubernetes.podspec-volumes-emptydir: enabled
+...
+----

@@ -1,0 +1,169 @@
+// Module included in the following assemblies:
+//
+// * logging/nodes-edge-remote-workers.adoc
+
+[id="nodes-edge-remote-workers-strategies_{context}"]
+= 远程 worker 节点策略
+
+如果您使用远程 worker 节点，请考虑使用哪个对象来运行应用程序。
+
+建议根据所计划的在出现网络问题或电源丢失时需要进行的行为，使用守护进程集或静态 pod。另外，如果 control plane 无法访问远程 worker 节点，您可以使用 Kubernetes 区和容限来控制或避免 pod 驱除。
+
+[id="nodes-edge-remote-workers-strategies-daemonsets_{context}"]
+守护进程集::
+守护进程集是管理远程 worker 节点上的 pod 的最佳方法，理由如下：
+--
+* 守护进程集通常不需要重新调度。如果节点断开与集群的连接，节点上的 pod 将继续运行。统信容器云管理平台 不更改守护进程设置 pod 的状态，并使 pod 保留为最新报告的状态。例如，如果守护进程集 pod 处于 Running 状态，当节点停止通信时，pod 会继续运行，并假定 统信容器云管理平台 正在运行。
+
+* 在默认情况下，守护进程集会被创建为带有对没有 `tolerationSeconds`  值的 `node.kubernetes.io/unreachable` 和 `node.kubernetes.io/not-ready` 污点的 `NoExecute` 容限。如果 control plane 无法访问节点，则守护进程集 pod 不会被驱除。例如：
++
+.容限默认添加到守护进程集 pod
+[source,yaml]
+----
+  tolerations:
+    - key: node.kubernetes.io/not-ready
+      operator: Exists
+      effect: NoExecute
+    - key: node.kubernetes.io/unreachable
+      operator: Exists
+      effect: NoExecute
+    - key: node.kubernetes.io/disk-pressure
+      operator: Exists
+      effect: NoSchedule
+    - key: node.kubernetes.io/memory-pressure
+      operator: Exists
+      effect: NoSchedule
+    - key: node.kubernetes.io/pid-pressure
+      operator: Exists
+      effect: NoSchedule
+    - key: node.kubernetes.io/unschedulable
+      operator: Exists
+      effect: NoSchedule
+----
+
+* 守护进程集可以使用标签来确保工作负载在匹配的 worker 节点上运行。
+
+* 您可以使用 统信容器云管理平台 服务端点来加载均衡守护进程设置 pod。
+
+[注意]
+====
+如果 统信容器云管理平台 无法访问该节点，守护进程集不会在节点重新引导后调度 pod。
+====
+--
+
+[id="nodes-edge-remote-workers-strategies-static_{context}"]
+静态 pods::
+如果您希望在一个节点重启后（例如发生了电源中断的情况）重启 pod，考虑使用静态 pod。节点上的 kubelet 会在节点重启时自动重启静态 pod。
+
+[注意]
+====
+静态 pod 无法使用 secret 和配置映射。
+====
+
+[id="nodes-edge-remote-workers-strategies-zones_{context}"]
+Kubernetes 区域::
+Kubernetes 区域 可能会降低速率，或在某些情况下完全停止 pod 驱除。
+
+当 control plane 无法访问节点时，节点控制器默认应用 `node.kubernetes.io/unreachable` 污点并驱除 pod，驱除率为每秒 0.1 个节点。但是，在使用 Kubernetes 区的集群中，pod 驱除行为会被改变。
+
+如果区被完全破坏，区中的所有节点都具有 `False` 或 `Unknown` 的 `Ready` 条件，control plane 不会将 `node.kubernetes.io/unreachable` 污点应用到那个区的节点。
+
+对于部分受破坏的区，超过 55% 的节点具有 `False` 或 `Unknown` 条件，pod 驱除率会降低为每秒 0.01 个节点。在较小集群（小于 50 个节点）中的节点不具有污点。您的集群必须具有超过三个区域才能使行为生效。
+
+您可以通过应用节点规格中的 `topology.kubernetes.io/region` 标签将节点分配给特定区。
+
+.Kubernetes 区节点标签示例
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  labels:
+    topology.kubernetes.io/region=east
+----
+
+[id="nodes-edge-remote-workers-strategies-kubeconfig_{context}"]
+`KubeletConfig` 对象::
+--
+您可以调整 kubelet 检查每个节点状态的时间长度。
+
+要设置影响内部节点控制器何时标记具有 `Unhealthy` 或 `Unreachable` 状况的节点的时间间隔，创建一个包含 `node-status-update-frequency` 参数的 `KubeletConfig` 对象，以及 `node-status-report-frequency` 参数。
+
+每个节点上的 kubelet 决定  `node-status-update-frequency` 设置定义的节点状态，并根据 `node-status-report-frequency` 设置向集群报告这个状态。默认情况下，kubelet 每 10 秒决定 pod 状态，并每分钟报告状态。但是，如果节点状态更改，kubelet 会立即报告到集群的更改。只有在启用了 Node Lease 功能门时，统信容器云管理平台 才会使用  `node-status-report-frequency` 设置，这是 统信容器云管理平台 集群的默认设置。如果禁用了 Node Lease 功能门，节点会根据 `node-status-update-frequency` 设置报告其状态。
+.kubelet 配置示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: disable-cpu-units
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      machineconfiguration.openshift.io/role: worker <1>
+  kubeletConfig:
+    node-status-update-frequency: <2>
+      - "10s"
+    node-status-report-frequency: <3>
+      - "1m"
+----
+<1> 使用 `MachineConfig` 对象中的标签指定此 `KubeletConfig` 对象应用到的节点类型。
+<2> 指定 kubelet 检查与此 `MachineConfig` 对象关联的节点状态的频率。默认值为 `10s`。如果更改此默认值，则 `node-status-report-frequency` 值将更改为相同的值。
+<3> 指定 kubelet 报告与此 `MachineConfig` 对象关联的节点状态的频率。默认值为 `1m`。
+
+`node-status-update-frequency` 参数与 `node-monitor-grace-period` 和  `pod-eviction-timeout` 参数一起工作。
+
+* `node-monitor-grace-period` 参数指定，如果控制器管理器未接收节点 heartbeat，统信容器云管理平台 会在与 `MachineConfig` 对象关联的节点标记为 Unhealthy 后等待多久。该节点上的工作负载在此时间之后将继续运行。如果在 `node-monitor-grace-period` 过期后远程 worker 节点重新加入集群，pod 会继续运行。新的 pod 可以调度到该节点。`node-monitor-grace-period` 间隔为 `40s`。`node-status-update-frequency` 值必须小于 `node-monitor-grace-period` 值。
+
+* `pod-eviction-timeout` 参数指定 统信容器云管理平台 在将与 `MachineConfig` 对象关联的节点标记为 Unreachable 后等待的时间，以开始标记 pod 进行驱除。被驱除的 pod 会被在其他节点上重新调度。如果在 pod-eviction-timeout 过期后远程 worker 节点重新加入集群，则在远程 worker 节点上运行的 pod 将会被终止，因为节点控制器已逐出 pod。然后可将 Pod 重新调度到该节点。`pod-eviction-timeout` 间隔为 `5m0s`。
+
+[NOTE]
+====
+不支持修改 `node-monitor-grace-period` 和 `pod-eviction-timeout` 参数。
+====
+
+--
+
+[id="nodes-edge-remote-workers-strategies-tolerations_{context}"]
+容限::
+如果内部节点控制器添加了一个 `node.kubernetes.io/unreachable` 污点，它在无法访问时对节点有一个 `NoExecute` 的效果，则可以使用 pod 容限来减轻影响。
+
+具有 `NoExecute` 效果的污点会影响节点上运行的 pod：
+
+* 不容许污点的 Pod 会被放入队列进行驱除。
+* 如果 Pod 容许污点，且没有在容限规格中指定 `tolerationSeconds` 值，则会永久保持绑定。
+* 如果 Pod 容许污点，且指定了 `tolerationSeconds` 值，则会在指定的时间里保持绑定。在这个时间过后， pod 会被放入队列以驱除。
+
+您可以通过把 pod 配置为使 `node.kubernetes.io/unreachable` 和 `node.kubernetes.io/not-ready` 污点有 `NoExecute` 的效果来延迟或避免 pod 驱除。
+
+.pod 规格中的容限示例
+[source,yaml]
+----
+...
+tolerations:
+- key: "node.kubernetes.io/unreachable"
+  operator: "Exists"
+  effect: "NoExecute" <1>
+- key: "node.kubernetes.io/not-ready"
+  operator: "Exists"
+  effect: "NoExecute" <2>
+  tolerationSeconds: 600
+...
+----
+<1> 没有 `tolerationSeconds` 的 `NoExecute` 效果可在 control plane 无法访问节点时永久保留 pod。
+<2> 带有 `tolerationSeconds: 600` 的 `NoExecute` 效果允许在 control plane 将节点标记为 Unhealthy 时让 pod 再保持 10 分钟。
+
+统信容器云管理平台 在 `pod-eviction-timeout` 值到期后使用 `tolerationSeconds` 值。
+
+其他类型的 统信容器云管理平台 对象::
+您可以使用副本集、部署和复制控制器。当节点断开连接五分钟后，调度程序可将这些 pod 重新调度到其他节点上。重新调度到其他节点对于某些工作负载（如 REST API）来说是很有帮助的，管理员可以保证特定数量的 pod 正在运行并可以被访问。
+
+[注意]
+====
+在使用远程 worker 节点时，如果远程 worker 节点旨在保留给特定功能，则不同节点上重新调度 pod 可能会是无法接受的。
+====
+
+[id="nodes-edge-remote-workers-strategies-statefulset_{context}"]
+有状态集不会在停机时重启。pod 处于 terminating 状态，直到 control plane 可以确认 pod 已被终止。
+
+为了避免调度到一个无法访问同一类型的持久性存储的节点，统信容器云管理平台 不允许在网络分离时将需要持久性卷的 pod 迁移到其他区。

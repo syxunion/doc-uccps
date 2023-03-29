@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * installing/post_installation_configuration/machine-configuration-tasks.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="machineconfig-modify-journald_{context}"]
+= 配置 journald 设置
+
+如果您需要在 统信容器云管理平台 节点上配置 journald 服务设置，您可以修改适当的配置文件并将该文件作为机器配置传递给适当的节点池。
+
+此流程描述了如何修改 `/etc/systemd/journald.conf` 文件中的 `journald` 限制设置并将其应用到 worker 节点。有关如何使用该文件的详情，请查看 `journald.conf` 手册页。
+
+.先决条件
+* 有一个正在运行的 统信容器云管理平台 集群。
+* 以具有管理特权的用户身份登录集群。
+
+.流程
+
+. 创建一个 Butane 配置文件 `40-worker-custom-journald.bu`，其中包含带有所需设置的 `/etc/systemd/journald.conf` 文件。
++
+[注意]
+====
+有关 Butane 的信息，请参阅"使用 Butane 创建机器配置"。
+====
++
+[source,yaml]
+----
+variant: openshift
+version: 4.10.0
+metadata:
+  name: 40-worker-custom-journald
+  labels:
+    machineconfiguration.openshift.io/role: worker
+storage:
+  files:
+  - path: /etc/systemd/journald.conf
+    mode: 0644
+    overwrite: true
+    contents:
+      inline: |
+        # Disable rate limiting
+        RateLimitInterval=1s
+        RateLimitBurst=10000
+        Storage=volatile
+        Compress=no
+        MaxRetentionSec=30s
+----
+
+. 使用 Butane 生成 `MachineConfig` 对象文件 `40-worker-custom-journald.yaml`，包含要发送到 worker 节点的配置：
++
+[source,terminal]
+----
+$ butane 40-worker-custom-journald.bu -o 40-worker-custom-journald.yaml
+----
+
+. 将机器配置应用到池：
++
+[source,terminal]
+----
+$ oc apply -f 40-worker-custom-journald.yaml
+----
+
+. 检查是否应用新机器配置，并且节点是否处于降级状态。它可能需要几分钟时间。worker 池将显示更新进行中，每个节点都成功应用了新的机器配置：
++
+[source,terminal]
+----
+$ oc get machineconfigpool
+NAME   CONFIG             UPDATED UPDATING DEGRADED MACHINECOUNT READYMACHINECOUNT UPDATEDMACHINECOUNT DEGRADEDMACHINECOUNT AGE
+master rendered-master-35 True    False    False    3            3                 3                   0                    34m
+worker rendered-worker-d8 False   True     False    3            1                 1                   0                    34m
+----
+
+. 要检查是否应用了更改，您可以登录到 worker 节点：
++
+[source,terminal]
+----
+$ oc get node | grep worker
+ip-10-0-0-1.us-east-2.compute.internal   Ready    worker   39m   v0.0.0-master+$Format:%h$
+$ oc debug node/ip-10-0-0-1.us-east-2.compute.internal
+Starting pod/ip-10-0-141-142us-east-2computeinternal-debug ...
+...
+sh-4.2# chroot /host
+sh-4.4# cat /etc/systemd/journald.conf
+# Disable rate limiting
+RateLimitInterval=1s
+RateLimitBurst=10000
+Storage=volatile
+Compress=no
+MaxRetentionSec=30s
+sh-4.4# exit
+----

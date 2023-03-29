@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-yaml.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-functions-func-yaml-environment-variables_{context}"]
+= 从 func.yaml 字段引用本地环境变量
+
+如果要避免在功能配置中存储敏感信息，如 API 密钥，您可以添加对本地环境中可用的环境变量的引用。您可以通过修改  `func.yaml` 文件中的 `envs` 字段来完成此操作。
+
+.先决条件
+
+* 您需要创建 function 项目。
+* 本地环境需要包含您要引用的变量。
+
+.流程
+
+* 要引用本地环境变量，请使用以下语法：
++
+[source]
+----
+{{ env:ENV_VAR }}
+----
++
+将 `ENV_VAR` 替换为您要用于本地环境中的变量名称。
++
+例如，您可能在本地环境中提供  `API_KEY` 变量。您可以将其值分配给 `MY_API_KEY` 变量，然后您可以在功能内直接使用该变量：
++
+.功能示例
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+envs:
+- name: MY_API_KEY
+  value: '{{ env:API_KEY }}'
+...
+----

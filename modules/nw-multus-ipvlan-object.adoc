@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-additional-network.adoc
+
+//37.1. IPVLAN overview
+// https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/getting-started-with-ipvlan_configuring-and-managing-networking#ipvlan-overview_getting-started-with-ipvlan
+
+[id="nw-multus-ipvlan-object_{context}"]
+= 配置 IPVLAN 额外网络
+
+以下对象描述了 IPVLAN CNI 插件的配置参数：
+
+.IPVLAN CNI 插件 JSON 配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`cniVersion`
+|`字符串`
+|CNI 规格版本。需要 `0.3.1` 值。
+
+|`name`
+|`字符串`
+|您之前为 CNO 配置提供的 `name` 参数的值。
+
+|`type`
+|`字符串`
+|用于配置的 CNI 插件的名称： `ipvlan`。
+
+|`mode`
+|`字符串`
+|虚拟网络的操作模式。这个值必须是 `l2`、`l3` 或 `l3s`。默认值为 `l2`。
+
+|`master`
+|`字符串`
+|虚拟网络的操作模式。这个值必须是 `l2`、`l3` 或 `l3s`。默认值为 `l2`。
+
+|`mtu`
+|`integer`
+|将最大传输单位 (MTU) 设置为指定的值。默认值由内核自动设置。
+
+|`ipam`
+|`object`
+|IPAM CNI 插件的配置对象。该插件管理网络附加定义的 IP 地址分配。
+
+不要指定 `dhcp`。不支持使用 DHCP 配置 IPVLAN，因为 IPVLAN 接口与主机接口共享 MAC 地址。
+
+|====
+
+[id="nw-multus-ipvlan-config-example_{context}"]
+== ipvlan 配置示例
+
+以下示例配置了名为 `ipvlan -net` 的额外网络：
+
+[source,json]
+----
+{
+  "cniVersion": "0.3.1",
+  "name": "work-network",
+  "type": "ipvlan",
+  "master": "eth1",
+  "mode": "l3",
+  "ipam": {
+    "type": "static",
+    "addresses": [
+       {
+         "address": "192.168.10.10/24"
+       }
+    ]
+  }
+}
+----
+

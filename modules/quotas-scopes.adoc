@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+[id="quotas-scopes_{context}"]
+= 配额范围
+
+每个配额都有一组关联的范围。配额只在与枚举的范围交集匹配时才会测量资源的使用量。
+
+为配额添加范围会限制该配额可应用的资源集合。指定允许的集合之外的资源会导致验证错误。
+
+|===
+
+|影响范围 |描述
+
+|`Terminating`
+|匹配 `spec.activeDeadlineSeconds >= 0` 的 Pod。
+
+|`NotTerminating`
+|匹配 `spec.activeDeadlineSeconds 为 nil` 的 Pod。
+
+|`BestEffort`
+|匹配 `cpu` 或 `memory` 具有最佳服务质量的 Pod。
+
+|`NotBestEffort`
+|匹配 `cpu` 和 `memory` 没有最佳服务质量的 Pod。
+|===
+
+`BestEffort`  范围将配额仅限为限制以下资源：
+
+- `pods`
+
+`Terminating`、`NotTerminating` 和 `NotBestEffort` 范围将配额仅限为跟踪以下资源：
+
+- `pods`
+- `memory`
+- `requests.memory`
+- `limits.memory`
+- `cpu`
+- `requests.cpu`
+- `limits.cpu`

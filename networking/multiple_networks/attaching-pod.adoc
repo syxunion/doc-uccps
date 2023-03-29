@@ -1,0 +1,12 @@
+:_content-type: ASSEMBLY
+[id="attaching-pod"]
+= 将 pod 附加到额外网络
+include::_attributes/common-attributes.adoc[]
+:context: attaching-pod
+
+toc::[]
+
+作为集群用户，您可以将 pod 附加到额外网络。
+
+include::modules/nw-multus-add-pod.adoc[leveloffset=+1]
+include::modules/nw-multus-advanced-annotations.adoc[leveloffset=+2]

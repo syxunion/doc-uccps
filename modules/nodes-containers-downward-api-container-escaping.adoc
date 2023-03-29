@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-downward-api-container-escaping_{context}"]
+= 转义环境变量引用
+
+在创建 pod 时，您可以使用双美元符号来转义环境变量引用。然后，其值将设为所提供值的单美元符号版本。
+
+.流程
+
+. 创建 pod.yaml 文件来引用现有的环境变量：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-env-test-pod
+spec:
+  containers:
+    - name: env-test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: MY_NEW_ENV
+          value: $$(SOME_OTHER_ENV)
+  restartPolicy: Never
+----
+
+. 从 `pod.yaml` 文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f pod.yaml
+----
+
+. 检查容器日志中的 `MY_NEW_ENV` 值：
++
+[source,terminal]
+----
+$ oc logs -p dapi-env-test-pod
+----

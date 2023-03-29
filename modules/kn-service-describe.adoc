@@ -1,0 +1,83 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: REFERENCE
+[id="kn-service-describe_{context}"]
+= 使用 Knative CLI 描述无服务器应用程序
+
+您可以使用 `kn service describe` 命令来描述 Knative 服务。
+
+.示例命令
+
+* 描述服务：
++
+[source,terminal]
+----
+$ kn service describe --verbose <service_name>
+----
++
+`--verbose`  标志是可选的，但可以包含它以提供更详细的描述。常规输出和详细输出之间的区别在以下示例中显示：
++
+.没有 `--verbose` 标记的输出示例
+[source,terminal]
+----
+Name:       hello
+Namespace:  default
+Age:        2m
+URL:        http://hello-default.apps.ocp.example.com
+
+Revisions:
+  100%  @latest (hello-00001) [1] (2m)
+        Image:  docker.io/openshift/hello-openshift (pinned to aaea76)
+
+Conditions:
+  OK TYPE                   AGE REASON
+  ++ Ready                   1m
+  ++ ConfigurationsReady     1m
+  ++ RoutesReady             1m
+----
++
+.带有 `--verbose`  标记的输出示例
+[source,terminal]
+----
+Name:         hello
+Namespace:    default
+Annotations:  serving.knative.dev/creator=system:admin
+              serving.knative.dev/lastModifier=system:admin
+Age:          3m
+URL:          http://hello-default.apps.ocp.example.com
+Cluster:      http://hello.default.svc.cluster.local
+
+Revisions:
+  100%  @latest (hello-00001) [1] (3m)
+        Image:  docker.io/openshift/hello-openshift (pinned to aaea76)
+        Env:    RESPONSE=Hello Serverless!
+
+Conditions:
+  OK TYPE                   AGE REASON
+  ++ Ready                   3m
+  ++ ConfigurationsReady     3m
+  ++ RoutesReady             3m
+----
+
+* 以 YAML 格式描述服务：
++
+[source,terminal]
+----
+$ kn service describe <service_name> -o yaml
+----
+
+* 以 JSON 格式描述服务：
++
+[source,terminal]
+----
+$ kn service describe <service_name> -o json
+----
+
+* 仅输出服务 URL：
++
+[source,terminal]
+----
+$ kn service describe <service_name> -o url
+----

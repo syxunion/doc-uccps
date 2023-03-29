@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * storage/understanding-persistent-storage.adoc
+
+[id="reclaim-policy_{context}"]
+= 更改持久性卷的重新声明策略
+
+更改持久性卷的重新声明策略：
+
+. 列出集群中的持久性卷：
++
+[source,terminal]
+----
+$ oc get pv
+----
++
+.输出示例
+[source-terminal]
+----
+NAME                                       CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS    CLAIM             STORAGECLASS     REASON    AGE
+ pvc-b6efd8da-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Delete          Bound     default/claim1    manual                     10s
+ pvc-b95650f8-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Delete          Bound     default/claim2    manual                     6s
+ pvc-bb3ca71d-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Delete          Bound     default/claim3    manual                     3s
+----
+
+. 选择一个持久性卷并更改其重新声明策略：
++
+[source,terminal]
+----
+$ oc patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+----
+
++
+. 验证您选择的持久性卷是否具有正确的策略：
++
+[source,terminal]
+----
+$ oc get pv
+----
++
+.输出示例
+[source-terminal]
+----
+NAME                                       CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS    CLAIM             STORAGECLASS     REASON    AGE
+ pvc-b6efd8da-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Delete          Bound     default/claim1    manual                     10s
+ pvc-b95650f8-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Delete          Bound     default/claim2    manual                     6s
+ pvc-bb3ca71d-b7b5-11e6-9d58-0ed433a7dd94   4Gi        RWO           Retain          Bound     default/claim3    manual                     3s
+----
++
+在前面的输出中，绑定到声明 `default/claim3` 的卷现在具有 Retain 重新声明策略。当用户删除声明 `default/claim3` 时，这个卷不会被自动删除。

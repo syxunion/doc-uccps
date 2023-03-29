@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-resources-configuring.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-resources-configuring-about_{context}"]
+= 了解如何为节点分配资源
+
+统信容器云管理平台 中为节点组件保留的 CPU 和内存资源基于两个节点设置：
+
+
+如果没有设置标志，则使用默认值。如果未设置任何标记，则分配的资源设置为引入可分配资源前的节点容量。
+
+[注意]
+====
+任何使用 reservedSystemCPUs 参数特别保留的 CPU 都无法使用 `kube-reserved` 或 `system-reserved`+ 进行分配。
+====
+
+[id="computing-allocated-resources_{context}"]
+== 统信容器云管理平台 如何计算分配的资源
+
+分配的资源数量根据以下公式来计算：
+
+----
+[Allocatable] = [Node Capacity] - [system-reserved] - [Hard-Eviction-Thresholds]
+----
+
+[注意]
+====
+`Allocatable` 提供的 `Hard-Eviction-Thresholds` 可提高系统可靠性，因为 `Allocatable` 的值在节点级别强制实施。
+====
+
+如果 `Allocatable`  为负值，它会被设为 0。
+
+每个节点报告容器运行时和 `kubelet` 使用的系统资源。为简化配置 `system-reserved` 参数，请使用节点概述 API 查看用于节点的资源。节点概述位于 `/api/v1/nodes/<node>/proxy/stats/summary`.
+
+[id="allocate-node-enforcement_{context}"]
+== 节点如何强制实施资源限制
+
+节点可以根据配置的可分配值限制 pod 可消耗的资源总量。此功能可以防止 pod 使用系统服务（如容器运行时和节点代理）所需的 CPU 和内存资源，从而显著提高节点可靠性。为提高节点可靠性，管理员应该根据目标保留资源使用。
+
+节点使用一个新的 cgroup 分级结构来强制实施对资源的约束。它可以强制实现对服务质量的要求。所有 pod 都在专用的 cgroup 层次结构中启动，与系统守护进程隔离。
+
+管理员应该像对待具有保证服务质量的 pod 一样对待系统守护进程。系统守护进程可能会在其限定控制组中爆发，此行为需要作为集群部署的一个部分进行管理。通过在 `system-reserved` 中指定 CPU 和内存资源量，为系统守护进程保留 CPU 和内存资源。
+
+强制实施 `system-reserved` 限制可防止关键系统服务接收 CPU 和内存资源。因此，关键系统服务可能会被内存不足 killer 结束。我们的建议是，只在您为节点进行了详细配置后，强制实施 system-reserved，且您可以确定，如果关键系统服务因为该组中的任何进程导致内存不足 killer 终止它时，可以恢复。
+
+[id="allocate-eviction-thresholds_{context}"]
+== 了解驱除阈值
+
+如果某个节点面临内存压力，这可能会影响整个节点以及该节点上运行的所有 pod。例如，使用超过保留内存量的系统守护进程可触发内存不足事件。为避免系统耗尽或降低内存不足事件的可能性，节点会提供处理资源不足情况的功能。
+
+您可以使用 `--eviction-hard` 标记保留一些内存。每当节点上的内存可用量低于该绝对值或百分比时，节点会尝试驱除 pod。如果节点上没有系统守护进程，pod 的内存会被限制在
+`capacity - eviction-hard`内。因此，pod 不能使用作为达到内存不足状态前驱除缓冲量而预留的资源。
+
+下例演示了节点内存可分配量的影响：
+
+* 节点容量为 `32Gi`
+* --system-reserved 为 `3Gi`
+* --eviction-hard 设置为 `100Mi`.
+
+对于这个节点，有效节点可分配量的值是 `28.9Gi`。如果节点和系统组件使用其所有保留量，则 pod 的可用内存为 `28.9Gi`，并且 kubelet 会在超过这个阈值时驱除 pod。
+
+如果您通过顶级 cgroup 强制实施节点可分配量 `28.9Gi`，那么 pod 永不会超过 28.9Gi。除非系统守护进程消耗的内存超过 3.1Gi，否则不会执行驱除。
+
+如果系统守护进程没有用尽其所有保留量，那么在上例中，pod 会在节点开始驱除前面临被其限定 cgroup 执行 memcg OOM 终止的问题。为了在这种情况下更好地强制实施 QoS，节点会对所有 pod 的顶级 cgroup 应用硬驱除阈值，即 Node Allocatable + Eviction Hard Thresholds。
+
+如果系统守护进程没有用尽所有保留量，每当 pod 消耗的内存超过 28.9Gi 时，节点就会驱除 pod。如果不及时驱除，消耗的内存超过 29Gi 时就会对 pod 执行 OOM 终止。
+
+[id="allocate-scheduler-policy_{context}"]
+== 调度程序如何确定资源可用性
+
+调度程序使用 `node.Status.Allocatable` （而非 `node.Status.Capacity`）的值来决定节点是否成为 pod 调度的候选者。
+
+在默认情况下，节点会将其机器容量报告为可完全被集群调度。

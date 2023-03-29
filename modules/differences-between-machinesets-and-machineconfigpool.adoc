@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/node-tasks.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+
+:_content-type: CONCEPT
+[id="differences-between-machinesets-and-machineconfigpool_{context}"]
+= 了解机器集和机器配置池之间的区别
+
+`MachineSet` 对象描述了与云或机器供应商相关的 统信容器云管理平台 节点。
+
+`MachineConfigPool` 对象允许 `MachineConfigController` 组件在升级过程中定义并提供机器的状态。
+
+`MachineConfigPool` 对象允许用户配置如何将升级应用到机器配置池中的 统信容器云管理平台 节点。
+
+`NodeSelector` 对象可以被一个到 `MachineSet` 对象的引用替换。

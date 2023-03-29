@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-running-pod-svc-acct_{context}"]
+= 使用其他服务帐户运行 pod
+
+您可以使用非默认服务帐户运行 pod。
+
+.流程
+
+. 编辑 `部署配置`：
++
+[source,terminal]
+----
+$ oc edit dc/<deployment_config>
+----
+
+. 将 `serviceAccount` 和 `serviceAccountName` 参数添加到 `spec` 字段，再指定您要使用的服务帐户：
++
+[source,yaml]
+----
+spec:
+  securityContext: {}
+  serviceAccount: <service_account>
+  serviceAccountName: <service_account>
+----

@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-using-proxy-git-cloning_{context}"]
+= 使用代理
+
+如果 Git 存储库只能使用代理访问，您可以在构建配置的 `source` 部分中定义要使用的代理。您可以同时配置要使用的 HTTP 和 HTTPS 代理。两个字段都是可选的。也可以在 `NoProxy` 字段中指定不应执行代理的域。
+
+[注意]
+====
+源 URI 必须使用 HTTP 或 HTTPS 协议才可以正常工作。
+====
+
+[source,yaml]
+----
+source:
+  git:
+    uri: "https://github.com/openshift/ruby-hello-world"
+    ref: "master"
+    httpProxy: http://proxy.example.com
+    httpsProxy: https://proxy.example.com
+    noProxy: somedomain.com, otherdomain.com
+----
+
+[注意]
+====
+对于 Pipeline 策略构建，因为 Jenkins Git 插件当前限制的缘故，通过 Git 插件执行的任何 Git 操作都不会利用 `BuildConfig` 中定义的 HTTP 或 HTTPS 代理。Git 插件将仅使用 Plugin Manager 面板上 Jenkins UI 中配置的代理。然后，在所有任务中，此代理都会被用于 Jenkins 内部与 git 的所有交互。
+====
+
+[role="_additional-resources"]
+.其他资源
+
+* 您可以在 link:https://wiki.jenkins-ci.org/display/JENKINS/JenkinsBehindProxy[JenkinsBehindProxy] 上找到有关如何通过 Jenkins UI 配置代理的说明。

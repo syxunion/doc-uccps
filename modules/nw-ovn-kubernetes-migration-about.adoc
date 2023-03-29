@@ -1,0 +1,199 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/migrate-from-openshift-sdn.adoc
+
+[id="nw-ovn-kubernetes-migration-about_{context}"]
+= 迁移到 OVN-Kubernetes 网络供应商
+
+迁移到 OVN-Kubernetes Container Network Interface（CNI）集群网络供应商是一个手动过程，其中会包括一些停机时间使集群无法访问。虽然提供了一个回滚过程，但迁移通常被认为是一个单向过程。
+
+
+在以下平台上支持迁移至 OVN-Kubernetes 集群网络供应商：
+
+* 裸机硬件
+* Amazon Web Services (AWS)
+* Google Cloud Platform (GCP)
+* Microsoft Azure
+* {rh-openstack-first}
+* {rh-virtualization-first}
+* VMware vSphere
+
+[id="considerations-migrating-ovn-kubernetes-network-provider_{context}"]
+== 迁移到 OVN-Kubernetes 网络供应商时的注意事项
+
+迁移过程中不会保留分配给节点的子网以及分配给各个 pod 的 IP 地址。
+
+虽然 OVN-Kubernetes 网络供应商实现了 OpenShift SDN 网络供应商中的许多功能，但配置并不相同。
+
+* 如果您的集群使用以下 OpenShift SDN 功能，则必须在 OVN-Kubernetes 中手动配置相同的功能：
++
+--
+* 命名空间隔离
+* 出口 IP 地址
+* 出口网络策略
+* 出口路由器 pod
+* 多播
+--
+
+* 如果您的集群使用 `100.64.0.0/16` IP 地址范围中的任何部分，则无法迁移到 OVN-Kubernetes，因为它在内部使用这个 IP 地址范围。
+
+以下小节重点介绍了上述功能在 OVN-Kubernetes 和 OpenShift SDN 中的配置的不同。
+
+[discrete]
+[id="namespace-isolation_{context}"]
+=== 命名空间隔离
+
+OVN-Kubernetes 仅支持网络策略隔离模式。
+
+[重要]
+====
+如果您的集群使用在多租户或子网隔离模式中配置的 OpenShift SDN，则无法迁移到 OVN-Kubernetes 网络供应商。
+====
+
+[discrete]
+[id="egress-ip-addresses_{context}"]
+=== 出口 IP 地址
+
+下表中描述了在 OVN-Kubernetes 和 OpenShift SDN 配置出口 IP 地址的不同：
+
+.出口 IP 地址配置的不同
+[cols="1a,1a",options="header"]
+|===
+|OVN-Kubernetes|OpenShift SDN
+
+|
+* 创建 `EgressIPs` 对象
+* 在一个 `Node` 对象上添加注解
+
+|
+* 对 `NetNamespace` 对象进行补丁
+* 对 `HostSubnet` 对象进行补丁
+|===
+
+有关在 OVN-Kubernetes 中使用出口 IP 地址的更多信息，请参阅"配置出口 IP 地址"。
+
+[discrete]
+[id="egress-network-policies_{context}"]
+=== 出口网络策略
+
+下表中描述在 OVN-Kubernetes 和 OpenShift SDN 间配置出口网络策略（也称为出口防火墙）的不同之处：
+
+.出口网络策略配置的不同
+[cols="1a,1a",options="header"]
+|===
+|OVN-Kubernetes|OpenShift SDN
+
+|
+* 在命名空间中创建 `EgressFirewall` 对象
+
+|
+* 在命名空间中创建一个 `EgressNetworkPolicy` 对象
+|===
+
+有关在 `OVN-Kubernetes` 中使用出口防火墙的更多信息，请参阅"配置项目出口防火墙"。
+
+[discrete]
+[id="egress-router-pods_{context}"]
+=== 出口路由器 pod
+
+OVN-Kubernetes 支持重定向模式的出口路由器 pod。OVN-Kubernetes 不支持 HTTP 代理模式或 DNS 代理模式的出口路由器 pod。
+
+使用 Cluster Network Operator 部署出口路由器时，您无法指定节点选择器来控制用于托管出口路由器 pod 的节点。
+
+[discrete]
+[id="multicast_{context}"]
+=== 多播
+
+下表中描述了在 OVN-Kubernetes 和 OpenShift SDN 上启用多播流量的区别：
+
+.多播配置的不同
+[cols="1a,1a",options="header"]
+|===
+|OVN-Kubernetes|OpenShift SDN
+
+|
+* 在 `Namespace` 对象上添加注解
+
+|
+* 在 `NetNamespace` 对象中添加注解
+|===
+
+有关在 OVN-Kubernetes 中使用多播的更多信息，请参阅"启用项目多播"。
+
+[discrete]
+[id="network-policies_{context}"]
+=== 网络策略
+
+OVN-Kubernetes 在 `networking.k8s.io/v1` API 组中完全支持 Kubernetes NetworkPolicy API。从 OpenShift SDN 进行迁移时，网络策略不需要更改。
+
+[id="how-the-migration-process-works_{context}"]
+== 迁移过程如何工作
+
+下表对迁移过程进行了概述，它分为操作中的用户发起的步骤，以及在响应过程中迁移过程要执行的操作。
+
+.从 OpenShift SDN 迁移到 OVN-Kubernetes
+[cols="1,1a",options="header"]
+|===
+
+|用户发起的步骤|迁移操作
+
+|
+将名为 `cluster` 的 `Network.operator.openshift.io` 自定义资源（CR）的 `migration` 字段设置为 `OVNKubernetes`。在设置值之前，请确保 `migration` 项为 null。
+|
+Cluster Network Operator (CNO):: 相应地更新名为 `cluster` 的 `Network.config.openshift.io` CR 的状态。
+Machine Config Operator (MCO):: 将更新发布到 `OVN-Kubernetes` 所需的 `systemd` 配置 ; MCO 默认更新每个池的单一机器，从而导致迁移总时间随着集群大小而增加。
+
+|`Network.config.openshift.io` CR 的 networkType 字段。
+|
+CNO:: 执行以下操作：
++
+--
+* 销毁 OpenShift SDN control plane pod。
+* 部署 OVN-Kubernetes control plane pod。
+* 更新 Multus 对象以反映新的集群网络供应商。
+--
+
+|
+重新引导集群中的每个节点。
+|
+Cluster:: 当节点重启时，集群会为 OVN-Kubernetes 集群网络上的 pod 分配 IP 地址。如果需要回滚到 OpenShift SDN，下表描述了这个过程。
+
+|===
+
+If a rollback to OpenShift SDN is required, the following table describes the process.
+
+.执行到 OpenShift SDN 的回滚
+[cols="1,1a",options="header"]
+|===
+
+|用户发起的步骤|迁移操作
+
+|挂起 MCO 以确保它不会中断迁移。
+|MCO 停止
+
+|
+将名为 `cluster` 的 `Network.operator.openshift.io` 自定义资源(CR)的 `migration` 字段设置为 `OpenShiftSDN`。在设置值之前，请确保 `migration` 项为 null。
+|
+CNO:: 相应地更新名为 `cluster` 的 `Network.config.openshift.io` CR 的状态。
+
+|更新 `networkType` 字段。
+|
+CNO:: 执行以下操作：
++
+--
+* 销毁 OVN-Kubernetes control plane pod。
+* 部署 OpenShift SDN control plane pod。
+* 更新 Multus 对象以反映新的集群网络供应商。
+--
+
+|
+重新引导集群中的每个节点。
+|
+Cluster:: 集群当节点重启时，集群会为 OVN-Kubernetes 集群网络上的 pod 分配 IP 地址。
+
+|
+在集群重启中的所有节点后启用 MCO。
+|
+MCO:: 将更新发布到 OpenShift SDN 所需的 systemd 配置 ; MCO 默认更新每个池的单一机器，因此迁移总时间随着集群的大小而增加。
+
+|===

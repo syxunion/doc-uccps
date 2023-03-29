@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+
+[id="identity-provider-apache-custom-proxy-configuration_{context}"]
+= 自定义代理配置
+
+使用 `mod_auth_gssapi`` 模块是使用请求标头身份提供程序配置 Apache 认证代理的流行方法，但这并不是必需的。如果满足以下要求，您可以轻松地使用其他代理：
+
+* 使用 mod_auth_gssapi 模块是使用请求标头身份提供程序配置 Apache 认证代理的流行方法，但这并不是必需的。如果满足以下要求，您可以轻松地使用其他代理：
+* 在 `RequestHeaderIdentityProvider` 配置中强制进行客户端证书验证 。
+* 使用质询流来要求 `X-CSRF-Token` 标头为所有身份验证请求设置。
+* 请确定只有 `/oauth/authorize` 端点和其子路径通过代理处理。重定向必须被重写，以便后端服务器可以将客户端发送到正确的位置。
+* 代理到 `https://<namespace_route>/oauth/authorize` 的 URL 必须以 `/authorize` 结尾，且最后没有尾部斜杠。例如： `https://proxy.example.com/login-proxy/authorize?…`​ 必须代理到 `https://<namespace_route>/oauth/authorize?…`​。
++
+* 代理到 `https://<namespace_route>/oauth/authorize` 的 URL 的子路径必须代理至 `https://<namespace_route>/oauth/authorize` 的子路径。例如： `https://proxy.example.com/login-proxy/authorize/approve?…`​ 必须代理到 `https://<namespace_route>/oauth/authorize/approve?…`​。
+
+[注意]
+====
+`https://<namespace_route>` 地址是到 OAuth 服务器的路由，可通过运行 `oc get route -n openshift-authentication` 获取。
+====

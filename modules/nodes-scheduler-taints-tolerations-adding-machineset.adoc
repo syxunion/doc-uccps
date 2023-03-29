@@ -1,0 +1,110 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-taints-tolerations.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-taints-tolerations-adding-machineset_{context}"]
+= 使用机器集添加污点和容限
+
+您可以使用机器集为节点添加污点。与 MachineSet 对象关联的所有节点都会使用污点更新。容限对由机器集添加的污点的处理方式与直接添加到节点的污点的处理方式相同。
+
+.流程
+
+. 通过编辑 Pod spec 使其包含 `tolerations` 小节来向 pod 添加容限：
++
+.使用 Equal 运算符的 pod 配置文件示例
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1" <1>
+    value: "value1"
+    operator: "Equal"
+    effect: "NoExecute"
+    tolerationSeconds: 3600 <2>
+----
+<1> 容限参数，如 *Taint 和 toleration 组件* 表中所述。
+<2> `tolerationSeconds` 参数指定 pod 在被驱除前与节点绑定的时长。
++
+例如：
++
+.使用 Exists 运算符的 pod 配置文件示例
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 3600
+----
+
+. 将污点添加到 `MachineSet` 对象:
+
+.. 为您想要污点的节点编辑 `MachineSet` YAML f，也可以创建新 `MachineSet` 对象:
++
+[source,terminal]
+----
+$ oc edit machineset <machineset>
+----
+
+.. 将污点添加到 `spec.template.spec` 部分：
+
+.节点规格中的污点示例
+[source,yaml]
+----
+spec:
+....
+  template:
+....
+    spec:
+      taints:
+      - effect: NoExecute
+        key: key1
+        value: value1
+....
+----
+
+本例在节点上放置一个键为 `key1`，值为 `value1`, 的污点，污点效果是  `NoExecute` 。
+
+.. 将机器缩减为 0:
++
+[source,terminal]
+----
+$ oc scale --replicas=0 machineset <machineset> -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来扩展机器集：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  replicas: 0
+----
+====
++
+等待机器被删除。
+
+.. 根据需要扩展机器设置：
++
+[source,terminal]
+----
+$ oc scale --replicas=2 machineset <machineset> -n openshift-machine-api
+----
++
+或者：
++
+[source,terminal]
+----
+$ oc edit machineset <machineset> -n openshift-machine-api
+----
++
+等待机器启动。污点添加到与 `MachineSet` 对象关联的节点上。

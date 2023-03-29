@@ -1,0 +1,173 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: REFERENCE
+[id="ossm-wasm-ref-wasmplugin_{context}"]
+= WasmPlugin API reference
+
+WasmPlugins API 提供了通过 WebAssembly 过滤器扩展 Istio 代理提供的功能的机制。
+
+您可以部署多个 WasmPlugins。`phase` 和`priority` 设置决定了执行顺序（作为 Envoy 的过滤器链的一部分），允许对用户提供的 WasmPlugin 和 Istio 的内部过滤器配置复杂交互。
+
+在以下示例中，身份验证过滤器实施 OpenID 流，并使用 JSON Web Token(JWT)填充 Authorization 标头。Istio 身份验证会消耗此令牌并将其部署到入口网关。WasmPlugin 文件在代理 sidecar 文件系统中存在。请注意字段 `url`。
+
+[source,yaml]
+----
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: openid-connect
+  namespace: istio-ingress
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  url: file:///opt/filters/openid.wasm
+  sha256: 1ef0c9a92b0420cf25f7fe5d481b231464bc88f486ca3b9c83ed5cc21d2f6210
+  phase: AUTHN
+  pluginConfig:
+    openid_server: authn
+    openid_realm: ingress
+----
+
+以下是相同的示例，但这一次使用 OCI 镜像而不是文件系统中的文件。记录 `url`, `imagePullPolicy`, 和 `imagePullSecret`　等字段。
+
+[source,yaml]
+----
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: openid-connect
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  url: oci://private-registry:5000/openid-connect/openid:latest
+  imagePullPolicy: IfNotPresent
+  imagePullSecret: private-registry-pull-secret
+  phase: AUTHN
+  pluginConfig:
+    openid_server: authn
+    openid_realm: ingress
+----
+
+.WasmPlugin 字段参考
+[options="header"]
+[cols="a, a, a, a"]
+|===
+| 字段 | Type | 类型 | 描述
+
+|spec.selector
+|WorkloadSelector
+|用于选择应该应用此插件配置的特定 pod/VM 集合的条件。如果省略，此配置将应用于同一命名空间中的所有工作负载实例。如果 config root 命名空间中存在 WasmPlugin 字段，它将应用于任何命名空间中的所有适用工作负载。
+|否
+
+|spec.url
+|string
+|Wasm 模块或 OCI 容器的 URL。如果没有方案，则默认为 oci://，代表 OCI 镜像。其他有效的方案是 file://（用于引用代理容器内的本地 .wasm 模块文件）；http[s]:// 用于远程托管的 .wasm 模块文件 。
+|否
+
+|spec.sha256
+|string
+|用于验证 Wasm 模块或 OCI 容器的 SHA256 checksum。如果 url 字段已引用 SHA256（使用 @sha256: 表示法），它必须与此字段的值匹配。如果 tag 引用了 OCI 镜像，并且设置了此字段，则在拉取后将根据此字段的内容验证其校验和。
+|否
+
+|spec.imagePullPolicy
+|PullPolicy
+|获取 OCI 镜像时要应用的拉取行为。只有在通过标签而不是 SHA 引用镜像时才相关。默认为 IfNotPresent 值，除非在 url 字段中引用了 OCI 镜像并且使用了 latest 标签时，这种情况下默认值为 Always，镜像 K8s 的行为。如果 url 字段直接使用 file:// 或 http[s]:// 直接引用 Wasm 模块，则忽略设置。
+|否
+
+|spec.imagePullSecret
+|string
+|用于 OCI 镜像拉取的凭证。与 WasmPlugin 对象相同的命名空间中的 secret 名称，其中包含用于在拉取镜像时对 registry 进行身份验证的 pull secret。
+|否
+
+|spec.phase
+|PluginPhase
+|决定过滤器链中注入这个 WasmPlugin 对象的位置。
+|否
+
+|spec.priority
+|`int64`
+|决定有同一 phase 值的 WasmPlugins 对象的顺序。当多个 WasmPlugins 对象应用于同一阶段的同一工作负载时，它们将按优先级和降序应用。如果没有设置 priority 字段，或者两个具有相同值的 WasmPlugins 对象，则排序将从 WasmPlugins 对象的名称和命名空间决定。默认值为 0。
+|否
+
+|spec.pluginName
+|string
+|Envoy 配置中使用的插件名称。有些 Wasm 模块可能需要这个值来选择要执行的 Wasm 插件。
+|否
+
+|spec.pluginConfig
+|Struct
+|将要传递给插件的配置。
+|否
+
+|spec.pluginConfig.verificationKey
+|string
+|用于验证签名 OCI 镜像或 Wasm 模块的公钥。必须以 PEM 格式提供。
+|否
+|===
+
+`WorkloadSelector` 对象指定用于确定过滤器是否可应用于代理的条件。匹配条件包括与代理关联的元数据、工作负载实例信息，如附加到 pod/VM 的标签，或代理在初始握手期间向 Istio 提供的任何其他信息。如果指定了多个条件，则所有条件都需要匹配才能选择工作负载实例。目前，只支持基于标签的选择机制。
+
+.WorkloadSelector
+[options="header"]
+[cols="a, a, a, a"]
+|===
+| 字段 | 类型 | 描述 | 必需
+|matchLabels
+|map<string, string>
+|指定应应用策略的特定 pod/VM 集合的一个或多个标签。标签搜索范围仅限于存在资源的配置命名空间。
+|是
+|===
+
+`PullPolicy` 对象指定要在获取 OCI 镜像时应用的 pull 行为。
+
+.PullPolicy
+[options="header"]
+[cols="a, a"]
+|===
+| 值 | 描述
+|<empty>
+|默认值为 IfNotPresent，但使用标签 latest 的 OCI 镜像除外，其默认值为 Always。
+
+|IfNotPresent
+|如果在之前拉取了镜像的现有版本，则会使用它。如果本地没有镜像版本，我们将拉取最新版本。
+
+|Always
+|应用此插件时，始终拉取镜像的最新版本。
+|===
+
+`Struct` 代表结构化数据值，由映射到动态输入的值的字段组成。在某些语言中，Struct 可能受到原生表示的支持。例如，在脚本语言中，JavaScript astruct 等脚本语言表示为对象。
+
+.Struct
+[options="header"]
+[cols="a, a, a"]
+|===
+| 字段 | 类型 | 描述
+|fields
+|map<string, Value>
+|动态输入的值的映射。
+|===
+
+`PluginPhase` 指定将注入插件的过滤器链中的阶段。
+
+.PluginPhase
+[options="header"]
+[cols="a, a"]
+|===
+| 字段 | 描述
+|<empty>
+|control plane 决定插入插件的位置。这通常位于过滤器链的末尾，在路由器前面。如果插件独立于其他插件，则不要指定 PluginPhase。
+
+|AUTHN
+|在 Istio 身份验证过滤器前插入插件。
+
+|AUTHZ
+|在 Istio 授权过滤器和 Istio 身份验证过滤器后插入插件。
+
+|STATS
+|在 Istio stats 过滤器和 Istio 授权过滤器后插入插件。
+|===

@@ -1,0 +1,111 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ipfailover-configuring-check-notify-scripts_{context}"]
+= 配置检查和通知脚本
+
+keepalived 通过定期运行可选用户提供的检查脚本来监控应用的健康状况。例如，该脚本可以通过发出请求并验证响应来测试 Web 服务器。
+
+不提供检查脚本时，将运行一个简单的默认脚本来测试 TCP 连接。当监控端口为 0 时，禁止此默认测试。
+
+每个 IP 故障转移 pod 管理一个 Keepalived 守护进程，在运行 pod 的节点上管理一个或多个虚拟 IP（VIP）。Keepalived 守护进程为该节点保留每个 VIP 的状态。特定节点上的特定 VIP 可能处于 `master`、`backup` 或 `fault` 状态。
+
+当处于 master 状态的节点上的 VIP 的检查脚本失败时，该节点上的 VIP 将进入 `fault` 状态，这会触发重新协商。在重新协商过程中，节点上没有处于 fault 状态的所有 VIP 都参与决定哪个节点接管 VIP。最后，VIP 在某些节点上进入 master 状态，VIP 则在其他节点上保持 backup 状态。
+
+当具有 `backup` 状态的 VIP 的节点失败时，该节点上的 VIP 将进入 `fault` 状态。当检查脚本再次通过了对 `fault` 状态的节点上的 VIP 检查时，该节点上的 VIP 将退出 `fault` 状态，并协商来进入 `master` 状态。然后，该节点上的 VIP 可能会进入 master 或 backup 状态。
+
+作为集群管理员，您可以提供一个可选的 notify 脚本，该脚本会在状态发生变化时调用。keepalived 将以下三个参数传递给脚本：
+
+* `$1` - `group` 或 `instance`
+* `$2` - `group` 或 `instance` 的名称
+* `$3` - `master`、`backup` 或 `fault`
+
+检查和通知在 IP 故障转移容器集中运行的脚本，并使用容器集文件系统，而不是主机文件系统。但是，IP 故障转移 pod 使主机文件系统在 /hosts 挂载路径下可用。在配置检查或通知脚本时，您必须提供脚本的完整路径。提供脚本的建议方法是使用配置映射。
+
+检查和通知脚本的完整路径名称添加到 Keepalived 配置文件 `_/etc/keepalived/keepalived.conf` 中，该文件会在 Keepalived 每次启动时加载。脚本可以通过配置映射添加到 pod，如下所示：
+
+.先决条件
+
+* 已安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+. 创建所需脚本并创建一个配置映射来容纳它。脚本没有输入参数，并且必须返回 `0`（ `OK`）和 `1`（ `fail`）。
++
+检查脚本，`mycheckscript.sh`：
++
+[source,bash]
+----
+#!/bin/bash
+    # Whatever tests are needed
+    # E.g., send request and verify response
+exit 0
+----
+
+. 创建配置映射：
++
+[source,terminal]
+----
+$ oc create configmap mycustomcheck --from-file=mycheckscript.sh
+----
++
+. 将脚本添加到容器集。挂载的配置映射文件的 defaultMode 必须能够使用 `oc` 命令或编辑部署配置来运行。值通常为 `0755`、`493`（十进制）：
++
+[source,terminal]
+----
+$ oc set env deploy/ipfailover-keepalived \
+    OPENSHIFT_HA_CHECK_SCRIPT=/etc/keepalive/mycheckscript.sh
+----
++
+[source,terminal]
+----
+$ oc set volume deploy/ipfailover-keepalived --add --overwrite \
+    --name=config-volume \
+    --mount-path=/etc/keepalive \
+    --source='{"configMap": { "name": "mycustomcheck", "defaultMode": 493}}'
+----
++
+[注意]
+====
+`oc set env` 命令对空格敏感。`=` 符号的两侧不能有空格。
+====
++
+[提示]
+====
+您还可以编辑 `ipfailover-keepalived` 部署配置：
+
+[source,terminal]
+----
+$ oc edit deploy ipfailover-keepalived
+----
+
+[source,yaml]
+----
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_HA_CHECK_SCRIPT  <1>
+          value: /etc/keepalive/mycheckscript.sh
+...
+        volumeMounts: <2>
+        - mountPath: /etc/keepalive
+          name: config-volume
+      dnsPolicy: ClusterFirst
+...
+      volumes: <3>
+      - configMap:
+          defaultMode: 0755 <4>
+          name: customrouter
+        name: config-volume
+...
+----
+<1> 在 `spec.container.env` 字段中，添加 `OPENSHIFT_HA_CHECK_SCRIPT` 环境变量以指向挂载的脚本文件。
+<2> 在 spec.container.env 字段中，添加 OPENSHIFT_HA_CHECK_SCRIPT 环境变量以指向挂载的脚本文件。
+<3> 添加新的 `spec.volumes` 字段以提及配置映射。
+<4> 添加新的 `spec.volumes` 字段以提及配置映射。
+
+添加新的 `spec.volumes` 字段以提及配置映射。
+====

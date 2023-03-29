@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-device
+[id="nodes-pods-device"]
+= 使用设备插件来利用 pod 访问外部资源
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+借助设备插件，您无需编写自定义代码，就能在 统信容器云管理平台 pod 中使用特定的设备类型，如 GPU、InfiniBand 或其他需要供应商专用初始化和设置的类似计算资源。
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-pods-plugins-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-plugins-device-mgr.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-plugins-install.adoc[leveloffset=+1]
+

@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-configuring.adoc
+// * nodes/nodes-cluster-pods-configuring
+
+[id="nodes-pods-configuring-restart_{context}"]
+= 配置 pod 重启后的行为
+
+pod 重启策略决定了 统信容器云管理平台 在该 pod 中的容器退出时作出何种响应。该策略适用于 pod 中的所有容器。
+
+可能的值有：
+
+* `Always` - 在 pod 被重启之前，按规定的延时值（10s，20s，40s）不断尝试重启 pod 中成功退出的容器。默认值为  `Always`.
+* `OnFailure` - 按规定的延时值（10s，20s，40s）不断尝试重启 pod 中失败的容器，上限为 5 分钟。
+* `Never` - 不尝试重启 pod 中已退出或失败的容器。Pod 立即失败并退出。
+
+在 pod 绑定到某个节点后，该 pod 永远不会绑定到另一个节点。这意味着，需要一个控制器才能使 pod 在节点失败后存活：
+
+[cols="3",options="header"]
+|===
+
+|状态
+|控制器类型
+|重启策略
+
+|应该终止的 Pod（例如，批量计算）
+|作业
+|`OnFailure` 或 `Never`
+
+|不应该终止的 Pod（例如，Web 服务器）
+|复制控制器
+| `Always`.
+
+|每台机器必须运行一个的 Pod
+|守护进程集
+|任意
+|===
+
+如果 pod 上的容器失败且重启策略设为 `OnFailure`，则 pod 会保留在该节点上并重新启动容器。如果您不希望容器重新启动，请使用 `Never` 重启策略。
+
+如果整个 pod 失败，统信容器云管理平台 会启动一个新 pod。开发人员必须解决应用程序可能会在新 pod 中重启的情况。特别是，应用程序必须处理由以往运行产生的临时文件、锁定、不完整输出等结果。
+
+[注意]
+====
+Kubernetes 架构需要来自云提供商的可靠端点。当云提供商停机时，kubelet 会防止 统信容器云管理平台 重启。
+
+如果底层云提供商端点不可靠，请不要使用云提供商集成来安装集群。应像在非云环境中一样安装集群。不建议在已安装的集群中打开或关闭云提供商集成。
+====
+

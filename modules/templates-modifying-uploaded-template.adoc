@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-modifying-uploaded-template_{context}"]
+= 修改所上传的模板
+
+您可编辑已上传至项目中的模板。
+
+.流程
+
+* 修改已上传的模板：
++
+[source,terminal]
+----
+$ oc edit template <template>
+----

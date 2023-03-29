@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/-ossm-troubleshooting-istio.adoc
+
+[id="ossm-troubleshooting-smcp_{context}"]
+= Troubleshooting the Service Mesh control plane
+
+如果您在部署 Service Mesh control plane 时遇到问题，
+
+* 确保 `ServiceMeshControlPlane` 资源安装在一个与您的服务和 Operator 分开的项目中。本文档使用 `istio-system` 项目作为示例，但只要它与包含 Operator 和服务的项目分开，就可以在任何项目中部署 control plane。
+
+* 确保 `ServiceMeshControlPlane` 和 `Jaeger` 自定义资源已部署在同一项目中。例如，两者都使用 `istio-system` 项目。
+
+//* If you selected to install the Elasticsearch Operator in a specific namespace in the cluster instead of selecting *All namespaces in on the cluster (default)*, then OpenShift could not automatically copy the Operator to the istio-system namespace and the {JaegerName} Operator could not call the Elasticsearch Operator during the installation?
+
+//The steps for deploying the service mesh control plane (SMCP) include verifying the deployment in the OpenShift console.

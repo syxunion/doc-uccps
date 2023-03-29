@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * registry/configuring_registry_storage/configuring-registry-storage-openstack-user-infrastructure.adoc
+
+[id="registry-operator-configuration-resource-overview-openstack-swift_{context}"]
+= 有栈 Swift 的 Image Registry Operator 配置参数
+
+以下配置参数可用于 Uniontech UStack Platform(有栈)Swift registry 存储。
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`authURL`
+|这个值是可选的。
+
+|`authVersion`
+|这个值是可选的。
+
+|`container`
+|这个值是可选的。
+
+|`domain`
+|这个值是可选的。
+
+|`domainID`
+|这个值是可选的。
+
+|`tenant`
+|这个值是可选的。
+
+|`tenantID`
+|这个值是可选的。
+
+|`regionName`
+|这个值是可选的。
+
+|===

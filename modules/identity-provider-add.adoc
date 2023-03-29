@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-allow-all-identity-provider.adoc
+// * authentication/identity_providers/configuring-deny-all-identity-provider.adoc
+// * authentication/identity_providers/configuring-htpasswd-identity-provider.adoc
+// * authentication/identity_providers/configuring-keystone-identity-provider.adoc
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+// * authentication/identity_providers/configuring-github-identity-provider.adoc
+// * authentication/identity_providers/configuring-gitlab-identity-provider.adoc
+// * authentication/identity_providers/configuring-google-identity-provider.adoc
+// * authentication/identity_providers/configuring-oidc-identity-provider.adoc
+
+// GitHub and Google IDPs do not support username/password login commands
+
+:_content-type: PROCEDURE
+[id="add-identity-provider_{context}"]
+= 将身份提供程序添加到集群中
+
+安装集群之后，请在其中添加一个身份提供程序，以便您的用户可以进行身份验证。
+
+.先决条件
+
+* 创建统信容器云管理平台集群。
+* 为身份提供程序创建自定义资源（CR）。
+* 必须已经以管理员身份登录。
+
+.流程
+
+. 应用定义的 CR：
++
+[source,terminal]
+----
+$ oc apply -f </path/to/CR>
+----
++
+[注意]
+====
+如果一个 CR 不存在，`oc apply` 会创建一个新的 CR，并可能会触发以下警告 `Warning: oc apply should be used on resources created by either oc create --save-config or oc apply`。在这种情况下，您可以忽略这个警告。
+====
+
+. 以来自身份提供程序的用户身份登录集群，并在提示时输入密码。
++
+[source,terminal]
+----
+$ oc login -u <username>
+----
+
+. Log in to the cluster, passing in the token to authenticate.
++
+[source,terminal]
+----
+$ oc login --token=<token>
+----
+
+. 确认用户登录成功，并显示用户名。
+[source,terminal]
+----
+$ oc whoami
+----

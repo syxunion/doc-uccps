@@ -1,0 +1,126 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmap-creating-from-directories_{context}"]
+= 从目录创建配置映射
+
+您可以从目录中创建配置映射。这个方法允许您使用目录中的多个文件来创建配置映射。
+
+.流程
+
+以下示例流程概述了如何从目录中创建配置映射。
+
+. 从包含一些已包含您要填充配置映射的数据的文件目录开始：
++
+[source,terminal]
+----
+$ ls example-files
+----
++
+.输出示例
+[source,terminal]
+----
+game.properties
+ui.properties
+----
++
+[source,terminal]
+----
+$ cat example-files/game.properties
+----
++
+.输出示例
+[source,terminal]
+----
+enemies=aliens
+lives=3
+enemies.cheat=true
+enemies.cheat.level=noGoodRotten
+secret.code.passphrase=UUDDLRLRBABAS
+secret.code.allowed=true
+secret.code.lives=30
+----
++
+[source,terminal]
+----
+$ cat example-files/ui.properties
+----
++
+.输出示例
+[source,terminal]
+----
+color.good=purple
+color.bad=yellow
+allow.textmode=true
+how.nice.to.look=fairlyNice
+----
+
+. 输入以下命令，创建包含此目录中每个文件内容的配置映射：
++
+[source,terminal]
+----
+$ oc create configmap game-config \
+    --from-file=example-files/
+----
++
+当  `--from-file` 选项指向某个目录时，该目录中的每个文件都直接用于在配置映射中填充密钥，其中键的名称是文件名称，键的值是文件的内容。
++
+例如，上一命令会创建以下配置映射：
++
+[source,terminal]
+----
+$ oc describe configmaps game-config
+----
++
+.输出示例
+[source,terminal]
+----
+Name:           game-config
+Namespace:      default
+Labels:         <none>
+Annotations:    <none>
+
+Data
+
+game.properties:        158 bytes
+ui.properties:          83 bytes
+----
++
+您可以看到，映射中的两个键都是从命令中指定的目录中的文件名创建的。因为这些键的内容可能较大，所以 oc describe 的输出只会显示键的名称及其大小。
++
+. 使用带有 -o 选项的 oc get 命令以查看键的值：
++
+[source,terminal]
+----
+$ oc get configmaps game-config -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  game.properties: |-
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2016-02-18T18:34:05Z
+  name: game-config
+  namespace: default
+  resourceVersion: "407"
+  selflink: /api/v1/namespaces/default/configmaps/game-config
+  uid: 30944725-d66e-11e5-8cd0-68f728db1985
+----

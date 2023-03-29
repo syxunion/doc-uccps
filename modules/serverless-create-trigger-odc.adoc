@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-trigger-odc_{context}"]
+= 使用 Web 控制台创建触发器
+
+使用 {product-title} web 控制台提供了一个简化且直观的用户界面来创建触发器。在集群中安装 Knative Eventing 并创建了代理后，您可以使用 web 控制台创建触发器。
+
+.先决条件
+
+* {ServerlessOperatorName}、Knative Serving 和 Knative Eventing 已在 {product-title} 集群中安装。
+* 已登陆到 web 控制台。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 您已创建了代理和 Knative 服务或其他事件 sink 以连接触发器。
+
+.流程
+
+. 在 *开发者* 视角中，进入 *拓扑* 页。
+. 将鼠标悬停在您要创建触发器的代理上，并拖动箭头。此时会显示 *添加 Trigger* 选项。
+. 点 *添加 Trigger*.
+. 在 *Subscriber* 列表中选择您的接收器。
+. 点 *添加*.
+
+.验证
+
+* 创建订阅后，您可以在 *拓扑* 页面中查看它，其中它是一个将代理连接到事件 sink 的行。
+
+.删除触发器
+// should be a separate module; out of scope for this PR
+
+. 在 *开发者* 视角中，进入  *拓扑* 页。
+. 点您要删除的触发器。
+. 在 *Actions* 上下文菜单中，选择 *删除 Trigger*.

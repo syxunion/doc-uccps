@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// storage/understanding-persistent-storage.adoc[leveloffset=+1]
+
+:_content-type: CONCEPT
+[id=persistent-storage-overview_{context}]
+= 持久性存储概述
+
+管理存储与管理计算资源不同。统信容器云管理平台使用 Kubernetes 持久性卷 (PV) 框架来允许集群管理员为集群提供持久性存储。开发者可以使用持久性卷声明 (PVC) 来请求 PV 资源而无需具体了解底层存储基础架构。
+
+PVC 是特定于一个项目的，开发人员可创建并使用它作为使用 PV 的方法。PV 资源本身并不特定于某一个项目; 它们可以在整个统信容器云管理平台集群间共享，并可以被任何项目使用。在 PV 绑定到 PVC 后，就不会将 PV 绑定到额外的 PVC。这意味着这个绑定 PV 被限制在一个命名空间（绑定的项目）中。
+
+PV 由 `PersistentVolume` API 对象定义，它代表了集群中现有存储的片段，这些存储可以由集群管理员静态置备，也可以使用 `StorageClass` 对象动态置备。它与一个节点一样，是一个集群资源。
+
+PV 是卷插件，与 `Volumes` 资源类似，但 PV 的生命周期独立于任何使用它的 pod。PV 对象获取具体存储（NFS、iSCSI 或者特定 cloud-provider 的存储系统）的实现详情。
+
+[重要]
+====
+存储的高可用性功能由底层的存储架构提供。
+====
+
+PVC 由 `PersistentVolumeClaim` API 项定义，它代表了开发人员对存储的一个请求。它与一个 pod 类似，pod 会消耗节点资源， PVC 消耗 PV 资源。例如：pod 可以请求特定级别的资源，比如 CPU 和内存，而 PVC 可以请求特定的存储容量和访问模式。例如：它们可以被加载为“只允许加载一次，可读写”，或“可以加载多次，只读”。

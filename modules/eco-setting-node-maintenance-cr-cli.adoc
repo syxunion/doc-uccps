@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+//nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: PROCEDURE
+[id="eco-setting-node-maintenance-cr-cli_{context}"]
+= 使用 CLI 将节点设置为维护模式
+
+您可以使用  `NodeMaintenance` 自定义资源（CR）将节点置于维护模式。应用 `NodeMaintenance` CR 时，所有允许的 pod 都会被驱除，且节点不可调度。被驱除的 pod 会被放入到集群中的另一节点中。
+
+.先决条件
+
+* 安装 统信容器云管理平台 CLI  `oc` 。
+* 以具有 `cluster-admin` 权限的用户身份登录集群。
+
+.流程
+
+. 创建以下 `NodeMaintenance` CR，并将文件保存为  `nodemaintenance-cr.yaml`:
++
+[source,yaml]
+----
+apiVersion: nodemaintenance.medik8s.io/v1beta1
+kind: NodeMaintenance
+metadata:
+  name: nodemaintenance-cr  <1>
+spec:
+  nodeName: node-1.example.com <2>
+  reason: "NIC replacement" <3>
+----
+<1> 节点维护 CR 的名称。
+<2> 要置于维护模式的节点名称。
+<3> 有关维护原因的纯文本描述。
++
+.  运行以下命令来应用节点维护 CR：
++
+[source,terminal]
+----
+$ oc apply -f nodemaintenance-cr.yaml
+----
+
+. 运行以下命令，将 <node-name> 替换为节点的名称来检查维护任务的进度；例如 `node-1.example.com`:
++
+[source,terminal]
+----
+$ oc describe node node-1.example.com
+----
++
+.输出示例
++
+[source,terminal]
+----
+Events:
+  Type     Reason                     Age                   From     Message
+  ----     ------                     ----                  ----     -------
+  Normal   NodeNotSchedulable         61m                   kubelet  Node node-1.example.com status is now: NodeNotSchedulable
+----

@@ -1,0 +1,121 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-configure-ingress-access-logging_{context}"]
+= 配置 Ingress 访问日志
+
+您可以配置 Ingress Controller 以启用访问日志。如果您的集群没有接收许多流量，那么您可以将日志记录到 sidecar。如果您的集群接收大量流量，为了避免超出日志记录堆栈的容量，或与 统信容器云管理平台 之外的日志记录基础架构集成，您可以将日志转发到自定义 syslog 端点。您还可以指定访问日志的格式。
+
+当不存在 Syslog 日志记录基础架构时，容器日志记录可用于在低流量集群中启用访问日志，或者在诊断 Ingress Controller 时进行简短使用。
+
+对于访问日志可能会超过 OpenShift Logging 堆栈容量的高流量集群，或需要任何日志记录解决方案与现有 Syslog 日志记录基础架构集成的环境，则需要 syslog。Syslog 用例可能会相互重叠。
+
+.先决条件
+
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+配置 Ingress 访问日志到 sidecar。
+
+* 要配置 Ingress 访问日志记录，您必须使用 `spec.logging.access.destination` 指定一个目的地。要将日志记录指定到 sidecar 容器，您必须指定 Container `spec.logging.access.destination.type`。以下示例是将日志记录到 `Container` 目的地的 Ingress Controller 定义：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 2
+  endpointPublishingStrategy:
+    type: NodePortService
+  logging:
+    access:
+      destination:
+        type: Container
+----
+type：在将 Ingress 访问日志配置到 sidecar 时，不需要使用 NodePortService。Ingress 日志记录与任何 endpointPublishingStrategy 兼容。
+
+* 当将 Ingress Controller 配置为日志记录到 sidecar 时，Operator 会在 Ingress Controller Pod 中创建一个名为 logs 的容器：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress logs deployment.apps/router-default -c logs
+----
++
+.输出示例
+[source,terminal]
+----
+2020-05-11T19:11:50.135710+00:00 router-default-57dfc6cd95-bpmk6 router-default-57dfc6cd95-bpmk6 haproxy[108]: 174.19.21.82:39654 [11/May/2020:19:11:50.133] public be_http:hello-openshift:hello-openshift/pod:hello-openshift:hello-openshift:10.128.2.12:8080 0/0/1/0/1 200 142 - - --NI 1/1/0/0/0 0/0 "GET / HTTP/1.1"
+----
+
+配置 Ingress 访问日志记录到 Syslog 端点。
+
+* 要配置 Ingress 访问日志记录，您必须使用 `spec.logging.access.destination` 指定一个目的地。要将日志记录指定到 `Syslog` 端点目的地，您必须为 `spec.logging.access.destination.type` 指定 `Syslog`。如果目的地类型是 `Syslog`，则必须使用 `spec.logging.access.destination.syslog.endpoint` 指定一个目的地端点，并可使用 `spec.logging.access.destination.syslog.facility` 指定一个工具。以下示例是将日志记录到 Syslog 目的地的 `Ingress Controller` 定义：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 2
+  logging:
+    access:
+      destination:
+        type: Syslog
+        syslog:
+          address: 1.2.3.4
+          port: 10514
+----
++
+[注意]
+====
+`syslog` 目的地端口必须是 UDP。
+====
+
+使用特定的日志格式配置 Ingress 访问日志。
+
+* 您可以指定 `spec.logging.access.httpLogFormat` 来自定义日志格式。以下示例是一个 Ingress Controller 定义，它将日志记录到 IP 地址为 1.2.3.4、端口为 10514 的 `syslog` 端点：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 2
+  logging:
+    access:
+      destination:
+        type: Syslog
+        syslog:
+          address: 1.2.3.4
+          port: 10514
+      httpLogFormat: '%ci:%cp [%t] %ft %b/%s %B %bq %HM %HU %HV'
+----
+
+禁用 Ingress 访问日志。
+
+* 要禁用 Ingress 访问日志，请保留 `spec.logging` 或 `spec.logging.access` 为空：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 2
+  logging:
+    access: null
+----

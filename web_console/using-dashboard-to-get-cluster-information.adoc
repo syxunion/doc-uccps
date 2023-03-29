@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="using-dashboard-to-get-cluster-info"]
+= 使用 统信容器云管理平台 dashboard 获取集群信息
+include::_attributes/common-attributes.adoc[]
+:context: using-dashboard-to-get-cluster-info
+
+toc::[]
+
+统信容器云管理平台 仪表板（dashboard） 包括了集群的高级别信息。在 统信容器云管理平台 web 控制台中通过 *Home* -> *Dashboards* -> *Overview* 访问它。
+
+统信容器云管理平台 仪表板提供各种集群信息，被分别显示在独立的仪表板卡中。
+
+include::modules/virt-about-the-overview-dashboard.adoc[leveloffset=+1]

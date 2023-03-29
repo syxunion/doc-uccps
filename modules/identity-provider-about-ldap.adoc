@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+
+:_content-type: CONCEPT
+[id="identity-provider-about-ldap_{context}"]
+= 关于 LDAP 身份验证
+
+在身份验证过程中，搜索 LDAP 目录中与提供的用户名匹配的条目。如果找到一个唯一匹配项，则尝试使用该条目的可分辨名称 (DN) 以及提供的密码进行简单绑定。
+
+执行下面这些步骤：
+
+. 通过将配置的 url 中的属性和过滤器与用户提供的用户名组合来生成搜索过滤器。
+. 通过将配置的 url 中的属性和过滤器与用户提供的用户名组合来生成搜索过滤器。
+. 尝试使用搜索所获条目的 DN 和用户提供的密码绑定到 LDAP 服务器。
+. 如果绑定失败，则拒绝访问。
+. 如果绑定成功，则将配置的属性用作身份、电子邮件地址、显示名称和首选用户名来构建一个身份。
+
+配置的 url 是 RFC 2255 URL，指定要使用的 LDAP 主机和搜索参数。URL 的语法是：
+
+----
+ldap://host:port/basedn?attribute?scope?filter
+----
+
+在这个 URL 中：
+
+[cols="2a,8a",options="header"]
+|===
+|URL 组件 | 描述
+.^|`ldap`      | 对于常规 LDAP，使用 `ldap` 字符串。对于安全 LDAP (LDAPS)，改为使用 `ldaps`。
+.^|`host:port` | LDAP 服务器的名称和端口。LDAP 默认为 `localhost:389`，LDAPS 则默认为 `localhost:636`。
+.^|`basedn`    | 所有搜索都应从中开始的目录分支的 DN。至少，这必须是目录树的顶端，但也可指定目录中的子树。
+.^|`attribute` | 要搜索的属性。虽然 RFC 2255 允许使用逗号分隔属性列表，但无论提供多少个属性，都仅使用第一个属性。如果没有提供任何属性，则默认使用 uid。建议选择一个在您使用的子树中的所有条目间是唯一的属性。
+.^|`scope`     | 搜索的范围。可以是 `one`` 或 `sub`。如果未提供范围，则默认使用 sub 范围。
+.^|`filter`    | 有效的 LDAP 搜索过滤器。如果未提供，则默认为 `(objectClass=*)`
+|===
+
+在进行搜索时，属性、过滤器和提供的用户名会组合在一起，创建类似如下的搜索过滤器：
+
+----
+(&(<filter>)(<attribute>=<username>))
+----
+
+例如，可考虑如下 URL：
+
+----
+ldap://ldap.example.com/o=Acme?cn?sub?(enabled=true)
+----
+
+当客户端尝试使用用户名 `bob` 连接时，生成的搜索过滤器将为 `(&(enabled=true)(cn=bob))`。
+
+如果 LDAP 目录需要身份验证才能搜索，请指定用于执行条目搜索的 `bindDN` 和 `bindPassword`。

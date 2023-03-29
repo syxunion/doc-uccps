@@ -1,0 +1,91 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-hub-interaction_{context}"]
+= hub 互动命令
+
+与 Tekton Hub 交互，以获取任务和管道等资源。
+
+== hub
+与 hub 交互。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn hub -h
+----
+
+.示例：与 hub API 服务器交互
+[source,terminal]
+----
+$ tkn hub --api-server https://api.hub.tekton.dev
+----
+
+[注意]
+====
+对于每个示例，若要获取对应的子命令和标记，请运行 `tkn hub <command> --help`。
+====
+
+== hub downgrade
+对一个安装的资源进行降级。
+
+.示例：将 `mynamespace` 命名空间中的 `mytask` 任务降级到它的较旧版本
+[source,terminal]
+----
+$ tkn hub downgrade task mytask --to version -n mynamespace
+----
+
+== hub get
+按名称、类型、目录和版本获取资源清单。
+
+.示例：从 `tekton` 目录中获取 `myresource` 管道或任务的特定版本的清单
+[source,terminal]
+----
+$ tkn hub get [pipeline | task] myresource --from tekton --version version
+----
+
+== hub info
+按名称、类型、目录和版本显示资源的信息。
+
+.示例：显示 `tekton` 目录中有关 `mytask` 任务的特定版本的信息
+[source,terminal]
+----
+$ tkn hub info task mytask --from tekton --version version
+----
+
+== hub install
+按类型、名称和版本从目录安装资源。
+
+.示例：从 mynamespace 命名空间中的 `tekton` 目录安装 `mytask` 任务的特定版本
+[source,terminal]
+----
+$ tkn hub install task mytask --from tekton --version version -n mynamespace
+----
+
+== hub reinstall
+按类型和名称重新安装资源。
+
+.示例：从 `mynamespace` 命名空间中的 `tekton` 目录重新安装 mytask 任务的特定版本
+[source,terminal]
+----
+$ tkn hub reinstall task mytask --from tekton --version version -n mynamespace
+----
+
+== hub search
+按名称、类型和标签组合搜索资源。
+
+.示例：搜索带有标签 `cli` 的资源
+[source,terminal]
+----
+$ tkn hub search --tags cli
+----
+
+== hub upgrade
+升级已安装的资源。
+
+.示例：将 `mynamespace` 命名空间中安装的 `mytask` 任务升级到新版本
+[source,terminal]
+----
+$ tkn hub upgrade task mytask --to version -n mynamespace
+----

@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/deleting-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:name: network
+:role: admin
+ifeval::[{product-version} >= 4.6]
+:ovn:
+endif::[]
+ifeval::["{context}" == "configuring-multi-network-policy"]
+:multi:
+:name: multi-network
+:role: cluster-admin
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-delete_{context}"]
+= 删除网络策略
+
+您可以删除命名空间中的网络策略。
+
+[注意]
+====
+如果使用具有 `cluster-admin` 角色的用户登录，您可以删除集群中的任何网络策略。
+====
+
+.先决条件
+
+* 集群使用支持 `NetworkPolicy` 对象的集群网络供应商，如设置了 `mode: NetworkPolicy` 的 OpenShift SDN 网络供应商。此模式是 OpenShift SDN 的默认模式。
+* 已安装 Uccp CLI (`oc`).
+* 您可以使用具有 admin 权限的用户登陆到集群。
+* 您在网络策略所在的命名空间中。
+
+.流程
+
+* 要删除网络策略对象，请输入以下命令：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc delete {name}policy <policy_name> -n <namespace>
+----
++
+--
+其中：
+
+`<policy_name>`:: 指定网络策略的名称。
+`<namespace>`:: 可选： 如果对象在与当前命名空间不同的命名空间中定义，使用它来指定命名空间。
+--
++
+.输出示例
+[source,text]
+----
+networkpolicy.networking.k8s.io/default-deny deleted
+----
+
+
+[注意]
+====
+如果使用 `cluster-admin` 权限登录到 web 控制台，您可以选择在集群上以 YAML 或通过 *Actions* 菜单从 web 控制台中的策略删除网络策略。
+====

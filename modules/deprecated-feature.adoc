@@ -1,0 +1,12 @@
+// When including this file, ensure that {FeatureName} is set immediately before
+// the include. Otherwise it will result in an incorrect replacement.
+
+[IMPORTANT]
+====
+[subs="attributes+"]
+{FeatureName} 是一个弃用的功能。弃用的功能仍然包含在 统信容器云管理平台 中，并将继续被支持。但是，这个功能会在以后的发行版本中被删除，且不建议在新的部署中使用。
+
+有关 统信容器云管理平台 中已弃用或删除的主要功能的最新列表，请参阅 统信容器云管理平台 发行注记中已弃用和删除的功能部分。
+====
+// Undefine {FeatureName} attribute, so that any mistakes are easily spotted
+:!FeatureName:

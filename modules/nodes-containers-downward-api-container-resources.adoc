@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-downward-api-container-resources-api_{context}"]
+= 了解如何使用 Downward API 消耗容器资源
+
+在创建 pod 时，您可以使用 Downward API 注入关于计算资源请求和限制的信息，以便镜像和应用程序作者能够正确地为特定环境创建镜像。
+
+您可以使用环境变量或卷插件进行此操作。
+

@@ -1,0 +1,138 @@
+// Module included in the following assemblies:
+// TODO
+// * networking/TBD
+// * networking/load-balancing-openstack.adoc
+// * installing/installing_bare_metal_ipi/ipi-install-post-installation-configuration.adoc jowilkin
+// For thinking and reviewing, adding to networking/load-balancing-openstack.adoc
+
+:_content-type: PROCEDURE
+[id="nw-osp-configuring-external-load-balancer_{context}"]
+= 配置外部负载均衡器
+
+You can configure an {product-title} cluster
+ifeval::["{context}" == "load-balancing-openstack"]
+您可以在 Uniontech UStack Platform（有栈）上
+endif::[]
+配置 统信容器云管理平台 集群，使其使用外部负载均衡器来代替默认负载均衡器。
+
+// Maybe an About mod in support
+
+
+
+.先决条件
+
+* 在负载均衡器中，系统任意用户使用端口 6443、443 和 80 的 TCP。
+
+* 在每个 control plane 节点之间负载平衡 API 端口 6443。
+
+* 在所有计算节点之间负载平衡应用程序端口 443 和 80。
+
+* 在负载均衡器中，用于为节点提供 ignition 启动配置的端口 22623 不会在集群外公开。
+
+* 您的负载均衡器必须能够访问集群中的每台机器。允许此访问的方法包括：
+** 将负载均衡器附加到集群的机器子网。
+** 将浮动 IP 地址附加到使用负载均衡器的机器。
+
+[重要]
+====
+当使用 VLAN 在负载均衡服务和 control plane 节点之间路由流量时，外部负载平衡服务和 control plane 节点必须在同一个 L2 网络上运行，并使用 VLAN 来路由负载平衡服务和 control plane 节点之间的流量。
+====
+
+.流程
+
+. 在端口 6443、443 和 80 中启用从负载均衡器访问集群的功能。
++
+例如，请注意此 HAProxy 配置：
++
+.HAProxy 配置示例
+[source,text]
+----
+...
+listen my-cluster-api-6443
+    bind 0.0.0.0:6443
+    mode tcp
+    balance roundrobin
+    server my-cluster-master-2 192.0.2.2:6443 check
+    server my-cluster-master-0 192.0.2.3:6443 check
+    server my-cluster-master-1 192.0.2.1:6443 check
+listen my-cluster-apps-443
+        bind 0.0.0.0:443
+        mode tcp
+        balance roundrobin
+        server my-cluster-worker-0 192.0.2.6:443 check
+        server my-cluster-worker-1 192.0.2.5:443 check
+        server my-cluster-worker-2 192.0.2.4:443 check
+listen my-cluster-apps-80
+        bind 0.0.0.0:80
+        mode tcp
+        balance roundrobin
+        server my-cluster-worker-0 192.0.2.7:80 check
+        server my-cluster-worker-1 192.0.2.9:80 check
+        server my-cluster-worker-2 192.0.2.8:80 check
+----
+
+. 在集群 API 的 DNS 服务器中添加记录，并在负载均衡器上应用记录。例如：
++
+[source,dns]
+----
+<load_balancer_ip_address> api.<cluster_name>.<base_domain>
+<load_balancer_ip_address> apps.<cluster_name>.<base_domain>
+----
+
+. 在命令行中，使用 curl 验证外部负载均衡器和 DNS 配置是否正常运行。
+
+.. 验证集群 API 是否可访问：
++
+[source,terminal]
+----
+$ curl https://<loadbalancer_ip_address>:6443/version --insecure
+----
++
+如果配置正确，您会收到 JSON 对象的响应：
++
+[source,json]
+----
+{
+  "major": "1",
+  "minor": "11+",
+  "gitVersion": "v1.11.0+ad103ed",
+  "gitCommit": "ad103ed",
+  "gitTreeState": "clean",
+  "buildDate": "2019-01-09T06:44:10Z",
+  "goVersion": "go1.10.3",
+  "compiler": "gc",
+  "platform": "linux/amd64"
+}
+----
+
+.. 验证集群应用程序是否可以访问：
++
+[注意]
+====
+您还可以在 Web 浏览器中打开 统信容器云管理平台 控制台来验证应用程序的可访问性。
+====
++
+[source, terminal]
+----
+$ curl http://console-openshift-console.apps.<cluster_name>.<base_domain> -I -L --insecure
+----
++
+如果配置正确，您会收到 HTTP 响应：
++
+[source,terminal]
+----
+HTTP/1.1 302 Found
+content-length: 0
+location: https://console-openshift-console.apps.<cluster-name>.<base domain>/
+cache-control: no-cacheHTTP/1.1 200 OK
+referrer-policy: strict-origin-when-cross-origin
+set-cookie: csrf-token=39HoZgztDnzjJkq/JuLJMeoKNXlfiVv2YgZc09c3TBOBU4NI6kDXaJH1LdicNhN1UsQWzon4Dor9GWGfopaTEQ==; Path=/; Secure
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+date: Tue, 17 Nov 2020 08:42:10 GMT
+content-type: text/html; charset=utf-8
+set-cookie: 1e2670d92730b515ce3a1bb65da45062=9b714eb87e93cf34853e87a92d6894be; path=/; HttpOnly; Secure; SameSite=None
+cache-control: private
+----

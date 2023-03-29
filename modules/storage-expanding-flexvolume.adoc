@@ -1,0 +1,35 @@
+// Module included in the following assemblies
+//
+// * storage/expanding-persistent-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="expanding-flexvolume_{context}"]
+= 使用支持的驱动程序扩展 FlexVolume
+
+当使用 FlexVolume 连接到后端存储系统时，您可以在创建后扩展持久性存储卷。这可以通过在统信容器云管理平台中手动更新持久性卷声明 (PVC) 实现 。
+
+当把驱动的 `RequiresFSResize` 设置为 `true` 时，FlexVolume 允许进行扩展。在 pod 重启时，FlexVolume 可以被扩展。
+
+与其他卷类型类似，FlexVolume 也可以在被 pod 使用时扩展。
+
+.先决条件
+
+* 底层卷驱动程序支持调整大小。
+* 驱动程序的 `RequiresFSResize` 功能被设置为 `true`。
+* 使用动态置备。
+* 控制 `StorageClass` 对象的 `allowVolumeExpansion` 被设置为 `true`。
+
+.流程
+
+* 要在 FlexVolume 插件中使用 resizing 功能 ，您必须使用以下方法实现 `ExpandableVolumePlugin` 接口：
+
+`RequiresFSResize`::
+如果为 `true`，直接更新容量。如果为 false，则调用 `ExpandFS` 方法来实现对文件系统大小的调整。
+
+`ExpandFS`::
+如果为 `true`，在物理卷扩展后调用ExpandFS 来调整文件系统的大小。卷驱动程序也可以与执行物理卷调整一起调整文件系统的大小。
+
+[重要]
+====
+因为统信容器云管理平台不支持在 control plane 节点上安装 FlexVolume 插件，所以不支持 FlexVolume 的 control-plane 扩展。
+====

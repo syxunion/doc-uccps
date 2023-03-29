@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage-iscsi.adoc
+
+[id="volume-security-iscsi_{context}"]
+= iSCSI 卷安全
+用户使用 `PersistentVolumeClaim` 对象请求存储。这个声明只在用户的命名空间中有效，且只能被在同一命名空间中的 pod 调用。尝试使用其他命名空间中的持久性卷声明会导致 pod 失败。
+
+每个 iSCSI LUN 都需要可以被集群中的所有节点访问。
+
+== Challenge Handshake Authentication Protocol (CHAP) 配置
+
+另外，统信容器云管理平台可以使用 CHAP 在 iSCSI 目标中验证自己：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: iscsi-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  iscsi:
+    targetPortal: 10.0.0.1:3260
+    iqn: iqn.2016-04.test.com:storage.target00
+    lun: 0
+    fsType: ext4
+    chapAuthDiscovery: true <1>
+    chapAuthSession: true <2>
+    secretRef:
+      name: chap-secret <3>
+----
+<1> 启用 iSCSI 发现的 CHAP 验证。
+<2> 启用 iSCSI 会话的 CHAP 验证。
+<3> 使用用户名 + 密码指定 Secrets 对象的名称。该 `Secret` 对象必须在所有可使用引用卷的命名空间中可用。

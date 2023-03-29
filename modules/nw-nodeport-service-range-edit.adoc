@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-node-port-service-range.adoc
+
+:_content-type: PROCEDURE
+[id="nw-nodeport-service-range-edit_{context}"]
+= 扩展节点端口范围
+
+您可以扩展集群的节点端口范围。
+
+.先决条件
+
+* 您可以扩展集群的节点端口范围。 (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+. 要扩展节点端口范围，请输入以下命令。将 `<port>` 替换为新范围内的最大端口号码。
++
+[source,terminal]
+----
+$ oc patch network.config.openshift.io cluster --type=merge -p \
+  '{
+    "spec":
+      { "serviceNodePortRange": "30000-<port>" }
+  }'
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来更新节点端口范围：
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  serviceNodePortRange: "30000-<port>"
+----
+====
++
+.输出示例
+[source,terminal]
+----
+network.config.openshift.io/cluster patched
+----
+
+. 要确认配置是活跃的，请输入以下命令。应用更新可能需要几分钟
++
+[source,terminal]
+----
+$ oc get configmaps -n openshift-kube-apiserver config \
+  -o jsonpath="{.data['config\.yaml']}" | \
+  grep -Eo '"service-node-port-range":["[[:digit:]]+-[[:digit:]]+"]'
+----
++
+.输出示例
+[source,terminal]
+----
+"service-node-port-range":["30000-33000"]
+----

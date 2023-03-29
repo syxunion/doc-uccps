@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.adoc
+
+ifeval::["{context}" == "configuring-ingress-cluster-traffic-nodeport"]
+:nodeport:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-exposing-service_{context}"]
+= 通过创建路由公开服务
+
+您可以使用 `oc expose` 命令，将服务公开为路由。
+
+.流程
+
+公开服务：
+
+. 登录 统信容器云管理平台。
+
+. 登录您想公开的服务所在的项目。
++
+[source,terminal]
+----
+$ oc project myproject
+----
+
+ifndef::nodeport[]
+. 运行 `oc expose service` 命令以公开路由：
++
+
+[source,terminal]
+----
+$ oc expose service nodejs-ex
+----
++
+.输出示例
+[source,terminal]
+----
+route.route.openshift.io/nodejs-ex exposed
+----
+
+. 要验证该服务是否已公开，您可以使用 cURL 等工具来确保该服务可从集群外部访问。
+
+.. 使用 `oc get route` 命令查找路由的主机名：
++
+[source,terminal]
+----
+$ oc get route
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        HOST/PORT                        PATH   SERVICES    PORT       TERMINATION   WILDCARD
+nodejs-ex   nodejs-ex-myproject.example.com         nodejs-ex   8080-tcp                 None
+----
+
+.. 使用 cURL 检查主机是否响应 GET 请求：
++
+[source,terminal]
+----
+$ curl --head nodejs-ex-myproject.example.com
+----
++
+.输出示例
+[source,terminal]
+----
+HTTP/1.1 200 OK
+...
+----
+
+endif::nodeport[]
+ifdef::nodeport[]
+. To expose a node port for the application, enter the following command. {product-title} automatically selects an available port in the `30000-32767` range.
++
+[source,terminal]
+----
+$ oc expose service nodejs-ex  --type=NodePort --name=nodejs-ex-nodeport --generator="service/v2"
+----
++
+.Example output
+[source,terminal]
+----
+service/nodejs-ex-nodeport exposed
+----
+
+. Optional: To confirm the service is available with a node port exposed, enter the following command:
++
+[source,terminal]
+----
+$ oc get svc -n myproject
+----
++
+.Example output
+[source,terminal]
+----
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+nodejs-ex           ClusterIP   172.30.217.127   <none>        3306/TCP         9m44s
+nodejs-ex-ingress   NodePort    172.30.107.72    <none>        3306:31345/TCP   39s
+----
+
+. Optional: To remove the service created automatically by the `oc new-app` command, enter the following command:
++
+[source,terminal]
+----
+$ oc delete svc nodejs-ex
+----
+endif::nodeport[]
+
+//Potentially add verification step, "If a verification step is needed, it would
+//look something like oc get route mysql-55-rhel7 and curl with the host from the
+//output of the oc get route command."
+
+ifdef::nodeport[]
+:!nodeport:
+endif::[]

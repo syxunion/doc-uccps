@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-displaying-webhook-urls_{context}"]
+= 显示 Webhook URL
+
+您可以使用以下命令来显示与构建配置关联的 Webhook URL。如果命令不显示任何 Webhook URL，则没有为该构建配置定义任何 Webhook 触发器。
+
+.流程
+
+* 显示与 `BuildConfig` 关联的任何 Webhook URL：
+
+[source,terminal]
+----
+$ oc describe bc <name>
+----

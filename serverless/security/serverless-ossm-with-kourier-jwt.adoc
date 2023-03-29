@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="serverless-ossm-with-kourier-jwt"]
+= 为 Knative 服务配置 JSON Web 令牌身份验证
+include::_attributes/common-attributes.adoc[]
+:context: serverless-ossm-with-kourier-jwt
+
+toc::[]
+
+Uccps Serverless 当前没有用户定义的授权功能。要为部署添加用户定义的授权，您必须将 Uccps Serverless 与统信容器云管理平台服务网格集成，然后为 Knative 服务配置 JSON Web Token (JWT) 身份验证和 sidecar 注入。
+
+include::modules/serverless-ossm-v2x-jwt.adoc[leveloffset=+1]

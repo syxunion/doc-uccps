@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="creating-alerting-rules-for-user-defined-projects_{context}"]
+= 为用户定义的项目创建警报规则
+
+您可以为用户定义的项目创建警报规则。这些警报规则将根据所选指标的值触发警报。
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 对于您要创建警报规则的项目，您已作为具有 `monitoring-rules-edit` 角色的用户登录。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 为警报规则创建 YAML 文件。在本例中，该文件名为 `example-app-alerting-rule.yaml`。
+
+. 向 YAML 文件添加警报规则配置。例如：
++
+[注意]
+====
+当创建警报规则时，如果在其他项目中存在具有相同名称的规则，则对其强制使用项目标签。
+====
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: example-alert
+  namespace: ns1
+spec:
+  groups:
+  - name: example
+    rules:
+    - alert: VersionAlert
+      expr: version{job="prometheus-example-app"} == 0
+----
++
+此配置会创建一个名为  `example-alert` 的警报规则。当示例服务公开的  `version` 指标变为 0 时，警报规则会触发警报。
++
+[重要]
+====
+用户定义的警报规则可以包含其自身项目的指标和集群指标。您不能包含其他用户定义的项目的指标。
+
+例如，用户定义的项目 `ns1` 的警报规则可以包含来自 `ns1` 的指标和集群指标，如 CPU 和内存指标。但是，该规则无法包含来自 `ns2` 的指标。
+
+另外，您无法为 `openshift-*` 核心 统信容器云管理平台 项目创建警报规则。统信容器云管理平台 监控默认为这些项目提供一组警报规则。
+====
+
+. 将配置文件应用到集群：
++
+[source,terminal]
+----
+$ oc apply -f example-app-alerting-rule.yaml
+----
++
+创建警报规则需要一些时间。

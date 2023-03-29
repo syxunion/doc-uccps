@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+
+[id="oauth-token-requests_{context}"]
+== OAuth 令牌请求
+
+每个对 OAuth 令牌的请求都必须指定要接收和使用令牌的 OAuth 客户端。启动统信容器云管理平台API 时会自动创建以下 OAuth 客户端：
+
+[options="header"]
+|===
+
+|OAuth 客户端 |使用方法
+
+|`openshift-browser-client`
+|使用可处理交互式登录的用户代理，在 `<namespace_route>/oauth/token/request` 请求令牌。 ^[1]^
+
+|`openshift-challenging-client`
+|使用可处理 `WWW-Authenticate` 质询的用户代理来请求令牌。
+
+|===
+[.注意]
+--
+1. `<namespace_route>` 是指命名空间路由。运行以下命令可以找到：
++
+[source,terminal]
+----
+$ oc get route oauth-openshift -n openshift-authentication -o json | jq .spec.host
+----
+--
+
+所有对 OAuth 令牌的请求都包括对 `<namespace_route>/oauth/authorize` 的请求。大部分身份验证集成都会在这个端点前放置一个身份验证代理，或者将统信容器云管理平台配置为针对后备身份提供程序验证凭证。对 `<namespace_route>/oauth/authorize` 的请求可能来自不能显示交互式登录页面的用户代理，如 CLI。因此，除了交互式登录流程外，统信容器云管理平台 也支持使用 `WWW-Authenticate` 质询进行验证。
+
+如果在 `<namespace_route>/oauth/authorize` 端点前面放置身份验证代理，它会向未经身份验证的非浏览器用户代理发送 `WWW-Authenticate` 质询，而不显示交互式登录页面或重定向到交互式登录流程。
+
+[注意]
+====
+为防止浏览器客户端遭受跨站请求伪造 (CSRF) 攻击，当请求中存在 `X-CSRF-Token` 标头时，仅发送基本身份验证质询。希望接收基本 `WWW-Authenticate` 质询的客户端必须将此标头设置为非空值。
+
+如果身份验证代理不支持 `WWW-Authenticate` 质询，或者如果统信容器云管理平台配置为使用不支持 `WWW-Authenticate` 质询的身份提供程序，则必须使用浏览器从 `<namespace_route>/oauth/token/request` 手动获取令牌。
+====

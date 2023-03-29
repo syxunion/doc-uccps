@@ -1,0 +1,46 @@
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-audit-disable_{context}"]
+= 禁用命名空间的网络策略审计日志记录
+
+作为集群管理员，您可以为命名空间禁用网络策略审计日志记录。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+* 要禁用命名空间的网络策略审计日志记录，请输入以下命令：
++
+[source,terminal]
+----
+$ oc annotate --overwrite namespace <namespace> k8s.ovn.org/acl-logging-
+----
++
+--
+其中：
+
+`<namespace>`:: 指定命名空间的名称。
+--
++
+[提示]
+====
+您还可以应用以下 YAML 来禁用审计日志记录：
+
+[source,yaml]
+----
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: <namespace>
+  annotations:
+    k8s.ovn.org/acl-logging: null
+----
+====
++
+.输出示例
+[source,terminal]
+----
+namespace/verify-audit-logging annotated
+----

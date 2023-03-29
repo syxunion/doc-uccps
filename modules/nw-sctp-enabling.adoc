@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * networking/using-sctp.adoc
+
+:_content-type: PROCEDURE
+[id="nw-sctp-enabling_{context}"]
+= 启用流控制传输协议 (SCTP)
+
+作为集群管理员，您可以在集群中的 worker 节点上加载并启用列入黑名单的 SCTP 内核模块。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 创建名为 `load-sctp-module.yaml` 的文件，其包含以下 YAML 定义：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: load-sctp-module
+  labels:
+    machineconfiguration.openshift.io/role: worker
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+        - path: /etc/modprobe.d/sctp-blacklist.conf
+          mode: 0644
+          overwrite: true
+          contents:
+            source: data:,
+        - path: /etc/modules-load.d/sctp-load.conf
+          mode: 0644
+          overwrite: true
+          contents:
+            source: data:,sctp
+----
+
+. 运行以下命令来创建 `MachineConfig` 对象：
++
+[source,terminal]
+----
+$ oc create -f load-sctp-module.yaml
+----
+
+. 可选： 要在 MachineConfig Operator 应用配置更改时监测节点的状态，请使用以下命令。当节点状态变为 Ready时，则代表配置更新已被应用。
++
+[source,terminal]
+----
+$ oc get nodes
+----

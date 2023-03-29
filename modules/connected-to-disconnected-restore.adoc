@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+:_content-type: PROCEDURE
+[id="connected-to-disconnected-restore_{context}"]
+= 恢复网络
+
+如果要重新连接断开连接的集群并从在线 registry 中拉取镜像，请删除集群的 ImageContentSourcePolicy(ICSP)对象。如果没有 ICSP，对外部 registry 的拉取请求不再重定向到镜像 registry。
+
+.流程
+
+. 查看集群中的 ICSP 对象：
++
+[source,terminal]
+----
+$ oc get imagecontentsourcepolicy
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                 AGE
+mirror-ocp           6d20h
+ocp4-index-0         6d18h
+qe45-index-0         6d15h
+----
+
+. 删除断开集群时创建的所有 ICSP 对象：
++
+[source,terminal]
+----
+$ oc delete imagecontentsourcepolicy <icsp_name> <icsp_name> <icsp_name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc delete imagecontentsourcepolicy mirror-ocp ocp4-index-0 qe45-index-0
+----
++
+.输出示例
+[source,terminal]
+----
+imagecontentsourcepolicy.operator.openshift.io "mirror-ocp" deleted
+imagecontentsourcepolicy.operator.openshift.io "ocp4-index-0" deleted
+imagecontentsourcepolicy.operator.openshift.io "qe45-index-0" deleted
+----
+
+. 等待所有节点重启并返回到 READY 状态，并验证 `registry.conf` 文件是否指向原始 registry，而不是镜像 registry：
+
+.. 登录到节点：
++
+[source,terminal]
+----
+$ oc debug node/<node_name>
+----
+
+.. 将 `/host` 设置为 debug shell 中的根目录：
++
+[source,terminal]
+----
+sh-4.4# chroot /host
+----
+
+.. 检查 `registry.conf` 文件：
++
+[source,terminal]
+----
+sh-4.4# cat /etc/containers/registries.conf 
+----
++
+.输出示例
+[source,terminal]
+----
+unqualified-search-registries = ["registry.access.redhat.com", "docker.io"] <1>
+----
+<1> 您删除的、由 ICSP 创建的 `registry` 和 `registry.mirror` 条目已被删除。

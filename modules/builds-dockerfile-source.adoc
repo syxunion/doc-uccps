@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-dockerfile-source_{context}"]
+= Dockerfile 源
+
+提供 `dockerfile` 值时，此字段的内容将写到磁盘上，存为名为 `Dockerfile` 的文件。这是处理完其他输入源之后完成的；因此，如果输入源存储库的根目录中包含 Dockerfile，它会被此内容覆盖。
+
+源定义是 `BuildConfig` 的 `spec` 部分的一部分：
+
+[source,yaml]
+----
+source:
+  dockerfile: "FROM centos:7\nRUN yum install -y httpd" <1>
+----
+<1> `dockerfile` 字段包含要构建的内联 Dockerfile。
+
+[role="_additional-resources"]
+.Additional resources
+
+* 此字段的典型用途是为 Docker 策略构建提供 Dockerfile。

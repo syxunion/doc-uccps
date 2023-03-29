@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+[id="nfs-reclaiming-resources_{context}"]
+= 重新声明资源
+NFS 实现了统信容器云管理平台 `Recyclable` 插件接口。自动进程根据在每个持久性卷上设定的策略处理重新声明的任务。
+
+默认情况下，PV 被设置为 `Retain`。
+
+当一个 PVC 被删除后，PV 被释放，这个 PV 对象不能被重复使用。反之，应该创建一个新的 PV，其基本的卷详情与原始卷相同。
+
+例如：管理员创建一个名为 `nfs1` 的 PV：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs1
+spec:
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 192.168.1.1
+    path: "/"
+----
+
+用户创建 `PVC1`，它绑定到 `nfs1`。然后用户删除了 `PVC1`，对 `nfs1`的声明会被释放。这将会使 `nfs1` 的状态变为 `Released`。如果管理员想要使这个 NFS 共享变为可用，则应该创建一个具有相同 NFS 服务器详情的新 PV，但使用一个不同的 PV 名称：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs2
+spec:
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 192.168.1.1
+    path: "/"
+----
+
+删除原来的 PV。不建议使用相同名称重新创建。尝试手工把一个 PV 的状态从 `Released` 改为 `Available` 会导致错误并可能造成数据丢失。

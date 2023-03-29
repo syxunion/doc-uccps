@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-kafka-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kafka-sink_{context}"]
+= 使用 Kafka sink
+
+您可以创建一个称为 Kafka sink 的事件 sink，用于将事件发送到 Kafka 主题。使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述应用程序，并以可重复的方式描述应用程序。要使用 YAML 创建 Kafka sink，您必须创建一个 YAML 文件来定义 `KafkaSink` 对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName}、Knative Eventing 和 KnativeKafka 自定义资源 (CR) 。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建一个 `KafkaSink` 对象定义作为一个 YAML 文件：
++
+.Kafka sink YAML
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1alpha1
+kind: KafkaSink
+metadata:
+  name: <sink-name>
+  namespace: <namespace>
+spec:
+  topic: <topic-name>
+  bootstrapServers:
+   - <bootstrap-server>
+----
+
+. 要创建 Kafka sink，请应用 `KafkaSink` YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 配置事件源，以便在其 spec 中指定 sink:
++
+.连接到 API 服务器源的 Kafka sink 示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1alpha2
+kind: ApiServerSource
+metadata:
+  name: <source-name> <1>
+  namespace: <namespace> <2>
+spec:
+  serviceAccountName: <service-account-name> <3>
+  mode: Resource
+  resources:
+  - apiVersion: v1
+    kind: Event
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: KafkaSink
+      name: <sink-name> <4>
+----
+<1> 事件源的名称。
+<2> 事件源的命名空间。
+<3> 事件源的服务帐户。
+<4> Kafka sink 名称。

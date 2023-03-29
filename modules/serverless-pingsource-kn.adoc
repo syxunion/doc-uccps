@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-pingsource.adoc
+// * serverless/reference/kn-eventing-ref.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-pingsource-kn_{context}"]
+= 使用 Knative CLI 创建 ping 源
+
+您可以使用 `kn source ping create` 命令，通过 Knative (`kn`) CLI 创建 ping 源。使用 Knative CLI 创建事件源提供了比直接修改 YAML 文件更精简且直观的用户界面。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} Knative Serving 和 Knative Eventing。
+* 已安装 Knative (`kn`) CLI.
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 可选： 如果要使用此流程的验证步骤，请安装 Uccps CLI (`oc`)。
+
+.流程
+
+. 要验证 ping 源是否可以工作，请创建一个简单的 Knative 服务，在服务日志中转储传入的信息：
++
+[source,terminal]
+----
+$ kn service create event-display \
+    --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+----
+
+. 对于您要请求的每一组 ping 事件，请在与事件消费者相同的命名空间中创建一个 ping 源：
++
+[source,terminal]
+----
+$ kn source ping create test-ping-source \
+    --schedule "*/2 * * * *" \
+    --data '{"message": "Hello world!"}' \
+    --sink ksvc:event-display
+----
+
+. 输入以下命令并检查输出，检查是否正确映射了控制器：
++
+[source,terminal]
+----
+$ kn source ping describe test-ping-source
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         test-ping-source
+Namespace:    default
+Annotations:  sources.knative.dev/creator=developer, sources.knative.dev/lastModifier=developer
+Age:          15s
+Schedule:     */2 * * * *
+Data:         {"message": "Hello world!"}
+
+Sink:
+  Name:       event-display
+  Namespace:  default
+  Resource:   Service (serving.knative.dev/v1)
+
+Conditions:
+  OK TYPE                 AGE REASON
+  ++ Ready                 8s
+  ++ Deployed              8s
+  ++ SinkProvided         15s
+  ++ ValidSchedule        15s
+  ++ EventTypeProvided    15s
+  ++ ResourcesCorrect     15s
+----
+
+.验证
+
+您可以通过查看 sink pod 的日志来验证 Kubernetes 事件是否已发送到 Knative 事件。
+
+默认情况下，如果在 60 秒内都没有流量，Knative 服务会终止其 Pod。本指南中演示的示例创建了一个 ping 源，每 2 分钟发送一条消息，因此每个消息都应该在新创建的 pod 中观察到。
+
+. 查看新创建的 pod：
++
+[source,terminal]
+----
+$ watch oc get pods
+----
+
+. 使用 Ctrl+C 取消查看 pod，然后查看所创建 pod 的日志：
++
+[source,terminal]
+----
+$ oc logs $(oc get pod -o name | grep event-display) -c user-container
+----
++
+.输出示例
+[source,terminal]
+----
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 1.0
+  type: dev.knative.sources.ping
+  source: /apis/v1/namespaces/default/pingsources/test-ping-source
+  id: 99e4f4f6-08ff-4bff-acf1-47f61ded68c9
+  time: 2020-04-07T16:16:00.000601161Z
+  datacontenttype: application/json
+Data,
+  {
+    "message": "Hello world!"
+  }
+----
+
+.删除 ping 源
+// move to a separate procedure, out of scope for this PR
+
+* 删除 ping 源：
++
+[source,terminal]
+----
+$ kn delete pingsources.sources.knative.dev <ping_source_name>
+----

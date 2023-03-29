@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-task-run_{context}"]
+= Task run 命令
+
+== taskrun
+管理任务运行。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn taskrun -h
+----
+
+== taskrun cancel
+取消任务运行。
+
+.示例：取消从命名空间中运行的 `mytaskrun` 任务
+[source,terminal]
+----
+$ tkn taskrun cancel mytaskrun -n myspace
+----
+
+== taskrun delete
+删除一个 TaskRun。
+
+.示例：从命名空间中删除 `mytaskrun1` 和 `mytaskrun2` 任务
+[source,terminal]
+----
+$ tkn taskrun delete mytaskrun1 mytaskrun2 -n myspace
+----
+
+.示例：删除除五个最近执行的任务外从命名空间中运行的所有任务
+[source,terminal]
+----
+$ tkn taskrun delete -n myspace --keep 5 <1>
+----
+<1> 将 `5` 替换为您要保留的最新执行任务数量。
+
+== taskrun describe
+描述任务运行。
+
+.示例：描述在命名空间中运行的 `mytaskrun` 任务
+[source,terminal]
+----
+$ tkn taskrun describe mytaskrun -n myspace
+----
+
+== taskrun list
+列出任务运行。
+
+.示例：列出所有任务在命名空间中运行
+[source,terminal]
+----
+$ tkn taskrun list -n myspace
+----
+
+
+== taskrun logs
+显示任务运行日志.
+
+.示例：显示在命名空间中运行的 `mytaskrun` 任务的实时日志
+
+[source,terminal]
+----
+$ tkn taskrun logs -f mytaskrun -n myspace
+----

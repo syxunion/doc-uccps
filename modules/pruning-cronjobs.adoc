@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+[id="pruning-cronjobs_{context}"]
+= 运行 cron 任务
+
+Cron 任务可以修剪成功的任务，但不能正确处理失败的任务。因此，集群管理员应该定期手动清理任务。另外，还应该将 cron 任务的访问权限限制到一小组信任的用户，并且设置适当的配额来阻止 cron 任务创建太多的任务和 Pod。

@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="cluster-network-operator"]
+= 统信容器云管理平台 中的 Cluster Network Operator
+include::_attributes/common-attributes.adoc[]
+:context: cluster-network-operator
+
+toc::[]
+
+Cluster Network Operator（CNO）在 统信容器云管理平台 集群上部署和管理集群网络组件，包括在安装过程中为集群选择的 Container Network Interface（CNI）默认网络供应商插件。
+
+include::modules/nw-cluster-network-operator.adoc[leveloffset=+1]
+
+include::modules/nw-cno-view.adoc[leveloffset=+1]
+
+include::modules/nw-cno-status.adoc[leveloffset=+1]
+
+include::modules/nw-cno-logs.adoc[leveloffset=+1]
+
+include::modules/nw-operator-cr.adoc[leveloffset=+1]

@@ -1,0 +1,25 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-testing-quarkus-functions_{context}"]
+= 测试 Quarkus 功能
+
+Quarkus 功能可以在您的计算机上进行本地测试。在使用 `kn func create` 创建功能时创建的默认项目中，有  `src/test/` 目录，其中包含基本的 Maven 测试。这些测试可以根据需要扩展。
+
+.先决条件
+
+* 您已创建了 Quarkus 功能。
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+. 导航到您的功能的项目文件夹。
+
+. 运行 Maven 测试：
++
+[source,terminal]
+----
+$ ./mvnw test
+----

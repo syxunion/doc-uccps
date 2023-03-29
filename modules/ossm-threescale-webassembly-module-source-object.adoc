@@ -1,0 +1,35 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-source-object_{context}"]
+= The 3scale WebAssembly module source object
+
+`source` 对象作为任何 `credentials` 对象字段中的源数组的一部分存在。对象字段名称，称为 `source`-类型代表以下任意一个：
+
+* `header` ：查找查询接收 HTTP 请求标头作为输入。
+* `query_string`: `lookup query` 接收 URL 查询字符串参数作为输入。
+* `filter`: `lookup query` 接收过滤器元数据作为输入。
+
+所有 `source`-类型对象至少具有以下两个字段：
+
+.`source`-类型对象字段
+|===
+|Name |描述 |必需
+
+a|`keys`
+a|一个字符串数组，各自对应一个 key，引用输入数据中找到的条目。
+|是
+
+a|`ops`
+a|用于执行 key 项匹配的操作数组。该数组是操作在下一个操作上接收输入并生成输出的管道。如果 operation 无法提供一个输出将会被解析为 lookup query 失败。操作的管道顺序决定了评估顺序
+|选填
+|===
+
+`filter` 字段名称具有所需的 `path` 条目，用于显示用于查找数据的元数据中的路径。
+
+当 `key` 与输入数据匹配时，不会评估其余的密钥，而且源解析算法会跳转到执行指定的 `operations` (`ops`) ，如果存在。如果没有指定 `ops` ，则返回匹配 `key` 的结果值（若有）。
+
+`Operations` 提供了一种方式，用于您在第一阶段查找 `key` 后为输入指定某些条件和转换。当您需要转换、解码和断言属性时，请使用 `operations` ，但它们不提供成熟的语言来满足所有需求并缺少 _Turing-completeness_ 。
+
+存储 `operations` 输出的堆栈。评估时， `lookup query` 通过在堆栈的底部分配值或值来完成，具体取决于凭据使用的值。

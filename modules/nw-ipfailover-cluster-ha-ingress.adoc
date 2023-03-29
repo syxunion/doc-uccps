@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+[id="nw-ipfailover-cluster-ha-ingress_{context}"]
+= ingressIP 的高可用性
+
+在非云集群中，可以将 IP 故障转移和 ingressIP 合并到服务。其结果是，为使用 `ingressIP` 创建服务的用户提供了高可用性服务。
+
+方法是指定一个 `ingressIPNetworkCIDR` 范围，然后在创建 ipfailover 配置时使用相同的范围。
+
+由于 IP 故障转移最多可支持整个集群的 255 个 VIP，所以 `ingressIPNetworkCIDR` 需要为 /24 或更小。

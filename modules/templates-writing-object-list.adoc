@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-writing-object-list_{context}"]
+= 编写模板对象列表
+
+模板主要部分为对象列表，将在模板实例化时创建。这可以是任何有效的 API 对象，如构建配置、部署配置或服务。该对象按照此处定义创建，创建前替换任意参数值。这些对象的定义可引用前面定义的参数。
+
+以下是对象列表的示例：
+
+[source,yaml]
+----
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: my-template
+objects:
+  - kind: "Service" <1>
+    apiVersion: "v1"
+    metadata:
+      name: "cakephp-mysql-example"
+      annotations:
+        description: "Exposes and load balances the application pods"
+    spec:
+      ports:
+        - name: "web"
+          port: 8080
+          targetPort: 8080
+      selector:
+        name: "cakephp-mysql-example"
+----
+<1> 服务的定义，由该模板创建。
+
+
+[注意]
+====
+如果对象定义元数据包含固定的 `namespace` 字段值，则会在模板实例化过程中从定义中分离。如果 `namespace` 字段包含参数引用，则将执行正常的参数替换，并参数替换将值解析到的任何命名空间中创建对象，假定用户有权在该命名空间中创建对象。
+====

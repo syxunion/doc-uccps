@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="configuring-node-port-service-range"]
+= 配置节点端口服务范围
+include::_attributes/common-attributes.adoc[]
+:context: configuring-node-port-service-range
+
+toc::[]
+
+作为集群管理员，您可以扩展可用的节点端口范围。如果您的集群使用大量节点端口，可能需要增加可用端口的数量。
+
+默认端口范围为 `30000-32767`。您永远不会缩小端口范围，即使您首先将其扩展超过默认范围。
+
+[id="configuring-node-port-service-range-prerequisites"]
+== 先决条件
+
+- 集群基础架构必须允许访问您在扩展范围内指定的端口。例如，如果您将节点端口范围扩展到 `30000-32900`，防火墙或数据包过滤配置必须允许 `32768-32900` 端口范围。
+
+include::modules/nw-nodeport-service-range-edit.adoc[leveloffset=+1]

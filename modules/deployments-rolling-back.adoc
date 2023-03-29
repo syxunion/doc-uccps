@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-rolling-back_{context}"]
+= 回滚部署
+
+回滚将应用恢复到上一修订，可通过 REST API、命令行或 Web 控制台进行。
+
+.流程
+
+. 回滚到配置的最近一次部署成功的修订：
++
+[source,terminal]
+----
+$ oc rollout undo dc/<name>
+----
++
+恢复 `部署配置` 的模板以匹配 undo 命令中指定的部署修订，并且会启动新的复制控制器。如果没有通过 `--to-revision` 指定修订，则使用最近一次成功部署的修订。
+
+. 部署过程中会禁用 `部署配置` 中的镜像更改触发器，以防止在回滚完成不久后意外启动新的部署过程。
++
+重新启用镜像更改触发器：
++
+[source,terminal]
+----
+$ oc set triggers dc/<name> --auto
+----
+
+[注意]
+====
+部署配置也支持最新部署过程失败时自动回滚到配置的最近一次成功修订。这时，系统会原样保留部署失败的最新模板，由用户来修复其配置。
+====

@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-levels.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-resource-levels-command_{context}"]
+= 在命令行中运行集群容量工具
+
+您可以从命令行运行 统信容器云管理平台 集群容量工具，以估算可以调度到集群的 pod 数量。
+
+.先决条件
+
+* 运行 Uccps Cluster Capacity Tool，它可作为来自统信生态系统目录中的容器镜像。
+
+* 创建一个 `Pod` spec 文件示例，工具将使用该文件来估算资源用量。podspec 以 `limits` 或 `requests` 的形式指定资源要求。集群容量工具在估算分析时会考虑 pod 的资源要求。
++
+`Pod` spec 输入的示例如下：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: small-pod
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  containers:
+  - name: php-redis
+    image: gcr.io/google-samples/gb-frontend:v4
+    imagePullPolicy: Always
+    resources:
+      limits:
+        cpu: 150m
+        memory: 100Mi
+      requests:
+        cpu: 150m
+        memory: 100Mi
+----
+
+
+.流程
+
+在命令行中使用集群容量工具：
+
+. 在终端中登录到 UnionTech Registry：
++
+[source,terminal]
+----
+$ podman login registry.redhat.io
+----
+
+. 拉取集群容量工具镜像：
++
+[source,terminal]
+----
+$ podman pull registry.redhat.io/openshift4/ose-cluster-capacity
+----
+
+. 运行集群容量工具：
++
+[source,terminal]
+----
+$ podman run -v $HOME/.kube:/kube:Z -v $(pwd):/cc:Z  ose-cluster-capacity \
+/bin/cluster-capacity --kubeconfig /kube/config --podspec /cc/pod-spec.yaml \
+--verbose <1>
+----
+<1> 您还可以添加 `--verbose` 选项，以输出集群的各个节点上可以调度多少个 pod 的详细描述：
++
+.输出示例
+[source,terminal]
+----
+small-pod pod requirements:
+	- CPU: 150m
+	- Memory: 100Mi
+
+The cluster can schedule 88 instance(s) of the pod small-pod.
+
+Termination reason: Unschedulable: 0/5 nodes are available: 2 Insufficient cpu,
+3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't
+tolerate.
+
+Pod distribution among nodes:
+small-pod
+	- 192.168.124.214: 45 instance(s)
+	- 192.168.124.120: 43 instance(s)
+----
++
+在上例中，集群中预计可以调度的 pod 数量为 88。

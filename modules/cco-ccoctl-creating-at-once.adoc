@@ -1,0 +1,131 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-gcp-workload-identity.adoc
+// * installing/installing_alibaba/manually-creating-alibaba-ram.adoc
+// * installing/installing_alibaba/installing-alibaba-network-customizations.adoc
+ifeval::["{context}" == "cco-mode-sts"]
+:!aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:!google-cloud-platform:
+endif::[]
+ifeval::["{context}" == "installing-alibaba-default"]
+:!alibabacloud-default:
+endif::[]
+ifeval::["{context}" == "installing-alibaba-customizations"]
+:!alibabacloud-customizations:
+endif::[]
+
+
+:_content-type: PROCEDURE
+[id="cco-ccoctl-creating-at-once_{context}"]
+= 使用单个命令创建 AWS 资源
+
+如果您不需要在修改 AWS 资源前查看 `ccoctl` 工具创建的 JSON 文件，并且如果 `ccoctl` 工具用于创建 AWS 资源的过程会自动满足您的要求，则可以使用 `ccoctl aws create-al`l 命令自动创建 AWS 资源。
+
+否则，您可以单独创建 AWS 资源。
+
+
+[注意]
+====
+默认情况下，`ccoctl` 在运行命令的目录中创建对象。要指定目录，使用 `--output-dir` 标志。此流程使用 `<path_to_ccoctl_output_dir>` 来引用这个位置。
+====
+
+.先决条件
+
+* 您必须提取并准备好 `ccoctl` 二进制文件。
+
+.流程
+
+. 从统信容器云管理平台发行镜像中提取 `CredentialsRequest` 对象列表：
++
+[source,terminal]
+----
+$ oc adm release extract \
+--credentials-requests \
+--cloud=aws \
+--to=<path_to_directory_with_list_of_credentials_requests>/credrequests \ <1>
+--from=quay.io/<path_to>/ocp-release:<version>
+----
+
+[注意]
+====
+运行此命令可能需要一些时间。
+====
+
+. 使用 `ccoctl` 工具处理 `credrequests` 目录中的所有 `CredentialsRequest` 对象：
++
+
+[source,terminal]
+----
+$ ccoctl aws create-all \
+--name=<name> \
+--region=<aws_region> \
+--credentials-requests-dir=<path_to_directory_with_list_of_credentials_requests>/credrequests
+----
++
+其中：
++
+--
+** `<name>` 是用于标记为跟踪而创建的云资源的名称。
+** `<aws_region>` 是将要在其中创建云资源的 AWS 区域。
+** `<path_to_directory_with_list_of_credentials_requests>/credrequests` 是含有组件 `CredentialsRequest` 对象的文件的目录。
+--
++
+[NOTE]
+====
+If your cluster uses Technology Preview features that are enabled by the `TechPreviewNoUpgrade` feature set, you must include the `--enable-tech-preview` parameter.
+====
++
+.输出示例
++
+[source,terminal]
+----
+2022/02/11 16:18:26 Created RAM User: user1-alicloud-openshift-machine-api-alibabacloud-credentials
+2022/02/11 16:18:27 Ready for creating new ram policy user1-alicloud-openshift-machine-api-alibabacloud-credentials-policy-policy
+2022/02/11 16:18:27 RAM policy user1-alicloud-openshift-machine-api-alibabacloud-credentials-policy-policy has created
+2022/02/11 16:18:28 Policy user1-alicloud-openshift-machine-api-alibabacloud-credentials-policy-policy has attached on user user1-alicloud-openshift-machine-api-alibabacloud-credentials
+2022/02/11 16:18:29 Created access keys for RAM User: user1-alicloud-openshift-machine-api-alibabacloud-credentials
+2022/02/11 16:18:29 Saved credentials configuration to: user1-alicloud/manifests/openshift-machine-api-alibabacloud-credentials-credentials.yaml
+...
+----
+
+.验证
+
+* 要验证统信容器云管理平台secret 是否已创建，列出 `<path_to_ccoctl_output_dir>/manifests` 目录中的文件：
++
+[source,terminal]
+----
+$ ls <path_to_ccoctl_output_dir>/manifests
+----
+
++
+.输出示例：
++
+[source,terminal]
+----
+cluster-authentication-02-config.yaml
+openshift-cloud-credential-operator-cloud-credential-operator-iam-ro-creds-credentials.yaml
+openshift-cluster-csi-drivers-ebs-cloud-credentials-credentials.yaml
+openshift-image-registry-installer-cloud-credentials-credentials.yaml
+openshift-ingress-operator-cloud-credentials-credentials.yaml
+openshift-machine-api-aws-cloud-credentials-credentials.yaml
+----
+//Would love a GCP version of the above output.
+
+您可以通过查询 AWS 来验证是否已创建 IAM 角色。如需更多信息，请参阅有关列出 IAM 角色的 AWS 文档。
+
+
+ifeval::["{context}" == "cco-mode-sts"]
+:!aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:!google-cloud-platform:
+endif::[]
+ifeval::["{context}" == "installing-alibaba-default"]
+:!alibabacloud-default:
+endif::[]
+ifeval::["{context}" == "installing-alibaba-customizations"]
+:!alibabacloud-customizations:
+endif::[]

@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-reference-smcp.adoc
+
+:_content-type: REFERENCE
+[id="ossm-cr-version_{context}"]
+= version parameter
+
+{SMProductName} Operator 支持安装不同版本的 `ServiceMeshControlPlane`。您可以使用 version 参数指定要安装的 Service Mesh control plane 版本。如果您在创建 SMCP 时没有指定 version 参数，Operator 会将值设为最新的版本：(2.1)。现有`ServiceMeshControlPlane` 对象会在 Operator 升级过程中保留其版本设置。

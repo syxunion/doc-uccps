@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="configuring-egress-router-configmap"]
+= 从配置映射配置出口路由器 pod 目的地列表
+include::_attributes/common-attributes.adoc[]
+:context: configuring-egress-router-configmap
+
+toc::[]
+
+作为集群管理员，您可以定义一个 ConfigMap 对象来指定出口路由器 pod 的目标映射。配置的特定格式取决于出口路由器 pod 的类型。有关格式的详情，请参阅特定出口路由器 pod 的文档。
+
+include::modules/nw-egress-router-configmap.adoc[leveloffset=+1]

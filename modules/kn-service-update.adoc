@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: REFERENCE
+[id="kn-service-update_{context}"]
+= 使用 Knative CLI 更新无服务器应用程序
+
+在以递增方式构建服务时，您可以使用 `kn service update` 命令进行命令行上的互动会话。与 `kn service update` 命令不同，在使用 kn service update 命令时，只需要指定您要更新的更改，而不是指定 Knative 服务的完整配置。
+
+.示例命令
+
+* 通过添加新环境变量来更新服务：
++
+[source,terminal]
+----
+$ kn service update <service_name> --env <key>=<value>
+----
+
+* 通过添加新端口来更新服务：
++
+[source,terminal]
+----
+$ kn service update <service_name> --port 80
+----
+
+* 通过添加新的请求和限制参数来更新服务：
++
+[source,terminal]
+----
+$ kn service update <service_name> --request cpu=500m --limit memory=1024Mi --limit cpu=1000m
+----
+
+* 为修订分配 latest 标签：
++
+[source,terminal]
+----
+$ kn service update <service_name> --tag <revision_name>=latest
+----
+
+* 为服务的最新 READY 修订将标签从 testing 更新为 staging：
++
+[source,terminal]
+----
+$ kn service update <service_name> --untag testing --tag @latest=staging
+----
+
+* 将 test 标签添加到接收 10% 流量的修订，并将其它流量发送到服务的最新 READY 修订：
++
+[source,terminal]
+----
+$ kn service update <service_name> --tag <revision_name>=test --traffic test=10,@latest=90
+----

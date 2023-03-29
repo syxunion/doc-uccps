@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-rebooting.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-rebooting-infrastructure_{context}"]
+= 关于重新引导运行关键基础架构的节点
+
+在重启托管关键 统信容器云管理平台 基础架构组件（如路由器 Pod、registry pod 和监控 pod）的节点时，请确保至少有三个节点可用于运行这些组件。
+
+以下场景演示了，在只有两个节点可用时，在 统信容器云管理平台 上运行的应用程序可能会发生服务中断：
+
+- 节点 A 标记为不可调度，所有 pod 都被撤离。
+- 该节点上运行的 registry pod 现在重新部署到节点 B 上。Node B 现在同时运行两个 registry pod。
+- 节点 B 现在标记为不可调度，并且被撤离。
+- 在节点上公开两个 pod 端点的服务在短时间内丢失所有端点，直到它们被重新部署到节点 A。
+
+当将三个节点用于基础架构组件时，此过程不会造成服务中断。但是，由于 pod 调度，被撤离并返回到轮转的最后一个节点没有 registry pod。其他节点中的一个会有两个 registry pod。要将第三个 registry pod 调度到最后一个节点上，请使用 pod 反关联性以防止将两个 registry pod 放置在同一节点上。

@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-descheduler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-descheduler-configuring-profiles_{context}"]
+= 配置 descheduler 配置集
+
+您可以配置 descheduler 使用哪些配置集来驱除 pod。
+
+.先决条件
+
+* 集群管理员特权
+
+.流程
+
+. 编辑 `KubeDescheduler` 对象：
++
+[source,terminal]
+----
+$ oc edit kubedeschedulers.operator.openshift.io cluster -n openshift-kube-descheduler-operator
+----
+
+. 在 spec.profiles 部分指定一个或多个配置集。
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: KubeDescheduler
+metadata:
+  name: cluster
+  namespace: openshift-kube-descheduler-operator
+spec:
+  deschedulingIntervalSeconds: 3600
+  logLevel: Normal
+  managementState: Managed
+  operatorLogLevel: Normal
+  profileCustomizations:
+    podLifetime: 48h        <1>
+  profiles:                 <2>
+  - AffinityAndTaints
+  - TopologyAndDuplicates   <3>
+  - LifecycleAndUtilization
+  - EvictPodsWithLocalStorage
+  - EvictPodsWithPVC
+----
+<1> 可选：为 `LifecycleAndUtilization` 配置集启用自定义 pod 生命周期值。有效单位是 `s`, `m`, 或 `h`。默认 pod 生命周期为 24 小时。
+<2> 添加一个或多个配置文件以启用。可用配置集： `AffinityAndTaints`, `TopologyAndDuplicates`, `LifecycleAndUtilization`, `SoftTopologyAndDuplicates` `EvictPodsWithLocalStorage`, 和 `EvictPodsWithPVC`.
+<3> 不要同时启用 `TopologyAndDuplicates` 和 `SoftTopologyAndDuplicates` 。启用两者会导致冲突。
++
+您可以启用多个配置集 ; 指定配置集的顺序并不重要。
+
+. 保存文件以使改变生效。

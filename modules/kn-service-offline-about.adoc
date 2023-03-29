@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: CONCEPT
+[id="kn-service-offline-about_{context}"]
+= 关于 Knative CLI 离线模式
+
+执行 `kn service` 命令时，更改会立即传播到集群。但是，作为替代方案，您可以在离线模式下执行 `kn service` 命令。当您以离线模式创建服务时，集群不会发生任何更改，而是在本地计算机上创建服务描述符文件。
+
+创建描述符文件后，您可以手动修改并在版本控制系统中跟踪该文件。您还可以使用 `kn service create -f`, `kn service apply -f`, 或 `oc apply -f` 命令将更改传播到集群。
+// Once `update` works, add it here and make it into a list
+
+离线模式有几种用途：
+
+* 在使用描述符文件对集群进行更改之前，您可以手动修改该文件。
+* 您可以在本地跟踪版本控制系统中服务的描述符文件。这可让您在目标集群以外的位置重复使用描述符文件，例如在持续集成（CI）管道、开发环境或演示中。
+* 您可以检查创建的描述符文件，以了解 Knative 服务的信息。特别是，您可以看到生成的服务如何受到传递给 kn 命令的不同参数的影响。
+
+离线模式有其优点：速度非常快，不需要连接到集群。但是，离线模式缺少服务器端验证。因此，您无法验证服务名称是否唯一，或者是否可以拉取指定镜像。

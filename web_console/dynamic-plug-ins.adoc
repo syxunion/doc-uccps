@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+[id="adding-dynamic-plugin-to-console"]
+= 在 统信容器云管理平台 Web 控制台中添加动态插件
+include::_attributes/common-attributes.adoc[]
+:context: dynamic-plugins
+
+toc::[]
+
+您可以在运行时加载的集群中创建和部署动态插件。
+
+:FeatureName: 创建动态插件
+include::snippets/technology-preview.adoc[leveloffset=+1]
+//
+
+include::modules/about-dynamic-plug-ins.adoc[leveloffset=+1]
+
+include::modules/dynamic-plug-ins-get-started.adoc[leveloffset=+1]
+
+include::modules/running-your-dynamic-plug-in.adoc[leveloffset=+1]
+
+include::modules/adding-tab-pods-page.adoc[leveloffset=+2]
+
+include::modules/adding-new-extension-dynamic-plug-in.adoc[leveloffset=+1]
+
+include::modules/build-image-docker.adoc[leveloffset=+1]
+
+include::modules/deployment-plug-in-cluster.adoc[leveloffset=+1]

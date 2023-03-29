@@ -1,0 +1,109 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-a-custom-pki.adoc
+// * networking/enable-cluster-wide-proxy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-proxy-configure-object_{context}"]
+= 启用集群范围代理
+
+`Proxy` 对象用于管理集群范围出口代理。如果在安装或升级集群时没有配置代理，则 `Proxy` 对象仍会生成，但它会有一个空的 `spec`。例如：
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Proxy
+metadata:
+  name: cluster
+spec:
+  trustedCA:
+    name: ""
+status:
+----
+
+集群管理员可以通过修改这个 `cluster` `Proxy` 对象来配置 统信容器云管理平台 的代理。
+
+[注意]
+====
+只支持名为 `cluster` 的 `Proxy` 对象，且无法创建额外的代理。
+====
+
+.先决条件
+
+* 集群管理员权限
+* 已安装 统信容器云管理平台 `oc` CLI 公爵
+
+.流程 
+
+. 创建包含代理 HTTPS 连接所需的额外 CA 证书的 ConfigMap。
++
+[注意]
+====
+如果代理的身份证书由来自 USwift 信任捆绑包的颁发机构签名，您可以跳过这一步。
+====
+
+.. 利用以下内容，创建一个名为 `user-ca-bundle.yaml` 的文件，并提供 PEM 编码证书的值：
++
+[source,yaml]
+----
+apiVersion: v1
+data:
+  ca-bundle.crt: | <1>
+    <MY_PEM_ENCODED_CERTS> <2>
+kind: ConfigMap
+metadata:
+  name: user-ca-bundle <3>
+  namespace: openshift-config <4>
+----
+<1> 这个数据键必须命名为 `ca-bundle.crt`。
+<2> 一个或多个 PEM 编码的 X.509 证书，用来为代理的身份证书签名。
+<3> 要从 Proxy 对象引用的 ConfigMap 名称。
+<4> ConfigMap 必须在 openshift-config 命名空间中。
+
+.. 从此文件创建 ConfigMap：
++
+[source,terminal]
+----
+$ oc create -f user-ca-bundle.yaml
+----
+
+. 使用 `oc edit` 命令修改 `Proxy` 对象：
++
+[source,terminal]
+----
+$ oc edit proxy/cluster
+----
+
+. 为代理配置所需的字段：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Proxy
+metadata:
+  name: cluster
+spec:
+  httpProxy: http://<username>:<pswd>@<ip>:<port> 
+  httpsProxy: https://<username>:<pswd>@<ip>:<port> 
+  noProxy: example.com 
+  readinessEndpoints:
+  - http://www.google.com 
+  - https://www.google.com
+  trustedCA:
+    name: user-ca-bundle
+----
++
+--
+httpProxy：用于创建集群外 HTTP 连接的代理 URL。URL 方案必须是 http。
+httpsProxy：用于创建集群外 HTTPS 连接的代理 URL。
+noProxy：要排除代理的目标域名、域、IP 地址或其他网络 CIDR 的逗号分隔列表。
++
+在域前面加 `.` 来仅匹配子域。例如： `.y.com` 匹配 `x.y.com`，但不匹配 `y.com`。使用 * 可对所有目的地绕过所有代理。如果您扩展了未包含在安装配置中 `networking.machineNetwork[].cidr` 字段定义的 worker，您必须将它们添加到此列表中，以防止连接问题。
++
+如果未设置 `httpProxy` 或 `httpsProxy` 字段，则此字段将被忽略。
+
+user-ca-bundle：引用 openshift-config 命名空间中的 ConfigMap，其包含代理 `HTTPS` 连接所需的额外 `CA` 证书。注意 `ConfigMap` 必须已经存在，然后才能在这里引用它。此字段是必需的，除非代理的身份证书由来自 USwift 信任捆绑包的颁发机构签名。
+--
+
+. 保存文件以应用更改。

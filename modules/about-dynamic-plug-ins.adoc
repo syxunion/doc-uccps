@@ -1,0 +1,34 @@
+// Module is included in the following assemblies:
+//
+// * openshift-docs/web_console/dynamic-plug-ins.adoc
+
+:_content-type: CONCEPT
+[id="about-dynamic-plugins_{context}"]
+= 关于动态插件
+
+动态插件允许您在运行时为接口添加自定义页面和其他扩展。`ConsolePlugin` 自定义资源使用控制台注册插件，集群管理员在 `console-operator` 配置中启用了插件。
+
+[id="dynamic-plugins-features"]
+== 主要特性
+
+通过动态插件，您可以对 统信容器云管理平台 体验进行以下自定义：
+
+* 添加自定义页面。
+* 添加视角和更新导航项。
+* 在资源页面中添加制表符和操作。
+
+== PatternFly 4 指南
+在创建插件时，请按照以下使用 PatternFly 的准则进行以下操作：
+
+* 使用 PatternFly4 组件和 PatternFly CSS 变量。SDK 提供了核心 PatternFly 组件。使用 PatternFly 组件和变量可帮助您的插件在将来的控制台版本中保持一致。
+* 您可以按照 PatternFly 的可访问性基础，使您的插件能被访问。
+* _不要使用_ 其他 CSS 库，如 Bootstrap 或 Tailwind。它们可能会与 PatternFly 冲突，不会与控制台的外观和感觉相匹配。
+
+[id="general-plug-in-guidelines"]
+== 常规指南
+在创建插件时，请遵循以下常规准则：
+
+* 为您的 CSS 类名称加上插件名称前缀，以避免冲突。例如，`my-plugin__heading` 和 `my-plugin_\_icon`。
+* 与其他控制台页面保持一致的外观、感觉和行为。
+* 使用 react-i18next 进行本地化。
+* 不要在您的标记或覆盖控制台 CSS 类中使用控制台 CSS 类。这些不是 API，可能随时更改。使用它们可能会破坏插件。避免选择器，比如元素选择器，它们可能会影响插件组件以外的标记。

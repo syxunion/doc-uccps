@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/triggering-updates-on-imagestream-changes.adoc
+
+
+[id="images-triggering-updates-imagestream-changes-kubernetes-about_{context}"]
+= 触发 Kubernetes 资源
+
+Kubernetes 资源没有用于触发的字段，这与部署和构建配置不同（在部署和构建配置中包括作为 API 定义的一组控制触发器字段）。您可以使用 统信容器云管理平台 中的注解请求触发器。
+
+该注解定义如下：
+
+[source,yaml]
+----
+Key: image.openshift.io/triggers
+Value:
+[
+ {
+   "from": {
+     "kind": "ImageStreamTag", <1>
+     "name": "example:latest", <2>
+     "namespace": "myapp" <3>
+   },
+   "fieldPath": "spec.template.spec.containers[?(@.name==\"web\")].image", <4>
+   "paused": false <5>
+ },
+ ...
+]
+----
+<1> 必需： kind 是要从中触发的资源，必须是 ImageStreamTag。
+<2> 必需： name 必须是镜像流标签的名称。
+<3> 可选： namespace 默认为对象的命名空间。
+<4> 必需： fieldPath 是到更改的 JSON 路径。此字段受限制，仅接受通过 ID 或索引完全匹配容器的 JSON 路径表达式。对于 pod，JSON 路径为 "spec.containers[?(@.name='web')].image"。
+<5> 可选： paused 代表触发器是否暂停，默认值为 false。将 paused 设置为 true 以临时禁用这个触发器。
+
+当其中一个核心 Kubernetes 资源同时包含 pod 模板和此注解时，统信容器云管理平台 会尝试使用当前与触发器引用的镜像流标签关联的镜像来更新对象。更新针对指定的 fieldPath 进行。
+
+可以包含 pod 模板和注解的核心 Kubernetes 资源示例包括：
+
+* `CronJobs`
+* `部署`
+* `StatefulSets`
+* `DaemonSets`
+* `Jobs`
+* `ReplicationControllers`
+* `Pods`

@@ -1,0 +1,58 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: REFERENCE
+[id="ossm-extensions-smextension-format_{context}"]
+= `ServiceMeshExtension` container format
+
+您必须有包含 WebAssembly 模块字节码的 `.wasm` 文件，以及容器文件系统根中的 `manifest.yaml` 文件，以使您的容器镜像成为有效的扩展镜像。
+
+
+.manifest.yaml
+[source,yaml]
+----
+schemaVersion: 1
+
+name: <your-extension>
+description: <description>
+version: 1.0.0
+phase: PreAuthZ
+priority: 100
+module: extension.wasm
+----
+
+.manifest.yml manifest.yml 的字段参考
+[options="header"]
+[cols="a, a, a"]
+|===
+| 字段 | 描述 |必需
+
+|schemaVersion
+|用于清单架构的版本。目前唯一可能的值是 1。
+|这是必填字段。
+
+|name
+|扩展名。
+|这个字段只是元数据且目前没有使用。
+
+|description
+|扩展的描述。
+|这个字段只是元数据且目前没有使用。
+
+|version
+|扩展名的版本。
+|这个字段只是元数据且目前没有使用。
+
+|phase
+|扩展的默认执行阶段。
+|这是必填字段。
+
+|priority
+|扩展的默认优先级。
+|这是必填字段。
+
+|module
+|容器文件系统的 root 到 WebAssembly 模块的相对路径。
+|这是必填字段。
+|===

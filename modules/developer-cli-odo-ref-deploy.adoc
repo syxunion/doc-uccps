@@ -1,0 +1,65 @@
+:_content-type: REFERENCE
+[id="odo-deploy_{context}"]
+= odo deploy
+
+
+`odo` 可用于部署组件的方式类似于如何使用 CI/CD 系统进行部署。首先，`odo` 构建容器镜像，然后部署部署组件所需的 Kubernetes 资源。
+
+在运行命令 `odo deploy` 时，odo 在 devfile 中搜索 kind  `deploy` 的默认命令，并执行这个命令。从 2.2.0 版本开始的 devfile 格式支持 kind 部署。
+
+`deploy` 命令通常是一个 _复合_ 命令，由多个 应用命令组成 ：
+
+* 引用 `镜像` 组件（应用时）的命令将构建要部署的容器的镜像，然后将其推送到注册表。
+* 引用 Kubernetes 组件的命令 （应用时）将在集群中创建 Kubernetes 资源。
+
+使用以下示例 `devfile.yaml` 文件，会使用 目录中存在的 `Dockerfile` 来构建容器镜像。镜像被推送到其 registry，然后使用这个全新的构建镜像在集群中创建 Kubernetes Deployment 资源。
+
+[source,terminal]
+----
+schemaVersion: 2.2.0
+[...]
+variables:
+  CONTAINER_IMAGE: quay.io/phmartin/myimage
+commands:
+  - id: build-image
+    apply:
+      component: outerloop-build
+  - id: deployk8s
+    apply:
+      component: outerloop-deploy
+  - id: deploy
+    composite:
+      commands:
+        - build-image
+        - deployk8s
+      group:
+        kind: deploy
+        isDefault: true
+components:
+  - name: outerloop-build
+    image:
+      imageName: "{{CONTAINER_IMAGE}}"
+      dockerfile:
+        uri: ./Dockerfile
+        buildContext: ${PROJECTS_ROOT}
+  - name: outerloop-deploy
+    kubernetes:
+      inlined: |
+        kind: Deployment
+        apiVersion: apps/v1
+        metadata:
+          name: my-component
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: node-app
+          template:
+            metadata:
+              labels:
+                app: node-app
+            spec:
+              containers:
+                - name: main
+                  image: {{CONTAINER_IMAGE}}
+----

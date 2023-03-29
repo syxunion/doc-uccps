@@ -1,0 +1,42 @@
+:_content-type: ASSEMBLY
+[id="ci-cd-overview"]
+= 统信容器云管理平台 CI/CD 概述
+include::_attributes/common-attributes.adoc[]
+:context: ci-cd-overview
+
+toc::[]
+
+
+统信容器云管理平台 是面向开发人员的企业就绪 Kubernetes 平台，使组织能够通过 DevOps 实践（如持续集成(CI)和持续交付(CD)）自动化应用程序交付流程。为了满足您的机构需求，统信容器云管理平台 提供以下 CI/CD 解决方案：
+
+* OpenShift 构建
+* OpenShift Pipelines
+* OpenShift GitOps
+
+[id="openshift-builds"]
+==  Uccps 构建
+使用 Uccps 构建时，您可以使用声明性构建过程创建云原生应用程序。您可以在用于创建 BuildConfig 对象的 YAML 文件中定义构建过程。此定义包括构建触发器、输入参数和源代码等属性。部署之后，BuildConfig 对象通常构建可运行的镜像并将其推送到容器镜像 registry。
+
+Uccps 构建为构建策略提供以下可扩展的支持：
+
+* Docker 构建
+* Source-to-image (S2I) 构建
+* Custom 构建
+
+如需更多信息，请参阅 xref:../cicd/builds/understanding-image-builds.adoc#understanding-image-builds[了解镜像构建]
+
+[id="openshift-pipelines"]
+==  Uccps Pipelines
+Uccps Pipelines 提供了一个 Kubernetes 原生 CI/CD 框架，用于在其自己的容器中设计和运行 CI/CD 管道的每个步骤。它可以通过可预测的结果独立扩展以满足按需管道。
+
+如需更多信息，请参阅 xref:../cicd/pipelines/understanding-openshift-pipelines.adoc#understanding-openshift-pipelines[了解 Uccps Pipelines]
+
+[id="openshift-gitops"]
+== Uccps GitOps
+Uccps GitOps 是一个使用 Argo CD 作为声明性 GitOps 引擎的 Operator。它启用了多集群 Uccps 和 Kubernetes 基础架构的 GitOps 工作流。使用 Uccps GitOps，管理员可以在集群和开发生命周期中一致地配置和部署基于 Kubernetes 的基础架构和应用程序。
+
+如需更多信息，请参阅 xref:../cicd/gitops/understanding-openshift-gitops.adoc#understanding-openshift-gitops[了解 Uccps GitOps]
+
+[id="jenkins-ci-cd"]
+== Jenkins
+Jenkins 自动化了构建、测试和部署应用和项目的过程。Uccps 开发者工具提供 Jenkins 镜像，它直接与 统信容器云管理平台 集成。Jenkins 可通过使用 Samples Operator 模板或认证的 Helm Chart 在 Uccps 上部署。

@@ -1,0 +1,84 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/assigning-egress-ips.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-ips-static_{context}"]
+= 为一个命名空间配置手动分配出口 IP 地址
+
+在 统信容器云管理平台 中，您可以将一个或多个出口 IP 与一个项目关联。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccp CLI (`oc`).
+
+.流程
+
+. 通过使用所需 IP 地址指定以下 JSON 对象来更新 `NetNamespace` 对象：
++
+[source,terminal]
+----
+ $ oc patch netnamespace <project_name> --type=merge -p \
+  '{
+    "egressIPs": [
+      "<ip_address>"
+    ]
+  }'
+----
++
+--
+其中：
+
+`<project_name>`:: 指定项目的名称。
+`<ip_address>`:: 为 `egressIPs` 数组指定一个或多个出口 IP 地址。
+--
++
+例如，将 `project1` 项目分配给 IP 地址 `192.168.1.100` 和 `192.168.1.101`：
++
+[source,terminal]
+----
+$ oc patch netnamespace project1 --type=merge \
+  -p '{"egressIPs": ["192.168.1.100","192.168.1.101"]}'
+----
++
+要提供高可用性，将 egressIPs 值设置为不同节点上的两个或多个 IP 地址。如果设置了多个出口 IP 地址，则 pod 会大致同样使用所有出口 IP 地址。
++
+[注意]
+====
+由于 OpenShift SDN 管理 `NetNamespace` 对象，因此只能通过修改现有的 `NetNamespace` 对象来进行更改。不要创建新的 `NetNamespace` 对象。
+====
+
+. 手动将出口 IP 地址分配给节点主机。
++
+如果在公共云基础架构上安装了集群，则必须确认该节点具有可用的 IP 地址容量。
++
+在节点主机上的 HostSubnet 对象中设置 `egressIPs` 参数。使用以下 JSON，尽可能包含您要分配给该节点主机的 IP 地址：
++
+[source,terminal]
+----
+$ oc patch hostsubnet <node_name> --type=merge -p \
+  '{
+    "egressIPs": [
+      "<ip_address>",
+      "<ip_address>"
+      ]
+  }'
+----
++
+--
+其中：
+
+`<node_name>`:: 指定节点名称。
+`<ip_address>`:: 指定一个 IP 地址。您可以为 `egressIPs` 数组指定多个 IP 地址。
+--
++
+例如，指定 node1 应具有出口 IP `192.168.1.100`、`192.168.1.101` 和 `192.168.1.102`：
++
+[source,terminal]
+----
+$ oc patch hostsubnet node1 --type=merge -p \
+  '{"egressIPs": ["192.168.1.100", "192.168.1.101", "192.168.1.102"]}'
+----
++
+在上例中，`project1`` 的所有出口流量都将路由到托管指定出口 IP 地址的节点，然后通过网络地址转换（NAT）连接到那个 `IP` 地址。

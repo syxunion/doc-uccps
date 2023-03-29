@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/enabling-multicast.adoc
+// * networking/ovn_kubernetes_network_provider/enabling-multicast.adoc
+
+ifeval::["{context}" == "openshift-sdn-enabling-multicast"]
+:openshift-sdn:
+:sdn: OpenShift SDN
+endif::[]
+ifeval::["{context}" == "ovn-kubernetes-enabling-multicast"]
+:ovn:
+:sdn: OVN-Kubernetes
+endif::[]
+
+:_content-type: CONCEPT
+[id="nw-about-multicast_{context}"]
+= 关于多播
+
+通过使用 IP 多播，数据可同时广播到许多 IP 地址。
+
+[重要]
+====
+目前，多播最适用于低带宽协调或服务发现。它不是一个高带宽解决方案。
+====
+
+默认情况下，统信容器云管理平台 pod 之间多播流量被禁用。如果使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商，可以根据每个项目启用多播。
+
+ifdef::openshift-sdn[]
+以 `networkpolicy` 隔离模式使用 OpenShift SDN 网络插件时：
+
+* pod 发送的多播数据包将传送到项目中的所有其他 pod，而无需考虑 `NetworkPolicy` 对象。即使在无法通过单播通信时，Pod 也能通过多播进行通信。
+* 一个项目中的 pod 发送的多播数据包不会传送到任何其他项目中的 pod，即使存在允许项目间通信的 `NetworkPolicy` 对象。
+
+以 `multitenant` 隔离模式使用 OpenShift SDN 网络插件时：
+
+* pod 发送的多播数据包将传送到项目中的所有其他 pod。
+* 只有在各个项目接合在一起并且每个接合的项目上都启用了多播时，一个项目中的 pod 发送的多播数据包才会传送到其他项目中的 pod。
+endif::openshift-sdn[]
+
+ifeval::["{context}" == "openshift-sdn-enabling-multicast"]
+:!openshift-sdn:
+endif::[]
+ifeval::["{context}" == "ovn-kubernetes-enabling-multicast"]
+:!ovn:
+endif::[]
+ifdef::sdn[]
+:!sdn:
+endif::sdn[]

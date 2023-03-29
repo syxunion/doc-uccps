@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * logging/nodes-edge-remote-workers.adoc
+
+[id="nodes-edge-remote-workers-power_{context}"]
+= 远程 worker 节点上的电源丢失
+
+如果远程 worker 节点断电或重启不可用，统信容器云管理平台 会使用几个默认机制进行响应。
+
+如果 Kubernetes Controller Manager Operator（kube controller）在配置的时间后无法访问节点，control plane 会将节点健康状况更新为 Unhealthy，并将节点 Ready 条件标记为 Unknown。因此，调度程序会停止将 pod 调度到该节点。内部节点控制器添加了 node.kubernetes.io/unreachable 污点，对节点具有 NoExecute 效果，默认情况下，在五分钟后调度节点上的 pod 进行驱除。
+
+在节点上当节点恢复电源并与 control plane 重新连接时， pod 必须重启。
+
+[注意]
+====
+如果您希望 pod 重启后立即重启，请使用静态 pod。
+====
+
+节点重启后，kubelet 还会重启并尝试重启节点上调度的 pod。如果到 control plane 的连接时间超过默认的 5 分钟，则 control plane 无法更新节点健康状况并移除 `node.kubernetes.io/unreachable` 污点。在节点上，kubelet 会终止任何正在运行的 pod。当这些条件被清除后，调度程序就可以开始将 pod 调度到该节点。
+
+您可以通过以下方法减轻电源损失的影响：
+
+* 使用守护进程集创建容许污点的 pod
+* 使用与节点自动重启的静态 pod
+* 配置 pod 容限以延迟或避免 pod 驱除
+* 配置 kubelet 以控制节点控制器何时将节点标记为不健康的时间。
+

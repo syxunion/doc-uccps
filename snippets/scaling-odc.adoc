@@ -1,0 +1,17 @@
+// Text snippet included in the following modules:
+//
+// * modules/odc-importing-codebase-from-git-to-create-application.adoc
+
+:_content-type: SNIPPET
+
+扩展:: 点击 *扩展* 链接，以定义您要初始部署的应用程序的 pod 数或实例数。
+
++
+如果要创建无服务器部署，也可以配置以下设置：
++
+* *最小 Pod* 决定 Knative 服务在任意给定时间运行的 pod 数量较低限制。这也被称为 minScale 设置。
+* *最大 Pod 决定了 Knative 服务可在任意给定时间运行的 pod 数量上限。这也被称为 maxScale 设置。
+* *并发目标* 决定了给定时间每个应用程序实例所需的并发请求数。
+* *并发限制* 决定了给定时间允许每个应用程序的并发请求数的限值。
+* *并发利用率* 决定了在 Knative 扩展额外 pod 前必须满足并发请求限制的百分比，以处理额外的流量。
+* *自动扩展窗口* 定义了平均时间窗口，以便在自动扩展器不处于 panic 模式时提供缩放决策的输入。如果在此窗口中没有收到任何请求，服务将缩减为零。autoscale 窗口的默认持续时间为 60s。这也被称为 stable 窗口。

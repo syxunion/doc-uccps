@@ -1,0 +1,103 @@
+:_content-type: ASSEMBLY
+:context: post-install-network-configuration
+[id="post-install-network-configuration"]
+= 安装后的网络配置
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+安装 统信容器云管理平台 后，您可以按照您的要求进一步扩展和自定义网络。
+
+include::modules/nw-operator-cr.adoc[leveloffset=+1]
+
+include::modules/nw-proxy-configure-object.adoc[leveloffset=+1]
+
+include::modules/private-clusters-setting-dns-private.adoc[leveloffset=+1]
+
+[id="post-install-configuring_ingress_cluster_traffic"]
+== 配置集群入口流量
+
+// This section is sourced from networking/configuring_ingress_cluster_traffic/overview-traffic.adoc
+
+统信容器云管理平台 提供了以下从集群外部与集群中运行的服务进行通信的方法：
+
+* 如果您有 HTTP/HTTPS，请使用 Ingress Controller。
+* 如果您有 HTTPS 之外的 TLS 加密协议，如使用 SNI 标头的 TLS，请使用 Ingress Controller。
+* 否则，请使用负载均衡器、外部 IP 或节点端口。
+
+[options="header"]
+|===
+
+|方法 |用途
+
+|xref:../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-ingress-controller.adoc#configuring-ingress-cluster-traffic-ingress-controller[使用 Ingress Controller]
+|允许访问 HTTP/HTTPS 流量和 HTTPS 以外的 TLS 加密协议（例如，使用 SNI 标头的 TLS）。
+
+|xref:../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-load-balancer.adoc#configuring-ingress-cluster-traffic-load-balancer[使用负载均衡器服务自动分配外部 IP]
+|允许流量通过从池分配的 IP 地址传到非标准端口。
+
+|xref:../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-service-external-ip.adoc#configuring-ingress-cluster-traffic-service-external-ip[手动将外部 IP 分配给服务]
+|允许流量通过特定的 IP 地址传到非标准端口。
+
+|xref:../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.adoc#configuring-ingress-cluster-traffic-nodeport[配置 NodePort]
+|在集群中的所有节点上公开某一服务。
+|===
+
+[id="post-install-configuring-node-port-service-range"]
+== 配置节点端口服务范围
+
+作为集群管理员，您可以扩展可用的节点端口范围。如果您的集群使用大量节点端口，可能需要增加可用端口的数量。
+
+默认端口范围为 `30000-32767`。您永远不会缩小端口范围，即使您首先将其扩展超过默认范围。
+
+[id="post-install-configuring-node-port-service-range-prerequisites"]
+=== 先决条件
+
+- 集群基础架构必须允许访问您在扩展范围内指定的端口。例如，如果您将节点端口范围扩展到 `30000-32900`，防火墙或数据包过滤配置必须允许 `32768-32900` 端口范围。
+
+include::modules/nw-nodeport-service-range-edit.adoc[leveloffset=+3]
+
+[id="post-install-configuring-network-policy"]
+== 配置网络策略
+
+作为集群管理员或项目管理员，您可以为项目配置网络策略。
+
+include::modules/nw-networkpolicy-about.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-object.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-create.adoc[leveloffset=+2]
+include::modules/nw-networkpolicy-multitenant-isolation.adoc[leveloffset=+2]
+
+ifdef::openshift-enterprise,openshift-webscale,openshift-origin[]
+[id="post-install-nw-networkpolicy-creating-default-networkpolicy-objects-for-a-new-project"]
+=== 为新项目创建默认网络策略
+
+作为集群管理员，您可以在创建新项目时修改新项目模板，使其自动包含 NetworkPolicy 对象。
+
+include::modules/modifying-template-for-new-projects.adoc[leveloffset=+2]
+
+include::modules/nw-networkpolicy-project-defaults.adoc[leveloffset=+3]
+endif::[]
+
+include::modules/ossm-supported-configurations.adoc[leveloffset=+1]
+
+include::modules/ossm-installation-activities.adoc[leveloffset=+2]
+
+
+[id="post-installationrouting-optimization"]
+== 优化路由
+
+统信容器云管理平台 HAProxy 路由器扩展以优化性能。
+
+include::modules/baseline-router-performance.adoc[leveloffset=+2]
+
+include::modules/router-performance-optimizations.adoc[leveloffset=+2]
+
+[id="post-installation-osp-fips"]
+== 安装后 RHOSP 网络配置
+
+您可在安装后在 UnionTech OpenStack Platform(RHOSP)集群中配置 统信容器云管理平台 的一些方面。
+
+include::modules/installation-osp-configuring-api-floating-ip.adoc[leveloffset=+2]
+include::modules/installation-osp-kuryr-port-pools.adoc[leveloffset=+2]
+include::modules/installation-osp-kuryr-settings-active.adoc[leveloffset=+2]
+include::modules/nw-osp-enabling-ovs-offload.adoc[leveloffset=+2]

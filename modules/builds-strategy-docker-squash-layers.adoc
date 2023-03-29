@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//* builds/running-entitled-builds.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-docker-squash-layers_{context}"]
+= 使用 docker 构建的 Squash 层
+
+通常，Docker 构建会为 Dockerfile 中的每条指令都创建一个层。将 `imageOptimizationPolicy` 设置为 SkipLayers，可将所有指令合并到基础镜像顶部的单个层中。
+
+.流程
+
+* 将 `imageOptimizationPolicy` 设置为 `SkipLayers`：
++
+[source,yaml]
+----
+strategy:
+  dockerStrategy:
+    imageOptimizationPolicy: SkipLayers
+----

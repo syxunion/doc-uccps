@@ -1,0 +1,94 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+// * openshift_images/samples-operator-alt-registry.adoc
+
+ifeval::["{context}" == "post-install-cluster-tasks"]
+:restrictednetwork:
+endif::[]
+
+ifeval::["{context}" == "samples-operator-alt-registry"]
+:samplesoperatoraltreg:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="installation-restricted-network-samples_{context}"]
+= 使用带有备用或镜像 registry 的 Cluster Samples Operator 镜像流
+
+Uccps 命名空间中大多数由 Cluster Samples Operator 管理的镜像流指向位于 registry.redhat.io 上统信容器镜像仓库中的镜像。
+
+[重要]
+====
+`jenkins`, `jenkins-agent-maven`, 和 `jenkins-agent-nodejs` 镜像流来自安装有效负载，并由 Samples Operator 管理。
+
+将 Sample Operator 配置文件中的 `samplesRegistry` 字段设置为 `registry.redhat.io` 有很多冗余，因为它已经定向到 `registry.redhat.io`，只用于 Jenkins 镜像和镜像流。
+====
+
+[注意]
+====
+`cli`, `installer`, `must-gather`, 和 `tests` 镜像流虽然属于安装有效负载的一部分，但不由 Cluster Samples Operator 管理。此流程中不涉及这些镜像流。
+====
+
+
+.先决条件
+* 使用具有  `cluster-admin` 角色的用户访问集群。
+* 为您的镜像 registry 创建 pull secret。
+
+.流程
+
+. 访问被镜像（mirror）的特定镜像流的镜像，例如：
++
+[source,terminal]
+----
+$ oc get is <imagestream> -n openshift -o json | jq .spec.tags[].from.name | grep registry.redhat.io
+----
++
+镜像 registry.redhat.io 中与您需要的任何镜像流关联的镜像
++
+[source,terminal]
+----
+$ oc image mirror registry.redhat.io/rhscl/ruby-25-rhel7:latest ${MIRROR_ADDR}/rhscl/ruby-25-rhel7:latest
+----
+
+. 创建集群的镜像配置对象：
++
+[source,terminal]
+----
+$ oc create configmap registry-config --from-file=${MIRROR_ADDR_HOSTNAME}..5000=$path/ca.crt -n Uccps-config
+----
+
+. 在集群的镜像配置对象中，为镜像添加所需的可信 CA：
++
+[source,terminal]
+----
+$ oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-config"}}}' --type=merge
+----
+
+. 更新 Cluster Samples Operator 配置对象中的 samplesRegistry 字段，使其包含镜像配置中定义的镜像位置的 hostname 部分：
++
+[source,terminal]
+----
+$ oc edit configs.samples.operator.openshift.io -n openshift-cluster-samples-operator
+----
++
+[注意]
+====
+这是必要的，因为镜像流导入过程在此刻不使用镜像（mirro）或搜索机制。
+====
++
+. 将所有未镜像的镜像流添加到 Cluster Samples Operator 配置对象的 `skippedImagestreams` 字段。或者，如果您不想支持任何示例镜像流，在 Cluster Samples Operator 配置对象中将 Cluster Samples Operator 设置为 Removed。
++
+[注意]
+====
+如果镜像流导入失败，Cluster Samples Operator 会发出警告，但 Cluster Samples Operator 会定期重试，或看起来并没有重试它们。
+====
++
+`Uccps` 命名空间中的许多模板都引用镜像流。因此，使用 Removed 清除镜像流和模板，将避免在因为缺少镜像流而导致镜像流和模板无法正常工作时使用它们。
+
+ifeval::["{context}" == "post-install-cluster-tasks"]
+:!restrictednetwork:
+endif::[]
+
+ifeval::["{context}" == "samples-operator-alt-registry"]
+:!samplesoperatoraltreg:
+endif::[]

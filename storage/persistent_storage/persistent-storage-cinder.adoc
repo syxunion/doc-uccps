@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-cinder"]
+= 使用 Cinder 的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-cinder
+
+toc::[]
+
+统信容器云管理平台支持 OpenStack Cinder。我们假设您对 Kubernetes 和 OpenStack 有一定的了解。
+
+Cinder 卷可以动态置备。持久性卷不与某个特定项目或命名空间相关联，它们可以在统信容器云管理平台集群间共享。持久性卷声明是针对某个项目或者命名空间的，相应的用户可请求它。
+
+[重要]
+====
+统信容器云管理平台默认使用 in-tree（非 CSI）插件来置备 Cinder 存储。
+
+在以后的统信容器云管理平台版本中，计划使用现有树内插件置备的卷迁移到对应的 CSI 驱动程序。CSI 自动迁移应该可以无缝进行。迁移不会改变您使用所有现有 API 对象的方式，如持久性卷、持久性卷声明和存储类。有关迁移的更多信息，请参阅 xref:../../storage/container_storage_interface/persistent-storage-csi-migration.adoc#persistent-storage-csi-migration[CSI 自动迁移]。
+
+完全迁移后，未来的统信容器云管理平台版本将最终删除树内插件。
+====
+
+
+include::modules/persistent-storage-cinder-provisioning.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-cinder-creating-pv.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-cinder-pv-format.adoc[leveloffset=+2]
+
+include::modules/persistent-storage-cinder-volume-security.adoc[leveloffset=+2]

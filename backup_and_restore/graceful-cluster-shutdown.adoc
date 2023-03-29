@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="graceful-shutdown-cluster"]
+= 安全的关闭集群
+include::_attributes/common-attributes.adoc[]
+:context: graceful-shutdown-cluster
+
+toc::[]
+
+本文档描述了安全关闭集群的过程。出于维护或者节约资源成本的原因，您可能需要临时关闭集群。
+
+== 先决条件
+
+* 关闭集群前进行 xref:../backup_and_restore/control_plane_backup_and_restore/backing-up-etcd.adoc#backing-up-etcd-data_backup-etcd[etcd 备份]。
+
+// Shutting down the cluster
+include::modules/graceful-shutdown.adoc[leveloffset=+1]
+
+

@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * builds/custom-builds-buildah.adoc
+
+
+:_content-type: PROCEDURE
+[id="builds-use-custom-builder-image_{context}"]
+= 使用自定义构建器镜像
+
+您可以定义一个 `BuildConfig` 对象，它将结合使用 Custom 策略与自定义构建器镜像来执行您的自定义构建逻辑。
+
+.先决条件
+
+* 为新自定义构建器镜像定义所有必要的输入。
+* 构建您的自定义构建器镜像。
+
+.流程
+
+. 创建名为 `buildconfig.yaml` 的文件。此文件定义要在项目中创建并执行的 `BuildConfig` 对象：
++
+[source,yaml]
+----
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: sample-custom-build
+  labels:
+    name: sample-custom-build
+  annotations:
+    template.alpha.openshift.io/wait-for-ready: 'true'
+spec:
+  strategy:
+    type: Custom
+    customStrategy:
+      forcePull: true
+      from:
+        kind: ImageStreamTag
+        name: custom-builder-image:latest
+        namespace: <yourproject> <1>
+  output:
+    to:
+      kind: ImageStreamTag
+      name: sample-custom:latest
+----
+<1> 指定项目的名称。
+
+. 创建 `BuildConfig`:
++
+[source,terminal]
+----
+$ oc create -f buildconfig.yaml
+----
+
+. 创建名为 `imagestream.yaml` 的文件。此文件定义构建要将镜像推送到的镜像流：
++
+[source,yaml]
+----
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: sample-custom
+spec: {}
+----
+
+. 创建镜像流：
++
+[source,terminal]
+----
+$ oc create -f imagestream.yaml
+----
+
+. 运行自定义构建：
++
+[source,terminal]
+----
+$ oc start-build sample-custom-build -F
+----
++
+构建运行时，它会启动一个 Pod 来运行之前构建的自定义构建器镜像。该 Pod 将运行定义为自定义构建器镜像入口点的 `build.sh` 逻辑。build.sh 逻辑调用 Buildah 来构建自定义构建器镜像中嵌入的 `dockerfile.sample`，然后使用 Buildah 将新镜像推送到 `sample-custom` 镜像流。

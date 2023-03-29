@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="configuring-default-certificate"]
+= 安全路由
+include::_attributes/common-attributes.adoc[]
+:context: secured-routes
+
+toc::[]
+
+安全路由提供以下几种 TLS 终止功能来为客户端提供证书。以下小节介绍了如何使用自定义证书创建重新加密、边缘和透传路由。
+
+[重要]
+====
+如果您在 Microsoft Azure 中创建通过公共端点的路由，则资源名称会受到限制。您不能创建使用某些词语的资源。如需 Azure 限制词语的列表，请参阅 Azure 文档中的解决预留资源名称错误。
+====
+
+include::modules/nw-ingress-creating-a-reencrypt-route-with-a-custom-certificate.adoc[leveloffset=+1]
+
+include::modules/nw-ingress-creating-an-edge-route-with-a-custom-certificate.adoc[leveloffset=+1]
+
+include::modules/nw-ingress-creating-a-passthrough-route.adoc[leveloffset=+1]

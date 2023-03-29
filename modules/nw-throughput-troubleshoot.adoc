@@ -1,0 +1,29 @@
+// Module filename: nw-throughput-troubleshoot.adoc
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+[id="nw-throughput-troubleshoot_{context}"]
+= 吞吐量问题错误排解
+有时，通过 统信容器云管理平台 部署的应用程序可能会导致网络吞吐量问题，如特定服务间的延迟异常高。
+
+如果 pod 日志未能揭示造成问题的原因，请使用以下方法分析性能问题：
+
+* 使用 ping 或 tcpdump 等数据包分析器，分析 pod 与其节点之间的流量。
++
+例如，在每个 pod 上运行 tcpdump 工具，同时重现导致问题的行为。检查两端的捕获信息，以便比较发送和接收时间戳来分析与 pod 往来的流量的延迟。如果节点接口被其他 pod、存储设备或者数据平面的流量过载，则 统信容器云管理平台 中可能会出现延迟。
++
+[source,terminal]
+----
+$ tcpdump -s 0 -i any -w /tmp/dump.pcap host <podip 1> && host <podip 2> <1>
+----
++
+<1> `podip` 是 pod 的 IP 地址。运行 `oc get pod <pod_name> -o wide` 命令来获取 pod 的 IP 地址。
++
+tcpdump 在 `/tmp/dump.pcap` 中生成一个包含这两个 pod 间所有流量的文件。最好在运行分析器后立即重现问题，并在问题重现完成后马上停止分析器，从而尽量减小文件的大小。您还可以通过以下命令，在节点之间运行数据包分析器（从考量范围中剔除 SDN）：
++
+[source,terminal]
+----
+$ tcpdump -s 0 -i any -w /tmp/dump.pcap port 4789
+----
+
+* 使用 iperf 等带宽测量工具来测量数据流吞吐量和 UDP 吞吐量。先从 pod 运行该工具，再从节点运行，以此来查找瓶颈。

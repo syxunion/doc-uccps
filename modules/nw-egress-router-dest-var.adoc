@@ -1,0 +1,109 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/deploying-egress-router-layer3-redirection.adoc
+// * networking/openshift_sdn/deploying-egress-router-http-redirection.adoc
+// * networking/openshift_sdn/deploying-egress-router-dns-redirection.adoc
+
+// Every redirection mode supports an expanded environment variable
+
+// Conditional per flavor of Pod
+ifeval::["{context}" == "deploying-egress-router-layer3-redirection"]
+:redirect:
+endif::[]
+ifeval::["{context}" == "deploying-egress-router-http-redirection"]
+:http:
+endif::[]
+ifeval::["{context}" == "deploying-egress-router-dns-redirection"]
+:dns:
+endif::[]
+
+[id="nw-egress-router-dest-var_{context}"]
+= 出口目的地配置格式
+
+ifdef::redirect[]
+当出口路由器 pod 被部署为重定向模式时，您可以使用以下一种或多种格式指定重定向规则：
+
+- `<port> <protocol> <ip_address>` - 到给定 `<port>` 的内向连接应该被重新定向到给定 `<ip_address>` 上的同一端口。`<protocol>` 可以是 `tcp` 或 `udp`。
+- `<port> <protocol> <ip_address> <remote_port>` - 和以上一样，除了连接被重新定向到 `<ip_address>` 上的一个不同的 `<remote_port>` 中。
+- `<ip_address>` - 如果最后一行是一个 IP 地址，那么其它端口上的所有连接都会被重新指向那个 IP 地址的对应端口。如果没有故障切换 IP 地址，则其它端口上的连接将被拒绝。
+
+在示例中定义了几个规则：
+
+- 第一行将流量从本地端口 `80` 重定向到 `203.0.113.25` 的端口 `80`。
+- 第二行和第三行将本地端口 `8080` 和 `8443` 重定向到 `203.0.113.26` 的远程端口 `80` 和 `443`。
+- 最后一行与之前规则中没有指定的端口的流量匹配。
+
+.配置示例
+[source,text]
+----
+80   tcp 203.0.113.25
+8080 tcp 203.0.113.26 80
+8443 tcp 203.0.113.26 443
+203.0.113.27
+----
+endif::redirect[]
+
+ifdef::http[]
+当出口路由器 pod 以 HTTP 代理模式部署时，您可以使用以下一个或多个格式指定重定向规则。配置中的每行都指定允许或者拒绝的连接组：
+
+- IP 地址允许连接到那个 IP 地址，如 `192.168.1.1`.
+- CIDR 范围允许连接到那个 CIDR 范围，如 `192.168.1.0/24`.
+- 主机名允许代理该主机，如 `www.example.com`.
+- 前面带有 `+*.+` 的域名允许代理到那个域及其所有子域，如 `*.example.com`.
+- `!` 再加上以前匹配的表达式会拒绝连接。
+- 如果最后一行是 `*`, 则任何没有被显式拒绝的都会被允许。否则，任何没有被允许的都会被拒绝。
+
+您还可以使用 `*` 允许到所有远程目的地的连接。
+
+.配置示例
+[source,text]
+----
+!*.example.com
+!192.168.1.0/24
+192.168.2.1
+*
+----
+endif::http[]
+
+ifdef::dns[]
+当路由器以 DNS 代理模式部署时，您会指定一个端口和目标映射列表。目的地可以是 IP 地址，也可以是 DNS 名称。
+
+出口路由器 pod 支持以下格式来指定端口和目的地映射：
+
+端口和远程地址::
+
+您可以使用两个字段格式来指定源端口和目标主机： `<port> <remote_address>`。
+
+主机可以是 IP 地址或 DNS 名称。如果提供了 DNS 名称，DNS 解析会在运行时进行。对于给定主机，代理在连接到目标主机的 IP 地址时连接到目标主机上指定的源端口。
+
+.端口和远程地址对示例
+[source,text]
+----
+80 172.16.12.11
+100 example.com
+----
+
+端口、远程地址和远程端口::
+
+您可以使用三字段格式 `<port> <remote_address> <remote_port>` 指定源端口、目标主机和目的地端口。
+
+三字段格式的行为与两字段版本相同，但目的地端口可能与源端口不同。
+
+.端口、远程地址和远程端口示例
+[source,text]
+----
+8080 192.168.60.252 80
+8443 web.example.com 443
+----
+endif::dns[]
+
+// unload flavors
+ifdef::redirect[]
+:!redirect:
+endif::[]
+ifdef::http[]
+:!http:
+endif::[]
+ifdef::dns[]
+:!dns:
+endif::[]

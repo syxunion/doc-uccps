@@ -1,0 +1,72 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-controller-metrics_{context}"]
+= 控制器指标
+
+以下指标由实施控制器逻辑的任何组件提供。这些指标显示协调操作的详细信息，以及将协调请求添加到工作队列的工作队列行为。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`work_queue_depth`
+|工作队列的深度。
+|量表
+|`reconciler`
+|整数 （无单位）
+
+|`reconcile_count`
+|协调操作的数量。
+|计数
+|`reconciler`, `success`
+|整数 （无单位）
+
+|`reconcile_latency`
+|协调操作的延迟。
+|Histogram
+|`reconciler`, `success`
+|Milli秒
+
+|`workqueue_adds_total`
+|由工作队列处理的添加操作总数。
+|计数
+|`name`
+|整数 （无单位）
+
+|`workqueue_queue_latency_秒`
+|在请求之前，项目保留在工作队列中的时长。
+|Histogram
+|`name`
+|秒
+
+|`workqueue_retries_total`
+|工作队列处理的重试总数。
+|计数
+|`name`
+|整数 （无单位）
+
+|`workqueue_work_duration_秒`
+|处理和从工作队列中项目所需的时间。
+|Histogram
+|`name`
+|秒
+
+|`workqueue_unfinished_work_秒`
+|未完成的工作队列项目的时间长度。
+|Histogram
+|`name`
+|秒
+
+|`workqueue_longest_running_processor_秒`
+|在处理中的、未完成的工作队列项的最长时间。
+|Histogram
+|`name`
+|秒
+|===

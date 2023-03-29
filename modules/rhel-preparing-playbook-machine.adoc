@@ -1,0 +1,78 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="rhel-preparing-playbook-machine_{context}"]
+= 准备机器以运行 Playbook
+
+在将使用 UnionTech OS Server 20(UOS20)作为操作系统的计算机器添加到 统信容器云管理平台 1.2 集群之前，必须准备一个 RHEL 7 机器，以运行向集群添加新节点的 Ansible playbook。这台机器不是集群的一部分，但必须能够访问集群。
+
+.先决条件
+
+* 在运行 playbook 的机器上安装 Uccps CLI（oc）。
+* 以具有 `cluster-admin` 权限的用户身份登录。
+
+.流程
+
+. 确保用于安装集群的 kubeconfig 文件和用于安装集群的安装程序位于 RHEL 7 机器中。若要实现这一目标，一种方法是使用安装集群时所用的同一台机器。
+
+. 配置机器，以访问您计划用作计算机器的所有 RHEL 主机。您可以使用公司允许的任何方法，包括使用 SSH 代理或 VPN 的堡垒主机。
+
+. 在运行 playbook 的机器上配置一个用户，该用户对所有 RHEL 主机具有 SSH 访问权限。
++
+[重要]
+====
+如果使用基于 SSH 密钥的身份验证，您必须使用 SSH 代理来管理密钥。
+====
+
+. 如果还没有这样做，请使用 RHSM 注册机器，并为它附加一个带有 `Uccps` 订阅的池：
+.. 使用 RHSM 注册机器：
++
+[source,terminal]
+----
+# subscription-manager register --username=<user_name> --password=<password>
+----
+
+.. 从 RHSM 获取最新的订阅数据：
++
+[source,terminal]
+----
+# subscription-manager refresh
+----
+
+.. 列出可用的订阅：
++
+[source,terminal]
+----
+# subscription-manager list --available --matches '*OpenShift*'
+----
+
+.. 在上一命令的输出中，找到 统信容器云管理平台 订阅的池 ID 并附加该池：
++
+[source,terminal]
+----
+# subscription-manager attach --pool=<pool_id>
+----
+
+. 启用 统信容器云管理平台 1.2 所需的存储库：
++
+[source,terminal]
+----
+# subscription-manager repos \
+    --enable="rhel-8-for-x86_64-baseos-rpms" \
+    --enable="rhel-8-for-x86_64-appstream-rpms" \
+    --enable="ansible-2.9-for-rhel-8-x86_64-rpms" \
+    --enable="rhocp-4.10-for-rhel-8-x86_64-rpms"
+----
+
+
+. 安装所需的软件包，包括 `openshift-ansible`:
++
+[source,terminal]
+----
+# yum install openshift-ansible openshift-clients jq
+----
++
+`openshift-ansible` 软件包提供了安装实用程序，并且会拉取将 RHEL 计算节点添加到集群所需要的其他软件包，如 Ansible、playbook 和相关的配置文件。`openshift-clients` 提供 `oc` CLI，`jq` 软件包则可改善命令行中 JSON 输出的显示。

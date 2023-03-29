@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+[id="ldap-syncing"]
+= 同步 LDAP 组
+include::_attributes/common-attributes.adoc[]
+:context: ldap-syncing-groups
+
+toc::[]
+
+作为管理员，您可以使用组来管理用户、更改其权限，并加强协作。您的组织可能已创建了用户组，并将其存储在 LDAP 服务器中。统信容器云管理平台 可以将这些 LDAP 记录与统信容器云管理平台内部记录同步，让您能够集中在一个位置管理您的组。统信容器云管理平台 目前支持与使用以下三种通用模式定义组成员资格的 LDAP 服务器进行组同步：RFC 2307、Active Directory 和增强 Active Directory。
+
+
+[注意]
+====
+您必须具有 `cluster-admin` 特权才能同步组。
+====
+
+
+include::modules/ldap-syncing-about.adoc[leveloffset=+1]
+include::modules/ldap-syncing-config-rfc2307.adoc[leveloffset=+2]
+include::modules/ldap-syncing-config-activedir.adoc[leveloffset=+2]
+include::modules/ldap-syncing-config-augmented-activedir.adoc[leveloffset=+2]
+include::modules/ldap-syncing-running.adoc[leveloffset=+1]
+include::modules/ldap-syncing-running-all-ldap.adoc[leveloffset=+2]
+include::modules/ldap-syncing-running-openshift.adoc[leveloffset=+2]
+include::modules/ldap-syncing-running-subset.adoc[leveloffset=+2]
+include::modules/ldap-syncing-pruning.adoc[leveloffset=+1]
+
+// Automatically syncing LDAP groups
+include::modules/ldap-auto-syncing.adoc[leveloffset=+1]
+include::modules/ldap-syncing-examples.adoc[leveloffset=+1]
+include::modules/ldap-syncing-rfc2307.adoc[leveloffset=+2]
+include::modules/ldap-syncing-rfc2307-user-defined.adoc[leveloffset=+2]
+include::modules/ldap-syncing-rfc2307-user-defined-error.adoc[leveloffset=+2]
+include::modules/ldap-syncing-activedir.adoc[leveloffset=+2]
+include::modules/ldap-syncing-augmented-activedir.adoc[leveloffset=+2]
+include::modules/ldap-syncing-nesting.adoc[leveloffset=+2]
+include::modules/ldap-syncing-spec.adoc[leveloffset=+1]

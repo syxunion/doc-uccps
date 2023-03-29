@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="serverless-developer-metrics"]
+= Serverless 开发人员指标
+include::_attributes/common-attributes.adoc[]
+:context: serverless-developer-metrics
+
+toc::[]
+
+指标 (metrics) 使开发人员能够监控 Knative 服务的运行情况。您可以使用 OpenShift Container Platform 监控堆栈记录并查看 Knative 服务的健康检查和指标。
+
+您可以通过在 统信容器云管理平台 控制台 *开发者* 视角中导航到 *Dashboards* 来查看 Uccps Serverless 的不同指标。
+
+
+[警告]
+====
+如果使用 mTLS 启用 统信容器云管理平台服务网格，则 Knative Serving 的指标会被默认禁用，因为 统信容器云管理平台服务网格 会防止 Prometheus 提取指标。
+
+有关解决这个问题的详情，请参阅在使用带有 mTLS 的 统信容器云管理平台服务网格 时启用 Knative Serving 指标。
+
+提取指标不会影响 Knative 服务的自动扩展，因为提取请求不会通过激活器。因此，如果没有 pod 正在运行，则不会进行提取。
+====
+
+include::modules/serverless-monitoring-services-default-metrics.adoc[leveloffset=+1]
+
+include::modules/serverless-monitoring-services-custom-metrics.adoc[leveloffset=+1]
+
+include::modules/serverless-monitoring-services-configuration-scraping.adoc[leveloffset=+1]
+
+include::modules/serverless-monitoring-services-examining-metrics.adoc[leveloffset=+1]
+
+include::modules/serverless-queue-proxy-metrics.adoc[leveloffset=+2]
+
+include::modules/serverless-monitoring-services-examining-metrics-dashboard.adoc[leveloffset=+1]

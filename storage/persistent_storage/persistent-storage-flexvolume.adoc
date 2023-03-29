@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-flexvolume"]
+= 使用 FlexVolume 的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-flexvolume
+
+toc::[]
+
+[重要]
+====
+FlexVolume 是一个已弃用的功能。弃用的功能仍然包含在统信容器云管理平台中，并将继续被支持。但是，这个功能会在以后的发行版本中被删除，且不建议在新的部署中使用。
+
+虚拟机监控程序 Container Storage Interface(CSI)驱动程序是在统信容器云管理平台中写入卷驱动程序的建议方法。FlexVolume 驱动程序的维护者应该实施 CSI 驱动程序，并将 FlexVolume 用户移到 CSI。FlexVolume 的用户应该将其工作负载移到 CSI 驱动程序。
+
+有关统信容器云管理平台中已弃用或删除的主要功能的最新列表，请参阅统信容器云管理平台发行注记中已弃用和删除的功能部分。
+====
+
+统信容器云管理平台支持 FlexVolume，这是一个树外插件，使用可执行模型与驱动程序进行接口。
+
+要从没有内置插件的后端使用存储，您可以通过 FlexVolume 驱动程序来扩展 统信容器云管理平台，并为应用程序提供持久性存储。
+
+Pod 通过 `flexvolume` 树内插件与 FlexVolume 驱动程序交互。
+
+include::modules/persistent-storage-flexvolume-drivers.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-flexvolume-driver-example.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-flexvolume-installing.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-flexvolume-consuming.adoc[leveloffset=+1]

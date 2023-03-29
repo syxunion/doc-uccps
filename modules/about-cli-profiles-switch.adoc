@@ -1,0 +1,113 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/managing-cli-profiles.adoc
+
+:_content-type: CONCEPT
+[id="about-switches-between-cli-profiles_{context}"]
+= 关于 CLI 配置集间的切换
+
+通过上下文，您可以在多个 统信容器云管理平台 服务器或使用 CLI 操作时轻松地切换多个用户。nicknames 通过提供对上下文、用户凭证和集群详情的简短参考来更轻松地管理 CLI 配置。第一次使用 CLI 登录后，统信容器云管理平台 会创建一个 `~/.kube/config` 文件（如果不存在）。随着更多身份验证和连接详情被提供给 CLI，可以在 `oc login` 操作或手动配置 CLI 配置集过程中自动提供，更新的信息会存储在配置文件中：
+
+.CLI 配置文件
+
+[source,yaml]
+----
+apiVersion: v1
+clusters: <1>
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://openshift1.example.com:8443
+  name: openshift1.example.com:8443
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://openshift2.example.com:8443
+  name: openshift2.example.com:8443
+contexts: <2>
+- context:
+    cluster: openshift1.example.com:8443
+    namespace: alice-project
+    user: alice/openshift1.example.com:8443
+  name: alice-project/openshift1.example.com:8443/alice
+- context:
+    cluster: openshift1.example.com:8443
+    namespace: joe-project
+    user: alice/openshift1.example.com:8443
+  name: joe-project/openshift1/alice
+current-context: joe-project/openshift1.example.com:8443/alice <3>
+kind: Config
+preferences: {}
+users: <4>
+- name: alice/openshift1.example.com:8443
+  user:
+    token: xZHd2piv5_9vQrg-SKXRJ2Dsl9SceNJdhNTljEKTb8k
+----
+
+<1> `clusters` 部分定义 统信容器云管理平台 集群的连接详情，包括其 master 服务器的地址。在本例中，一个集群的别名为 `openshift1.example.com:8443`，另一个别名是 `openshift2.example.com:8443`。
+<2> 这个 `contexts` 项定义了两个上下文：一个别名是 `alice-project/openshift1.example.com:8443/alice`，使用 `alice-project` 项目，`openshift1.example.com:8443` 集群以及 alice 用户，另外一个别名是 `joe-project/openshift1.example.com:8443/alice`，使用 `joe-project` 项目，`openshift1.example.com:8443` 集群以及 `alice` 用户。
+<3> `current-context` 参数显示 `joe-project/openshift1.example.com:8443/alice` 上下文当前正在使用中，允许 alice 用户在 `openshift1.example.com:8443` 集群上的 `joe-project` 项目中工作。
+<4> users 部分定义用户凭据。在本例中，用户别名 `alice/openshift1.example.com:8443` 使用访问令牌。
+
+CLI 可以支持多个在运行时加载的配置文件，并合并在一起，以及从命令行指定的覆盖选项。登录后，您可以使用 `oc status` 或 `oc project` 命令验证您当前的环境：
+
+.验证当前工作环境
+
+[source,terminal,options="nowrap"]
+----
+$ oc status
+----
+
+.输出示例
+[source,terminal]
+----
+oc status
+In project Joe's Project (joe-project)
+
+service database (172.30.43.12:5434 -> 3306)
+  database deploys docker.io/openshift/mysql-55-centos7:latest
+    #1 deployed 25 minutes ago - 1 pod
+
+service frontend (172.30.159.137:5432 -> 8080)
+  frontend deploys origin-ruby-sample:latest <-
+    builds https://github.com/openshift/ruby-hello-world with joe-project/ruby-20-centos7:latest
+    #1 deployed 22 minutes ago - 2 pods
+
+To see more information about a service or deployment, use 'oc describe service <name>' or 'oc describe dc <name>'.
+You can use 'oc get all' to see lists of each of the types described in this example.
+----
+
+.列出当前项目
+[source,terminal,options="nowrap"]
+----
+$ oc project
+----
+
+.输出示例
+[source,terminal]
+----
+Using project "joe-project" from context named "joe-project/openshift1.example.com:8443/alice" on server "https://openshift1.example.com:8443".
+----
+
+您可以再次运行 `oc login` 命令，并在互动过程中提供所需的信息，使用用户凭证和集群详情的任何其他组合登录。基于提供的信息构建上下文（如果尚不存在）。如果您已经登录，并希望切换到当前用户已有权访问的另一个项目，请使用 `oc project` 命令并输入项目名称：
+
+[source,terminal,options="nowrap"]
+----
+$ oc project alice-project
+----
+
+.输出示例
+[source,terminal]
+----
+Now using project "alice-project" on server "https://openshift1.example.com:8443".
+----
+
+在任何时候，您可以使用 `oc config view` 命令查看当前的 CLI 配置，如输出中所示。其他 CLI 配置命令也可用于更高级的用法。
+
+[注意]
+====
+如果您可以访问管理员凭证，但不再作为默认系统用户 system:admin 登录，只要仍存在于 CLI 配置文件中，您可以随时以这个用户身份登录。以下命令登录并切换到默认项目：
+
+[source,terminal]
+----
+$ oc login -u system:admin -n default
+----
+====

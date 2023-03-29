@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+[id="odc-customizing-available-cluster-roles-using-developer-perspective_{context}"]
+= 使用开发者视角自定义可用的集群角色
+
+项目的用户根据其访问控制分配到集群角色。您可以通过导航到 *项目* -> *项目访问* -> *角色*。 默认情况下，这些角色为 *Admin*, *Edit*, 和 *View*.
+
+要为项目添加或编辑集群角色，您可以自定义集群的 YAML 代码。
+
+.流程
+自定义项目的不同集群角色：
+
+. 在 *搜索* 视图中，使用 *资源* 下拉列表搜索 `Console`。
+. 在可用选项中，选择 *Console operator.openshift.io/v1*。
++
+.搜索控制台资源
+image::odc_cluster_console.png[]
+. 在 *名称* 列表下选择 *cluster*。
+. 导航到 *YAML* 选项卡以查看和编辑 YAML 代码。
+. 在 `spec` 下的 YAML 代码中，添加或编辑 `availableClusterRoles` 列表并保存您的更改：
++
+[source,yaml]
+----
+spec:
+  customization:
+    projectAccess:
+      availableClusterRoles:
+      - admin
+      - edit
+      - view
+----

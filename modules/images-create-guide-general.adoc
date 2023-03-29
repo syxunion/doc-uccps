@@ -1,0 +1,146 @@
+// Module included in the following assemblies:
+// * openshift_images/create-images.adoc
+
+[id="images-create-guide-general_{context}"]
+= 常规容器镜像准则
+
+无论容器镜像是否在 统信容器云管理平台 中使用，在创建容器镜像时都需要遵循以下指导信息。
+
+[discrete]
+== 重复利用镜像
+
+您的镜像尽可能使用 FROM 语句基于适当的上游镜像。这可确保，在上游镜像更新时您的镜像也可轻松从中获取安全修复，而不必再直接更新依赖项。
+
+此外，请使用 `FROM` 指令中的标签（如 `rhel:rhel7`），方便用户准确了解您的镜像基于哪个版本的镜像。使用除 latest 以外的标签可确保您的镜像不受 latest 版上游镜像重大更改的影响。
+
+[discrete]
+== 在标签内维持兼任性
+
+在为自己的镜像添加标签时，建议尽量在标签内保持向后兼容性。例如，如果您提供名为 foo 的镜像，当前包含 `1.0` 版本，则可提供一个 `foo:v1` 标签。当您更新了镜像时，只要仍与原始镜像兼容，就可继续使用 foo:v1 做为新镜像的标签。而使用这个标签的下游用户就可获得更新，而不会出现问题。
+
+如果后续发布了不兼容的更新，则需要使用新标签，例如 `foo:v2`。这样，下游用户就可以根据需要选择是否升级到新版本，而不会因为不兼容的新镜像造成问题。下游用户如果使用 foo:latest，则可能要承担引入不兼容更改的风险。
+
+[discrete]
+== 避免多进程
+
+不要在同一容器中启动多个服务，如数据库和 SSHD。因为容器是轻量级的，可轻松链接到一起以编排多个进程，所以没有在同一个容器中启动多个服务的必要。您可以利用 统信容器云管理平台 将相关镜像分组到一个 pod 中来轻松并置和共同管理镜像。
+
+这种并置可确保容器共享一个网络命名空间和存储进行通信。因为对每个镜像的更新频率较低且可以独立进行，所以更新所可能带来的破坏风险也较小，单一进程的信号处理流程也更加清晰，因为无需管理将信号路由到多个分散进程的操作。
+
+[discrete]
+== 在 wrapper 脚本中使用 exec
+
+很多镜像在启动正在运行的软件的进程前，会先使用 `wrapper` 脚本进行一些设置。如果您的镜像使用这类脚本，则该脚本应使用 exec，以便使您的软件可以替代脚本的进程。如果不使用 exec，则容器运行时发送的信号将进入 wrapper 脚本，而非软件的进程。这不是您想要的。
+
+如果您有一个为某些服务器启动进程的 `wrapper` 脚本。您启动了容器（例如使用 podman run -i），该容器运行 wrapper 脚本，继而启动您的进程。如果要使用 `CTRL+C` 关闭容器。如果您的 wrapper 脚本使用了 exec 来启动服务器进程，则 podman 会将 SIGINT 发送至服务器进程，一切都可以正常工作。如果您没有在 wrapper 脚本中使用 exec，则 podman 会将 SIGINT 发送至 wrapper 脚本的进程，并且您的进程不会象任何情况一样继续运行。
+
+另请注意，您的进程在容器中运行时，将作为 `PID 1` 运行。这意味着，如果主进程终止，则整个容器都会停止，取消您从 `PID 1` 进程启动的所有子进程。
+
+
+[discrete]
+== 清理临时文件
+
+删除构建过程中创建的所有临时文件。这也包括通过 `ADD` 命令添加的任何文件。例如，在执行 `yum install` 操作后运行 `yum clean` 命令。
+
+您可按照如下所示创建 `RUN` 语句来防止 `yum` 缓存最终留在镜像层：
+
+[source,terminal]
+----
+RUN yum -y install mypackage && yum -y install myotherpackage && yum clean all -y
+----
+
+请注意，如果您改写为：
+
+[source,terminal]
+----
+RUN yum -y install mypackage
+RUN yum -y install myotherpackage && yum clean all -y
+----
+
+则首次 yum 调用会将额外文件留在该层，后续运行 yum clean 操作时无法删除这些文件。最终镜像中看不到这些额外文件，但它们存在于底层中。
+
+如果在较早层中删除了一些内容时，当前容器构建进程不允许在较晚的层中运行一个命令来缩减镜像使用的空间。但是，这个行为可能会在以后的版本中有所改变。这表示，如果在较晚层中执行 rm 命令，虽然被这个命令删除的文件不会出现在镜像中，但它不会使下载的镜像变小。因此，与 yum clean 示例一样，最好尽可能使用创建文件的同一命令删除文件，以免文件最终写入层中。
+
+另外，在单个 RUN 语句中执行多个命令可减少镜像中的层数，缩短下载和提取时间。
+
+[discrete]
+== 按正确顺序放置指令
+
+容器构建程序读取 `Dockerfile`，并自上而下运行指令。成功执行的每个指令都会创建一个层，可在下次构建该镜像或其他镜像时重复使用。务必要将很少更改的指令放置在 Dockerfile 的顶部。这样做可确保下次构建相同镜像会非常迅速，因为缓存不会因为上层变化而失效。
+
+例如：如果您正在使用 `Dockerfile`，它包含一个用于安装正在迭代的文件的 `ADD` 命令，以及一个用于 `yum install` 软件包的 `RUN` 命令，则最好将 ADD 命令放在最后：
+
+[source,terminal]
+----
+FROM foo
+RUN yum -y install mypackage && yum clean all -y
+ADD myfile /test/myfile
+----
+
+这样，您每次编辑 `myfile` 和重新运行 podman build 或 docker build 时，系统都可重复利用 yum 命令的缓存层，仅为 ADD 操作生成新层。
+
+如果您将 `Dockerfile` 改写为：
+
+[source,terminal]
+----
+FROM foo
+ADD myfile /test/myfile
+RUN yum -y install mypackage && yum clean all -y
+----
+
+则您每次更改 `myfile` 和重新运行 podman build 或 docker build 时，ADD 操作都会导致 RUN 层缓存无效，因此 yum 操作也必须要重新运行。
+
+[discrete]
+== 标记重要端口
+
+EXPOSE 指令使主机系统和其它容器可使用容器中的端口。尽管可以指定应当通过 podman run 调用来公开端口，但在 Dockerfile 中使用 EXPOSE 指令可显式声明您的软件需要运行的端口，让用户和软件更易于使用您的镜像：
+
+* 公开端口显示在 podman ps 下，与从您的镜像创建的容器关联。
+* 公开端口存在于 podman inspect 返回的镜像元数据中。
+* 当将一个容器链接到另一容器时，公开端口也会链接到一起
+
+[discrete]
+== 设置环境变量
+
+设置环境变量的最佳做法是使用 `ENV` 指令设置环境变量。一个例子是设置项目版本。这让人可以无需通过查看 `Dockerfile` 便可轻松找到版本。另一示例是在系统上公告可供其他进程使用的路径，如 `JAVA_HOME`。
+
+[discrete]
+== 避免默认密码
+
+避免设置默认密码。许多人扩展镜像时会忘记删除或更改默认密码。如果在生产环境中的用户被分配了众所周知的密码，则这可能引发安全问题。可以使用环境变量来配置密码。
+
+如果您的确要选择设置默认密码，请确保在容器启动时显示适当的警告消息。消息中应告知用户默认密码的值并说明如何修改密码，例如要设置什么环境变量。
+
+[discrete]
+== 避免 sshd
+
+最好避免在您的镜像中运行 sshd。您可使用 `podman exec` 或 `docker exec` 命令访问本地主机上运行的容器。另外，也可使用 `oc exec` 命令或 `oc rsh` 命令访问 统信容器云管理平台 集群上运行的容器。在镜像中安装并运行 `sshd` 会为安全攻击打开额外通道，因而需要安装安全补丁。
+
+[discrete]
+== 对持久性数据使用卷
+
+镜像应对持久性数据使用卷。这样，统信容器云管理平台 便可将网络存储挂载至运行容器的节点，如果容器移至新节点，存储也将重新连接至该节点。通过使用卷来满足所有持久性存储需求，即使容器重启或移动，其内容也会保留下来。如果您的镜像将数据写入容器中的任意位置，则其内容可能无法保留。
+
+所有在容器销毁后仍需要保留的数据都必须写入卷中。容器引擎支持容器的 readonly 标记，可用于严格执行不将数据写入容器临时存储的良好做法。现在围绕该功能设计您的镜像，将更便于以后利用。
+
+在 Dockerfile 中显式定义卷可方便镜像用户轻松了解在运行您的镜像时必须要定义的卷。
+
+有关如何在 统信容器云管理平台 中使用卷的更多信息，请参阅 Kubernetes 文档。
+
+////
+For more information on how Volumes are used in {product-title}, see https://kubernetes.io/docs/concepts/storage/volumes[this documentation]. (NOTE to docs team:  this link should really go to something in the openshift docs, once we have it)
+////
+
+[注意]
+====
+即使具有持久性卷，您的镜像的每个实例也都有自己的卷，且文件系统不会在实例之间共享。这意味着卷无法用于共享集群中的状态。
+====
+
+////
+[role="_additional-resources"]
+.Additional resources
+
+* Docker documentation - https://docs.docker.com/articles/dockerfile_best-practices/[Best practices for writing Dockerfiles]
+
+* Project Atomic documentation - http://www.projectatomic.io/docs/docker-image-author-guidance/[Guidance for Container Image Authors]
+////

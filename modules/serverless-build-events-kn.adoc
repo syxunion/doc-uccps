@@ -1,0 +1,81 @@
+:_content-type: PROCEDURE
+[id="serverless-build-events-kn_{context}"]
+= Building events by using the kn-event plugin
+
+您可以使用`kn event build` 命令的 builder 接口来构建事件。然后，您可以稍后发送该事件或在另一个上下文中使用它。
+
+.先决条件
+
+* 已安装 Knative (`kn`)  CLI。
+
+.流程
+
+* 构建事件：
++
+[source,terminal]
+----
+$ kn event build --field <field-name>=<value> --type <type-name> --id <id> --output <format>
+----
+其中：
+** `--field` 标志将数据作为字段值对添加到事件中。您可以多次使用它。
+** `--type` 标志允许您指定指定事件类型的字符串。
+** `--id` 标志指定事件的 ID。
+** 您可以将 `json` 或 `yaml` 参数与 `--output` 标志一起使用，以更改事件的输出格式。
++
+所有这些标记都是可选的。
++
+.构建简单的事件
+[source,terminal]
+----
+$ kn event build -o yaml
+----
++
+.结果为 YAML 格式
+[source,yaml]
+----
+data: {}
+datacontenttype: application/json
+id: 81a402a2-9c29-4c27-b8ed-246a253c9e58
+source: kn-event/v0.4.0
+specversion: "1.0"
+time: "2021-10-15T10:42:57.713226203Z"
+type: dev.knative.cli.plugin.event.generic
+----
++
+.构建示例事务事件
+[source,terminal]
+----
+$ kn event build \
+    --field operation.type=local-wire-transfer \
+    --field operation.amount=2345.40 \
+    --field operation.from=87656231 \
+    --field operation.to=2344121 \
+    --field automated=true \
+    --field signature='FGzCPLvYWdEgsdpb3qXkaVp7Da0=' \
+    --type org.example.bank.bar \
+    --id $(head -c 10 < /dev/urandom | base64 -w 0) \
+    --output json
+----
++
+.JSON 格式的结果事件
+[source,json]
+----
+{
+  "specversion": "1.0",
+  "id": "RjtL8UH66X+UJg==",
+  "source": "kn-event/v0.4.0",
+  "type": "org.example.bank.bar",
+  "datacontenttype": "application/json",
+  "time": "2021-10-15T10:43:23.113187943Z",
+  "data": {
+    "automated": true,
+    "operation": {
+      "amount": "2345.40",
+      "from": 87656231,
+      "to": 2344121,
+      "type": "local-wire-transfer"
+    },
+    "signature": "FGzCPLvYWdEgsdpb3qXkaVp7Da0="
+  }
+}
+----

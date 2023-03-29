@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * registry/configuring-registry-operator.adoc
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-cas_{context}"]
+= 为镜像 registry 访问配置额外的信任存储
+
+`Image.config.openshift.io/cluster` 自定资源可包含对配置映射的引用，该配置映射包含要在镜像 registry 访问期间被信任的额外证书颁发机构。
+
+.先决条件
+* 证书颁发机构（CA）必须经过 PEM 编码。
+
+.流程
+
+您可以在Uccps-config命名空间中创建配置映射，并在 `image.config.openshift.io` 子定义资源中的 `AdditionalTrustedCA` 中使用其名称，以提供与外部 registry 联系时可以被信任的额外CA。
+
+对于每个要信任的额外 registry CA，配置映射键是带有信任此 CA 的端口的 registry 的主机名，而使用 base64 编码的证书是它的值。
+
+.镜像 registry CA 配置映射示例
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-registry-ca
+data:
+  registry.example.com: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+  registry-with-port.example.com..5000: | <1>
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+----
+<1>  如果 registry 带有端口，如 `registry-with-port.example.com:5000`, `:` 需要被 `..` 替换。
+
+您可以按照以下过程配置其他CA。
+
+. 配置其他CA：
++
+[source,terminal]
+----
+$ oc create configmap registry-config --from-file=<external_registry_address>=ca.crt -n openshift-config
+----
++
+[source,terminal]
+----
+$ oc edit image.config.openshift.io cluster
+----
++
+[source,yaml]
+----
+spec:
+  additionalTrustedCA:
+    name: registry-config
+----

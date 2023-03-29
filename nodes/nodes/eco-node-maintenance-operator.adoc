@@ -1,0 +1,54 @@
+:_content-type: ASSEMBLY
+[id="node-maintenance-operator"]
+= 使用 Node Maintenance Operator 将节点置于维护模式
+include::_attributes/common-attributes.adoc[]
+:context: node-maintenance-operator
+
+toc::[]
+
+您可以使用 Node Maintenance Operator 将节点置于维护模式。这是独立于 Uccps Virtualization 安装的节点维护 Operator 的独立版本。
+
+[注意]
+====
+如果已安装 Uccps Virtualization，则必须使用与之捆绑的 Node Maintenance Operator。
+====
+
+include::modules/eco-about-node-maintenance-standalone.adoc[leveloffset=+1]
+
+include::modules/eco-maintaining-bare-metal-nodes.adoc[leveloffset=+1]
+
+[id="installing-standalone-nmo"]
+== 安装 Node Maintenance Operator
+您可以使用 Web 控制台或 Uccps CLI(oc)安装 Node Maintenance Operator。
+
+include::modules/eco-node-maintenance-operator-installation-web-console.adoc[leveloffset=+2]
+
+include::modules/eco-node-maintenance-operator-installation-cli.adoc[leveloffset=+2]
+
+受限网络环境中支持 Node Maintenance Operator。如需更多信息，请参阅 xref:../../operators/admin/olm-restricted-networks.adoc#olm-restricted-networks[在受限网络中使用 Operator Lifecycle Manager]。
+
+[id="setting-node-in-maintenance-mode"]
+== 将节点设置为维护模式
+您可以通过 web 控制台或使用 `NodeMaintenance` CR 在 CLI 中将节点置于维护模式。
+
+include::modules/eco-setting-node-maintenance-cr-web-console.adoc[leveloffset=+2]
+
+include::modules/eco-setting-node-maintenance-cr-cli.adoc[leveloffset=+2]
+
+include::modules/eco-checking_status_of_node_maintenance_cr_tasks.adoc[leveloffset=+3]
+
+[id="resuming-node-from-maintenance-mode"]
+== 从维护模式恢复节点
+
+您可以通过 CLI 或使用 `NodeMaintenance` CR 从维护模式恢复节点。恢复节点会使节点退出维护模式，并使其可再次调度。
+
+include::modules/eco-resuming-node-maintenance-cr-web-console.adoc[leveloffset=+2]
+
+include::modules/eco-resuming-node-maintenance-cr-cli.adoc[leveloffset=+2]
+
+
+[role="_additional-resources"]
+[id="additional-resources-node-maintenance-operator-installation"]
+== 其他资源
+* xref:../../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-evacuating_nodes-nodes-working[了解如何撤离节点上的 pod]
+* xref:../../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-marking_nodes-nodes-working[了解如何将节点标记为不可调度或可以调度]

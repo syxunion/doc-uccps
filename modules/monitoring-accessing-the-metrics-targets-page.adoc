@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics-targets.adoc
+
+:_content-type: PROCEDURE
+[id="monitoring-accessing-the-metrics-targets-page_{context}"]
+= 在 管理员 视角中访问 Metrics Targets 页面
+
+您可以在 统信容器云管理平台 Web 控制台的 *管理员* 视角中查看 *Metrics Targets* 页面。
+
+.先决条件
+
+* 您可以访问集群，作为您要查看指标目标的项目的管理员。
+
+.流程
+
+* 在 *管理员* 视角中，选择 *Observe* -> *Targets* 。*Metrics Targets* 页面会打开，其中包含为指标提取的所有服务端点目标的列表。
+

@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// installing/installing_alibaba/installing-alibaba-network-customizations.adoc
+// * cli_reference/openshift_cli/getting-started.adoc
+// * installing/installing_aws/installing-aws-user-infra.adoc
+// * installing/installing_aws/installing-aws-customizations.adoc
+// * installing/installing_aws/installing-aws-default.adoc
+// * installing/installing_aws/installing-aws-china.adoc
+// * installing/installing_aws/installing-aws-government-region.adoc
+// * installing/installing_aws/installing-aws-secret-region.adoc
+// * installing/installing_aws/installing-aws-network-customizations.adoc
+// * installing/installing_aws/installing-aws-private.adoc
+// * installing/installing_aws/installing-aws-vpc.adoc
+// * installing/installing_aws/installing-restricted-networks-aws-installer-provisioned.adoc
+// * installing/installing_azure/installing-azure-customizations.adoc
+// * installing/installing_azure/installing-azure-default.adoc
+// * installing/installing_azure/installing-azure-government-region.adoc
+// * installing/installing_azure/installing-azure-private.adoc
+// * installing/installing_azure/installing-azure-vnet.adoc
+// * installing/installing_azure/installing-azure-user-infra.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-default.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-user-infra.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_gcp/installing-gcp-customizations.adoc
+// * installing/installing_gcp/installing-gcp-private.adoc
+// * installing/installing_gcp/installing-gcp-default.adoc
+// * installing/installing_gcp/installing-gcp-vpc.adoc
+// * installing/installing_gcp/installing-gcp-user-infra.adoc
+// * installing/installing_gcp/installing-restricted-networks-gcp-installer-provisioned.adoc
+// * installing/installing_ibm_cloud_public/installing-ibm-cloud-customizations.adoc
+// * installing/installing_ibm_cloud_public/installing-ibm-cloud-network-customizations.adoc
+// * installing/install_config/installing-restricted-networks-preparations.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc.adoc
+// * installing/installing_vmc/installing-vmc-customizations.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-restricted-networks-installer-provisioned-vsphere.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * openshift_images/samples-operator-alt-registry.adoc
+// * installing/installing_rhv/installing-rhv-customizations.adoc
+// * installing/installing_rhv/installing-rhv-default.adoc
+// * updating/updating-restricted-network-cluster/restricted-network-update.adoc
+//
+// AMQ docs link to this; do not change anchor
+
+ifeval::["{context}" == "updating-restricted-network-cluster"]
+:restricted:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="cli-installing-cli_{context}"]
+= 通过下载二进制文件安装 Uccps CLI
+
+您可以安装 Uccps CLI(oc)来使用命令行界面与 统信容器云管理平台 进行交互。您可以在 Linux、Windows 或 macOS 上安装 oc。
+
+[重要]
+====
+如果安装了旧版本的 oc，则无法使用 统信容器云管理平台 1.2 中的所有命令。下载并安装新版本的 oc。
+====
+
+[discrete]
+== 在 Linux 上安装 Uccps CLI
+
+您可以按照以下流程在 Linux 上安装 Uccps CLI(oc)二进制文件。
+
+.流程
+
+
+. 导航到 统信容器云管理平台 下载页面。
+. 在 Version 下拉菜单中选择相应的版本。
+. 点 Uccps 1.2 Linux Client 条目旁的 Download Now 来保存文件。
+
+. 解包存档：
++
+[source,terminal]
+----
+$ tar xvzf <file>
+----
+. 将 oc 二进制文件放到 PATH 中的目录中。
++
+要查看您的 PATH，请执行以下命令：
++
+[source,terminal]
+----
+$ echo $PATH
+----
+
+安装 Uccps CLI 后，可以使用 oc 命令：
+
+[source,terminal]
+----
+$ oc <command>
+----

@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-node-selectors
+[id="nodes-pods-node-selectors"]
+= 使用节点选择器将 pod 放置到特定节点
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+_节点选择器_ 指定一个键值对映射。使用节点中的自定义标签和 pod 中指定的选择器来定义规则。
+
+若要使 pod 有资格在某一节点上运行，pod 必须具有指定为该节点上标签的键值对。
+
+如果您在同一 pod 配置中同时使用节点关联性和节点选择器，请查看下方的重要注意事项。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-scheduler-node-selectors-pod.adoc[leveloffset=+1]
+

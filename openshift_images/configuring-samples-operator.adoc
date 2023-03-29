@@ -1,0 +1,35 @@
+:_content-type: ASSEMBLY
+[id="configuring-samples-operator"]
+= 配置 the Cluster Samples Operator
+include::_attributes/common-attributes.adoc[]
+:context: configuring-samples-operator
+
+toc::[]
+
+Cluster Samples Operator 运行在 Uccps 命名空间中，用于安装和更新基于 UnionTech Enterprise Linux (RHEL) 的 统信容器云管理平台 镜像流和 统信容器云管理平台 模板。
+
+include::modules/samples-operator-overview.adoc[leveloffset=+1]
+
+[discrete]
+[role="_additional-resources"]
+== 其他资源
+
+* 如果在安装过程中删除了 Cluster Samples Operator，您可以 xref:../openshift_images/samples-operator-alt-registry.adoc#samples-operator-alt-registry[使用带有备用 registry] 的 Cluster Samples Operator，以便导入内容，然后将 Cluster Samples Operator 设置为 Managed 来获取示例。
+* 确保在带有初始网络访问权限的受限网络安装中将 Cluster Samples Operator 引导为 `Removed`，直到您决定需要哪些样本，请按照 xref:../installing/install_config/installing-customizing.adoc#installing-customizing[自定义节点] 来覆盖 Cluster Samples Operator 默认配置，最初以 `Removed` 的形式出现。
+** 要在断开连接的环境中托管示例，请按照 xref:../openshift_images/samples-operator-alt-registry.adoc#samples-operator-alt-registry[使用带有备用 registry] 的Cluster Samples Operator 的说明进行操作。
+
+include::modules/installation-images-samples-disconnected-mirroring-assist.adoc[leveloffset=+2]
+
+如需了解详细信息，请参阅 xref:../openshift_images/samples-operator-alt-registry.adoc#installation-restricted-network-samples_samples-operator-alt-registry[使用带有备用或镜像 registry 的 Cluster Samples Operator 镜像流]。
+
+include::modules/samples-operator-configuration.adoc[leveloffset=+1]
+
+include::modules/samples-operator-crd.adoc[leveloffset=+1]
+
+include::modules/images-samples-operator-deprecated-image-stream.adoc[leveloffset=+1]
+
+[discrete]
+[role="_additional-resources"]
+== 其他资源
+
+* 有关配置凭证的更多信息，请参阅 xref:../openshift_images/managing_images/using-image-pull-secrets.adoc#using-image-pull-secrets[使用镜像 pull secret]。

@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/viewing-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:name: network
+:role: admin
+ifeval::["{context}" == "configuring-multi-network-policy"]
+:multi:
+:name: multi-network
+:role: cluster-admin
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-view_{context}"]
+=  查看网络策略
+
+您可以检查命名空间中的网络策略。
+
+[注意]
+====
+如果使用具有 `cluster-admin` 角色的用户登录，您可以查看集群中的任何网络策略。
+====
+
+.先决条件
+
+* 已安装 Uccp CLI (`oc`).
+* 您可以使用具有 admin 权限的用户登陆到集群。
+* 您在网络策略所在的命名空间中。
+
+.流程
+
+* 列出命名空间中的网络策略：
+
+** 要查看命名空间中定义的网络策略对象，请输入以下命令：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get {name}policy
+----
+
+** 可选： 要检查特定的网络策略，请输入以下命令：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc describe {name}policy <policy_name> -n <namespace>
+----
++
+--
+其中：
+
+  `<policy_name>`:: 指定要检查的网络策略的名称。
+  `<namespace>`:: 可选： 如果对象在与当前命名空间不同的命名空间中定义，使用它来指定命名空间。
+--
+
++
+例如：
++
+[source,terminal]
+----
+$ oc describe networkpolicy allow-same-namespace
+----
++
+.oc describe 命令的输出
+[source,text]
+----
+Name:         allow-same-namespace
+Namespace:    ns1
+Created on:   2021-05-24 22:28:56 -0400 EDT
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      PodSelector: <none>
+  Not affecting egress traffic
+  Policy Types: Ingress
+----
+
+
+[注意]
+====
+如果您使用 `cluster-admin` 权限登录到 web 控制台，您可以选择在集群中的任何命名空间中以 YAML 或 web 控制台的形式查看网络策略。
+====

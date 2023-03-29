@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * machine_management/deploying-machine-health-checks.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="machine-health-checks-about_{context}"]
+= 关于机器健康检查
+
+机器健康检查自动修复特定机器池中不健康的机器。
+
+要监控机器的健康状况，创建资源来定义控制器的配置。设置要检查的条件（例如，处于 NotReady 状态达到 5 分钟或 node-problem-detector 中显示了持久性状况），以及用于要监控的机器集合的标签。
+
+[注意]
+====
+您不能对具有 master 角色的机器进行机器健康检查。
+====
+
+监控 `MachineHealthCheck` 资源的控制器会检查定义的条件。如果机器无法进行健康检查，则会自动删除机器并创建一个机器来代替它。删除机器之后，您会看到机器被删除事件。
+
+为限制删除机器造成的破坏性影响，控制器一次仅清空并删除一个节点。如果目标机器池中不健康的机器池中不健康的机器数量大于 `maxUnhealthy` 的值，则补救会停止，需要启用手动干预。
+
+[注意]
+====
+请根据工作负载和要求仔细考虑超时。
+
+* 超时时间较长可能会导致不健康的机器上的工作负载长时间停机。
+* 超时时间太短可能会导致补救循环。例如，检查 `NotReady` 状态的超时时间必须足够长，以便机器能够完成启动过程。
+====
+
+要停止检查，请删除资源。
+
+[id="machine-health-checks-limitations_{context}"]
+== 部署机器健康检查时的限制
+
+部署机器健康检查前需要考虑以下限制：
+
+* 只有机器集拥有的机器才可以由机器健康检查修复。
+* 目前不支持 control plane 机器，如果不健康，则不会被修复。
+* 如果机器的节点从集群中移除，机器健康检查会认为机器不健康，并立即修复机器。
+* 如果机器对应的节点在 `nodeStartupTimeout` 之后没有加入集群，则会修复机器。
+* 如果 `Machine` 资源阶段为 `Failed`，则会立即修复机器。

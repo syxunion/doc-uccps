@@ -1,0 +1,83 @@
+// Module included in the following assemblies:
+//
+// * /serverless/functions/serverless-functions-on-cluster-builds.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-functions-creating-on-cluster-builds_{context}"]
+= 在集群中构建和部署功能
+
+您可以使用 Knative (`kn`) CLI 启动功能项目构建，然后直接将功能部署到集群中。若要以这种方式构建功能项目，您的功能项目的源代码必须存在于可供集群访问的 Git 存储库分支中。
+
+.先决条件
+
+* 在集群中必须安装 Uccps Pipelines。
+
+* 已安装 Uccps CLI (`oc`).
+
+* 已安装 Knative  (`kn`) CLI.
+
+.流程
+
+. 在您要运行 Pipelines 和部署功能的每个命名空间中，您必须创建以下资源：
+
+.. 创建 `s2i` Tekton 任务，以便在管道中使用 Source-to-Image：
++
+[source,terminal]
+----
+$ oc apply -f https://raw.githubusercontent.com/openshift-knative/kn-plugin-func/serverless-1.26.0/pipelines/resources/tekton/task/func-s2i/0.1/func-s2i.yaml
+----
+
+.. 创建 `kn func` 部署 Tekton 任务，以便在管道中部署该功能：
++
+[source,terminal]
+----
+$ oc apply -f https://raw.githubusercontent.com/openshift-knative/kn-plugin-func/serverless-1.26.0/pipelines/resources/tekton/task/func-deploy/0.1/func-deploy.yaml
+----
+
+. 创建功能：
++
+[source,terminal]
+----
+$ kn func create <function_name> -l <runtime>
+----
+
+. 在创建了新的功能项目后，您必须将项目添加到 Git 存储库，并确保该存储库可供集群使用。关于此 Git 存储库的信息用于在下一步中更新  `func.yaml` 文件。
+
+. 更新功能项目的 `func.yaml` 文件中的配置，以便为 Git 仓库启用 on-cluster 构建：
++
+[source,yaml]
+----
+...
+git:
+  url: <git_repository_url> <1>
+  revision: main <2>
+  contextDir: <directory_path> <3>
+...
+----
+<1> 必需。指定包含功能源代码的 Git 存储库。
+<2> 可选。指定要使用的 Git 存储库修订。这可以是分支、标签或提交。
+<3> 可选。如果函数没有位于 Git 存储库根文件夹中，请指定函数的目录的路径。
+
+. 实施您功能的业务逻辑。然后，使用 Git 提交并推送更改。
+
+. 部署功能：
++
+[source,terminal]
+----
+$ kn func deploy --remote
+----
++
+如果您没有登录到功能配置中引用的容器 registry，系统会提示您为托管功能镜像的远程容器 registry 提供凭证：
++
+.输出和提示示例
+[source,terminal]
+----
+🕕 Creating Pipeline resources
+Please provide credentials for image registry used by Pipeline.
+? Server: https://index.docker.io/v1/
+? Username: my-repo
+? Password: ********
+   Function deployed at URL: http://test-function.default.svc.cluster.local
+----
+
+. 要更新您的功能，使用 Git 提交并推送新的更改，然后再次运行 `kn func deploy --remote` 命令。

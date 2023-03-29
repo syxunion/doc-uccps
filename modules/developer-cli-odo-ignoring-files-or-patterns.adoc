@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/configuring-the-odo-cli.adoc  
+
+[id="ignoring-files-or-patterns_{context}"]
+= 忽略文件或特征
+
+您可以通过修改应用程序根目录中的 `.odoignore` 文件来配置要忽略的文件或模式列表。这适用于 `odo push` 和 `odo watch`。
+
+如果 `.odoignore` 文件 不 存在，则会使用 `.gitignore` 文件来忽略特定的文件和文件夹。
+
+要忽略 `.git` 文件、任意带有 `.js` 扩展名的文件，以及 `tests` 目录，在 `.odoignore` 或 `.gitignore` 文件中添加以下内容：
+
+----
+.git
+*.js
+tests/
+----
+
+`.odoignore` 文件 允许任何 glob 表达式。

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress_operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-configuring-router-compression_{context}"]
+= 使用路由器压缩
+
+您可以将 HAProxy Ingress Controller 配置为为特定 MIME 类型全局指定路由器压缩。您可以使用 `mimeTypes` 变量定义压缩应用到的 MIME 类型的格式。类型包括：application, image, message, multipart, text, video, 或带有一个 "X-" 前缀的自定义类型。要查看 MIME 类型和子类型的完整表示法，请参阅 RFC1341。
+
+[注意]
+====
+为压缩分配的内存可能会影响最大连接。此外，对大型缓冲区的压缩可能导致延迟，如非常复杂的正则表达式或较长的正则表达式列表。
+
+并非所有 MIME 类型从压缩中受益，但 HAProxy 仍然使用资源在指示时尝试压缩。通常而言，文本格式（如 html、css 和 js）与压缩格式获益，但已经压缩的格式（如图像、音频和视频）可能会因为需要压缩操作而无法获得太多的好处。
+====
+
+.流程
+
+. 为 Ingress Controller 配置 `httpCompression` 字段。
+.. 使用以下命令来编辑 `IngressController` 资源：
++
+[source,terminal]
+----
+$ oc edit -n openshift-ingress-operator ingresscontrollers/default
+----
++
+.. 在 `spec` 下，将 `httpCompression` 策略字段设置为 `mimeTypes`，并指定应该应用压缩的 MIME 类型列表：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  httpCompression:
+    mimeTypes:
+    - "text/html"
+    - "text/css; charset=utf-8"
+    - "application/json"
+   ...
+----

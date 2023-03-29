@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+
+[id="example-apache-httpd-configuration_{context}"]
+= 基本身份供应商的 Apache HTTPD 配置示例
+
+统信容器云管理平台中的基本身份供应商 (IDP) 配置要求 IDP 服务器的 JSON 响应以获得成功和失败。您可以使用 Apache HTTPD 中的 CGI 脚本来达到此目的。本节提供示例。
+
+.`/etc/httpd/conf.d/login.conf` 示例
+----
+<VirtualHost *:443>
+  # CGI Scripts in here
+  DocumentRoot /var/www/cgi-bin
+
+  # SSL Directives
+  SSLEngine on
+  SSLCipherSuite PROFILE=SYSTEM
+  SSLProxyCipherSuite PROFILE=SYSTEM
+  SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+  SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+  # Configure HTTPD to execute scripts
+  ScriptAlias /basic /var/www/cgi-bin
+
+  # Handles a failed login attempt
+  ErrorDocument 401 /basic/fail.cgi
+
+  # Handles authentication
+  <Location /basic/login.cgi>
+    AuthType Basic
+    AuthName "Please Log In"
+    AuthBasicProvider file
+    AuthUserFile /etc/httpd/conf/passwords
+    Require valid-user
+  </Location>
+</VirtualHost>
+----
+
+.`/var/www/cgi-bin/login.cgi` 示例
+----
+#!/bin/bash
+echo "Content-Type: application/json"
+echo ""
+echo '{"sub":"userid", "name":"'$REMOTE_USER'"}'
+exit 0
+----
+
+.`/var/www/cgi-bin/fail.cgi` 示例
+----
+#!/bin/bash
+echo "Content-Type: application/json"
+echo ""
+echo '{"error": "Login failure"}'
+exit 0
+----
+
+== 文件要求
+
+以下是您在 Apache HTTPD Web 服务器中创建的文件要求：
+
+* `login.cgi` 和 `fail.cgi` 必须可执行 (`chmod +x`).
+* 如果启用了 `SELinux`，`login.cgi` 和 fail.cgi 需要有适当的 SELinux 上下文：`restorecon -RFv /var/www/cgi-bin`，或确保上下文是 `httpd_sys_script_exec_t`（运行 ls -laZ）。
+* `login.cgi` 只有在用户根据 Require and Auth 项成功登陆时才执行。
+* `如果用户无法登录，则执行 `fail.cgi`，并做出 HTTP 401 响应。

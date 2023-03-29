@@ -1,0 +1,158 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: CONCEPT
+[id="serverless-invoking-quarkus-functions_{context}"]
+= 关于调用 Quarkus 功能
+
+您可以创建一个 Quarkus 项目来响应云事件，或创建响应简单 HTTP 请求的 Quarkus 项目。Knative 中的云事件作为 POST 请求通过 HTTP 传输，因此任一功能类型都可以侦听和响应传入的 HTTP 请求。
+
+收到传入请求时，通过允许类型的实例调用 Quarkus 函数。
+
+.功能调用选项
+[options="header",cols="d,d,m"]
+|====
+|调用方法 |实例中包含的数据类型 |数据示例
+|HTTP POST 请求 | 请求正文中的 JSON 对象 |`{ "customerId": "0123456", "productId": "6543210" }`
+|HTTP GET 请求 | 查询字符串中的数据 |`?customerId=0123456&productId=6543210`
+|`CloudEvent` | 属性中的 JSON 对象 |`{ "customerId": "0123456", "productId": "6543210" }`
+|====
+
+以下示例显示了接收并处理上表中列出的 `customerId` 和 `productId` 购买数据的函数：
+
+.Quarkus 功能示例
+[source,java]
+----
+public class Functions {
+    @Funq
+    public void processPurchase(Purchase purchase) {
+        // process the purchase
+    }
+}
+----
+
+包含购买数据的对应 `Purchase` JavaBean 类如下：
+
+.类示例
+[source,java]
+----
+public class Purchase {
+    private long customerId;
+    private long productId;
+    // getters and setters
+}
+----
+
+[id="serverless-invoking-quarkus-functions-examples_{context}"]
+== 调用示例
+
+以下示例代码定义了名为 `withBeans`, `withCloudEvent` 和 `withBinary` 的三个功能；
+
+.示例
+[source,java]
+----
+import io.quarkus.funqy.Funq;
+import io.quarkus.funqy.knative.events.CloudEvent;
+
+public class Input {
+    private String message;
+
+    // getters and setters
+}
+
+public class Output {
+    private String message;
+
+    // getters and setters
+}
+
+public class Functions {
+    @Funq
+    public Output withBeans(Input in) {
+        // function body
+    }
+
+    @Funq
+    public CloudEvent<Output> withCloudEvent(CloudEvent<Input> in) {
+        // function body
+    }
+
+    @Funq
+    public void withBinary(byte[] in) {
+        // function body
+    }
+}
+----
+
+`Functions` 类的 `withBeans` 功能可以通过以下方法调用：
+
+* 带有 JSON 正文的 HTTP POST 请求：
++
+[source,terminal]
+----
+$ curl "http://localhost:8080/withBeans" -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"message": "Hello there."}'
+----
+* 带有查询参数的 HTTP GET 请求：
++
+[source,terminal]
+----
+$ curl "http://localhost:8080/withBeans?message=Hello%20there." -X GET
+----
+* 二进制编码中的 `CloudEvent` 对象：
++
+[source,terminal]
+----
+$ curl "http://localhost:8080/" -X POST \
+  -H "Content-Type: application/json" \
+  -H "Ce-SpecVersion: 1.0" \
+  -H "Ce-Type: withBeans" \
+  -H "Ce-Source: cURL" \
+  -H "Ce-Id: 42" \
+  -d '{"message": "Hello there."}'
+----
+* 结构化编码中的 `CloudEvent` 对象：
++
+[source,terminal]
+----
+$ curl http://localhost:8080/ \
+    -H "Content-Type: application/cloudevents+json" \
+    -d '{ "data": {"message":"Hello there."},
+          "datacontenttype": "application/json",
+          "id": "42",
+          "source": "curl",
+          "type": "withBeans",
+          "specversion": "1.0"}'
+----
+
+与 `withCloudEvent` 函数类似，可以利用 `CloudEvent` 对象来调用 `Functions` 类的 `withBeans` 功能。但是，与 Beans 不同，CloudEvent 无法通过普通 HTTP 请求来调用。 
+
+`Functions` 类的 `withBinary` 功能可通过以下方式调用：
+
+* 二进制编码中的 `CloudEvent` 对象：
++
+[source]
+----
+$ curl "http://localhost:8080/" -X POST \
+  -H "Content-Type: application/octet-stream" \
+  -H "Ce-SpecVersion: 1.0"\
+  -H "Ce-Type: withBinary" \
+  -H "Ce-Source: cURL" \
+  -H "Ce-Id: 42" \
+  --data-binary '@img.jpg'
+----
+* 结构化编码中的 `CloudEvent` 对象：
++
+[source]
+----
+$ curl http://localhost:8080/ \
+  -H "Content-Type: application/cloudevents+json" \
+  -d "{ \"data_base64\": \"$(base64 --wrap=0 img.jpg)\",
+        \"datacontenttype\": \"application/octet-stream\",
+        \"id\": \"42\",
+        \"source\": \"curl\",
+        \"type\": \"withBinary\",
+        \"specversion\": \"1.0\"}"
+----

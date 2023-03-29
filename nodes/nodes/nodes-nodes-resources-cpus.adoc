@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+:context: nodes-nodes-resources-cpus
+[id="nodes-nodes-resources-cpus"]
+= 为集群中的节点分配特定 CPU
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+使用静态 CPU Manager 策略时，您可以保留特定的 CPU，供集群中的特定节点使用。例如，在具有 24 个 CPU 的系统中，您可以为 control plane 保留编号为 0-3 的 CPU，允许计算节点使用 CPU 4 到 23。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-resources-cpus-reserve.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关 `systemReserved` 和 `kubeReserved` 参数的更多信息，请参阅 xref:../../nodes/nodes/nodes-nodes-resources-configuring.html#nodes-nodes-resources-configuring-about_nodes-nodes-resources-configuring[为 统信容器云管理平台 集群中的节点分配资源].

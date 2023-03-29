@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * storage/understanding-persistent-storage.adoc
+//
+// This module should only be present in openshift-enterprise and
+// openshift-origin distributions.
+
+[id="block-volume-support_{context}"]
+= 块卷支持
+
+统信容器云管理平台可以静态置备原始块卷。这些卷没有文件系统。对于可以直接写入磁盘或者实现其自己的存储服务的应用程序来说，使用它可以获得性能优势。
+
+原始块卷可以通过在 PV 和 PVC 规格中指定 `volumeMode: Block` 来置备。
+
+[重要]
+====
+使用原始块卷的 pod 需要配置为允许特权容器。
+====
+
+下表显示了哪些卷插件支持块卷。
+
+.块卷支持
+[cols="1,1,1,1", width="100%",options="header"]
+|===
+|卷插件  |手动置备  |动态置备 |完全支持
+|Cinder | ✅ | ✅ | ✅
+|Fibre Channel | ✅ | | ✅
+|HostPath | | |
+|iSCSI | ✅ | | ✅
+|Local volume | ✅ || ✅
+|NFS | | |
+|{rh-storage-first} | ✅ | ✅ | ✅
+|VMware vSphere  | ✅ | ✅ | ✅
+|===
+
+[注意]
+====
+可手动置备但未提供完全支持的块卷作可能在功能方面有缺陷。不推荐在生产环境中使用它们。
+====

@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//  * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-creating-route-for-application_{context}"]
+= 为您的应用程序创建路由
+
+您可公开服务来为您的应用程序创建路由。
+
+.流程
+
+* 要通过向服务提供外部可访问的主机名（如 `www.example.com`）来公开服务，请使用 统信容器云管理平台 路由。对于您的情况，需要通过键入以下命令来公开前端服务：
++
+[source,terminal]
+----
+$ oc expose service rails-app --hostname=www.example.com
+----
+
+[警告]
+====
+确保您指定的主机名解析为路由器的 IP 地址。
+====

@@ -1,0 +1,123 @@
+:_content-type: REFERENCE
+[id="odo-storage_{context}"]
+= odo storage
+
+
+`odo` 允许用户管理附加到组件的存储卷。存储卷可以是使用 `emptyDir` Kubernetes 卷或 持久性卷声明 (PVC)的临时卷。PVC 允许用户声明持久性卷（如 GCE PersistentDisk 或 iSCSI 卷），而无需了解特定的云环境的详情。持久性存储卷可用于在重启后保留数据，并重新构建组件。
+
+== 添加存储卷
+
+要在集群中添加存储卷，请运行以下命令：
+
+[source,terminal]
+----
+$ odo storage create
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo storage create store --path /data --size 1Gi
+✓  Added storage store to nodejs-project-ufyy
+
+$ odo storage create tempdir --path /tmp --size 2Gi --ephemeral
+✓  Added storage tempdir to nodejs-project-ufyy
+
+Please use `odo push` command to make the storage accessible to the component
+----
+
+
+在上例中，第一个存储卷已挂载到 `/data` 路径中，大小为 1Gi，第二个卷已挂载到 `/tmp`，并且是临时卷。
+
+== 列出存储卷
+
+要检查组件当前使用的存储卷，请运行以下命令：
+
+[source,terminal]
+----
+$ odo storage list
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo storage list
+The component 'nodejs-project-ufyy' has the following storage attached:
+NAME      SIZE     PATH      STATE
+store     1Gi      /data     Not Pushed
+tempdir   2Gi      /tmp      Not Pushed
+----
+
+== 删除存储卷
+
+要删除存储卷，请运行以下命令：
+
+[source,terminal]
+----
+$ odo storage delete
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo storage delete store -f
+Deleted storage store from nodejs-project-ufyy
+
+Please use `odo push` command to delete the storage from the cluster
+----
+
+在上例中，使用 `-f` 标志强制删除存储而无需询问用户权限。
+
+== 在特定容器中添加存储
+
+如果您的 devfile 有多个容器，您可以使用 `odo storage create` 命令中的 `--container` 标志指定您要将存储附加到的容器。
+
+以下示例是带有多个容器的 devfile 摘录：
+
+[source,yaml]
+----
+components:
+  - name: nodejs1
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-12:1-36
+      memoryLimit: 1024Mi
+      endpoints:
+        - name: "3000-tcp"
+          targetPort: 3000
+      mountSources: true
+  - name: nodejs2
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-12:1-36
+      memoryLimit: 1024Mi
+----
+
+在示例中，有两个容器 `nodejs1` 和 `nodejs2`。要将存储附加到 `nodejs2` 容器，请使用以下命令：
+
+[source,terminal]
+----
+$ odo storage create --container
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo storage create store --path /data --size 1Gi --container nodejs2
+✓  Added storage store to nodejs-testing-xnfg
+
+Please use `odo push` command to make the storage accessible to the component
+----
+
+您可以使用 `odo storage list` 命令列出存储资源：
+
+[source,terminal]
+----
+$ odo storage list
+----
+
+.输出示例：
+[source,terminal]
+----
+The component 'nodejs-testing-xnfg' has the following storage attached:
+NAME      SIZE     PATH      CONTAINER     STATE
+store     1Gi      /data     nodejs2       Not Pushed
+----

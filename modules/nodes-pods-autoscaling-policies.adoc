@@ -1,0 +1,106 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling.adoc
+
+[id="nodes-pods-autoscaling-policies_{context}"]
+= 扩展策略
+
+The `autoscaling/v2` API 允许您为 pod 横向自动扩展添加 扩展策略。扩展策略用于控制 统信容器云管理平台 横向自动扩展（HPA）如何扩展 pod。扩展策略允许您通过设置在指定时间段内扩展的特定数量或特定百分比来限制 HPA 扩展或缩减的速率。您还可以定义一个稳定化窗口 （_stabilization window_），在指标有较大波动时，使用之前计算出的期望状态来控制扩展。您可以为相同的扩展方向创建多个策略，并根据更改的大小决定使用哪些策略。您还可以通过计时的迭代限制缩放。HPA 在迭代过程中扩展 pod，然后在以后的迭代中执行扩展（如果需要）。
+
+.带有扩展策略的 HPA 对象示例
+[source, yaml]
+----
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-resource-metrics-memory
+  namespace: default
+spec:
+  behavior:
+    scaleDown: <1>
+      policies: <2>
+      - type: Pods <3>
+        value: 4 <4>
+        periodSeconds: 60 <5>
+      - type: Percent
+        value: 10 <6>
+        periodSeconds: 60
+      selectPolicy: Min <7>
+      stabilizationWindowSeconds: 300 <8>
+    scaleUp: <9>
+      policies:
+      - type: Pods
+        value: 5 <10>
+        periodSeconds: 70
+      - type: Percent
+        value: 12 <11>
+        periodSeconds: 80
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+...
+----
+<1> 指定扩展策略的方向，可以是 `scaleDown` 或 `scaleUp` 。本例为缩减创建一个策略。
+<2> 定义扩展策略。
+<3> 决定策略是否在每次迭代过程中根据特定的 pod 数量或 pod 百分比进行扩展。默认值为 `pods`.
+<4> 决定在每次迭代过程中缩放数量（pod 数量或 pod 的百分比）。在按 pod 数量进行缩减时没有默认的值。
+<5> 决定扩展迭代的长度。默认值为 15 秒。
+<6> 按百分比缩减的默认值为 100%。
+<7> 如果定义了多个策略，则决定首先使用哪个策略。指定 Max 使用允许最多更改的策略，Min 使用允许最小更改的策略，或者 Disabled 阻止 HPA 在策略方向进行扩展。默认值为 Max。
+<8> 决定 HPA 应该重新查看所需状态的时间周期。默认值为 0。
+<9> 本例为扩展创建了策略。
+<10> 根据 pod 数量进行扩展的数量。扩展 pod 数量的默认值为 4%.
+<11> 按 pod 百分比扩展的数量。按百分比扩展的默认值为 100%。
+
+.缩减策略示例
+[source,yaml]
+----
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-resource-metrics-memory
+  namespace: default
+spec:
+...
+  minReplicas: 20
+...
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 30
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      selectPolicy: Disabled
+----
+
+在本例中，当 pod 的数量大于 40 时，则使用基于百分比的策略进行缩减。这个策略会产生较大变化，这是 selectPolicy 需要的。
+
+如果有 80 个 pod 副本，在第一次迭代时 HPA 会将 pod 减少 8 个，即 80 个 pod 的 10%（根据 type: Percent 和 value: 10 参数），持续一分钟（periodSeconds: 60）。对于下一个迭代，pod 的数量为 72。HPA 计算剩余 pod 的 10% 为 7.2，这个数值被舍入到 8，这会缩减 8 个 pod。在每一后续迭代中，将根据剩余的 pod 数量重新计算要缩放的 pod 数量。当 pod 的数量低于 40 时，基于 pod 的策略会被应用，因为基于 pod 的数值会大于基于百分比的数值。HPA 每次减少 4 个 pod（type: Pod 和 value: 4），持续 30 秒（periodSeconds: 30），直到剩余 20 个副本（minReplicas）。
+
+`selectPolicy: Disabled` 参数可防止 HPA 扩展 pod。如果需要，可以通过调整副本集或部署集中的副本数来手动扩展。
+
+如果设置，您可以使用 oc edit 命令查看扩展策略：
+
+[source,terminal]
+----
+$ oc edit hpa hpa-resource-metrics-memory
+----
+
+.输出示例
+[source,terminal]
+----
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations:
+    autoscaling.alpha.kubernetes.io/behavior:\
+'{"ScaleUp":{"StabilizationWindowSeconds":0,"SelectPolicy":"Max","Policies":[{"Type":"Pods","Value":4,"PeriodSeconds":15},{"Type":"Percent","Value":100,"PeriodSeconds":15}]},\
+"ScaleDown":{"StabilizationWindowSeconds":300,"SelectPolicy":"Min","Policies":[{"Type":"Pods","Value":4,"PeriodSeconds":60},{"Type":"Percent","Value":10,"PeriodSeconds":60}]}}'
+...
+----
+

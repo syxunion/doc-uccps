@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-using-brokers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-broker-labeling_{context}"]
+= 通过标记命名空间来创建代理
+
+代理可与触发器结合使用，用于将事件源发送到事件 sink。您可以通过标记您拥有的命名空间或具有写入权限来自动创建 `default` 代理。
+
+[注意]
+====
+如果您删除该标签，则不会删除使用这个方法创建的代理。您必须手动删除它们。
+====
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title}  集群中。
+* 安装 Uccps CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+* 使用 `eventing.knative.dev/injection=enabled` 标识一个命名空间：
++
+[source,terminal]
+----
+$ oc label namespace <namespace> eventing.knative.dev/injection=enabled
+----
+
+.验证
+
+您可以使用 oc CLI，或使用 web 控制台中的 *拓扑* 视图来验证代理是否已成功创建。
+
+. 使用 oc 命令获取代理：
++
+[source,terminal]
+----
+$ oc -n <namespace> get broker <broker_name>
+----
++
+.示例命令
+[source,terminal]
+----
+$ oc -n default get broker default
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      READY     REASON    URL                                                                     AGE
+default   True                http://broker-ingress.knative-eventing.svc.cluster.local/test/default   3m56s
+----
+
+. 可选：如果使用 统信容器云管理平台 控制台，在 *开发者* 视角中进入 *拓扑* 视图来查看存在的代理：
++
+image::odc-view-broker.png[View the broker in the web console 拓扑 view]
+// need to add separate docs for broker in ODC - out of scope for this PR

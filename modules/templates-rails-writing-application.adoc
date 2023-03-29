@@ -1,0 +1,76 @@
+// Module included in the following assemblies:
+// * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-writing-application_{context}"]
+= 编写应用程序
+
+如果要从头开始启动 Rails 应用程序，必须先安装 Rails gem，然后才可编写应用程序。
+
+.流程
+
+. 安装 Rails gem：
++
+[source,terminal]
+----
+$ gem install rails
+----
++
+.输出示例
+[source,terminal]
+----
+Successfully installed rails-4.3.0
+1 gem installed
+----
+
+. 安装完 Rails gem 后，使用 PostgreSQL 创建一个新应用程序，作为数据库：
++
+[source,terminal]
+----
+$ rails new rails-app --database=postgresql
+----
+
+. 更改至新应用程序目录：
++
+[source,terminal]
+----
+$ cd rails-app
+----
+
+. 如果您已有应用程序，请确保 `Gemfile` 中存在 pg (postgresql) gem。如果尚无应用程序，则通过添加 gem 来编辑 `Gemfile`：
++
+[source,terminal]
+----
+gem 'pg'
+----
+
+. 使用所有依赖项生成新的 `Gemfile.lock`：
++
+[source,terminal]
+----
+$ bundle install
+----
+
+. 除了将 postgresql 数据库与 `pg gem` 结合使用外，您还必须确保 `config/database.yml` 正在使用 `postgresql` 适配器。
++
+请确保更新了 `config/database.yml` 文件中的 `default` 部分，如下所示：
++
+[source,yaml]
+----
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  host: localhost
+  username: rails
+  password:
+----
+
+. 创建应用程序的开发和测试数据库：
++
+[source,terminal]
+----
+$ rake db:create
+----
++
+这会在您的 PostgreSQL 服务器中创建 `development` 和 `test` 数据库。

@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="creating-applications-using-cli"]
+= 使用 CLI 创建应用程序
+include::_attributes/common-attributes.adoc[]
+:context: creating-applications-using-cli
+
+toc::[]
+
+您可以使用 统信容器云管理平台 CLI，从包含源代码或二进制代码、镜像和模板的组件创建 统信容器云管理平台 应用程序。
+
+由 `new-app` 创建的对象集合取决于作为输入传递的工件，如输入源存储库、镜像或模板。
+
+include::modules/applications-create-using-cli-source-code.adoc[leveloffset=+1]
+
+include::modules/applications-create-using-cli-image.adoc[leveloffset=+1]
+
+include::modules/applications-create-using-cli-template.adoc[leveloffset=+1]
+
+include::modules/applications-create-using-cli-modify.adoc[leveloffset=+1]

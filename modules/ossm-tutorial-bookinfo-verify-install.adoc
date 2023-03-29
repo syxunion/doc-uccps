@@ -1,0 +1,81 @@
+////
+This PROCEDURE module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-tutorial-bookinfo-verify-install_{context}"]
+= Verifying the Bookinfo installation
+
+要确认示例 Bookinfo 应用程序已被成功部署，请执行以下步骤。
+
+.先决条件
+
+* 安装了 {SMProductName} installed。
+* 完成安装 Bookinfo 示例应用程序的步骤。
+
+.通过 CLI的步骤
+
+. 登录 {product-title} CLI。
+
+. 验证所有 pod 是否都与此命令就绪：
++
+[source,terminal]
+----
+$ oc get pods -n bookinfo
+----
++
+所有容器集的状态都应为 `Running`。您应该看到类似如下的输出：
++
+[source,terminal]
+----
+NAME                              READY   STATUS    RESTARTS   AGE
+details-v1-55b869668-jh7hb        2/2     Running   0          12m
+productpage-v1-6fc77ff794-nsl8r   2/2     Running   0          12m
+ratings-v1-7d7d8d8b56-55scn       2/2     Running   0          12m
+reviews-v1-868597db96-bdxgq       2/2     Running   0          12m
+reviews-v2-5b64f47978-cvssp       2/2     Running   0          12m
+reviews-v3-6dfd49b55b-vcwpf       2/2     Running   0          12m
+----
++
+. 运行以下命令来检索产品页面的 URL:
++
+[source,terminal]
+----
+echo "http://$GATEWAY_URL/productpage"
+----
+. 在网页浏览器中复制并粘贴输出以验证是否已部署了 Bookinfo 产品页面。
+
+.来自Kiali web 控制台的步骤
+
+. 获取 Kiali web 控制台的地址。
+
+.. 以具有 `cluster-admin` 权限的用户身份登录 {product-title} 控制台。
+
+.. 进入 *网络* -> *路由*。
+
+.. 在 *路由* 页面中，从 *Namespace*  菜单中选择 {SMProductShortName} control plane 项目，如  `istio-system`。
++
+*位置* 列显示每个路由的链接地址。
++
+
+.. 点 Kiali 的 *位置* 列中的链接。
+
+.. 单击 *Log In With Uccps*。Kiali *Overview* 屏幕显示每个项目命名空间的标题。
+
+. 在 Kiali 中，点  *Graph*。
+
+. 从 *Namespace* 列表中选择 bookinfo，从 *Graph Type* 列表中选择 App graph。
+
+. 从 *Display idle nodes* 菜单中选择 *Display* 。
++
+这将显示定义的节点，但尚未收到或发送请求。它可以确认应用已正确定义，但未报告任何请求流量。
++
+image::ossm-kiali-graph-bookinfo.png[Kiali displaying bookinfo application]
++
+* 使用 *Duration*  菜单增加时间段，以帮助确保捕获旧的流量。
++
+* 使用 *Refresh Rate* 菜单刷新流量频率或更小，或者根本不刷新流量。
+
+. 点 *Services*, *Workloads* 或 *Istio Config* 查看 bookinfo 组件列表视图，并确认它们是否正常运行。

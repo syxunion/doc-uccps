@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+[id="web-console-overview"]
+= 关于 web 控制台中的开发者视角
+include::_attributes/common-attributes.adoc[]
+:context: web-console-overview
+
+toc::[]
+
+统信容器云管理平台 web 控制台提供两种视角: *Administrator* 视角和 *Developer* 视角。
+
+[注意]
+====
+显示的默认 Web 控制台视角取决于用户的角色。如果用户是开发人员，则 *Developer* 视角会被默认显示。
+====
+
+. Developer 视角提供开发人员用例特有的工作流，比如：
+
+* 通过导入现有代码基、镜像和 dockerfile 在 统信容器云管理平台 中创建和部署应用程序。
+* 在一个项目中，以可视的形式和与其关联的应用程序、组件和服务进行交互，并监控它们的部署和构建状态。
+* 在应用程序中对组件进行分组，并在应用程序内部及跨应用程序间连接组件。
+* 集成无服务器功能（技术预览）。 
+* 使用 Eclipse Che 创建开发平台来编辑应用程序代码。
+
+.先决条件
+
+. 要访问 Developer 视角，需要已登陆到 web 控制台。
+
+
+include::modules/odc-accessing-perspectives.adoc[leveloffset=+1]

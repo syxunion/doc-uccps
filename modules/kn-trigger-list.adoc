@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="kn-trigger-list_{context}"]
+= 使用 Knative CLI 列出触发器
+
+使用 Knative (kn) CLI 列出触发器提供精简、直观的用户界面。您可以使用 `kn trigger list` 命令列出集群中的现有触发器。
+
+.先决条件
+
+* The {ServerlessOperatorName}  和 Knative Eventing 已安装在 {product-title} 集群中。
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+. 显示可用触发器列表：
++
+[source,terminal]
+----
+$ kn trigger list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME    BROKER    SINK           AGE   CONDITIONS   READY   REASON
+email   default   ksvc:edisplay   4s    5 OK / 5     True
+ping    default   ksvc:edisplay   32s   5 OK / 5     True
+----
+
+. 可选：以 JSON 格式输出触发器列表：
++
+[source,terminal]
+----
+$ kn trigger list -o json
+----
+//example output?

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-garbage-collection.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+
+:_content-type: CONCEPT
+[id="nodes-nodes-garbage-collection-containers_{context}"]
+= 了解如何通过垃圾回收移除已终止的容器
+
+可使用驱除阈值来执行容器垃圾回收。
+
+为垃圾回收设定了驱除阈值时，节点会尝试为任何可从 API 访问的 pod 保留容器。如果 pod 已被删除，则容器也会被删除。只要 pod 没有被删除且没有达到驱除阈值，容器就会保留。如果节点遭遇磁盘压力，它会移除容器，并且无法再通过 oc logs 访问其日志。
+
+* *eviction-soft* - 软驱除阈值将驱除阈值与一个由管理员指定的必要宽限期配对。
+
+* *eviction-hard* - 硬驱除阈值没有宽限期，如果观察到，统信容器云管理平台 就会立即采取行动。
+
+下表列出了驱除阈值：
+
+.用于配置容器垃圾回收的变量
+|===
+| 节点状况 | 驱除信号 | 描述
+
+| MemoryPressure 
+| `memory.available` 
+| 节点上的可用内存。
+
+| DiskPressure 
+a| * `nodefs.available`
+  * `nodefs.inodesFree`
+  * `imagefs.available`
+  * `imagefs.inodesFree`
+| 节点根文件系统、`nodefs` 或镜像文件系统 `imagefs` 上的可用磁盘空间或索引节点。
+|===
+
+[注意]
+====
+对于 `evictionHard` ，您必须指定所有这些参数。如果没有指定所有参数，则只应用指定的参数，垃圾回收将无法正常工作。
+====
+
+如果节点在软驱除阈值上下浮动，但没有超过其关联的宽限期，则对应的节点将持续在 `true` 和 `false` 之间振荡。因此，调度程序可能会做出不当的调度决策。
+
+要防止这种情况的出现，请使用 `remove-pressure-transition-period` 标记来控制 统信容器云管理平台 在摆脱压力状况前必须等待的时间。统信容器云管理平台 不会设置在状况切换回 false 前，在指定期限内针对指定压力状况满足的驱除阈值。

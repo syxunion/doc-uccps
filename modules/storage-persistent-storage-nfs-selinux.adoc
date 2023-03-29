@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+:_content-type: PROCEDURE
+[id="nfs-selinux_{context}"]
+= SELinux
+
+UnionTech OS Server 20和 UnionTech OS Cloud 20（USwift）系统被配置为默认在远程 NFS 服务器中使用 SELinux。
+
+对于非 UnionTech OS Server 20 和非 UnionTech OS Cloud 20 系统，SELinux 不允许从 pod 写入远程 NFS 服务器。NFS 卷正确挂载，但只读。您将需要按照以下步骤启用正确的 SELinux 权限。
+
+.先决条件
+
+* 必须安装 `container-selinux` 软件包。这个软件包提供 `virt_use_nfs` SELinux 布尔值。
+
+.流程
+
+* 使用以下命令启用 `virt_use_nfs` 布尔值。使用 `-P` 选项可以使这个布尔值在系统重启后仍然有效。
++
+[source,terminal]
+----
+# setsebool -P virt_use_nfs 1
+----

@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+//  * openshift_images/using-templates.adoc
+
+[id="templates-writing-labels_{context}"]
+= 编写模板标签
+
+模板可包括一组标签。这些标签添加到模板实例化时创建的各个对象中。采用这种方式定义标签可方便用户查找和管理从特定模板创建的所有对象。
+
+以下是模板对象标签的示例：
+
+[source,yaml]
+----
+kind: "Template"
+apiVersion: "v1"
+...
+labels:
+  template: "cakephp-mysql-example" <1>
+  app: "${NAME}" <2>
+----
+<1> 标签（label）应用于从该模板创建的所有对象。
+<2> 参数化标签也应用于从该模板创建的所有对象。对标签键和值均执行参数扩展。

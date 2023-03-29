@@ -1,0 +1,95 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/tracking-network-flows.adoc
+
+:_content-type: PROCEDURE
+[id="nw-network-flows-create_{context}"]
+= 为网络流收集器添加目的地
+
+作为集群管理器，您可以将 Cluster Network Operator（CNO）配置为发送有关 pod 网络的网络流元数据到网络流收集器。
+
+.先决条件
+
+* 已安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+* 您有一个网络流收集器，知道它所侦听的 IP 地址和端口。
+
+.流程
+
+. 创建补丁文件，用于指定网络流收集器类型以及收集器的 IP 地址和端口信息：
++
+[source,terminal]
+----
+spec:
+  exportNetworkFlows:
+    netFlow:
+      collectors:
+        - 192.168.1.99:2056
+----
+
+. 使用网络流收集器配置 CNO：
++
+[source,terminal]
+----
+$ oc patch network.operator cluster --type merge -p "$(cat <file_name>.yaml)"
+----
++
+.输出示例
+[source,terminal]
+----
+network.operator.openshift.io/cluster patched
+----
+
+.验证
+
+通常情况不需要进行验证。您可以运行以下命令，确认每个节点上的 Open vSwitch（OVS）已配置为将网络流记录发送到一个或多个收集器。
+
+. 查看 Operator 配置，确认配置了 `exportNetworkFlows` 字段：
++
+[source,terminal]
+----
+$ oc get network.operator cluster -o jsonpath="{.spec.exportNetworkFlows}"
+----
++
+.输出示例
+[source,terminal]
+----
+{"netFlow":{"collectors":["192.168.1.99:2056"]}}
+----
+
+. 查看每个节点中的 OVS 网络流配置：
++
+[source,terminal]
+----
+$ for pod in $(oc get pods -n openshift-ovn-kubernetes -l app=ovnkube-node -o jsonpath='{range@.items[*]}{.metadata.name}{"\n"}{end}');
+  do ;
+    echo;
+    echo $pod;
+    oc -n openshift-ovn-kubernetes exec -c ovnkube-node $pod \
+      -- bash -c 'for type in ipfix sflow netflow ; do ovs-vsctl find $type ; done';
+done
+----
++
+.输出示例
+[source,terminal]
+----
+ovnkube-node-xrn4p
+_uuid               : a4d2aaca-5023-4f3d-9400-7275f92611f9
+active_timeout      : 60
+add_id_to_interface : false
+engine_id           : []
+engine_type         : []
+external_ids        : {}
+targets             : ["192.168.1.99:2056"]
+
+ovnkube-node-z4vq9
+_uuid               : 61d02fdb-9228-4993-8ff5-b27f01a29bd6
+active_timeout      : 60
+add_id_to_interface : false
+engine_id           : []
+engine_type         : []
+external_ids        : {}
+targets             : ["192.168.1.99:2056"]-
+
+...
+----

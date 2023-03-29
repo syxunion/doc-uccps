@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-vsphere.adoc
+
+:_content-type: PROCEDURE
+[id="vsphere-dynamic-provisioning-cli_{context}"]
+= 使用 CLI 动态置备 VMware vSphere 卷
+
+统信容器云管理平台安装了一个默认的 StorageClass，其名为 `thin`，使用 `thin` 磁盘格式置备卷。
+
+.先决条件
+
+* 当存储可以被挂载为统信容器云管理平台中的卷之前，它必须已存在于底层的存储系统中。
+
+.流程 (CLI)
+
+. 您可以通过创建一个包含以下内容的 `pvc.yaml`  文件来定义 VMware vSphere PersistentVolumeClaim：
++
+[source,yaml]
+----
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc <1>
+spec:
+  accessModes:
+  - ReadWriteOnce <2>
+  resources:
+    requests:
+      storage: 1Gi <3>
+----
+<1> 代表持久性卷声明的唯一名称。
+<2> 持久性卷声明的访问模式。使用 `ReadWriteOnce` 时，单个节点可以通过读写权限挂载该卷。
+<3> 持久性卷声明的大小。
+
+. 从文件创建 `PersistentVolumeClaim` 对象：
++
+[source,terminal]
+----
+$ oc create -f pvc.yaml
+----

@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+// * virt/logging_events_monitoring/virt-prometheus-queries.adoc
+
+[id="querying-metrics_{context}"]
+= 查询指标
+
+统信容器云管理平台 监控仪表板可供您运行 Prometheus Query Language (PromQL) 查询来查看图表中呈现的指标。此功能提供有关集群以及要监控的任何用户定义工作负载的状态信息。
+
+作为 *集群管理员*, 您可以查询所有 统信容器云管理平台 核心项目和用户定义的项目的指标。
+
+作为 *开发者*, 您必须在查询指标时指定项目名称。您必须具有所需权限才能查看所选项目的指标。

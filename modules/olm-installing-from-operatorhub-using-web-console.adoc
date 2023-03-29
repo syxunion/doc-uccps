@@ -1,0 +1,94 @@
+// Module included in the following assemblies:
+//
+// * operators/user/olm-installing-operators-in-namespace.adoc
+// * operators/admin/olm-adding-operators-to-cluster.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+//
+// Module watched for changes by Ecosystem Catalog team:
+// https://projects.engineering.redhat.com/projects/RHEC/summary
+
+// Add additional ifevals here, but before context == olm-adding-operators-to-a-cluster
+ifndef::filter-type[]
+//ifeval::["{context}" != "olm-adding-operators-to-a-cluster"]
+:filter-type: jaeger
+:filter-operator: Jaeger
+:olm-admin:
+endif::[]
+ifeval::["{context}" == "olm-installing-operators-in-namespace"]
+:filter-type: advanced
+:filter-operator: Advanced Cluster Management for Kubernetes
+:olm-admin!:
+:olm-user:
+endif::[]
+
+// Keep this ifeval last
+ifeval::["{context}" == "olm-adding-operators-to-a-cluster"]
+:filter-type: advanced
+:filter-operator: Advanced Cluster Management for Kubernetes
+:olm-admin:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="olm-installing-from-operatorhub-using-web-console_{context}"]
+= 使用 Web 控制台从 OperatorHub 安装
+
+您可以使用 统信容器云管理平台 Web 控制台从 OperatorHub 安装并订阅 Operator。
+
+.先决条件
+
+- 使用具有 `cluster-admin` 权限的账户访问 统信容器云管理平台 集群。
+
+ifdef::olm-user[]
+- 使用具有 Operator 安装权限的帐户访问 统信容器云管理平台  集群。
+endif::[]
+
+.流程
+
+. 在 Web 控制台中导航至 *Operators → OperatorHub* 页面。
+
+. 找到您需要的 Operator（滚动页面会在 *Filter by keyword* 框中输入查找关键字）。例如，键入 jaeger 来查找 Jaeger Operator。
++
+您还可以根据基础架构功能过滤选项。例如，如果您希望 Operator 在断开连接的环境中工作，请选择 `Disconnected`。
+
+. 选择要显示更多信息的 Operator。
++
+[注意]
+====
+选择 Community Operator 会警告统信没有认证社区 Operator ; 您必须确认该警告方可继续。
+====
+
+. 阅读 Operator 信息并单击 *Install*。
+
+. 在 *Install Operator* 页面中：
+
+ifdef::olm-admin[]
+.. 任选以下一项：
+*** *All namespaces on the cluster (default)*，选择该项会将 Operator 安装至默认 `openshift-operators` 命名空间，以便供集群中的所有命名空间监视和使用。该选项并非始终可用。
+*** *A specific namespace on the cluster*，该项支持您选择单一特定命名空间来安装 Operator。该 Operator 仅限在该单一命名空间中监视和使用。
+endif::[]
+ifdef::olm-user[]
+.. 选择要在其中安装Operator的特定的独立的命名空间。Operator将只在这个独立的命名空间中监视和使用。
+endif::[]
+
+.. 选择一个更新频道（如有多个可用）。
+
+.. 如前面所述，选择 *自动* 或 *手动* 批准策略。
+
+. 点击 *Install* 使 Operator 可供 统信容器云管理平台 集群上的所选命名空间使用。
+
+.. 如果选择了 *手动* 批准策略，订阅的升级状态将保持在 *Upgrading* 状态，直至您审核并批准安装计划。
++
+在 *Install Plan* 页面批准后，订阅的升级状态将变为 *Up to date*。
+
+.. 如果选择了 *Automatic* 批准策略，升级状态会在不用人工参与的情况下变为 *Up to date*。
+
+. 在订阅的升级状态成为 *Up to date* 后，选择 *Operators → Installed Operators*  来验证已安装 Operator 的 ClusterServiceVersion（CSV）是否最终出现了。 *状态* 最终会在相关命名空间中变为 *InstallSucceeded* 。
++
+[注意]
+====
+对于 *All namespaces*…​ 安装模式，状态在 openshift-operators 命名空间中解析为 *InstallSucceeded*，但如果检查其他命名空间，则状态为 *Copied*。
+====
++
+如果没有：
+
+.. 检查 `openshift-operators` 项目（如果选择了 *A specific namespace…*​ 安装模式）中的 openshift-operators 项目中的 pod 的日志，这会在 *Workloads → Pods* 页面中报告问题以便进一步排除故障。

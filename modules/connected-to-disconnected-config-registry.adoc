@@ -1,0 +1,190 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+[id="connected-to-disconnected-config-registry_{context}"]
+= 为镜像 registry 配置集群
+
+在将镜像创建并镜像(mirror)到镜像 registry 后，您必须修改集群，以便 pod 可以从镜像 registry 中拉取镜像。
+ 
+您必须：
+
+* 将镜像 registry 凭证添加到全局 pull secret 中。
+* 在集群中添加镜像 registry 服务器证书。
+* 创建 `ImageContentSourcePolicy` 自定义资源(ICSP)，它将镜像 registry 与源 registry 关联。
+
+
+
+. 将镜像 registry 凭证添加到集群全局 pull-secret 中：
++
+[source,terminal]
+----
+$ oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=<pull_secret_location> <1>
+----
+<1> 提供新 pull secret 文件的路径。
++
+例如：
++
+[source,terminal]
+----
+$ oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=.mirrorsecretconfigjson
+----
+
+. 将 CA 签名的镜像 registry 服务器证书添加到集群中的节点：
+
+.. 创建包含镜像 registry 的服务器证书的配置映射
++
+[source,terminal]
+----
+$ oc create configmap <config_map_name> --from-file=<mirror_address_host>..<port>=$path/ca.crt -n openshift-config
+----
++
+例如：
++
+[source,terminal]
+----
+S oc create configmap registry-config --from-file=mirror.registry.com..443=/root/certs/ca-chain.cert.pem -n openshift-config
+----
+
+.. 使用配置映射更新 `image.config.openshift.io/cluster` 自定义资源(CR)。统信容器云管理平台 将对此 CR 的更改应用到集群中的所有节点：
++
+[source,terminal]
+----
+$ oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"<config_map_name>"}}}' --type=merge
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-config"}}}' --type=merge
+----
+
+. 创建一个 ICSP，将在线 registry 中的容器拉取请求重定向到镜像 registry：
+
+.. 创建 `ImageContentSourcePolicy` 自定义资源：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: mirror-ocp
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - mirror.registry.com:443/ocp/release <1>
+    source: quay.io/openshift-release-dev/ocp-release <2>
+  - mirrors:
+    - mirror.registry.com:443/ocp/release
+    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+----
+<1> 指定镜像 registry 和存储库的名称。
+<2> 指定包含所镜像内容的在线 registry 和存储库。
+
+.. 创建 ICSP 对象：
++
+[source,terminal]
+----
+$ oc create -f registryrepomirror.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+imagecontentsourcepolicy.operator.openshift.io/mirror-ocp created
+----
++
+统信容器云管理平台 会将对此 CR 的更改应用到集群中的所有节点。
+
+. 验证已添加了镜像 registry 的凭证、CA 和 ICSP：
+
+.. 登录到节点：
++
+[source,terminal]
+----
+$ oc debug node/<node_name>
+----
+
+.. 将 `/host` 设置为 debug shell 中的根目录：
++
+[source,terminal]
+----
+sh-4.4# chroot /host
+----
+
+.. 检查凭证的 config.json 文件：
++
+[source,terminal]
+----
+sh-4.4# cat /var/lib/kubelet/config.json
+----
++
+.输出示例
+[source,terminal]
+----
+{"auths":{"brew.registry.redhat.io":{"xx=="},"brewregistry.stage.redhat.io":{"auth":"xxx=="},"mirror.registry.com:443":{"auth":"xx="}}} <1>
+----
+<1> 确保存在镜像 registry 和凭证。
+
+.. 进入 `certs.d` 目录
++
+[source,terminal]
+----
+sh-4.4# cd /etc/docker/certs.d/
+----
+
+.. 列出 `certs.d` 目录中的证书：
++
+[source,terminal]
+----
+sh-4.4# ls
+----
++
+.输出示例
+----
+image-registry.openshift-image-registry.svc.cluster.local:5000
+image-registry.openshift-image-registry.svc:5000
+mirror.registry.com:443 <1>
+----
+<1> 确保镜像 registry 位于列表中。
+
+.. 检查 ICSP 是否将镜像 registry 添加到 `registry.conf` 文件中：
++
+[source,terminal]
+----
+sh-4.4# cat /etc/containers/registries.conf
+----
++
+.输出示例
++
+[source,terminal]
+----
+unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+
+[[registry]]
+  prefix = ""
+  location = "quay.io/openshift-release-dev/ocp-release"
+  mirror-by-digest-only = true
+
+  [[registry.mirror]]
+    location = "mirror.registry.com:443/ocp/release"
+
+[[registry]]
+  prefix = ""
+  location = "quay.io/openshift-release-dev/ocp-v4.0-art-dev"
+  mirror-by-digest-only = true
+
+  [[registry.mirror]]
+    location = "mirror.registry.com:443/ocp/release"
+----
++
+`registry.mirror` 参数表示在原始 registry 前搜索镜像 registry。
+
+.. 退出节点。
++
+[source,terminal]
+----
+sh-4.4# exit
+----
+

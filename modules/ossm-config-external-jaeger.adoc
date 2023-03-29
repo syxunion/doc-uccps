@@ -1,0 +1,41 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-config-external-jaeger_{context}"]
+= Connecting an existing distributed tracing instance
+
+如果您已在 {product-title} 中已有现有  {JaegerName} 您可以将 `ServiceMeshControlPlane` 资源配置为使用该实例进行分布式追踪。
+
+.先决条件
+
+* 安装和配置统信容器云管理平台分布式追踪实例。
+
+.流程
+
+. 在  {product-title} 控制台中，点击 *Operators* -> *安装的 Operators*。
+
+. 点  *项目* 菜单，选择安装 {SMProductShortName} control plane，如 *istio-system*.
+
+. 点 {SMProductName} Operator。在 *Istio Service Mesh Control Plane* 列中，点 `ServiceMeshControlPlane` 资源的名称，例如 `basic`。
+
+. 将分布式追踪平台实例的名称添加到 {JaegerShortName} `ServiceMeshControlPlane`。
++
+.. 点 *YAML* 标签。
++
+.. 将分布式追踪平台实例的名称添加到 `ServiceMeshControlPlane` 资源中的 `spec.addons.jaeger.name` 中。在以下示例中， `distr-tracing-production` 是分布式追踪平台实例的名称。instance.
++
+.分布式追踪配置示例
+[source,yaml]
+----
+spec:
+  addons:
+    jaeger:
+      name: distr-tracing-production
+----
++
+.. 点 *保存*.
+
+. 点 *重新加载* 来验证 `ServiceMeshControlPlane` 资源已被正确配置。

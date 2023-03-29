@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-using-instant-app-quickstart_{context}"]
+= 使用即时应用程序和快速启动模板
+
+统信容器云管理平台 提供了很多默认的即时应用程序和快速启动模板，以便您轻松开始为不同语言创建新应用程序。提供了适用于 Rails (Ruby)、Django (Python)、Node.js、CakePHP (PHP) 和 Dancer (Perl) 的模板。您的集群管理员必须在默认的全局 `Uccps` 项目中创建这些模板，以便您访问。
+
+默认情况下，模板会使用 GitHub 上包含必要应用程序代码的公共源存储库进行构建。
+
+.流程
+
+. 您可以通过以下命令列出可用的默认即时应用程序和快速启动模板：
++
+[source,terminal]
+----
+$ oc get templates -n openshift
+----
+
+. 要修改源并构建您自己的应用程序版本：
++
+.. 对模板默认的 `SOURCE_REPOSITORY_URL` 参数引用的存储库进行分叉。
++
+.. 在从模板创建时，覆盖 `SOURCE_REPOSITORY_URL` 参数的值，从而指定您的分叉而非默认值。
++
+这样，模板创建的构建配置将指向应用程序代码的分叉，您可随意修改代码和重新构建应用程序。
+
+
+[注意]
+====
+某些 Instant App 和 Quickstart 模板会定义一个数据库部署配置。它们定义的配置对数据库内容使用临时存储。这些模板仅限于演示目的，因为如果数据库 pod 因任何原因重启，所有数据库数据都将丢失。
+====

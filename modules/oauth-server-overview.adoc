@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+// * authentication/configuring-internal-oauth.adoc
+
+
+[id="oauth-server-overview_{context}"]
+= 统信容器云管理平台OAuth 服务器
+
+统信容器云管理平台 master 包含内置的 OAuth 服务器。用户获取 OAuth 访问令牌来对自身进行 API 身份验证。
+
+有人请求新的 OAuth 令牌时，OAuth 服务器使用配置的身份提供程序来确定提出请求的人的身份。
+
+然后，它会确定该身份所映射到的用户，为该用户创建一个访问令牌，再返回要使用的令牌。

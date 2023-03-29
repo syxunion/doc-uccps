@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-csi-snapshots-restore_{context}"]
+= 恢复卷快照
+
+`VolumeSnapshot` CRD 内容可用于将现有卷恢复到以前的状态。
+
+绑定 `VolumeSnapshot` CRD 并将 `readyToUse` 值设置为 `true` 后，您可以使用该资源置备一个预先填充快照数据的新卷。先决条件 * 已登陆到一个正在运行的统信容器云管理平台集群。* 使用支持卷快照的容器存储接口 (CSI) 驱动程序创建的持久性卷声明 (PVC) 。* 用于置备存储后端的存储类。* 已创建卷快照并可使用。
+
+
+.流程
+
+. 在 PVC 上指定 VolumeSnapshot 数据源，如下所示：
++
+.pvc-restore.yaml
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim-restore
+spec:
+  storageClassName: csi-hostpath-sc
+  dataSource:
+    name: mysnap <1>
+    kind: VolumeSnapshot <2>
+    apiGroup: snapshot.storage.k8s.io <3>
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+----
+<1> `VolumeSnapshot` 对象的名称，代表作为源的快照。
+<2> 必须设置为 `VolumeSnapshot` 的值。
+<3> 必须设置为 `snapshot.storage.k8s.io` 的值 。
+
+. 运行以下命令来创建一个 PVC：
+
++
+[source,terminal]
+----
+$ oc create -f pvc-restore.yaml
+----
+
+. 运行以下命令验证恢复的 PVC 是否已创建：
+
++
+[source,terminal]
+----
+$ oc get pvc
+----
++
+此时会显示一个新的 PVC，如 `myclaim-restore`。

@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-csi-manila"]
+= OpenStack Manila CSI Driver Operator
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-csi-manila
+
+toc::[]
+
+== 概述
+
+统信容器云管理平台可以使用 OpenStack Manila 共享文件系统服务的 Container Storage Interface（CSI）驱动程序置备持久性卷（PV）。
+
+在使用 Container Storage Interface（CSI）Operator 和驱动器时，请先熟悉持久性存储和配置 CSI 卷。
+
+要创建挂载到 Manila 存储资产中的 CSI 置备 PV，统信容器云管理平台会在所有启用了 Manila 服务的 OpenStack 集群上默认安装 Manila CSI Driver Operator 和 Manila CSI 驱动程序。
+
+* _Manila CSI Driver Operator_ 会创建所需的存储类，以为所有可用 Manila 共享类型创建 PVC。Operator 安装在 `openshift-cluster-csi-drivers` 命名空间中。
+
+* _Manila CSI driver_ 允许您创建并挂载 Manila PV。该驱动程序安装在 `openshift-manila-csi-driver` 命名空间中。
+
+include::modules/persistent-storage-csi-about.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-manila-limitations.adoc[leveloffset=+1]
+
+include::modules/persistent-storage-csi-manila-dynamic-provisioning.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.Additional resources
+* xref:../../storage/container_storage_interface/persistent-storage-csi.adoc#persistent-storage-csi[Configuring CSI volumes]

@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: CONCEPT
+[id="ossm-automatic-gateway-injection_{context}"]
+= Enabling gateway injection
+
+网关配置适用于在网格边缘运行的独立 Envoy 代理，而不是与您的服务工作负载一同运行的 sidecar Envoy 代理。因为网关是 Envoy 代理，所以您可以将 Service Mesh 配置为自动注入网关，类似于如何注入 sidecar。
+
+使用自动注入网关，您可以独立于 `ServiceMeshControlPlane` 资源部署和管理网关，并使用用户应用程序管理网关。使用自动注入网关部署时，开发人员可以完全控制网关部署，同时简化操作。当新的升级可用时，或者配置有变化时，您可以重启网关 pod 以更新它们。这样做会使操作网关部署的操作体验与操作 sidecar 相同。
+
+[NOTE]
+====
+ServiceMeshControlPlane 命名空间默认禁用注入，如 istio-system 命名空间。作为安全最佳实践，在与 control plane 的不同命名空间中部署网关.
+====

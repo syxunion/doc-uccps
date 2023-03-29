@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-restricted-networks-installer-provisioned-vsphere.adoc
+// * installing/installing_vsphere/preparing-to-install-on-vsphere.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vmc/installing-vmc.adoc
+// * installing/installing_vmc/installing-vmc-customizations.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vmc/preparing-to-install-on-vmc.adoc
+// * storage/container_storage_interface/persistent-storage-csi-vsphere.adoc
+
+:_content-type: CONCEPT
+[id="vsphere-csi-driver-reqs_{context}"]
+= VMware vSphere CSI Driver Operator 要求
+
+要安装 CSI Driver Operator，必须满足以下要求：
+
+* VMware vSphere 版本 6.7U3 或更高版本
+* 硬件版本 15 或更高版本的虚拟机
+* 集群中还没有安装第三方 CSI 驱动程序
+
+如果集群中存在第三方 CSI 驱动程序，统信容器云管理平台不会覆盖它。存在第三方 CSI 驱动程序可防止统信容器云管理平台升级。

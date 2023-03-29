@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * registry/index.adoc
+
+:_content-type: PROCEDURE
+[id="registry-third-party-registries_{context}"]
+= 第三方 registry
+
+统信容器云管理平台可以使用由第三方 registry 提供的镜像创建容器，但是这些registry 可能不会象统信容器云管理平台中集成的registry一样提供相同的镜像通知支持。在这种情况下，统信容器云管理平台将在创建镜像流时从远程 registry 中获取 tag。`oc import-image <stream>` 就可以更新获取的 tag。当检测到新的镜像时，以前的构建和部署将会被重新创建。

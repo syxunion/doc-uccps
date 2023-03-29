@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-creating-from-console_{context}"]
+= 使用 web 控制台创建应用程序
+
+您可使用 web 控制台从模板创建应用程序。
+
+.流程
+
+. 在所需项目中，点击  *Add to Project*.
+
+. 从项目中的镜像列表或从服务目录中选择构建程序镜像。
++
+[注意]
+====
+只有其注解中列出 builder 标签的 `imagestreamtag` 才会出现在此列表中，如下所示：
+====
++
+[source,yaml]
+----
+kind: "ImageStream"
+apiVersion: "v1"
+metadata:
+  name: "ruby"
+  creationTimestamp: null
+spec:
+  dockerImageRepository: "registry.redhat.io/rhscl/ruby-26-rhel7"
+  tags:
+    -
+      name: "2.6"
+      annotations:
+        description: "Build and run Ruby 2.6 applications"
+        iconClass: "icon-ruby"
+        tags: "builder,ruby" <1>
+        supports: "ruby:2.6,ruby"
+        version: "2.6"
+----
+<1> 此处包含 `builder` 可确保该镜像流标签作为构建程序出现在 web 控制台中。
+
+. 修改新应用程序屏幕中的设置，以配置对象来支持您的应用程序。

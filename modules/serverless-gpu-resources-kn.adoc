@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+//  * serverless/integrations/gpu-resources.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-gpu-resources-kn_{context}"]
+=  为服务指定 GPU 要求
+
+为统信容器云管理平台集群启用 GPU 资源后，您可以使用 Knative (kn) CLI 为 Knative 服务指定 GPU 要求。
+
+.先决条件
+
+* 在集群中安装了统信容器云管理平台无服务器、Knative Serving 和 Knative Eventing。
+* 已安装 Knative (kn) CLI。
+* 为统信容器云管理平台集群启用 GPU 资源。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在统信容器云管理平台中创建应用程序和其他工作负载。
+
+.流程
+
+. 创建 Knative 服务并使用 `--limit nvidia.com/gpu=1`标志将 GPU 资源要求限制设置为 1：
++
+[source,terminal]
+----
+$ kn service create hello --image <service-image> --limit nvidia.com/gpu=1
+----
++
+GPU 资源要求限制为 1 表示该服务有 1 个专用的 GPU 资源。服务不共享 GPU 资源。所有需要 GPU 资源的其他服务都必须等待 GPU 资源不再被使用为止。
++
+限值为 1 个 GPU 意味着超过使用 1 个 GPU 资源的应用程序会受到限制。如果服务请求超过 1 个 GPU 资源，它将部署到可以满足 GPU 资源要求的节点。
+
+. 可选。对于现有服务，您可以使用`--limit nvidia.com/gpu=3` 标志将 GPU 资源要求限制改为 3：
++
+[source,terminal]
+----
+$ kn service update hello --limit nvidia.com/gpu=3
+----

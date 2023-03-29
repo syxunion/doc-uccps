@@ -1,0 +1,91 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-additional-network.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multus-create-network_{context}"]
+= 使用 Cluster Network Operator 创建额外网络附加
+
+Cluster Network Operator (CNO) 管理额外网络定义。当您指定要创建的额外网络时，CNO 会自动创建 `NetworkAttachmentDefinition` 对象。
+
+[重要]
+====
+不要编辑 Cluster Network Operator 所管理的 `NetworkAttachmentDefinition` 对象。这样做可能会破坏额外网络上的网络流量。
+====
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 可选：为额外网络创建命名空间：
++
+[source,terminal]
+----
+$ oc create namespace <namespace_name>
+----
+
+. 要编辑 CNO 配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc edit networks.operator.openshift.io cluster
+----
+
+. 通过为您要创建的额外网络添加配置来修改您要创建的 CR，如下例所示。
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  # ...
+  additionalNetworks:
+  - name: tertiary-net
+    namespace: namespace2
+    type: Raw
+    rawCNIConfig: |-
+      {
+        "cniVersion": "0.3.1",
+        "name": "tertiary-net",
+        "type": "ipvlan",
+        "master": "eth1",
+        "mode": "l2",
+        "ipam": {
+          "type": "static",
+          "addresses": [
+            {
+              "address": "192.168.1.23/24"
+            }
+          ]
+        }
+      }
+----
+
+. 保存您的更改，再退出文本编辑器以提交更改。
+
+.验证
+
+* 通过运行以下命令确认 CNO 创建了 `NetworkAttachmentDefinition` 对象。CNO 创建对象之前可能会有延迟。
++
+[source,terminal]
+----
+$ oc get network-attachment-definitions -n <namespace>
+----
++
+--
+其中：
+
+`<namespace>`:: 指定添加到 CNO 配置中的网络附加的命名空间。
+--
++
+.输出示例
+[source,terminal]
+----
+NAME                 AGE
+test-network-1       14m
+----

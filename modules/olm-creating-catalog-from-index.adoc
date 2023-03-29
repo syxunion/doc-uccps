@@ -1,0 +1,155 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/preparing-for-users.adoc
+// * operators/admin/olm-restricted-networks.adoc
+// * operators/admin/managing-custom-catalogs.adoc
+
+ifdef::openshift-origin[]
+:index-image: catalog
+:tag: latest
+:namespace: olm
+endif::[]
+ifndef::openshift-origin[]
+:index-image: redhat-operator-index
+:tag: v{product-version}
+:namespace: openshift-marketplace
+endif::[]
+ifeval::["{context}" == "post-install-preparing-for-users"]
+:olm-restricted-networks:
+endif::[]
+ifeval::["{context}" == "olm-restricted-networks"]
+:olm-restricted-networks:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="olm-creating-catalog-from-index_{context}"]
+= 在集群中添加目录源
+
+将目录源添加到 统信容器云管理平台 集群可为用户发现和安装 Operator。集群管理员可以创建一个 `CatalogSource` 对象来引用索引镜像。OperatorHub 使用目录源来填充用户界面。
+
+.先决条件
+
+* 构建并推送到 registry 的索引镜像。
+
+.流程
+
+. 创建一个 `CatalogSource` 对象来引用索引镜像。
+ifdef::olm-restricted-networks[]
+如果使用 `oc adm catalog mirror` 命令将目录镜像到目标 registry，您可以使用 manifests 目录中生成的 `catalogSource.yaml` 文件作为起点。
+endif::[]
+
+.. 根据您的规格修改以下内容，并将它保存为 `catalogSource.yaml` 文件：
++
+ifdef::olm-restricted-networks[]
+[source,yaml,subs="attributes+"]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: my-operator-catalog <1>
+  namespace: {namespace} <2>
+spec:
+  sourceType: grpc
+  image: <registry>/<namespace>/{index-image}:{tag} <3>
+  displayName: My Operator Catalog
+  publisher: <publisher_name> <4>
+  updateStrategy:
+    registryPoll: <5>
+      interval: 30m
+----
+<1> 如果您在上传到 registry 前将内容镜像到本地文件，请从 `metadata.name` 字段中删除任何反斜杠(`/`)字符，以避免在创建对象时出现 "invalid resource name" 错误。
+<2> 如果您希望目录源对所有命名空间中的用户全局可用，请指定 openshift-marketplace 命名空间。否则，您可以指定一个不同的命名空间来对目录进行作用域并只对该命名空间可用。
+<3> 指定索引镜像。
+<4> 指定发布目录的名称或机构名称。
+<5> 目录源可以自动检查新版本以保持最新。
+endif::[]
+ifndef::olm-restricted-networks[]
+[source,yaml,subs="attributes+"]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: my-operator-catalog
+  namespace: {namespace} <1>
+  annotations:
+    olm.catalogImageTemplate: <2>
+      "<registry>/<namespace>/<index_image_name>:v{kube_major_version}.{kube_minor_version}.{kube_patch_version}"
+spec:
+  sourceType: grpc
+  image: <registry>/<namespace>/<index_image_name>:<tag> <3>
+  displayName: My Operator Catalog
+  publisher: <publisher_name> <4>
+  updateStrategy:
+    registryPoll: <5>
+      interval: 30m
+----
+<1> 如果您希望目录源可用于所有命名空间中的用户，请指定 `{namespace}` 命名空间。 否则，您可以指定一个不同的命名空间，以示为目录，仅适用于该名称空间。
+<2> 可选：将 `olm.catalogimagetemplate` 注释”设置为索引镜像名称，并使用一个或多个kubernetes群集版本变量，如构造镜像标签的模板时所示。
+<3> 指定索引镜像。
+<4> 指定发布目录的名称或机构名称。
+<5> 目录源可以自动检查新版本以保持最新。
+endif::[]
+
+.. 使用该文件创建 CatalogSource 对象：
++
+[source,terminal]
+----
+$ oc apply -f catalogSource.yaml
+----
+
+. 确定成功创建以下资源。
+
+.. 检查 pod:
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get pods -n {namespace}
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                    READY   STATUS    RESTARTS  AGE
+my-operator-catalog-6njx6               1/1     Running   0         28s
+marketplace-operator-d9f549946-96sgr    1/1     Running   0         26h
+----
+
+.. 检查目录源：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get catalogsource -n {namespace}
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                  DISPLAY               TYPE PUBLISHER  AGE
+my-operator-catalog   My Operator Catalog   grpc            5s
+----
+
+.. 检查软件包清单：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc get packagemanifest -n {namespace}
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                          CATALOG               AGE
+jaeger-product                My Operator Catalog   93s
+----
+
+现在，您可以在 统信容器云管理平台 Web 控制台中通过 *OperatorHub* 安装 Operator。
+
+:!index-image:
+:!tag:
+:!namespace:
+ifeval::["{context}" == "post-install-preparing-for-users"]
+:!olm-restricted-networks:
+endif::[]
+ifeval::["{context}" == "olm-restricted-networks"]
+:!olm-restricted-networks:
+endif::[]

@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-cluster-admin-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-channel-admin-web-console_{context}"]
+=  使用 管理员 视角创建频道
+
+include::snippets/serverless-channels-intro.adoc[]
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+
+* 您已登录到 Web 控制台，且处于 *管理员* 视角。
+
+* 具有集群管理员 {product-title} 的权限。
+
+.流程
+. 在 {product-title}  Web 控制台的  *管理员* 视角中，导航到 *Serverless* -> *Eventing*.
+. 在 *Create* 列表中，选择 *频道*。您将被定向到 *频道* 页。
+. 选择您要在 *类型* 列表中创建的 *频道* 对象类型。
++
+[NOTE]
+====
+Currently only `InMemoryChannel` channel objects are supported by default. Kafka channels are available if you have installed Knative Kafka on {ServerlessProductName}.
+====
+. Click *Create*.

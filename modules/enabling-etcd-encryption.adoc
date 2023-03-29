@@ -1,0 +1,95 @@
+// Module included in the following assemblies:
+//
+// * security/encrypting-etcd.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="enabling-etcd-encryption_{context}"]
+= 启用 etcd 加密
+
+您可以启用 etcd 加密来加密集群中的敏感资源。
+
+[警告]
+====
+不建议在初始加密过程完成前备份 etcd。如果加密过程还没有完成，则备份可能只被部分加密。
+====
+
+.先决条件
+
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 修改 `APIServer` 对象：
++
+[source,terminal]
+----
+$ oc edit apiserver
+----
+
+. 把 `encryption` 项类型设置为 `aescbc`：
++
+[source,yaml]
+----
+spec:
+  encryption:
+    type: aescbc <1>
+----
+<1> `aescbc` 类型表示 AES-CBC 使用 PKCS#7 padding 和 32 字节密钥来执行加密。
+
+. 保存文件以使改变生效。
++
+加密过程开始。根据集群的大小，这个过程可能需要 20 分钟或更长的时间才能完成。
+
+. 验证 etcd 加密是否成功。
+
+.. 查看 Uccps API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功加密：
++
+[source,terminal]
+----
+$ oc get openshiftapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功加密后输出显示 `EncryptionCompleted`：
++
+[source,terminal]
+----
+EncryptionCompleted
+All resources encrypted: routes.route.openshift.io
+----
++
+如果输出显示 `EncryptionInProgress`，加密仍在进行中。等待几分钟后重试。
+
+.. 查看 Kubernetes API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功加密：
++
+[source,terminal]
+----
+$ oc get kubeapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功加密后输出显示 `EncryptionCompleted`：
++
+[source,terminal]
+----
+EncryptionCompleted
+All resources encrypted: secrets, configmaps
+----
++
+如果输出显示 `EncryptionInProgress`，加密仍在进行中。等待几分钟后重试。
+
+.. 查看 Uccps OAuth API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功加密：
++
+[source,terminal]
+----
+$ oc get authentication.operator.openshift.io -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功加密后输出显示 `EncryptionCompleted`：
++
+[source,terminal]
+----
+EncryptionCompleted
+All resources encrypted: oauthaccesstokens.oauth.openshift.io, oauthauthorizetokens.oauth.openshift.io
+----
++
+如果输出显示 `EncryptionInProgress`，加密仍在进行中。等待几分钟后重试。

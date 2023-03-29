@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+//  * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-channel-default_{context}"]
+= 配置默认频道实施
+
+您可以使用 `default-ch-webhook` 配置映射来指定 Knative Eventing 的默认频道实现。您可以为整个集群或一个或多个命名空间指定默认频道实现。目前支持 `InMemoryChannel` 和 `KafkaChannel` 频道类型。
+
+.先决条件
+
+* 在 {product-title} 上具有管理员权限。
+* 在集群中安装了 Uccps Serverless Operator 和 Knative Eventing。
+* 如果要使用 Kafka 频道作为默认频道实现，还必须在集群中安装 KnativeKafka CR。
+
+.流程
+
+* 修改 `KnativeEventing` 自定义资源，以添加 `default-ch-webhook` 配置映射的配置详情：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  config: <1>
+    default-ch-webhook: <2>
+      default-ch-config: |
+        clusterDefault: <3>
+          apiVersion: messaging.knative.dev/v1
+          kind: InMemoryChannel
+          spec:
+            delivery:
+              backoffDelay: PT0.5S
+              backoffPolicy: exponential
+              retry: 5
+        namespaceDefaults: <4>
+          my-namespace:
+            apiVersion: messaging.knative.dev/v1beta1
+            kind: KafkaChannel
+            spec:
+              numPartitions: 1
+              replicationFactor: 1
+----
+<1> 在 `spec.config`中，您可以指定您要为修改的配置添加的配置映射。 
+<2> 在 `default-ch-webhook` 配置映射可以用来指定集群的默认频道实施，也可以用于一个或多个命名空间。
+<3> 集群范围的默认频道类型配置。在本例中，集群的默认频道实现是 `InMemoryChannel`.
+<4> 命名空间范围的默认频道类型配置。在本例中,  `my-namespace` 命名空间的默认频道实现是 `KafkaChannel`.
++
+[重要]
+====
+配置特定于命名空间的默认设置会覆盖任何集群范围的设置。
+====

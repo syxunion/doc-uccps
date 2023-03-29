@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-gitlab-identity-provider.adoc
+
+[id="identity-provider-gitlab-CR_{context}"]
+= GitLab CR 示例
+
+以下自定义资源 (CR) 显示 GitLab 身份提供程序的参数和可接受值。
+
+.GitLab CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: gitlabidp <1>
+    mappingMethod: claim <2>
+    type: GitLab
+    gitlab:
+      clientID: {...} <3>
+      clientSecret: <4>
+        name: gitlab-secret
+      url: https://gitlab.com <5>
+      ca: <6>
+        name: ca-config-map
+----
+name：此提供程序名称作为前缀放在 GitLab 数字用户 ID 前，以此组成身份名称。它还可用来构建回调 URL。
+mappingMethod：控制如何在此提供程序的身份和 User 对象之间建立映射。
+clientID：注册的 GitLab OAuth 应用程序的客户端 ID 。应用程序必须配置有回调 URL https://oauth-openshift.apps.<cluster-name>.<cluster-domain>/oauth2callback/<idp-provider-name>。
+clientSecret：对包含 GitLab 发布的客户端 Secret 的统信容器云管理平台Secret 的引用。
+url：GitLab 提供程序的主机 URL。这可以是 https://gitlab.com/ 或其他自托管 GitLab 实例。
+ca：可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台ConfigMap 的引用，以用于验证所配置 URL 的服务器证书。

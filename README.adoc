@@ -1,0 +1,3 @@
+= OpenShift Documentation
+
+Welcome to the OpenShift documentation GitHub repository. To contribute to OpenShift docs, see https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/contributing.adoc

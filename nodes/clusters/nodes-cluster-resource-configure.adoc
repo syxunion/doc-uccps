@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+:context: nodes-cluster-resource-configure
+[id="nodes-cluster-resource-configure"]
+= 配置集群内存以满足容器内存和风险要求
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+作为集群管理员，您可以通过以下方式管理应用程序内存，从而帮助集群有效运作：
+
+* 确定容器化应用程序组件的内存和风险要求，并配置容器内存参数以满足这些要求。
+
+* 配置容器化应用程序运行时（如 OpenJDK），以最佳的方式遵守配置的容器内存参数。
+
+* 诊断并解决与在容器中运行相关的内存错误情况。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-cluster-resource-configure-about.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.Additional resources
+* xref:../../nodes/clusters/nodes-cluster-overcommit.adoc#nodes-cluster-overcommit-reserving-memory_nodes-cluster-overcommit[理解计算资源和容器]
+
+
+include::modules/nodes-cluster-resource-configure-jdk.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-configure-request-limit.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-configure-oom.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-configure-evicted.adoc[leveloffset=+1]

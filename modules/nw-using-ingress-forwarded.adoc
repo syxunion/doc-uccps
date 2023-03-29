@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ingress-controller
+
+:_content-type: PROCEDURE
+[id="nw-using-ingress-forwarded_{context}"]
+= 使用 X-Forwarded 标头
+
+您可以将 HAProxy Ingress Controller 配置为指定如何处理 HTTP 标头的策略，其中包括 `Forwarded` 和 `X-Forwarded-For`。Ingress Operator 使用 `HTTPHeaders` 字段配置 Ingress Controller 的 `ROUTER_SET_FORWARDED_HEADERS` 环境变量。
+
+.流程
+
+. 为 Ingress Controller 配置 `HTTPHeaders` 字段。
+.. 使用以下命令来编辑 `IngressController` 资源：
++
+[source,terminal]
+----
+$ oc edit IngressController
+----
++
+.. 在 `spec` 下，将 `HTTPHeaders` 策略字段设置为 `Append`、`Replace`、`IfNone` 或 `Never`:
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: default
+  namespace: openshift-ingress-operator
+spec:
+  httpHeaders:
+    forwardedHeaderPolicy: Append
+----
+
+
+[discrete]
+== 使用案例示例
+
+*作为集群管理员，您可以:*
+
+* 配置将 `X-Forwarded-For` 标头注入每个请求的外部代理，然后将其转发到 Ingress Controller。
++
+要将 Ingress Controller 配置为通过未修改的标头传递，您需要指定 `never` 策略。然后，Ingress Controller 不会设置标头，应用程序只接收外部代理提供的标头。
+
+
+* 将 Ingress Controller 配置为通过未修改的外部代理在外部集群请求上设置 `X-Forwarded-For` 标头。
++
+要将 Ingress Controller 配置为在不通过外部代理的内部集群请求上设置 `X-Forwarded-For` 标头，请指定 `if-none` 策略。如果 HTTP 请求已经通过外部代理设置了标头，则 Ingress Controller 会保留它。如果缺少标头，因为请求没有通过代理，Ingress Controller 会添加标头。
+
+*作为应用程序开发人员，您可以:*
+
+* 配置特定于应用程序的外部代理来注入 `X-Forwarded-For` 标头。
++
+要配置 Ingress Controller，以便在不影响其他路由策略的情况下将标头传递到应用程序的路由，请在应用程序的路由上添加注解 `haproxy.router.openshift.io/set-forwarded-headers: if-none` 或 `haproxy.router.openshift.io/set-forwarded-headers: never`。
++
+[注意]
+====
+您可以根据每个路由设置 `haproxy.router.openshift.io/set-forwarded-headers` 注解，独立于 Ingress Controller 的全局设置值。
+====

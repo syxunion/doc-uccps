@@ -1,0 +1,7 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.aodc
+
+[id="images-imagestream-image_{context}"]
+= 镜像流镜像
+
+镜像流镜像允许您从标记了特定容器镜像的特定镜像流中检索该镜像。镜像流镜像是一个 API 资源对象，用于收集一些有关特定镜像 SHA 标识符的元数据。

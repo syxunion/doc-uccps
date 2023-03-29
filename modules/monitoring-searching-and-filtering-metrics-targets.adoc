@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics-targets.adoc
+
+[id="monitoring-searching-and-filtering-metrics-targets_{context}"]
+= 搜索和过滤指标目标
+
+指标目标列表可能比较长。您可以根据各种条件过滤和搜索这些目标。
+
+在 *管理员* 视角中， *Metrics Targets*  页面提供有关 统信容器云管理平台 默认项目和用户定义的项目的详细信息。本页列出了每个目标的以下信息：
+
+* 正在提取的服务端点 URL
+* 被监控的 ServiceMonitor 组件
+* 目标的 up 或 down 状态
+* 命名空间
+* 最后一次提取时间
+* 最后一次提取的持续时间
+
+您可以根据状态和源过滤目标列表。可用的过滤选项如下：
+
+* *Status* 过滤器：
+** *Up*. 目标当前已启动，正在主动抓取指标。
+** *Down*. 目标当前已停机，没有提取指标。
+
+* *Source* 过滤器：
+** *Platform*. 平台级别目标仅与 统信容器云管理平台 默认项目相关。这些项目提供 统信容器云管理平台 核心功能。
+** *User*. 用户目标与用户定义的项目相关。这些项目是用户创建的，可以进行自定义。
+
+您还可以使用搜索框根据目标名称或标签查找目标。从搜索框中选择 *Text* 或 *Label*，以限制您的搜索。

@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+:_content-type: CONCEPT
+[id="about_{context}"]
+= 关于动态置备
+
+`StorageClass` 资源对象描述并分类了可请求的存储，并提供了根据需要为动态置备存储传递参数的方法。StorageClass 也可以作为控制不同级别的存储和访问存储的管理机制。集群管理员(`cluster-admin`)或存储管理员(storage-admin)可以在无需了解底层存储卷资源的情况下，定义并创建用户可以请求的 `StorageClass` 对象。
+
+统信容器云管理平台的持久性卷框架启用了这个功能，并允许管理员为集群提供持久性存储。该框架还可让用户在不了解底层存储架构的情况下请求这些资源。
+
+很多存储类型都可用于统信容器云管理平台中的持久性卷。虽然它们都可以由管理员静态置备，但有些类型的存储是使用内置供应商和插件 API 动态创建的。

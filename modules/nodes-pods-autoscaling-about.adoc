@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-autoscaling-about_{context}"]
+= 了解 pod 横向自动扩展
+
+您可以创建一个 pod 横向自动扩展来指定您要运行的 pod 的最小和最大数量，以及 pod 的目标 CPU 使用率或内存使用率。
+
+在创建了 pod 横向自动扩展后，统信容器云管理平台 会开始查询 pod 上的 CPU 和/或内存资源指标。当这些指标可用时，pod 横向自动扩展会计算当前指标使用率与所需指标使用率的比率，并相应地扩展或缩减。查询和缩放是定期进行的，但可能需要一到两分钟时间才会有可用指标。
+
+对于复制控制器，这种缩放直接与复制控制器的副本对应。对于部署配置，缩放直接与部署配置的副本计数对应。注意，自动缩放仅应用到 Complete 阶段的最新部署。
+
+统信容器云管理平台 会自动考虑资源情况，并防止在资源激增期间进行不必要的自动缩放，比如在启动过程中。处于 unready 状态的 pod 在扩展时具有 0 CPU 用量，自动扩展在缩减时会忽略这些 pod。没有已知指标的 Pod 在扩展时具有 0% CPU 用量，在缩减时具有 100% CPU 用量。这在 HPA 决策过程中提供更高的稳定性。要使用这个功能，您必须配置就绪度检查来确定新 pod 是否准备就绪。
+
+要使用 pod 横向自动扩展，您的集群管理员必须已经正确配置了集群指标。
+
+== 支持的指标
+
+pod 横向自动扩展支持以下指标：
+
+.支持
+[cols="3a,5a,5a",options="header"]
+|===
+
+|指标 |描述 |API 版本
+
+|CPU 使用率
+|已用的 CPU 内核数。可以用来计算 pod 的已请求 CPU 百分比。
+|`autoscaling/v1`, `autoscaling/v2`
+
+|内存使用率
+|已用内存量。可以用来计算 pod 的已请求内存百分比。
+|`autoscaling/v2`
+|===
+
+[重要]
+====
+对于基于内存的自动缩放，内存用量必须与副本数呈正比增大和减小。平均而言：
+
+* 增加副本数一定会导致每个 pod 的内存（工作集）用量总体降低。
+* 减少副本数一定会导致每个 pod 的内存用量总体增高。
+
+使用 统信容器云管理平台 Web 控制台检查应用程序的内存行为，并确保应用程序在使用基于内存的自动缩放前满足这些要求。
+====
+
+以下示例显示了 `image-registry` `Deployment` 对象的自动扩展。初始部署需要 3 个 pod。HPA 对象将最小值增加到 5。如果 pod 的 CPU 用量达到 75%，pod 会增加到 7:
+
+[source,terminal]
+----
+$ oc autoscale deployment/image-registry --min=5 --max=7 --cpu-percent=75
+----
+
+.输出示例
+[source,terminal]
+----
+horizontalpodautoscaler.autoscaling/image-registry autoscaled
+----
+
+.`image-registry` `Deployment` 对象的 HPA 示例，其中 `minReplicas` 被设置为 3
+[source,yaml]
+----
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: image-registry
+  namespace: default
+spec:
+  maxReplicas: 7
+  minReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: image-registry
+  targetCPUUtilizationPercentage: 75
+status:
+  currentReplicas: 5
+  desiredReplicas: 0
+----
+
+. 查看部署的新状态：
++
+[source,terminal]
+----
+$ oc get deployment image-registry
+----
++
+部署中现在有 5 个 pod:
++
+.输出示例
+[source,terminal]
+----
+NAME             REVISION   DESIRED   CURRENT   TRIGGERED BY
+image-registry   1          5         5         config
+----

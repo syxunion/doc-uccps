@@ -1,0 +1,27 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-priority
+[id="nodes-pods-priority"]
+= 在 pod 调度决策中纳入 pod 优先级
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+您可以在集群中启用 pod 优先级与抢占功能。pod 优先级指明 pod 相对于其他 pod 的重要程度，并根据这个优先级对 pod 进行队列处理。pod 抢占允许集群驱除或抢占较低优先级 pod，以便在合适的节点 pod 上没有可用空间时，可以调度优先级较高的 pod，并影响节点上资源不足驱除顺序。
+
+要使用优先级和抢占功能，您需要创建优先级类来定义 pod 的相对权重。然后，在 pod 规格中引用优先级类，以应用这个权重来进行调度。
+
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-pods-priority-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-priority-preempt-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-priority-configuring.adoc[leveloffset=+1]
+
+

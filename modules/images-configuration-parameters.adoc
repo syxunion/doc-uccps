@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+[id="images-configuration-parameters_{context}"]
+= 镜像控制器配置参数
+
+`Image.config.openshift.io/cluster` 资源包含有关如何处理镜像的集群范围信息。规范且唯一有效的名称是 cluster。它的 spec 提供以下配置参数。
+
+[注意]
+====
+`DisableScheduledImport`, `MaxImagesBulkImportedPerRepository`, `MaxScheduledImportsPerMinute`, `ScheduledImageImportMinimumIntervalSeconds`, `InternalRegistryHostname` 等参数不可配置。
+====
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`allowedRegistriesForImport`
+|限制普通用户可从中导入镜像的容器镜像 registry。将此列表设置为您信任包含有效镜像且希望应用程序能够从中导入的 registry。有权从 API 创建镜像或 `ImageStreamMappings` 的用户不受此策略的影响。通常只有集群管理员具有适当权限。
+
+这个列表中的每个项包含由 registry 域名指定的 registry 的位置。
+
+`domainName`: 指定 registry 的域名。如果 registry 使用非标准的 80 或 443 端口，则该端口也应包含在域名中。
+
+`insecure`: 不安全指示 registry 是否安全。默认情况下，如果未另行指定，registry 假定为安全。
+
+|`additionalTrustedCA`
+|对包含 `image stream import`、`pod image pull`、`openshift-image-registry pullthrough` 和构建期间应受信任的额外 CA 的配置映射的引用。
+
+此配置映射的命名空间为 `openshift-config`。ConfigMap 的格式是使用 registry 主机名作为键，使用 PEM 编码证书作为值，用于每个要信任的额外 registry CA。
+
+|`externalRegistryHostnames`
+|提供默认外部镜像 registry 的主机名。只有在镜像 registry 对外公开时才应设置外部主机名。第一个值用于镜像流中的 `publicDockerImageRepository` 字段。该值必须采用 `hostname[:port]` 格式。
+
+|`registrySources`
+|包含用于决定容器运行时在访问构建和 pod 的镜像时应如何处理个别 registry 的配置。例如，是否允许不安全的访问。它不包含内部集群 registry 的配置。
+
+`insecureRegistries`: 无有效 TLS 证书或仅支持 HTTP 连接的 registry。要指定所有子域，请在域名中添加星号 (*) 通配符字符作为前缀。例如： ` *.example.com`。您可以在 registry 中指定单独的软件仓库。例如： `reg1.io/myrepo/myapp:latest`。
+
+`blockedRegistries`: 拒绝镜像拉取（pull）和推送（push）操作的 registry。要指定所有子域，请在域名中添加星号 (*) 通配符字符作为前缀。例如： ` *.example.com`。您可以在 registry 中指定单独的软件仓库。例如： `reg1.io/myrepo/myapp:latest`。允许所有其他 registry。
+
+`allowedRegistries`: 允许镜像拉取（pull）和推送（push）操作的 registry。要指定所有子域，请在域名中添加星号 (*) 通配符字符作为前缀。例如： ` *.example.com`。您可以在 registry 中指定单独的软件仓库。例如： `reg1.io/myrepo/myapp:latest`。阻止所有其他 registry。
+
+`containerRuntimeSearchRegistries`: 允许使用镜像短名称的镜像拉取（pull）和推送（push）操作的 registry。阻止所有其他 registry。可以设置 `blockedRegistries`` 或 `allowedRegistries`，但不能同时都被设置。
+
+|===
+
+[警告]
+====
+当定义 `allowedRegistries` 参数时，除非明确列出，否则所有 registry（包括 `registry.redhat.io` 和 `quay.io registry`）以及默认的内部镜像 registry 都会被阻断。当使用参数时，为了避免 pod 失败，将所有 registry（包括 `registry.redhat.io` 和 `quay.io registry`）和 `internalRegistryHostname` 添加到 `allowedRegistries` 列表中，因为环境中有效负载镜像需要它们。对于断开连接的集群，还应添加镜像的 registry。
+====
+
+`image.config.openshift.io/cluster` 资源的 `status` 项包括了从集群观察到的值。
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`internalRegistryHostname`
+|由控制 `internalRegistryHostname` 的 Image Registry Operator 设置。它为默认内部镜像 registry 设置主机名。该值必须采用 `hostname[:port]` 格式。为实现向后兼容，您仍可使用 `OPENSHIFT_DEFAULT_REGISTRY` 环境变量，但该设置会覆盖环境变量。
+
+|`externalRegistryHostnames`
+|由 Image Registry Operator 设置，在镜像 registry 通过外部公开时为它提供外部主机名。第一个值用于镜像流中的 `publicDockerImageRepository` 字段。该值必须采用 `hostname[:port]` 格式。
+
+|===

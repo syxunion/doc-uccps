@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="triggering-updates-on-imagestream-changes"]
+= 在镜像流更改时触发更新
+include::_attributes/common-attributes.adoc[]
+:context: triggering-updates-on-imagestream-changes
+
+toc::[]
+
+
+当更新镜像流标签以指向新镜像时，统信容器云管理平台 可以自动采取行动将新镜像推出到使用旧镜像的资源。您可以根据引用镜像流标签的资源类型以不同方式配置此行为。
+
+[id="openshift-resources"]
+== 统信容器云管理平台 资源
+
+统信容器云管理平台 Deployment 配置和构建配置可通过更改镜像流标签自动触发。可使用更新的镜像流标签引用的镜像的新值运行触发的操作。
+
+include::modules/images-triggering-updates-imagestream-changes-kubernetes-about.adoc[leveloffset=+1]
+
+include::modules/images-triggering-updates-imagestream-changes-kubernetes-cli.adoc[leveloffset=+1]

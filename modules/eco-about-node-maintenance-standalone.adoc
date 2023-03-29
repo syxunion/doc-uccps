@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+// nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: CONCEPT
+[id="eco-about-node-maintenance-operator_{context}"]
+= 关于 Node Maintenance Operator
+
+您可以使用 oc adm 实用程序或使用 `NodeMaintenance` 自定义资源(CR)将节点置于维护模式。
+
+Node Maintenance Operator 监视是否有新的或删除的  `NodeMaintenance` CRs. 当检测到新的 `NodeMaintenance` CR 时，不会调度新的工作负载，并且该节点从集群的其余部分中分离。所有可被驱除的 pod 都会从节点上驱除。删除 `NodeMaintenance` CR 时，CR 中引用的节点将可用于新工作负载。
+
+[注意]
+====
+使用 `NodeMaintenance` CR 进行节点维护任务可实现与 `oc adm cordon` 和 `oc adm drain` 命令相同的结果，使用标准的 统信容器云管理平台 CR 处理。
+====

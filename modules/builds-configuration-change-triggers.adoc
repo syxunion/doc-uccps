@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+[id="builds-configuration-change-triggers_{context}"]
+= 配置更改触发器
+
+通过配置更改触发器，您可以在创建新 `BuildConfig` 时立即自动调用构建。
+
+如下是 `BuildConfig` 中的示例触发器定义 YAML：
+
+[source,yaml]
+----
+  type: "ConfigChange"
+----
+
+[注意]
+====
+配置更改触发器目前仅在创建新 `BuildConfig` 时运作。在未来的版本中，配置更改触发器也可以在每当 `BuildConfig` 更新时启动构建。
+====

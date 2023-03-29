@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="creating-a-project-using-the-web-console_{context}"]
+= 使用 Web 控制台创建项目
+
+如果集群管理员允许，您可以创建新项目。
+
+
+.流程
+
+. 浏览至 *主页* -> *项目*。
+
+. 点 *创建项目*。
+
+. 输入项目详情。
+
+. 点击 *创建*。

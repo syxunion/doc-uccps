@@ -1,0 +1,11 @@
+:_content-type: PROCEDURE
+[id="odc-upgrading-helm-release_{context}"]
+= 升级 Helm 发行版本
+
+您可以把一个 Helm 发行版本升级到新的 chart 版本，或更发行版本的配置。
+
+.流程
+
+. 在 *开发者* 视角中，导航到 *拓扑* 视图中右键点击要升级的 Helm 发行 版本。
+. 点 *操作* -> *升级*。
+. 在 创建 *Helm 发行* 页面中，选择您要升级到的 *Chart 版本* ，然后点 升级 以创建另一个 Helm 发行版本。*Helm 发行* 页面会显示两个修订版本。

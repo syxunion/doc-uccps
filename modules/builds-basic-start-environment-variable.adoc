@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-start-environment-variable_{context}"]
+= 在启动构建时设置环境变量
+
+您可以指定 `--env` 标志，为构建设置任何所需的环境变量。
+
+.流程
+
+* 要指定所需的环境变量，请输入以下命令：
++
+[source,terminal]
+----
+$ oc start-build <buildconfig_name> --env=<key>=<value>
+----

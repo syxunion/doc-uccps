@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-using.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-about_{context}"]
+= 关于 Pod
+
+统信容器云管理平台 使用 Kubernetes 的 pod 概念，它是共同部署在同一主机上的一个或多个容器，也是可被定义、部署和管理的最小计算单元。对容器而言，Pod 大致相当于机器实例（物理或虚拟）。
+
+您可以查看与特定项目关联的 pod 列表，或者查看 pod 的使用情况统计。

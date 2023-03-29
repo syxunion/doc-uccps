@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-subs.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-subscriptions-yaml_{context}"]
+= 使用 YAML 创建订阅
+
+创建频道和事件 sink 后，您可以创建一个订阅来启用事件交付。使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以声明性的方式描述订阅，并以可重复的方式描述订阅。要使用 YAML 创建订阅，您必须创建一个 YAML 文件来定义`Subscription` 对象，然后使用 `oc apply` 命令应用它。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 安装 CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+* 创建 `Subscription` 对象：
+** 创建 YAML 文件并将以下示例代码复制到其中：
++
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1beta1
+kind: Subscription
+metadata:
+  name: my-subscription <1>
+  namespace: default
+spec:
+  channel: <2>
+    apiVersion: messaging.knative.dev/v1beta1
+    kind: Channel
+    name: example-channel
+  delivery: <3>
+    deadLetterSink:
+      ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: error-handler
+  subscriber: <4>
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+----
++
+<1> 订阅的名称。
+<2> 订阅连接的频道的配置设置。
+<3> 事件交付的配置设置。这会告诉订阅无法发送给订阅者的事件。配置后，消耗的事件会发送到 `deadLetterSink`。事件将被丢弃，不会尝试重新发送该事件，并在系统中记录错误。 `deadLetterSink` 的值需要是一个Destination。
+<4> 订阅用户的配置设置。这是事件从频道发送的事件 sink。
+** 应用 YAML 文件：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

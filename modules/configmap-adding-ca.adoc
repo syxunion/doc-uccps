@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * builds/setting-up-trusted-ca
+
+:_content-type: PROCEDURE
+[id="configmap-adding-ca_{context}"]
+= 在集群中添加证书颁发机构
+
+您可以按照以下流程将证书颁发机构 (CA) 添加到集群，以便在推送和拉取镜像时使用。
+
+.先决条件
+
+* 您必须具有集群管理员特权。
+* 您必须有权访问 registry 的公共证书，通常是位于 `/etc/docker/certs.d/` 目录中的 `hostname/ca.crt` 文件。
+
+.流程
+
+. 在 `openshift-config` 命名空间中创建一个 `ConfigMap`，其中包含使用自签名证书的 registry 的可信证书。对于每个 CA 文件，确保 ConfigMap 中的键是 `hostname[..port]` 格式的容器镜像仓库的主机名：
++
+[source,terminal]
+----
+$ oc create configmap registry-cas -n openshift-config \
+--from-file=myregistry.corp.com..5000=/etc/docker/certs.d/myregistry.corp.com:5000/ca.crt \
+--from-file=otherregistry.com=/etc/docker/certs.d/otherregistry.com/ca.crt
+----
+
+. 更新集群镜像配置：
++
+[source,terminal]
+----
+$ oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-cas"}}}' --type=merge
+----

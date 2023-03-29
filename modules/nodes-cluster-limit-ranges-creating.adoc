@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/limit-ranges.adoc
+
+[id="nodes-cluster-limit-creating_{context}"]
+= 创建限制范围
+
+将限制范围应用到一个项目：
+
+. 使用您的所需规格创建 `LimitRange` 对象：
++
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: "Pod" <2>
+      max:
+        cpu: "2"
+        memory: "1Gi"
+      min:
+        cpu: "200m"
+        memory: "6Mi"
+    - type: "Container" <3>
+      max:
+        cpu: "2"
+        memory: "1Gi"
+      min:
+        cpu: "100m"
+        memory: "4Mi"
+      default: <4>
+        cpu: "300m"
+        memory: "200Mi"
+      defaultRequest: <5>
+        cpu: "200m"
+        memory: "100Mi"
+      maxLimitRequestRatio: <6>
+        cpu: "10"
+    - type: openshift.io/Image <7>
+      max:
+        storage: 1Gi
+    - type: openshift.io/ImageStream <8>
+      max:
+        openshift.io/image-tags: 20
+        openshift.io/images: 30
+    - type: "PersistentVolumeClaim" <9>
+      min:
+        storage: "2Gi"
+      max:
+        storage: "50Gi"
+----
+<1> 为 LimitRange 对象指定一个名称。
+<2> 要为 pod 设置限值，请根据需要指定最小和最大 CPU 和内存请求。
+<3> 要为容器设置限值，请根据需要指定最小和最大 CPU 和内存请求。
+<4> 可选。对于容器，如果没有在 Pod spec 中指定，则指定容器可以使用的默认 CPU 或内存量。
+<5> 可选。对于容器，如果没有在 Pod spec 中指定，则指定容器可以请求的默认 CPU 或内存量。
+<6> 可选。对于容器，指定 Pod spec 中可指定的最大限制与请求比例。
+<7> 要为镜像对象设置限制，请设置可推送到内部 registry 的镜像的最大值。
+<8> 要为镜像流设置限值，请根据需要设置 ImageStream 对象文件中的最大镜像标签和引用数。
+<9> 要为持久性卷声明设置限制，请设置可请求的最小和最大存储量。
+ 
+. 创建对象：
++
+----
+$ oc create -f <limit_range_file> -n <project> <1>
+----
+<1> 指定您创建的 YAML 文件的名称以及要应用限制的项目。

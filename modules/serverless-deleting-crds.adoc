@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+//  * serverless/install/removing-openshift-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-deleting-crds_{context}"]
+= 删除 {ServerlessProductName} 自定义资源定义
+
+卸载 Uccps Serverless 后，Operator 和 API 自定义资源定义（CRD）会保留在集群中。您可以使用以下步骤删除剩余的 CRD。
+
+[IMPORTANT]
+====
+移除 Operator 和 API CRD 也会移除所有使用它们定义的资源，包括 Knative 服务.
+====
+
+.先决条件
+
+* 安装 Uccps CLI (`oc`).
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 您已卸载了 Knative Serving 并移除了 {ServerlessOperatorName} 。
+
+.流程
+
+* 运行以下命令删除 Uccps Serverless CRD：
++
+[source,terminal]
+----
+$ oc get crd -oname | grep 'knative.dev' | xargs oc delete
+----

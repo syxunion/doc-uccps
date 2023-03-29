@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+// * openshift_images/tagging-images
+
+:_content-type: PROCEDURE
+[id="images-add-tags-to-imagestreams_{context}"]
+= 向镜像流中添加标签
+
+统信容器云管理平台 中的镜像流包含 0 个或更多由标签标识的容器镜像。
+
+有各种不同类型的标签可用。默认行为使用 `permanent` 标签，指向一段时间内的特定镜像。如果正在使用 `permanent` 标签并且源更改，则目的地的标签不会更改。
+
+`tracking` 标签表示，在导入源标签期间对目的地标签的元数据进行了更新。
+
+.流程
+
+* 您可使用 oc tag 命令向镜像流中添加标签：
++
+[source,terminal]
+----
+$ oc tag <source> <destination>
+----
++
+例如：要将 `ruby` 镜像流 `static-2.0` 标签配置为始终引用 `ruby` 镜像流 `2.0` 标签的当前镜像：
++
+[source,terminal]
+----
+$ oc tag ruby:2.0 ruby:static-2.0
+----
++
+这会在 ruby 镜像流中创建名为 `static-2.0` 的新镜像流标签。运行 oc tag 时，新标签会直接引用 `ruby:2.0` 镜像流标签所指向的镜像 id，而所指向的镜像不会改变。
+
+* 为确保目标标签在源标签更改时进行更新，请使用 `--alias=true` 标志：
++
+[source,terminal]
+----
+$ oc tag --alias=true <source> <destination>
+----
+
+[注意]
+====
+使用跟踪标签创建持久别名，如 `latest` 或 `stable`。该标签只在单一镜像流中正常工作。试图创建跨镜像流别名会出错。
+====
+
+* 您还可添加 `--scheduled=true` 标志来定期刷新或重新导入目的地标签。周期在系统级别进行全局配置。
+
+* `--reference` 标志会创建一个非导入的镜像流标签。该标签持久指向源位置。
++
+如果您想指示 统信容器云管理平台 始终从集成的 registry 中获取标记的镜像，请使用 `--reference-policy=local`。registry 使用 pull-through 功能为客户端提供镜像。默认情况下，镜像 Blob 由 registry 在本地进行镜像。因此，下次需要时便可更快拉取（pull）。只要镜像流具有不安全的注解，或者标签具有不安全的导入策略，该标志也允许从不安全的 registry 拉取（pull），无需向容器运行时提供 `--insecure-registry`。

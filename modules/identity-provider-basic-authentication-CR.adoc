@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+
+[id="identity-provider-basic-authentication-CR_{context}"]
+= 基本身份验证 CR 示例
+
+以下自定义资源（CR）显示基本身份验证身份提供程序的参数和可接受值。
+
+.基本身份验证 CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: basicidp <1>
+    mappingMethod: claim <2>
+    type: BasicAuth
+    basicAuth:
+      url: https://www.example.com/remote-idp <3>
+      ca: <4>
+        name: ca-config-map
+      tlsClientCert: <5>
+        name: client-cert-secret
+      tlsClientKey: <6>
+        name: client-key-secret
+----
+<1> 此提供程序名称作为前缀放在返回的用户 ID 前，以此组成身份名称。
+<2> 控制如何在此提供程序的身份和 User 对象之间建立映射。
+<3> 接受基本身份验证标头中凭证的 URL。
+<4> 可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台 `ConfigMap` 的引用，以用于验证所配置 URL 的服务器证书。
+<5> 可选：对包含客户端证书的统信容器云管理平台 `Secret` 对象的引用，该证书在向所配置的 URL 发出请求时出示。
+<6> 对包含客户端证书密钥的统信容器云管理平台 `Secret` 对象的引用。指定了 `tlsClientCert`` 时必需此项。

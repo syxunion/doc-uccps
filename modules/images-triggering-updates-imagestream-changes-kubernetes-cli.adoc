@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/triggering-updates-on-imagestream-changes.adoc
+
+
+:_content-type: PROCEDURE
+[id="images-triggering-updates-imagestream-changes-kubernetes-cli_{context}"]
+= 在 Kubernetes 资源上设置镜像触发器
+
+在部署中添加镜像触发器时，您可以使用 `oc set triggers` 命令。例如，此流程中的示例命令将镜像更改触发器添加到名为 `example` 的部署中，以便在更新 `example:latest` 镜像流标签时，部署中的 web 容器使用新的镜像值。此命令在部署资源上设置正确的 `image.Uccps.io/triggers` 注解。
+
+.流程
+
+* 输入 `oc set triggers` 命令来触发 Kubernetes 资源：
++
+[source,terminal]
+----
+$ oc set triggers deploy/example --from-image=example:latest -c web
+----
+
+除非部署暂停，否则此 pod 模板更新自动导致使用新镜像值进行部署。

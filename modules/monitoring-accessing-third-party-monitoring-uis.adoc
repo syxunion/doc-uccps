@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * monitoring/accessing-third-party-monitoring-uis-and-apis.adoc
+
+:_content-type: CONCEPT
+[id="accessing-third-party-monitoring-uis"]
+= 访问第三方监控 UI
+
+[role="_abstract"]
+统信容器云管理平台 不支持对监控堆栈中的以下组件的直接访问第三方 Web 用户界面(UI)：Alertmanager、Thanos Ruler 和 Thanos Querier。作为这些第三方 UI 的替代选择，导航到 统信容器云管理平台 Web 控制台的 *Observe* 部分，以访问平台组件的指标、警报、指标目标和仪表板 UI。
+
+[注意]
+====
+虽然您可以从 Web 控制台或 CLI 访问第三方 Grafana 和 Prometheus Web UI，但此访问已弃用，并计划在以后的 统信容器云管理平台 发行版本中删除。
+====
+
+

@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/customizing-installation-ossm.adoc
+:_content-type: CONCEPT
+[id="ossm-specifying-external-kiali_{context}"]
+= 在 Kiali 自定义资源中指定 Kiali 配置
+
+您可以通过在 Kiali 自定义资源(CR)而不是 `ServiceMeshControlPlane` (SMCP)资源中配置 Kiali 部署来完全自定义 Kiali 部署。这个配置有时被称为 "外部 Kiali"，因为配置是在 SMCP 之外指定的。
+
+[NOTE]
+====
+您必须在同一命名空间中部署 ServiceMeshControlPlane 和 Kiali 自定义资源。例如： `istio-system`.
+====
+
+您可以配置和部署 Kiali 实例，然后将 Kiali 资源的 `name` 指定为 SMCP 资源中的 `spec.addons.kiali.name` 的值。如果存在与名称值匹配的 Kiali CR，Service Mesh control plane 将使用现有安装。这个方法可让您完全自定义 Kiali 配置。

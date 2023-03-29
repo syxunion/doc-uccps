@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+// * openshift_images/templates-ruby-on-rails.adoc
+
+
+:_content-type: PROCEDURE
+[id="templates-rails-storing-application-in-git_{context}"]
+= 将应用程序存储在 Git 中
+
+在 统信容器云管理平台 中构建应用程序通常需要将源代码存储在 git 存储库中，因此如果还没有 git，必须要安装。
+
+.先决条件
+
+* 安装 git。
+
+.流程
+
+. 运行 ls -1 命令，确保已在 Rails 应用程序目录中。命令输出应类似于：
++
+[source,terminal]
+----
+$ ls -1
+----
++
+.输出示例
+[source,terminal]
+----
+app
+bin
+config
+config.ru
+db
+Gemfile
+Gemfile.lock
+lib
+log
+public
+Rakefile
+README.rdoc
+test
+tmp
+vendor
+----
+
+. 在 Rails 应用程序目录中运行以下命令，以便初始化代码并将其提交给 git：
++
+[source,terminal]
+----
+$ git init
+----
++
+[source,terminal]
+----
+$ git add .
+----
++
+[source,terminal]
+----
+$ git commit -m "initial commit"
+----
++
+提交应用程序后，必须将其推送（push）到远程存储库。Github 帐户，您可使用它创建新的存储库。
+
+. 设置指向 `git` 存储库的远程存储库：
++
+[source,terminal]
+----
+$ git remote add origin git@github.com:<namespace/repository-name>.git
+----
+
+. 将应用程序推送（push）到远程 git 存储库。
++
+[source,terminal]
+----
+$ git push
+----

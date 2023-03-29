@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="odc-starting-recreate-deployment_{context}"]
+= 使用开发者视角启动重新创建的部署
+
+您可以使用 web 控制台中的 *开发者* 视角将部署策略从默认的滚动模式切换到重新创建模式。
+
+.先决条件
+* 确认您使用 web 控制台的 *开发者* 视角。
+* 确保您已使用 *Add* 视图创建了一个应用程序，并可以在 *拓扑* 视图中查看它。
+
+.流程
+
+切换到重新创建的更新策略并升级应用程序：
+
+. 在 *操作* 下拉菜单中，选择 *编辑部署配置* 来查看应用程序的部署配置详情。
+. 在 `表单视图` 中，将 `策略类型` 更改为 `重新创建` ，然后点 *保存*。
+. 在 *拓扑* 视图中，选择节点即可看到侧面板中的 *详情* 选项卡。更新策略 现在设为 `Recreate`。
+. 使用 *操作* 下拉菜单选择 *恢复推出部署* 以使用 recreate 策略启动更新。recreate 策略首先会终止旧版本应用程序的 pod，然后为新版本启动 pod。

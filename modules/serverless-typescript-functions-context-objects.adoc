@@ -1,0 +1,112 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-typescript-functions.adoc
+
+:_content-type: REFERENCE
+[id="serverless-typescript-functions-context-objects_{context}"]
+= TypeScript 上下文对象
+
+若要调用函数，您可以提供一个 `context` 对象作为第一个参数。访问 `context` 对象的属性可以提供有关传入 HTTP 请求的信息。
+
+.上下文对象示例
+[source,javascript]
+----
+function handle(context:Context): string
+----
+
+此信息包括 HTTP 请求方法、通过请求发送的任何查询字符串或标头、HTTP 版本和请求正文。传入包含 CloudEvent 的请求将进入 `CloudEvent` 实例附加到上下文对象，以便使用 `context.cloudevent` 访问它。
+
+[id="serverless-typescript-functions-context-objects-methods_{context}"]
+== 上下文对象方法
+
+`context` 对象具有单一方法 `cloudEventResponse()`，它接受数据值并返回 CloudEvent。
+
+在 Knative 系统中，如果发送 CloudEvent 的事件代理调用将部署为服务的功能，代理会检查响应。如果响应是 CloudEvent，则此事件由代理处理。
+
+.上下文对象方法示例
+[source,javascript]
+----
+// Expects to receive a CloudEvent with customer data
+export function handle(context: Context, cloudevent?: CloudEvent): CloudEvent {
+  // process the customer
+  const customer = cloudevent.data;
+  const processed = processCustomer(customer);
+  return context.cloudEventResponse(customer)
+    .source('/customer/process')
+    .type('customer.processed')
+    .response();
+}
+----
+
+[id="serverless-typescript-functions-context-types_{context}"]
+== 上下文类型
+
+TypeScript 类型定义文件导出以下类型以便在您的功能中使用。
+
+.导出类型定义
+[source,javascript]
+----
+// Invokable is the expeted Function signature for user functions
+export interface Invokable {
+    (context: Context, cloudevent?: CloudEvent): any
+}
+
+// Logger can be used for structural logging to the console
+export interface Logger {
+  debug: (msg: any) => void,
+  info:  (msg: any) => void,
+  warn:  (msg: any) => void,
+  error: (msg: any) => void,
+  fatal: (msg: any) => void,
+  trace: (msg: any) => void,
+}
+
+// Context represents the function invocation context, and provides
+// access to the event itself as well as raw HTTP objects.
+export interface Context {
+    log: Logger;
+    req: IncomingMessage;
+    query?: Record<string, any>;
+    body?: Record<string, any>|string;
+    method: string;
+    headers: IncomingHttpHeaders;
+    httpVersion: string;
+    httpVersionMajor: number;
+    httpVersionMinor: number;
+    cloudevent: CloudEvent;
+    cloudEventResponse(data: string|object): CloudEventResponse;
+}
+
+// CloudEventResponse is a convenience class used to create
+// CloudEvents on function returns
+export interface CloudEventResponse {
+    id(id: string): CloudEventResponse;
+    source(source: string): CloudEventResponse;
+    type(type: string): CloudEventResponse;
+    version(version: string): CloudEventResponse;
+    response(): CloudEvent;
+}
+----
+
+[id="serverless-typescript-functions-context-objects-cloudevent-data_{context}"]
+== CloudEvent 数据
+
+如果传入的请求为 CloudEvent，则从事件中提取与 CloudEvent 相关的任何数据，并作为第二个参数提供。例如，如果收到在它的数据属性中包含类似如下的 JSON 字符串的 CloudEvent：
+
+[source,json]
+----
+{
+  "customerId": "0123456",
+  "productId": "6543210"
+}
+----
+
+在调用时。函数的第二个参数（在上下文 对象后），将是带有 `customerId` 和 `productId` 属性的 JavaScript 对象。
+
+.签名示例
+[source,javascript]
+----
+function handle(context: Context, cloudevent?: CloudEvent): CloudEvent
+----
+
+本例中的 `cloudevent` 参数是一个 JavaScript 对象，包含 `customerId` 和 `productId` 属性。

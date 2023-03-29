@@ -1,0 +1,121 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-using.adoc
+
+[id="nodes-pods-using-example_{context}"]
+= pod 配置示例
+
+统信容器云管理平台 使用 Kubernetes 的  _pod_ 概念，它是共同部署在同一主机上的一个或多个容器，也是可被定义、部署和管理的最小计算单元。
+
+以下是来自 Rails 应用的容器集定义示例：它展示了 pod 的许多特性，其中大多数已在其他主题中阐述，因此这里仅简略提及：
+
+[id="example-pod-definition_{context}"]
+.`Pod` 对象定义 (YAML)
+
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  name: example
+  namespace: default
+  selfLink: /api/v1/namespaces/default/pods/example
+  uid: 5cc30063-0265780783bc
+  resourceVersion: '165032'
+  creationTimestamp: '2019-02-13T20:31:37Z'
+  labels:                  
+    app: hello-openshift <1>
+  annotations:
+    openshift.io/scc: anyuid
+spec:
+  restartPolicy: Always <2>
+  serviceAccountName: default
+  imagePullSecrets:
+    - name: default-dockercfg-5zrhb
+  priority: 0
+  schedulerName: default-scheduler
+  terminationGracePeriodSeconds: 30
+  nodeName: ip-10-0-140-16.us-east-2.compute.internal
+  securityContext: <3>
+    seLinuxOptions:
+      level: 's0:c11,c10'
+  containers: <4>        
+    - resources: {}
+      terminationMessagePath: /dev/termination-log
+      name: hello-openshift
+      securityContext:
+        capabilities:
+          drop:
+            - MKNOD
+        procMount: Default
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      imagePullPolicy: Always
+      volumeMounts: <5>
+        - name: default-token-wbqsl
+          readOnly: true
+          mountPath: /var/run/secrets/kubernetes.io/serviceaccount <6>
+      terminationMessagePolicy: File
+      image: registry.redhat.io/openshift4/ose-ogging-eventrouter:v4.3 <7>
+  serviceAccount: default <8>
+  volumes: <9>
+    - name: default-token-wbqsl
+      secret:
+        secretName: default-token-wbqsl
+        defaultMode: 420
+  dnsPolicy: ClusterFirst
+status:
+  phase: Pending
+  conditions:
+    - type: Initialized
+      status: 'True'
+      lastProbeTime: null
+      lastTransitionTime: '2019-02-13T20:31:37Z'
+    - type: Ready
+      status: 'False'
+      lastProbeTime: null
+      lastTransitionTime: '2019-02-13T20:31:37Z'
+      reason: ContainersNotReady
+      message: 'containers with unready status: [hello-openshift]'
+    - type: ContainersReady
+      status: 'False'
+      lastProbeTime: null
+      lastTransitionTime: '2019-02-13T20:31:37Z'
+      reason: ContainersNotReady
+      message: 'containers with unready status: [hello-openshift]'
+    - type: PodScheduled
+      status: 'True'
+      lastProbeTime: null
+      lastTransitionTime: '2019-02-13T20:31:37Z'
+  hostIP: 10.0.140.16
+  startTime: '2019-02-13T20:31:37Z'
+  containerStatuses:
+    - name: hello-openshift
+      state:
+        waiting:
+          reason: ContainerCreating
+      lastState: {}
+      ready: false
+      restartCount: 0
+      image: openshift/hello-openshift
+      imageID: ''
+  qosClass: BestEffort
+----
+
+<1> pod 可以被 "tagged" 一个或多个标签，然后使用这些标签在一个操作中选择和管理多组 pod。标签以键/值格式保存在 `metadata` 散列中。
+<2> pod 重启策略，可能的值有 `Always`, `OnFailure`, 和 `Never` 。默认值为 `Always`。
+<3> 统信容器云管理平台 为容器定义了一个安全上下文，指定是否允许其作为特权容器来运行，或者以所选用户身份运行，等等。默认上下文的限制性比较强，但管理员可以根据需要进行修改。
+<4> `containers` 指定包括一个或多个容器定义的数组。
+<5> 容器指定在容器中挂载外部存储卷的位置。在本例中，有一个卷可用来存储对凭证的访问，该卷是根据 registry 对 统信容器云管理平台 API 发出请求所需的。
+<6> 指定要为 pod 提供的卷。卷挂载在指定路径上。不要挂载到容器 root `/` 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统（如主机的 `/dev/pts`文件）。使用 `/host` 挂载主机是安全的。
+<7> pod 中的每个容器使用自己的容器镜像进行实例化。
+<8> pod 对 统信容器云管理平台 API 发出请求是一种比较常见的模式，利用一个 `serviceAccount` 字段指定 pod 在发出请求时使用哪个服务帐户用户来进行身份验证。这可以为自定义基础架构组件提供精细的访问控制。
+<9> pod 定义了可供其容器使用的存储卷。在本例中，它为包含默认服务帐户令牌的 `secret`  卷提供一个临时卷。
++
+如果将具有高文件数的持久性卷附加到 pod，则这些 pod 可能会失败，或者可能需要很长时间才能启动。如需更多信息，请参阅在 Uccps 中使用具有高文件计数的持久性卷时，为什么 pod 无法启动或占用大量时间来实现"Ready"状态？
+
+[注意]
+====
+此 pod 定义不包括 统信容器云管理平台 在 pod 创建并开始其生命周期后自动填充的属性。Kubernetes pod 文档详细介绍了 pod 的功能和用途。
+====

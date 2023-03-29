@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-accessing-secrets-configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-functions-key-value-in-configmap-to-env-variable_{context}"]
+= 从配置映射中定义的键值设置环境变量
+
+您可以从定义为配置映射的键值设置环境变量。然后，之前存储在配置映射中的值可以被函数在运行时作为环境变量访问。这对于获取配置映射中存储的值（如用户的 ID）非常有用。
+
+.先决条件
+
+* 在集群中安装了统信容器云管理平台无服务扩展组件和 Knative Serving。
+* 已安装 Knative  (`kn`) CLI.
+* 您已创建了一个功能。
+
+.流程
+
+. 为您的功能打开 `func.yaml` 文件。
+
+. 对于您要分配给环境变量的配置映射键值对中的每个值，请将以下 YAML 添加到 `envs` 部分：
++
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+envs:
+- name: EXAMPLE
+  value: '{{ configMap:myconfigmap:key }}'
+----
++
+* 将 `EXAMPLE` 替换为环境变量的名称。
+* 将 `myconfigmap` 替换为目标配置映射的名称。
+* 使用映射到目标值的键替换 key。
++
+例如，要访问存储在 `userdetailsmap`  中的用户 ID，请使用以下 YAML：
++
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+envs:
+- value: '{{ configMap:userdetailsmap:userid }}'
+----
+
+. 保存配置。

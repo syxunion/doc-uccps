@@ -1,0 +1,124 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/creating-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:name: network
+:role: admin
+ifeval::[{product-version} >= 4.6]
+:ovn:
+endif::[]
+ifeval::["{context}" == "configuring-multi-network-policy"]
+:multi:
+:name: multi-network
+:role: cluster-admin
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-create_{context}"]
+= 创建网络策略
+
+要定义细致的规则来描述集群中命名空间允许的入口或出口网络流量，您可以创建一个网络策略。
+
+ifndef::multi[]
+[注意]
+====
+如果使用具有 `cluster-admin` 角色的用户登录，则可以在集群中的任何命名空间中创建网络策略。
+====
+endif::multi[]
+
+.先决条件
+
+* 集群使用支持 NetworkPolicy 对象的集群网络供应商，如设置了 mode: NetworkPolicy 的 OpenShift SDN 网络供应商。此模式是 OpenShift SDN 的默认模式。
+* 已安装 Uccp CLI（oc）。 (`oc`).
+* 您可以使用具有 admin 权限的用户登陆到集群。
+* 您在网络策略要应用到的命名空间中。
+
+.流程
+
+. 创建策略规则：
+.. 创建一个 `<policy_name>.yaml` 文件：
++
+[source,terminal]
+----
+$ touch <policy_name>.yaml
+----
++
+--
+其中：
+
+`<policy_name>`:: 指定网络策略文件名。
+--
+
+.. 在您刚才创建的文件中定义网络策略，如下例所示：
++
+.拒绝来自所有命名空间中的所有 pod 的入口流量
+[source,yaml]
+----
+ifndef::multi[]
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+endif::multi[]
+ifdef::multi[]
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+endif::multi[]
+metadata:
+  name: deny-by-default
+ifdef::multi[]
+  annotations:
+    k8s.v1.cni.cncf.io/policy-for: <network_name>
+endif::multi[]
+spec:
+  podSelector:
+  ingress: []
+----
++
+.允许来自所有命名空间中的所有 pod 的入口流量
+[source,yaml]
+----
+ifndef::multi[]
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+endif::multi[]
+ifdef::multi[]
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+endif::multi[]
+metadata:
+  name: allow-same-namespace
+ifdef::multi[]
+  annotations:
+    k8s.v1.cni.cncf.io/policy-for: <network_name>
+endif::multi[]
+spec:
+  podSelector:
+  ingress:
+  - from:
+    - podSelector: {}
+----
+
+. 运行以下命令来创建网络策略对象：
++
+[source,terminal]
+----
+$ oc apply -f <policy_name>.yaml -n <namespace>
+----
++
+--
+其中：
+
+`<policy_name>`:: 指定网络策略文件名。
+`<namespace>`:: 可选： 如果对象在与当前命名空间不同的命名空间中定义，使用它来指定命名空间。
+--
++
+.输出示例
+[source,terminal]
+----
+networkpolicy.networking.k8s.io/default-deny created
+----
+
+[注意]
+====
+如果您使用 `cluster-admin` 权限登录到 web 控制台，您可以选择在集群中的任何命名空间中以 YAML 或 web 控制台的形式创建网络策略。
+====

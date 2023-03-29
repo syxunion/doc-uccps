@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-observability.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-access-grafana_{context}"]
+= Accessing the Grafana console
+
+Grafana 是一个分析工具，可用于查看、查询和分析服务网格指标。在本例中， `istio-system` 是 {SMProductShortName} control plane 命名空间。要访问 Grafana，请执行以下操作：
+
+.流程
+
+. 登陆到  {product-title} web 控制台。
+
+. 点  *项目* 菜单，选择安装 {SMProductShortName} 的项目，如 *istio-system*.
+
+. 单击 *路由*.
+
+. 点击 *Grafana* 行的 *位置*  列中的链接。
+
+. 使用 {product-title} 凭证登录到 Grafana 控制台。

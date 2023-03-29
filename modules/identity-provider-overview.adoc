@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-identity-provider.adoc
+// * authentication/identity_providers/configuring-allow-all-identity-provider.adoc
+// * authentication/identity_providers/configuring-deny-all-identity-provider.adoc
+// * authentication/identity_providers/configuring-htpasswd-identity-provider.adoc
+// * authentication/identity_providers/configuring-keystone-identity-provider.adoc
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+// * authentication/identity_providers/configuring-github-identity-provider.adoc
+// * authentication/identity_providers/configuring-gitlab-identity-provider.adoc
+// * authentication/identity_providers/configuring-google-identity-provider.adoc
+// * authentication/identity_providers/configuring-oidc-identity-provider.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: CONCEPT
+[id="identity-provider-overview_{context}"]
+= 关于统信容器云管理平台中的身份提供程序
+
+默认情况下，集群中只有 `kubeadmin` 用户。要指定身份提供程序，您必须创建一个自定义资源（CR） 来描述该身份提供程序并把它添加到集群中。
+
+[注意]
+====
+统信容器云管理平台 用户名不能包括 `/`、 `:` 和 `%。`
+====

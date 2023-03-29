@@ -1,0 +1,41 @@
+:_content-type: ASSEMBLY
+[id="ossm-troubleshooting"]
+= Troubleshooting your service mesh
+include::_attributes/common-attributes.adoc[]
+:context: troubleshooting-ossm
+
+toc::[]
+
+本节论述了如何识别和解决  {SMProductName} 中的常见问题。在 {product-title} 上部署 {SMProductName} 时，请使用以下部分帮助排除故障并调试问题。
+
+// The following include statements pull in the module files that comprise the assembly.
+
+== 安装故障排除 Operator
+
+include::modules/ossm-validating-operators.adoc[leveloffset=+2]
+
+include::modules/ossm-troubleshooting-operators.adoc[leveloffset=+2]
+
+== Troubleshooting the control plane
+
+Service Mesh _control plane_ 由 Istiod 组成，它会将几个以前的 control plane 组件（Citadel、Galley、Pilot）整合为一个二进制文件。部署 `ServiceMeshControlPlane` 还会创建组成 {SMProductName} 的其他组件。
+
+include::modules/ossm-validating-smcp.adoc[leveloffset=+2]
+
+include::modules/ossm-kiali-accessing-console.adoc[leveloffset=+3]
+
+include::modules/ossm-jaeger-accessing-console.adoc[leveloffset=+3]
+
+include::modules/ossm-troubleshooting-smcp.adoc[leveloffset=+2]
+
+== Troubleshooting the data plane
+
+_data plane_ 是一组智能代理，用于拦截和控制服务网格中服务之间的所有入站和出站网络通信。
+
+{SMProductName} 依赖于应用程序 pod 中的 proxy sidecar 来为应用程序提供服务网格功能。
+
+include::modules/ossm-troubleshooting-injection.adoc[leveloffset=+2]
+
+
+include::modules/ossm-troubleshooting-proxy.adoc[leveloffset=2]
+

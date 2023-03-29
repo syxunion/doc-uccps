@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-exposing-object-fields_{context}"]
+= 公开模板对象字段
+
+模板创建者可指定模板中的特定对象字段应公开。Template Service Broker 会识别 `ConfigMap`、`Secret`、`Service` 和 `Route `上公开的字段，并在用户绑定代理支持的服务时返回公开字段的值。
+
+要公开对象的一个或多个字段，请在模板中为对象添加以 `template.Uccps.io/expose-` 或 `emplate.Uccps.io/base64-expose-` 为前缀的注解。
+
+每个移除前缀的注解键均会被传递成为 bind 响应中的一个键。
+
+每个注解值是一个 Kubernetes JSONPath 表达式，该表达式将在绑定时解析，以指示应在 bind 响应中返回值的对象字段。
+
+[注意]
+====
+`Bind` 响应键/值对可在系统其他部分用作环境变量。因此，建议删除前缀的每个注解键均应为有效的环境变量名称，以字符 `A-Z`, `a-z`, or `pass:[_]` 开头，后跟 `A-Z`, `a-z`, `0-9`, or `pass:[_]` 等更多字符。
+====
+
+[注意]
+====
+除非用反斜杠转义，否则 Kubernetes 的 JSONPath 实现会将 .、@ 字符等解析为元字符，而无关其在表达式中的位置。因此，例如要引用名为 my.key 的 ConfigMap 数据，所需 JSONPath 表达式应为 `{.data['my\.key']}` 。根据 JSONPath 表达式在 YAML 中的编写方式，可能需要额外增加反斜杠，如 `"{.data['my\\.key']}"`。
+====
+
+以下是被公开的不同对象字段的示例：
+
+[source,yaml]
+----
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: my-template
+objects:
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: my-template-config
+    annotations:
+      template.openshift.io/expose-username: "{.data['my\\.username']}"
+  data:
+    my.username: foo
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: my-template-config-secret
+    annotations:
+      template.openshift.io/base64-expose-password: "{.data['password']}"
+  stringData:
+    password: bar
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: my-template-service
+    annotations:
+      template.openshift.io/expose-service_ip_port: "{.spec.clusterIP}:{.spec.ports[?(.name==\"web\")].port}"
+  spec:
+    ports:
+    - name: "web"
+      port: 8080
+- kind: Route
+  apiVersion: route.openshift.io/v1
+  metadata:
+    name: my-template-route
+    annotations:
+      template.openshift.io/expose-uri: "http://{.spec.host}{.spec.path}"
+  spec:
+    path: mypath
+----
+
+下面是在遵守上述部分模板情况下，对 `bind` 操作的一个响应示例：
+
+[source,json]
+----
+{
+  "credentials": {
+    "username": "foo",
+    "password": "YmFy",
+    "service_ip_port": "172.30.12.34:8080",
+    "uri": "http://route-test.router.default.svc.cluster.local/mypath"
+  }
+}
+----
+
+.流程
+
+* 使用 `template.Uccps.io/expose-` 注解来以字符串形式返回字段值。这样很方便，尽管没有处理任意二进制数据。
+
+* 如果要返回二进制数据，请在返回前使用 `template.Uccps.io/base64-expose-` 注解对数据进行 base64 编码。

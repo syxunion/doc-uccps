@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-broker-ingress-metrics_{context}"]
+= 代理入口指标
+
+您可以使用以下指标调试代理 ingress，请参阅它的执行方式，以及哪些事件由 ingress 组件分配。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`event_count`
+|代理接收的事件数
+|计数
+|`broker_name`, `event_type`, `namespace_name`, `response_code`, `response_code_class`, `unique_name`
+|整数 (无单位)
+
+|`event_dispatch_latencies`
+|将事件发送到频道的时间。
+|Histogram
+|`broker_name`, `event_type`, `namespace_name`, `response_code`, `response_code_class`, `unique_name`
+|Milliseconds
+|===

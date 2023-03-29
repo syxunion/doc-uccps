@@ -1,0 +1,121 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/replacing-unhealthy-etcd-member.adoc
+
+:_content-type: PROCEDURE
+[id="restore-determine-state-etcd-member_{context}"]
+= 确定不健康的 etcd 成员的状态
+
+替换不健康 etcd 成员的步骤取决于 etcd 的以下状态：
+
+* 机器没有运行或者该节点未就绪
+* etcd pod 处于 crashlooping 状态
+
+此流程决定了 etcd 成员处于哪个状态。这可让您了解替换不健康的 etcd 成员要遵循的步骤。
+
+[注意]
+====
+如果您知道机器没有运行或节点未就绪，但它们应该很快返回健康状态，那么您就不需要执行替换 etcd 成员的流程。当机器或节点返回一个健康状态时，etcd cluster Operator 将自动同步。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已找到不健康的 etcd 成员。
+
+.流程
+
+. 检查 *机器是否没有运行*:
++
+[source,terminal]
+----
+$ oc get machines -A -ojsonpath='{range .items[*]}{@.status.nodeRef.name}{"\t"}{@.status.providerStatus.instanceState}{"\n"}' | grep -v running
+----
++
+.输出示例
+[source,terminal]
+----
+ip-10-0-131-183.ec2.internal  stopped <1>
+----
+<1> 此输出列出了节点以及节点机器的状态。如果状态不是 running，则代表 *机器没有运行*。
++
+// TODO: xref
+如果 *机器没有运行*，按照替换机器没有运行或节点没有就绪的非健康 etcd 成员过程进行操作。
+
+
+. 确定 *节点是否未就绪*。
++
+如果以下任何一种情况是正确的，则代表 *节点没有就绪*。
+
+** 如果机器正在运行，检查节点是否不可访问：
++
+[source,terminal]
+----
+$ oc get nodes -o jsonpath='{range .items[*]}{"\n"}{.metadata.name}{"\t"}{range .spec.taints[*]}{.key}{" "}' | grep unreachable
+----
++
+.输出示例
+[source,terminal]
+----
+ip-10-0-131-183.ec2.internal	node-role.kubernetes.io/master node.kubernetes.io/unreachable node.kubernetes.io/unreachable <1>
+----
+<1> 如果节点带有 `unreachable`` 污点，则 *节点没有就绪*。
+
+** 如果该节点仍然可访问，则检查该节点是否列为 `NotReady`:
++
+[source,terminal]
+----
+$ oc get nodes -l node-role.kubernetes.io/master | grep "NotReady"
+----
++
+.输出示例
+[source,terminal]
+----
+ip-10-0-131-183.ec2.internal   NotReady   master   122m   v1.23.0 <1>
+----
+<1> 如果节点列表为 `NotReady`，则 该节点没有就绪。
+
++
+// TODO: xref
+如果 *节点没有就绪*，按照替换机器没有运行或节点没有就绪的 etcd 成员的步骤进行操作。
+
+
+. 确定 *etcd Pod 是否处于 crashlooping* 状态。
++
+如果机器正在运行并且节点已就绪，请检查 etcd pod 是否处于 crashlooping 状态。
+
+.. 验证所有控制平面节点都列为 `Ready` ：
++
+[source,terminal]
+----
+$ oc get nodes -l node-role.kubernetes.io/master
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                           STATUS   ROLES    AGE     VERSION
+ip-10-0-131-183.ec2.internal   Ready    master   6h13m   v1.23.0
+ip-10-0-164-97.ec2.internal    Ready    master   6h13m   v1.23.0
+ip-10-0-154-204.ec2.internal   Ready    master   6h13m   v1.23.0
+----
+
+.. 检查 etcd pod 的状态是否为 `Error` 或 `CrashLoopBackOff`:
++
+[source,terminal]
+----
+$ oc get pods -n openshift-etcd | grep -v etcd-quorum-guard | grep etcd
+----
++
+.输出示例
+[source,terminal]
+----
+etcd-ip-10-0-131-183.ec2.internal                2/3     Error       7          6h9m <1>
+etcd-ip-10-0-164-97.ec2.internal                 3/3     Running     0          6h6m
+etcd-ip-10-0-154-204.ec2.internal                3/3     Running     0          6h6m
+----
+<1> 由于此 pod 的状态是 Error，因此 *etcd pod 为 crashlooping* 状态。
+
++
+// TODO: xref
+如果 *etcd pod 为 crashlooping* 状态，请按照替换 etcd pod 处于 crashlooping 状态的不健康的 etcd 成员的步骤进行操作。

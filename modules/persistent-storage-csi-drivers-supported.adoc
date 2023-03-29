@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi.adoc
+
+[id="csi-drivers-supported_{context}"]
+= 统信容器云管理平台支持的 CSI 驱动程序
+
+统信容器云管理平台默认安装某些 CSI 驱动程序，为用户提供树状卷插件无法使用的存储选项。
+
+要创建挂载到这些支持的存储资产中的 CSI 置备的持久性卷，统信容器云管理平台会默认安装必要的 CSI 驱动程序 Operator、CSI 驱动程序和所需的存储类。如需有关 Operator 和驱动程序的默认命名空间的更多信息，请参阅特定 CSI Driver Operator 的文档。
+
+下表描述了统信容器云管理平台安装的 CSI 驱动程序及其支持的 CSI 功能，如卷快照、克隆和调整大小。
+
+.统信容器云管理平台中支持的 CSI 驱动程序和功能
+[cols=",^v,^v,^v, width="100%",options="header"]
+|===
+|CSI 驱动  |CSI 卷快照  |CSI 克隆  |CSI 调整大小
+
+|AliCloud Disk | ✅ | - | ✅
+|OpenStack Cinder | ✅ | ✅ | ✅
+|Uccp Container Storage | ✅ | ✅ | ✅
+|OpenStack Manila | ✅ | - | -
+|VMware vSphere | - | - | -
+|===
+
+[重要]
+====
+如果上表中没有列出您的 CSI 驱动程序，则需要按照 CSI 存储厂商提供的安装说明方可使用其支持的 CSI 功能。
+====

@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-listing-event-sources.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-list-source-types-kn_{context}"]
+= 使用 Knative CLI 列出可用事件源类型
+
+使用 Knative (`kn`) CLI 提供了简化和直观的用户界面，用来在集群中查看可用事件源类型。您可以使用 `kn source list-types` CLI 命令列出集群中创建和使用的事件源类型。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Eventing。
+* 已安装 Knative Knative (`kn`) CLI.
+
+.流程
+
+. 列出终端中的可用事件源类型：
++
+[source,terminal]
+----
+$ kn source list-types
+----
++
+.输出示例
+[source,terminal]
+----
+TYPE              NAME                                            DESCRIPTION
+ApiServerSource   apiserversources.sources.knative.dev            Watch and send Kubernetes API events to a sink
+PingSource        pingsources.sources.knative.dev                 Periodically send ping events to a sink
+SinkBinding       sinkbindings.sources.knative.dev                Binding for connecting a PodSpecable to a sink
+----
+
+ifdef::openshift-enterprise[]
+. 可选：您也可以以 YAML 格式列出可用事件源类型：
++
+[source,terminal]
+----
+$ kn source list-types -o yaml
+----
+endif::[]
+// optional step not allowed yet for OSD due to upstream https://github.com/knative/client/issues/1385

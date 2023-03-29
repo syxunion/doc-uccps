@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-hostpath.adoc
+
+:_content-type: CONCEPT
+[id="persistent-storage-hostpath-about_{context}"]
+= 概述
+
+统信容器云管理平台支持在单节点集群中使用 hostPath 挂载用于开发和测试目的。
+
+在用于生产环境的集群中，不要使用 hostPath。集群管理员会置备网络资源，如NFS 共享。网络资源支持使用存储类设置动态置备。
+
+hostPath 卷必须静态置备 。
+
+[重要]
+====
+不要挂载到容器 `root`、`/` 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统。使用 /host 挂载主机是安全的。以下示例显示主机中的 `/` 目录被挂载到位于`/host` 的容器中。
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-host-mount
+spec:
+  containers:
+  - image: registry.access.redhat.com/ubi8/ubi
+    name: test-container
+    command: ['sh', '-c', 'sleep 3600']
+    volumeMounts:
+    - mountPath: /host
+      name: host-slash
+  volumes:
+   - name: host-slash
+     hostPath:
+       path: /
+       type: ''
+----
+====

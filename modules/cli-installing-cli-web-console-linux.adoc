@@ -1,0 +1,45 @@
+ifeval::["{context}" == "updating-restricted-network-cluster"]
+:restricted:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="cli-installing-cli-web-console-macos-linux_{context}"]
+= 使用 Web 控制台在 Linux 上安装 Uccps CLI
+
+您可以按照以下流程在 Linux 上安装 Uccps CLI(oc)二进制文件。
+
+.流程
+
+. 从 Web 控制台，单击 *?*.
++
+image::click-question-mark.png[]
+. 单击 *Command Line Tools*。
++
+image::CLI-list.png[]
+. 为您的 Linux 平台选择适当的 oc 二进制文件，然后点 *Download oc for Linux*。
+. 保存该文件。
+. 解包存档。
++
+[source,terminal]
+----
+$ tar xvzf <file>
+----
+. 将 `oc` 二进制文件移到 `PATH` 中的目录中。
++
+要查看您的 `PATH`，请执行以下命令：
++
+[source,terminal]
+----
+$ echo $PATH
+----
+
+安装 Uccps CLI 后，可以使用 `oc` 命令：
+
+[source,terminal]
+----
+$ oc <command>
+----
+
+ifeval::["{context}" == "updating-restricted-network-cluster"]
+:!restricted:
+endif::[]

@@ -1,0 +1,234 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-additional-network.adoc
+// * networking/hardware_networks/configuring-sriov-net-attach.adoc
+// * virt/virtual_machines/vm_networking/virt-defining-an-sriov-network.adoc
+
+// Because the Cluster Network Operator abstracts the configuration for
+// Macvlan, including IPAM configuration, this must be provided as YAML
+// for the Macvlan CNI plugin only. In the future other Multus plugins
+// might be managed the same way by the CNO.
+
+ifeval::["{context}" == "configuring-sriov-net-attach"]
+:sr-iov:
+endif::[]
+
+:_content-type: CONCEPT
+[id="nw-multus-ipam-object_{context}"]
+= 为额外网络配置 IP 地址分配
+
+IP 地址管理(IPAM)Container Network Interface(CNI)插件为其他 CNI 插件提供 IP 地址。
+
+您可以使用以下 IP 地址分配类型：
+
+- 静态分配。
+- 通过 DHCP 服务器进行动态分配。您指定的 DHCP 服务器必须可从额外网络访问。
+- 通过 Whereabouts IPAM CNI 插件进行动态分配。
+
+////
+IMPORTANT: If you set the `type` parameter to the `DHCP` value, you cannot set
+any other parameters.
+////
+
+[id="nw-multus-static_{context}"]
+== 静态 IP 地址分配配置
+
+下表描述了静态 IP 地址分配的配置：
+
+.`ipam` 静态配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`type`
+|`字符串`
+|IPAM 地址类型。值必须是 static。
+
+|`addresses`
+|`array`
+|指定分配给虚拟接口的 IP 地址的对象数组。支持 IPv4 和 IPv6 IP 地址。
+
+|`routes`
+|`array`
+|指定要在 pod 中配置的路由的一组对象。
+
+|`dns`
+|`array`
+|O可选：指定 DNS 配置的对象数组。
+
+|====
+
+`addresses` 数组需要带有以下字段的对象：
+
+.`ipam.addresses[]` array
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`address`
+|`字符串`
+|您指定的 IP 地址和网络前缀。例如：如果您指定 `10.10.21.10/24`，那么会为额外网络分配 IP 地址 `10.10.21.10`，网掩码为 `255.255.255.0`。
+
+|`gateway`
+|`字符串`
+|出口网络流量要路由到的默认网关。
+
+|====
+
+.`ipam.routes[]` array
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`dst`
+|`字符串`
+|CIDR 格式的 IP 地址范围，如 `192.168.17.0/24` 或默认路由 `0.0.0.0/0`。
+
+|`gw`
+|`字符串`
+|网络流量路由的网关。
+
+|====
+
+.`ipam.dns` 对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`nameservers`
+|`array`
+|用于发送 DNS 查询的一个或多个 IP 地址的数组。
+
+|`domain`
+|`array`
+|要附加到主机名的默认域。例如，如果将域设置为 `example.com`，对 `example-host` 的 DNS 查找查询将被改写为 `example-host.example.com`。
+
+|`search`
+|`array`
+|在 DNS 查找查询过程中，附加到非限定主机名（如 example-host）的域名的数组。
+
+|====
+
+.静态 IP 地址分配配置示例
+[source,json]
+----
+{
+  "ipam": {
+    "type": "static",
+      "addresses": [
+        {
+          "address": "191.168.1.7/24"
+        }
+      ]
+  }
+}
+----
+
+[id="nw-multus-dhcp_{context}"]
+== 动态 IP 地址(DHCP)分配配置
+
+以下 JSON 描述了使用 DHCP 进行动态 IP 地址地址分配的配置：
+
+.DHCP 租期续订
+
+
+pod 在创建时获取其原始 DHCP 租期。该租期必须由集群中运行的一个小型的 DHCP 服务器部署定期续订。
+
+要触发 DHCP 服务器的部署，您必须编辑 Cluster Network Operator 配置来创建 shim 网络附加，如下例所示：
+
+.shim 网络附加定义示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  additionalNetworks:
+  - name: dhcp-shim
+    namespace: default
+    type: Raw
+    rawCNIConfig: |-
+      {
+        "name": "dhcp-shim",
+        "cniVersion": "0.3.1",
+        "type": "bridge",
+        "ipam": {
+          "type": "dhcp"
+        }
+      }
+  # ...
+----
+
+.`ipam` DHCP 配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`type`
+|`字符串`
+|IPAM 地址类型。需要值 `dhcp`。
+
+|====
+
+.动态 IP 地址(DHCP)分配配置示例
+[source,json]
+----
+{
+  "ipam": {
+    "type": "dhcp"
+  }
+}
+----
+
+[id="nw-multus-whereabouts_{context}"]
+== 使用 Whereabouts 进行动态 IP 地址分配配置
+
+Whereabouts CNI 插件允许在不使用 DHCP 服务器的情况下动态地将 IP 地址分配给额外网络。
+
+下表描述了使用 Whereabouts 进行动态 IP 地址分配的配置：
+
+.`ipam` whereabouts 配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`type`
+|`字符串`
+|IPAM 地址类型。需要 abouts 的值。
+
+|`range`
+|`字符串`
+|CIDR 表示法中的 IP 地址和范围。IP 地址是通过这个地址范围来分配的。
+
+|`exclude`
+|`array`
+|可选： CIDR 标记中零个或更多 IP 地址和范围的列表。包含在排除地址范围中的 IP 地址。
+
+|====
+
+////
+[NOTE]
+=====
+Whereabouts can be used for both IPv4 and IPv6 addresses.
+=====
+////
+
+.使用 Whereabouts 的动态 IP 地址分配配置示例
+[source,json]
+----
+{
+  "ipam": {
+    "type": "whereabouts",
+    "range": "192.0.2.192/27",
+    "exclude": [
+       "192.0.2.192/30",
+       "192.0.2.196/32"
+    ]
+  }
+}
+----
+
+ifdef::sr-iov[]
+:!sr-iov:
+endif::[]

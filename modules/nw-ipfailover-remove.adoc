@@ -1,0 +1,129 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ipfailover-remove_{context}"]
+= 删除 IP 故障切换
+
+在初始配置 IP 故障切换时，集群中的 worker 节点会使用 `iptables` 规则修改，该规则明确允许 Keepalived 在 `224.0.0.18` 上多播数据包。由于对节点的更改，移除 IP 故障切换需要运行一个作业来删除 `iptables` 规则并删除 Keepalived 使用的虚拟 IP 地址。
+
+.流程
+
+. 可选：识别并删除存储为配置映射的任何检查和通知脚本：
+
+.. 确定任何用于 IP 故障切换的 pod 是否使用配置映射作为卷：
++
+[source,terminal]
+----
+$ oc get pod -l ipfailover \
+  -o jsonpath="\
+{range .items[?(@.spec.volumes[*].configMap)]}
+{'Namespace: '}{.metadata.namespace}
+{'Pod:       '}{.metadata.name}
+{'Volumes that use config maps:'}
+{range .spec.volumes[?(@.configMap)]}  {'volume:    '}{.name}
+  {'configMap: '}{.configMap.name}{'\n'}{end}
+{end}"
+----
++
+.输出示例
+----
+Namespace: default
+Pod:       keepalived-worker-59df45db9c-2x9mn
+Volumes that use config maps:
+  volume:    config-volume
+  configMap: mycustomcheck
+----
+
+.. 如果上一步提供了用作卷的配置映射的名称，请删除配置映射：
++
+[source,terminal]
+----
+$ oc delete configmap <configmap_name>
+----
+
+. 为 IP 故障切换识别现有部署：
++
+[source,terminal]
+----
+$ oc get deployment -l ipfailover
+----
++
+.输出示例
+[source,terminal]
+----
+NAMESPACE   NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+default     ipfailover   2/2     2            2           105d
+----
+
+. 删除部署：
++
+[source,terminal]
+----
+$ oc delete deployment <ipfailover_deployment_name>
+----
+
+. 删除 ipfailover 服务帐户：
++
+[source,terminal]
+----
+$ oc delete sa ipfailover
+----
+
+. 运行一个作业，该作业会删除最初配置 IP 故障切换时添加的 IP 表规则：
+
+.. 创建一个文件，如 `remove-ipfailover-job.yaml`，其内容类似以下示例：
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: remove-ipfailover-
+  labels:
+    app: remove-ipfailover
+spec:
+  template:
+    metadata:
+      name: remove-ipfailover
+    spec:
+      containers:
+      - name: remove-ipfailover
+        image: quay.io/openshift/origin-keepalived-ipfailover:{product-version}
+        command: ["/var/lib/ipfailover/keepalived/remove-failover.sh"]
+      nodeSelector:
+        kubernetes.io/hostname: <host_name>  <.>
+      restartPolicy: Never
+----
+<.> <host_name>：为集群中配置 IP 故障切换的每个节点运行作业，并每次替换主机名。
+
+.. 运行作业：
++
+[source,terminal]
+----
+$ oc create -f remove-ipfailover-job.yaml
+----
++
+.输出示例
+----
+job.batch/remove-ipfailover-2h8dm created
+----
+
+.验证
+
+* 确认作业删除了 IP 故障切换的初始配置。
++
+[source,terminal]
+----
+$ oc logs job/remove-ipfailover-2h8dm
+----
++
+.输出示例
+[source,terminal]
+----
+remove-failover.sh: OpenShift IP Failover service terminating.
+  - Removing ip_vs module ...
+  - Cleaning up ...
+  - Releasing VIPs  (interface eth0) ...
+----

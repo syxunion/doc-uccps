@@ -1,0 +1,126 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/customizing-installation-ossm.adoc
+// * service_mesh/v2x/customizing-installation-ossm.adoc
+
+[id="ossm-cr-threescale_{context}"]
+
+= 3scale configuration
+
+下表解释了`ServiceMeshControlPlane` 资源中的 3scale Istio 适配器的参数
+
+.3scale 参数示例
+[source,yaml]
+----
+spec:
+  addons:
+    3Scale:
+      enabled: false
+      PARAM_THREESCALE_LISTEN_ADDR: 3333
+      PARAM_THREESCALE_LOG_LEVEL: info
+      PARAM_THREESCALE_LOG_JSON: true
+      PARAM_THREESCALE_LOG_GRPC: false
+      PARAM_THREESCALE_REPORT_METRICS: true
+      PARAM_THREESCALE_METRICS_PORT: 8080
+      PARAM_THREESCALE_CACHE_TTL_SECONDS: 300
+      PARAM_THREESCALE_CACHE_REFRESH_SECONDS: 180
+      PARAM_THREESCALE_CACHE_ENTRIES_MAX: 1000
+      PARAM_THREESCALE_CACHE_REFRESH_RETRIES: 1
+      PARAM_THREESCALE_ALLOW_INSECURE_CONN: false
+      PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS: 10
+      PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS: 60
+      PARAM_USE_CACHED_BACKEND: false
+      PARAM_BACKEND_CACHE_FLUSH_INTERVAL_SECONDS: 15
+      PARAM_BACKEND_CACHE_POLICY_FAIL_CLOSED: true
+----
+
+.3scale 参数
+|===
+|参数 |描述 |值 |默认值
+
+|`enabled`
+|是否使用 3scale 适配器
+|`true`/`false`
+|`false`
+
+|`PARAM_THREESCALE_LISTEN_ADDR`
+|为 gRPC 服务器设定侦听地址
+|有效端口号
+|`3333`
+
+|`PARAM_THREESCALE_LOG_LEVEL`
+|设置最小日志输出级别。
+|`debug`, `info`, `warn`, `error`, 或 `none`
+|`info`
+
+|`PARAM_THREESCALE_LOG_JSON`
+|是否将日志格式转化为 JSON
+|`true`/`false`
+|`true`
+
+|`PARAM_THREESCALE_LOG_GRPC`
+|日志是否包含 gRPC 信息
+|`true`/`false`
+|`true`
+
+|`PARAM_THREESCALE_REPORT_METRICS`
+|是否收集 3scale 系统和后端的指标数据并报告给 Prometheus
+|`true`/`false`
+|`true`
+
+|`PARAM_THREESCALE_METRICS_PORT`
+|设置 3scale `/metrics` 端点可以从中分离的端口
+|有效端口号
+|`8080`
+
+|`PARAM_THREESCALE_CACHE_TTL_SECONDS`
+|在从缓存中移除过期项目前等待的时间（以秒为单位）
+|时间间隔（以秒为单位）
+|`300`
+
+|`PARAM_THREESCALE_CACHE_REFRESH_SECONDS`
+|尝试刷新缓存元素的过期时间
+|时间间隔（以秒为单位）
+|`180`
+
+|`PARAM_THREESCALE_CACHE_ENTRIES_MAX`
+|在任何时间可以保存在缓存中的最大项目数。设为 0 会禁用缓存
+|有效数量
+|`1000`
+
+|`PARAM_THREESCALE_CACHE_REFRESH_RETRIES`
+|在缓存更新循环中检索无法访问的主机的次数
+|有效数量
+|`1`
+
+|`PARAM_THREESCALE_ALLOW_INSECURE_CONN`
+|在调用 `3scale` API 时允许跳过证书验证。不推荐启用此功能。
+|`true`/`false`
+|`false`
+
+|`PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS`
+|终止到 3scale 系统和后端请求前等待的秒数
+|时间间隔（以秒为单位）
+|`10`
+
+|`PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS`
+|在连接关闭前设置连接的最大秒数（+/-10％ 抖动）
+|时间间隔（以秒为单位）
+|60
+
+
+|`PARAM_USE_CACHE_BACKEND`
+|如果为 true，则尝试为授权请求创建一个内存 apisonator 缓存
+|`true`/`false`
+|`false`
+
+|`PARAM_BACKEND_CACHE_FLUSH_INTERVAL_SECONDS`
+|如果启用了后端缓存，这会在 3scale 中设置刷新缓存的时间间隔（以秒为单位）
+|Time period in seconds
+|15
+
+|`PARAM_BACKEND_CACHE_POLICY_FAIL_CLOSED`
+|每当后端缓存无法检索授权数据时，无论是拒绝（已关闭）还是允许（打开）请求
+|`true`/`false`
+|`true`
+|===

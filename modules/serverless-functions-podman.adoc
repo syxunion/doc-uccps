@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * serverless/serverless-functions-setup.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-functions-podman_{context}"]
+= 设置 Podman
+
+要使用高级容器管理功能，您可能需要将 Podman 与 Uccps Serverless 功能一起使用。要做到这一点，您需要启动 Podman 服务并配置 Knative (kn) CLI 来连接它。
+
+.流程
+
+// This step might no longer be needed in the future, when automatic
+// podman startup is reliable.
+// https://github.com/openshift/openshift-docs/pull/46660/files#r907310116
+. 在 `${XDG_RUNTIME_DIR}/podman/podman.sock` 的 UNIX 套接字上启动提供 Docker API 的 Podman 服务：
++
+[source,terminal]
+----
+$ systemctl start --user podman.socket
+----
++
+[注意]
+====
+在大多数系统中，此套接字位于 /run/user/$ (id -u) /podman/podman.sock。
+====
+
+. 建立用于构建功能的环境变量：
++
+[source,terminal]
+----
+$ export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
+----
+
+. 在功能项目目录中使用 `-v` 标记运行构建命令，以查看详细的输出。您应该看到到本地 UNIX 套接字的连接： 
++
+[source,terminal]
+----
+$ kn func build -v
+----

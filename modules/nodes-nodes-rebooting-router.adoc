@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-rebooting.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-rebooting-router_{context}"]
+= 了解如何重新引导运行路由器的节点
+
+在大多数情况下，运行 统信容器云管理平台 路由器的 pod 会公开一个主机端口。
+
+`PodFitsPorts` 调度程序 predicate 确保没有使用相同端口的其他路由器 pod 在同一节点上运行，并且达成 pod 反关联性。如果路由器依赖 IP 故障转移来实现高可用性，则不需要任何其他操作。
+
+如果路由器 pod 依赖 AWS Elastic Load Balancing 等外部服务来实现高可用性，则由该服务负责响应路由器 pod 重启。
+
+在极少见的情形中，路由器 pod 可能没有配置主机端口。这时，务必要按照推荐的基础架构节点重启流程来进行操作。

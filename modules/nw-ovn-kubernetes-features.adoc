@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ovn-kubernetes.adoc
+
+[id="nw-ovn-kubernetes-features_{context}"]
+= OVN-Kubernetes 特性
+
+OVN-Kubernetes Container Network Interface (CNI) 集群网络供应商实现以下功能：
+
+// OVN (Open Virtual Network) is consistent with upstream usage.
+
+* 使用 OVN（开源虚拟网络）管理网络流量。OVN 是一个社区开发、与供应商无关的网络虚拟化解决方案。
+* 实现 Kubernetes 网络策略支持，包括入口和出口规则。
+* 使用 Geneve（通用网络虚拟化封装）协议而不是 VXLAN 在节点间创建覆盖网络。

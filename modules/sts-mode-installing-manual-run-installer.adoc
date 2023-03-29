@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-gcp-workload-identity.adoc
+
+:_content-type: PROCEDURE
+[id="sts-mode-installing-manual-run-installer_{context}"]
+= 运行安装程序
+
+.先决条件
+
+* 获取统信容器云管理平台发行镜像。
+
+.流程
+
+. 进入包含安装程序的目录并创建 `install-config.yaml` 文件：
++
+[source,terminal]
+----
+$ openshift-install create install-config --dir <installation_directory>
+----
++
+其中 `<installation_directory>` 是安装程序在其中创建文件的目录。
+
+. 编辑 `install-config.yaml` 配置文件，使其包含将 `credentialsMode` 参数设置为 `Manual`。
++
+.`install-config.yaml` 配置文件示例
+[source,yaml]
+----
+apiVersion: v1
+baseDomain: cluster1.example.com
+credentialsMode: Manual <1>
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+----
+<1> 这一行将 `credentialsMode` 参数设置为 `Manual`。
+
+. 创建所需的统信容器云管理平台安装清单：
++
+[source,terminal]
+----
+$ utccp-install create manifests
+----
+
+. 将 `ccoctl` 生成的清单复制到安装程序创建的 `manifests` 目录中：
++
+[source,terminal,subs="+quotes"]
+----
+$ cp /<path_to_ccoctl_output_dir>/manifests/* ./manifests/
+----
+
+. 将`ccoctl` 在 `tls` 目录中生成的私钥复制到安装目录中：
++
+[source,terminal,subs="+quotes"]
+----
+$ cp -a /<path_to_ccoctl_output_dir>/tls .
+----
+
+. 运行统信容器云管理平台安装程序：
++
+[source,terminal]
+----
+$ ./utccp-install create cluster
+----

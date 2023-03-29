@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// * nodes/containers/nodes-containers-sysctls.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-sysctls-setting_{context}"]
+= 为 pod 设置 sysctl
+
+您可以使用 pod 的 `securityContext` 在 pod 上设置 sysctl。`securityContext` 适用于同一 pod 中的所有容器。
+
+默认允许安全 sysctl。带有不安全 sysctl 的 pod 无法在任何节点上启动，除非集群管理员在某个节点上明确启用了不安全 sysctl。与节点级 sysctl 一样，使用污点和容限功能或节点上的标签将这些 pod 调度到正确的节点。
+
+以下示例使用 pod `securityContext` 设置安全 `sysctl kernel.shm_rmid_forced`，以及两个不安全 `sysctl net.core.somaxconn` 和 `kernel.msgmax`。在规格中，_安全_ 和 _不安全_ sysctl 并无区别。
+
+[警告]
+====
+为了避免让操作系统变得不稳定，只有在了解了参数的作用后才修改 sysctl 参数。
+====
+
+.流程
+
+使用安全和不安全 sysctl：
+
+. 修改定义 pod 的 YAML 文件并添加 `securityContext` 规格，如下例所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sysctl-example
+spec:
+  securityContext:
+    sysctls:
+    - name: kernel.shm_rmid_forced
+      value: "0"
+    - name: net.core.somaxconn
+      value: "1024"
+    - name: kernel.msgmax
+      value: "65536"
+  ...
+----
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc apply -f <file-name>.yaml
+----
++
+如果节点不允许不安全 sysctl，则 pod 会被调度，但不会部署：
++
+[source,terminal]
+----
+$ oc get pod
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        READY   STATUS            RESTARTS   AGE
+hello-pod   0/1     SysctlForbidden   0          14s
+----

@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-operator-logs_{context}"]
+= 查看 Ingress Controller 日志
+
+您可以查看 Ingress Controller 日志。
+
+.流程
+
+* 您可以查看 Ingress Controller 日志。
++
+[source,terminal]
+----
+$ oc logs --namespace=openshift-ingress-operator deployments/ingress-operator -c <container_name>
+----

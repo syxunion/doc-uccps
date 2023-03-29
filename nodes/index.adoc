@@ -1,0 +1,128 @@
+:_content-type: ASSEMBLY
+[id="overview-of-nodes"]
+= 节点概述
+include::_attributes/common-attributes.adoc[]
+:context: overview-of-nodes
+
+toc::[]
+
+// TODO: Need some help with an intro blurb
+
+[id="nodes-overview"]
+== 关于节点
+
+节点是 Kubernetes 集群中的虚拟机或裸机。Worker 节点托管您的应用程序容器，分组为 pod。control plane 节点运行控制 Kubernetes 集群所需的服务。在 统信容器云管理平台 中，control plane 节点不仅仅包含用于管理 统信容器云管理平台 集群的 Kubernetes 服务。
+
+在集群中运行稳定和健康的节点是基本运行托管应用程序的基本操作。在 统信容器云管理平台 中，您可以通过代表节点的 *Node* 对象访问、管理和监控节点。使用 Uccps CLI(oc)或 Web 控制台，您可以在节点上执行以下操作。
+
+
+[discrete]
+=== 读取操作
+
+通过读操作，管理员可以或开发人员获取 统信容器云管理平台 集群中节点的信息。
+
+* xref:../nodes/nodes/nodes-nodes-viewing.adoc#nodes-nodes-viewing-listing_nodes-nodes-viewing[列出集群中所有的节点].
+* 获取节点的相关信息，如内存和 CPU 使用量、健康、状态和年龄。
+* xref:../nodes/nodes/nodes-nodes-viewing.adoc#nodes-nodes-viewing-listing-pods_nodes-nodes-viewing[列出节点上运行的 Pod].
+
+[discrete]
+=== 管理操作
+
+作为管理员，您可以通过几个任务轻松地在 统信容器云管理平台 集群中管理节点：
+
+* xref:../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-updating_nodes-nodes-working[添加或更新节点]。 标签是应用于 `Node` 对象的键值对。您可以使用标签来控制 pod 的调度。
+* 使用自定义资源定义(CRD)或  `kubeletConfig` 对象更改节点配置。
+* 配置节点以允许或禁止调度 pod。具有 `Ready` 状态的健康 worker 节点默认允许 pod 放置，而 control plane 节点没有；您可以通过将 xref:../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-marking_nodes-nodes-working[ worker 节点配置为不可调度] 并 xref:../nodes/nodes/nodes-nodes-working.adoc#nodes-nodes-working-marking_nodes-nodes-working[将 control plane 节点配置为可以调度。]
+* 使用 `system-reserved` 设置 xref:../nodes/nodes/nodes-nodes-resources-configuring.adoc#nodes-nodes-resources-configuring[为节点分配资源] 。您可以允许 统信容器云管理平台 自动决定节点的最佳 `system-reserved` 和内存资源，也可以手动决定并为节点设置最佳资源。
+* 根据节点上的处理器内核数、硬限制或两者， xref:../nodes/nodes/nodes-nodes-managing-max-pods.adoc#nodes-nodes-managing-max-pods-about_nodes-nodes-managing-max-pods[配置可在节点上运行的 pod 数量。]
+* 使用 xref:../nodes/nodes/nodes-nodes-rebooting.adoc#nodes-nodes-rebooting-affinity_nodes-nodes-rebooting[ pod 反关联性] 来安全地重新引导节点。
+* 通过使用机器集缩减集群， xref:../nodes/nodes/nodes-nodes-working.adoc#deleting-nodes[从集群中删除节点] 要从裸机集群中删除节点，您必须首先排空节点上的所有 pod，然后手动删除该节点。
+
+[discrete]
+=== 增强操作
+
+统信容器云管理平台 不仅支持访问和管理节点；作为管理员，您可以在节点上执行以下任务，使集群更高效、应用程序友好，并为开发人员提供更好的环境。
+
+* xref:../nodes/nodes/nodes-node-tuning-operator.adoc#nodes-node-tuning-operator[使用 Node Tuning Operator]，为需要一定等级内核调整的高性能应用程序管理节点级别的性能优化。
+* 在节点上启用 TLS 安全配置集，以保护 kubelet 和 Kubernetes API 服务器之间的通信。
+* xref:../nodes/jobs/nodes-pods-daemonsets.adoc#nodes-pods-daemonsets[使用守护进程集在节点上自动运行后台任务]。您可以创建并使用守护进程集来创建共享存储，在每个节点上运行日志记录 pod，或者在所有节点上部署监控代理。
+* xref:../nodes/nodes/nodes-nodes-garbage-collection.adoc#nodes-nodes-garbage-collection[使用垃圾回收释放节点资源]。 您可以通过删除终止的容器以及任何正在运行的 pod 不引用的镜像来确保节点高效运行。
+* xref:../nodes/nodes/nodes-nodes-managing.adoc#nodes-nodes-kernel-arguments_nodes-nodes-managing[在一组节点中添加内核参数]。
+* 将 统信容器云管理平台 集群配置为在网络边缘（远程 worker 节点）具有 worker 节点。如需有关在 统信容器云管理平台 集群中具有远程 worker 节点的挑战，以及一些在远程 worker 节点上管理 pod 的建议方法，请参阅在网络边缘使用远程 worker 节点。
+
+
+[id="pods-overview"]
+== 关于 Pod
+
+pod 是节点上共同部署的一个或多个容器。作为集群管理员，您可以定义 pod，为它分配在准备好调度和管理的健康节点上运行。只要容器正在运行，pod 就会运行。在 Pod 被定义并运行后，您无法更改它。使用 pod 时，您可以执行的一些操作包括：
+
+[discrete]
+=== 读取操作
+
+作为管理员，您可以通过以下任务来获取项目中的 pod 信息：
+
+* xref:../nodes/pods/nodes-pods-viewing.adoc#nodes-pods-viewing-project_nodes-pods-viewing[列出与项目关联的 pod]，包括副本数、重启、当前状态和年龄等信息。
+* xref:../nodes/pods/nodes-pods-viewing.adoc#nodes-pods-viewing-usage_nodes-pods-viewing[查看 pod 用量统计]， 如 CPU、内存和存储消耗。
+
+[discrete]
+=== 管理操作
+
+以下任务列表概述了管理员如何在 统信容器云管理平台 集群中管理 pod。
+
+* 使用 统信容器云管理平台 中可用的高级调度功能控制 pod 调度：
+** 节点到 pod 的绑定规则，如 xref:../nodes/scheduling/nodes-scheduler-pod-affinity.adoc#nodes-scheduler-pod-affinity-example-affinity_nodes-scheduler-pod-affinity[pod 关联性], xref:../nodes/scheduling/nodes-scheduler-node-affinity.adoc#nodes-scheduler-node-affinity[节点关联性], and xref:../nodes/scheduling/nodes-scheduler-pod-affinity.adoc#nodes-scheduler-pod-anti-affinity-configuring_nodes-scheduler-pod-affinity[反关联性]。
+** xref:../nodes/scheduling/nodes-scheduler-node-selectors.adoc#nodes-scheduler-node-selectors[节点标签和选择器]。
+** xref:../nodes/scheduling/nodes-scheduler-taints-tolerations.adoc#nodes-scheduler-taints-tolerations[污点和容限].
+** xref:../nodes/scheduling/nodes-scheduler-pod-topology-spread-constraints.adoc#nodes-scheduler-pod-topology-spread-constraints[Pod 拓扑分布约束]。
+** xref:../nodes/scheduling/nodes-custom-scheduler.adoc#nodes-custom-scheduler[自定义调度程序]。
+* xref:../nodes/scheduling/nodes-descheduler.adoc#nodes-descheduler[配置 descheduler 以根据特定策略驱除 pod]，以便调度程序将 pod 重新调度到更合适的节点。
+* xref:../nodes/pods/nodes-pods-configuring.adoc#nodes-pods-configuring-restart_nodes-pods-configuring[配置 pod 如何使用 pod 控制器重启后的行为，然后重新启动策略。].
+* xref:../nodes/pods/nodes-pods-configuring.adoc#nodes-pods-configuring-bandwidth_nodes-pods-configuring[限制 pod 上的出口和入口流量。].
+* xref:../nodes/containers/nodes-containers-volumes.adoc#nodes-containers-volumes[从具有 pod 模板的任何对象中添加和移除卷。]卷是 pod 中所有容器使用的已挂载文件系统。容器存储是临时的；您可以使用卷来持久保留容器数据。
+
+[discrete]
+=== 增强操作
+
+您可以使用 统信容器云管理平台 中提供的各种工具和功能，更轻松地使用 pod。以下操作涉及使用这些工具和功能来更好地管理 pod。
+
+
+[cols="2,1,2"]
+|===
+|操作 |User |更多信息
+
+|创建并使用 pod 横向自动扩展。
+|开发者
+|您可以使用 pod 横向自动扩展来指定您要运行的 pod 的最小和最大数量，以及 pod 的目标 CPU 使用率或内存使用率。通过使用 pod 横向自动扩展，您可以 xref:../nodes/pods/nodes-pods-autoscaling.adoc#nodes-pods-autoscaling[自动扩展 Pod].
+
+|xref:../nodes/pods/nodes-pods-vertical-autoscaler.adoc#nodes-pods-vpa[安装和使用垂直 pod 自动缩放器]。
+|管理员和开发人员
+|作为管理员，通过监控资源和资源要求，使用垂直 pod 自动扩展来更好地利用集群资源。
+
+作为开发人员，使用垂直 pod 自动扩展来确保 pod 在高负载时可以继续工作，方法是将 pod 调度到具有每个 pod 充足资源的节点。
+
+|使用设备插件提供对外部资源的访问。
+|Administrator
+|设备插件是在节点 (kubelet 的外部)上运行的 gRPC 服务，用于管理特定的硬件资源。您可以部署设备插件 以提供一致且可移植的解决方案，以便在集群中使用硬件设备。
+
+|使用 Secret 对象 向 pod 提供敏感数据。
+|Administrator
+|有些应用程序需要敏感信息，如密码和用户名。您可以使用 `Secret` 对象向应用程序 pod 提供此类信息。
+
+
+|===
+
+[id="containers-overview"]
+== 关于容器
+
+容器是 统信容器云管理平台 应用程序的基本单元，它由应用程序代码与其依赖项、库和二进制文件一起打包。容器提供不同环境间的一致性和多个部署目标：物理服务器、虚拟机 (VM) 和私有或公有云。
+
+Linux 容器技术是一种轻量型机制，用于隔离运行中的进程，仅限制对指定的资源的访问。作为管理员，您可以在 Linux 容器上执行各种任务，例如：
+
+* xref:../nodes/containers/nodes-containers-copying-files.adoc#nodes-containers-copying-files[将文件复制到一个容器中或从容器中复制]。
+* xref:../nodes/containers/nodes-containers-downward-api.adoc#nodes-containers-downward-api[允许容器消耗 API 对象]。
+* xref:../nodes/containers/nodes-containers-remote-commands.adoc#nodes-containers-remote-commands[在容器中执行远程命令]。
+* xref:../nodes/containers/nodes-containers-port-forwarding.adoc#nodes-containers-port-forwarding[使用端口转发来访问容器中的应用程序]。
+
+统信容器云管理平台 提供针对 Init 容器的专用容器。init 容器在应用程序容器之前运行，可以包含应用程序镜像中不存在的工具或设置脚本。您可以在部署 pod 的其余部分之前，使用 Init 容器执行任务。
+
+除了在节点、Pod 和容器上执行特定任务外，您还可使用整个 统信容器云管理平台 集群来使集群高效和应用程序 pod 具有高可用性。

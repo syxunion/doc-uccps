@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+//  * /serverless/develop/serverless-creating-channels.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-channel-odc_{context}"]
+= 使用 Web 控制台创建频道
+
+使用 {product-title} Web 控制台提供了一个简化的用户界面来创建频道。在集群中安装 Knative Eventing 后，您可以使用 web 控制台创建频道。
+
+.先决条件
+
+* 已登陆到 {product-title} Web 控制台。
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在 {product-title} 集群中。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在  {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+. 在 *Developer* 视角中，导航到 *+Add* -> *Channel*.
+. 选择您要在 *Type* 列表中创建的 `Channel` 对象类型。
+. 点 *创建*.
+
+.验证
+
+* 通过导航到 *Topology* 页面确认频道现在存在。
++
+image::verify-channel-odc.png[View the channel in the Topology view]

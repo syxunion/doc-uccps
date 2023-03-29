@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-affinity.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-node-affinity-configuring-required_{context}"]
+=  配置节点关联性必要规则
+
+必须满足必要规则，pod 才能调度到节点上。
+
+.流程
+
+以下步骤演示了一个简单的配置，此配置会创建一个节点，以及调度程序要放置到该节点上的 pod。
+
+. 使用 `oc label node`  命令给节点添加标签：
++
+[source,terminal]
+----
+$ oc label node node1 e2e-az-name=e2e-az1
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    e2e-az-name: e2e-az1
+----
+====
+
+. 在 `Pod` spec 中，使用 `nodeAffinity` 小节来配置  `requiredDuringSchedulingIgnoredDuringExecution` 参数：
++
+.. 指定必须满足的键和值。如果希望新 pod 调度到您编辑的节点上，请使用与节点中标签相同的 key 和 value 参数。
++
+.. 指定一个 operator。运算符可以是 `In`, `NotIn`, `Exists`, `DoesNotExist`, `Lt`, 或 `Gt` 例如，使用运算符 In 来要求节点上存在该标签：
++
+.输出示例
+[source,yaml]
+----
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: e2e-az-name
+            operator: In
+            values:
+            - e2e-az1
+            - e2e-az2
+----
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f e2e-az2.yaml
+----

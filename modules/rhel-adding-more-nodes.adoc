@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * machine_management/more-rhel-compute.adoc
+
+:_content-type: PROCEDURE
+[id="rhel-adding-more-nodes_{context}"]
+= 在集群中添加更多 RHEL 计算机器
+
+您可以将使用 UnionTech OS Server 20(UOS20)作为操作系统的更多计算机器添加到 统信容器云管理平台 1.2 集群中。
+
+.先决条件
+
+* 您的 统信容器云管理平台 集群已包含 RHEL 计算节点。
+* 用于运行 playbook 的机器上具有您将第一台 RHEL 计算机器添加到集群时使用的 `hosts` 文件。
+* 运行 playbook 的机器必须能够访问所有 RHEL 主机。您可以使用公司允许的任何方法，包括使用 SSH 代理或 VPN 的堡垒主机。
+* 运行 `playbook` 的机器上具有集群的 `kubeconfig` 文件，以及用于安装集群的安装程序。
+* 您必须对 RHEL 主机进行安装准备。
+* 在运行 playbook 的机器上配置一个用户，该用户对所有 RHEL 主机具有 SSH 访问权限。
+* 如果使用基于 SSH 密钥的身份验证，您必须使用 SSH 代理来管理密钥。
+* 在运行 playbook 的机器上安装 Uccps CLI（oc）。
+
+
+.流程
+
+. 打开位于 `/<path>/inventory/hosts` 的 Ansible 清单文件，该文件定义您的计算机器主机和必要的变量。
+
+. 将文件的 `[new_workers]` 部分重命名为 `[workers]`。
+
+. 在文件中添加 `[new_workers]` 部分，并且定义每个新主机的完全限定域名。该文件类似于以下示例：
++
+----
+[all:vars]
+ansible_user=root
+#ansible_become=True
+
+openshift_kubeconfig_path="~/.kube/config"
+
+[workers]
+mycluster-rhel8-0.example.com
+mycluster-rhel8-1.example.com
+
+[new_workers]
+mycluster-rhel8-2.example.com
+mycluster-rhel8-3.example.com
+----
++
+在本例中，`mycluster-rhel8-0.example.com` 和 `mycluster-rhel8-1.example.com` 机器已在集群中，您要添加 `mycluster-rhel8-2.example.com` 和 `mycluster-rhel8-3.example.com` 机器。
+
+. 进入到 Ansible playbook 目录：
++
+[source,terminal]
+----
+$ cd /usr/share/ansible/openshift-ansible
+----
+
+. 运行扩展 playbook：
++
+[source,terminal]
+----
+$ ansible-playbook -i /<path>/inventory/hosts playbooks/scaleup.yml <1>
+----
+<1> 对于 `<path>` ，指定您创建的Ansible库存文件的路径。

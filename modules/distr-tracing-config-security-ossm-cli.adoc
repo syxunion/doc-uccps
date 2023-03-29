@@ -1,0 +1,93 @@
+////
+This module included in the following assemblies:
+service_mesh/v2x/ossm-reference-jaeger.adoc
+////
+:_content-type: PROCEDURE
+[id="distr-tracing-config-security-ossm-cli_{context}"]
+= Configuring distributed tracing security for service mesh from the command line
+
+您可以使用 `oc` 程序从命令行修改 Jaeger 资源来配置分布式追踪平台安全性，以用于 Service Mesh。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 必须安装 {SMProductName} Operator 。
+* 部署到集群的 `ServiceMeshControlPlane` 。
+* 您可以访问与  统信容器云平台 版本匹配的 Uccps CLI(oc)。
+
+.流程
+
+. 以具有 `cluster-admin`  角色的用户身份登录  {product-title} CLI 。
++
+[source,terminal]
+----
+$ oc login https://<HOSTNAME>:6443
+----
++
+. 输入以下命令来更改安装 control plane 的项目，如 `istio-system` 。
++
+[source,terminal]
+----
+$ oc project istio-system
+----
++
+. 运行以下命令以编辑 Jaeger 自定义资源文件，其中 `jaeger.yaml` 是 Jaeger 自定义资源的名称。
++
+[source,terminal]
+----
+$ oc edit -n tracing-system -f jaeger.yaml
+----
++
+. 编辑 `Jaeger` 自定义资源文件，以添加e `htpasswd` 配置，如下例所示。
+
+* `spec.ingress.openshift.htpasswdFile`
+* `spec.volumes`
+* `spec.volumeMounts`
++
+.显示 `htpasswd` 配置的 Jaeger 资源示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+spec:
+  ingress:
+    enabled: true
+    openshift:
+      htpasswdFile: /etc/proxy/htpasswd/auth
+      sar: '{"namespace": "istio-system", "resource": "pods", "verb": "get"}'
+    options: {}
+    resources: {}
+    security: oauth-proxy
+  volumes:
+    - name: secret-htpasswd
+      secret:
+        secretName: htpasswd
+    - configMap:
+        defaultMode: 420
+        items:
+          - key: ca-bundle.crt
+            path: tls-ca-bundle.pem
+        name: trusted-ca-bundle
+        optional: true
+      name: trusted-ca-bundle
+  volumeMounts:
+    - mountPath: /etc/proxy/htpasswd
+      name: secret-htpasswd
+    - mountPath: /etc/pki/ca-trust/extracted/pem/
+      name: trusted-ca-bundle
+      readOnly: true
+----
++
+. 运行以下命令以应用您的更改，其中 <jaeger.yaml> 是 Jaeger 自定义资源的名称。
++
+[source,terminal]
+----
+$ oc apply -n tracing-system -f <jaeger.yaml>
+----
++
+. 运行以下命令来监控 pod 部署的进度：
++
+[source,terminal]
+----
+$ oc get pods -n tracing-system -w
+----

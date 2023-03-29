@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/installing-ossm.adoc
+// * service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-member-roll-modify_{context}"]
+= Adding or removing projects from the service mesh
+
+您可以使用 web 控制台从现有  {SMProductShortName} `ServiceMeshMemberRoll` 资源中添加或删除项目。
+
+* 您可以添加多个项目，但每个项目只能属于 *一个* `ServiceMeshMemberRoll` 资源。
+
+* 当它对应的 `ServiceMeshMemberRoll`  资源被删除后， `ServiceMeshControlPlane` 资源也会被删除。
+
+[id="ossm-member-roll-modify-console_{context}"]
+== Adding or removing projects from the member roll using the web console
+
+.先决条件
+* 已安装并验证的 {SMProductName} Operator。
+* 现有 `ServiceMeshMemberRoll` 资源
+* 带有 `ServiceMeshMemberRoll` 资源的项目名称 。
+* 您要为网格添加或删除的项目的名称。
+
+.流程
+
+. 登陆到 {product-title} Web 控制台。
+
+. 导航到 *Operators* -> *安装的 Operators*。
+
+. 点 *项目* 菜单，从列表中选择部署 `ServiceMeshControlPlane` 资源的项目，如 `istio-system`。
+
+. 点 the {SMProductName} Operator。
+
+. 点 *Istio Service Mesh Member Roll* 选项卡。
+
+. 点 `default` 链接。
+
+. 点 YAML 标签。
+
+. 修改 YAML 以添加或删除作为成员的项目。您可以添加多个项目，但每个项目只能属于 *一个* `ServiceMeshMemberRoll` 资源。
+
+. 点 *保存*。
+
+. 点 *重新加载*。
+
+[id="ossm-member-roll-modify-cli_{context}"]
+== Adding or removing projects from the member roll using the CLI
+
+您可以使用命令行修改现有 {SMProductShortName} member roll 。
+
+.先决条件
+
+* 已安装并验证的 {SMProductName} Operator。
+* 现有 `ServiceMeshMemberRoll` 资源。
+* 带有 `ServiceMeshMemberRoll` 资源的项目名称。
+* 您要为网格添加或删除的项目的名称。
+* 访问 Uccps CLI (`oc`)。
+
+
+.流程
+
+. 登录 {product-title} CLI。
+
+. 编辑 `ServiceMeshMemberRoll` 资源。
++
+[source,terminal]
+----
+$ oc edit smmr -n <controlplane-namespace>
+----
++
+
+. 修改 YAML 以添加或删除作为成员的项目。您可以添加多个项目，但每个项目只能属于 *一个* `ServiceMeshMemberRoll` 资源。
+
++
+.servicemeshmemberroll-default.yaml 示例
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: istio-system #control plane project
+spec:
+  members:
+    # a list of projects joined into the service mesh
+    - your-project-name
+    - another-project-name
+----

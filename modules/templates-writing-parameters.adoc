@@ -1,0 +1,137 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-writing-parameters_{context}"]
+= 编写模板参数
+
+允许用户提供一个值或在实例化模板时生成一个值作为参数。然后，该值将在引用参数的任意位置上被替换。可在对象列表字段中的任意字段中定义引用。这有助于生成随机密码，或允许用户提供自定义模板时所需的主机名或其他用户特定值。可通过以下两种方式引用参数：
+
+* 作为字符串值，将格式为 `${PARAMETER_NAME}` 的值放在模板的任意字符串字段中。
+
+* 作为 JSON 或 YAML 值，将格式为 `${{PARAMETER_NAME}}` 的值放在模板中的任意字段中。
+
+使用 `${PARAMETER_NAME}` 语法时，可将多个参数引用合并到一个字段中，并可将引用嵌入到固定数据中，如 `"http://${PARAMETER_1}${PARAMETER_2}"`。两个参数值均将被替换，结果值将是一个带引号的字符串。
+
+使用 `${{PARAMETER_NAME}}` 语法时，仅允许单个参数引用，不允许使用前导/尾随字符。执行替换后，结果值将不加引号，除非结果不是有效的 JSON 对象。如果结果不是有效的 JSON 值，则结果值会被添加引号并视为标准字符串。
+
+单个参数可在模板中多次引用，且可在单个模板中使用两种替换语法来引用。
+
+可提供默认值，如果您未提供其他值则使用默认值：
+
+以下是将确切值设置为默认值的示例：
+
+[source,yaml]
+----
+parameters:
+  - name: USERNAME
+    description: "The user name for Joe"
+    value: joe
+----
+
+还可根据参数定义中指定的规则生成参数值，例如：
+
+[source,yaml]
+----
+parameters:
+  - name: PASSWORD
+    description: "The random user password"
+    generate: expression
+    from: "[a-zA-Z0-9]{12}"
+----
+
+
+在上例中，处理生成一个由大小写字母和数字组成的 12 个字符长的随机密码。
+
+可用语法并非完整的正则表达式语法。但是，您可以使用 `\w`, `\d`, `\a`, 和 `\A` 修饰符：
+
+- `[\w]{10}` 生成 10 个字母字符、数字和下划线。它遵循 PCRE 标准，等同于 `[a-zA-Z0-9_]{10}`.
+- `[\d]{10}` 生成 10 个数字。等同于 `[0-9]{10}`.
+- `[\a]{10}` 生成 10 个字母字符。这等同于 `[a-zA-Z]{10}`.
+- `[\A]{10}` 生成 10 个标点或符号字符。这等同于  ``[~!@#$%\^&*()\-_+={}\[\]\\|<,>.?/"';:`]{10}``.
+
+[注意]
+====
+取决于模板是以 YAML 还是以 JSON 编写，以及其中的修饰符的字符串类型，您可能需要用第二个反斜杠转义反斜杠。以下示例等同于：
+
+.带有修饰程序的 YAML 模板示例
+[source,yaml]
+----
+  parameters:
+  - name: singlequoted_example
+    generate: expression
+    from: '[\A]{10}'
+  - name: doublequoted_example
+    generate: expression
+    from: "[\\A]{10}"
+----
+
+.带有修饰符的 JSON 模板示例
+[source,json]
+----
+{
+    "parameters": [
+       {
+        "name": "json_example",
+        "generate": "expression",
+        "from": "[\\A]{10}"
+       }
+    ]
+}
+----
+====
+
+下面是附带参数定义和参考的完整模板示例：
+
+[source,yaml]
+----
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: my-template
+objects:
+  - kind: BuildConfig
+    apiVersion: build.openshift.io/v1
+    metadata:
+      name: cakephp-mysql-example
+      annotations:
+        description: Defines how to build the application
+    spec:
+      source:
+        type: Git
+        git:
+          uri: "${SOURCE_REPOSITORY_URL}" <1>
+          ref: "${SOURCE_REPOSITORY_REF}"
+        contextDir: "${CONTEXT_DIR}"
+  - kind: DeploymentConfig
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      name: frontend
+    spec:
+      replicas: "${{REPLICA_COUNT}}" <2>
+parameters:
+  - name: SOURCE_REPOSITORY_URL <3>
+    displayName: Source Repository URL <4>
+    description: The URL of the repository with your application source code <5>
+    value: https://github.com/sclorg/cakephp-ex.git <6>
+    required: true <7>
+  - name: GITHUB_WEBHOOK_SECRET
+    description: A secret string used to configure the GitHub webhook
+    generate: expression <8>
+    from: "[a-zA-Z0-9]{40}" <9>
+  - name: REPLICA_COUNT
+    description: Number of replicas to run
+    value: "2"
+    required: true
+message: "... The GitHub webhook secret is ${GITHUB_WEBHOOK_SECRET} ..." <10>
+----
+<1> 模板实例化时，该值将被替换为 `SOURCE_REPOSITORY_URL` 参数的值。
+<2> 模板实例化时，该值将被替换为 `REPLICA_COUNT` 参数的不加引号值。
+<3> 参数的名称。该值用于引用模板中的参数。
+<4> 参数的用户友好型名称。这会为用户显示。
+<5> 参数的描述。出于参数目的提供更详细的信息，包括对预期值的任何限制。描述应当按照控制台的文本标准使用完整句子。不可与显示名称重复。
+<6> 如果您实例化该模板时不覆盖该值，则使用该参数的默认值。密码之类避免使用默认值，而应结合使用生成的参数与 `secret`。
+<7> 指示此参数是必需的，这意味着您无法使用空值覆盖它。如果参数未提供默认值或生成值，您必须提供一个值。
+<8> 生成其值的参数。
+<9> 生成器的输入。这种情况下，生成器会生成一个 40 个字符的字母数字值，其中包括大写和小写字符。
+<10> 参数可包含在模板消息中。这将告知您生成的值。

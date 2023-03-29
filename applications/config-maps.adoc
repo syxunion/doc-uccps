@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="config-maps"]
+= 将配置映射与应用程序搭配使用
+include::_attributes/common-attributes.adoc[]
+:context: config-maps
+
+toc::[]
+
+配置映射允许您将配置工件与镜像内容分离，从而使容器化应用程序可以移植。
+
+以下部分定义配置映射以及如何创建和使用它们。
+
+有关创建配置映射的详情，请参考 xref:../nodes/pods/nodes-pods-configmaps.adoc[创建和使用配置映射]。
+
+include::modules/nodes-pods-configmap-overview.adoc[leveloffset=+1]
+
+[id="nodes-pods-config-maps-consuming-configmap-in-pods"]
+== 在 pod 中使用配置映射
+
+以下小节描述了在 pod 中消耗 `ConfigMap` 对象时的一些用例。
+
+include::modules/nodes-pods-configmaps-use-case-consuming-in-env-vars.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmaps-use-case-setting-command-line-arguments.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmaps-use-case-consuming-in-volumes.adoc[leveloffset=+2]

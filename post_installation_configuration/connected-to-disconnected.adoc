@@ -1,0 +1,57 @@
+:_content-type: ASSEMBLY
+[id="connected-to-disconnected"]
+= 将连接的集群转换为断开连接的集群
+include::_attributes/common-attributes.adoc[]
+:context: connected-to-disconnected
+
+toc::[]
+
+
+
+在某些情况下，您可能需要将 统信容器云管理平台 集群从连接的集群转换为断开连接的集群。
+
+断开连接的集群（也称为受限集群）没有与互联网的活跃连接。因此，您必须镜像 registry 和安装介质的内容。您可以在可以访问互联网和您的封闭网络的主机上创建此镜像 registry，或者将镜像复制到可跨网络界限的设备中。
+
+本主题描述了将现有连接的集群转换为断开连接的集群的一般过程。
+
+include::modules/installation-about-mirror-registry.adoc[leveloffset=+1]
+
+[id="prerequisites_connected-to-disconnected"]
+== 先决条件
+
+* 已安装 `oc` 客户端。
+
+* 一个正在运行的集群。
+
+* 安装的镜像 registry，这是支持托管 统信容器云管理平台 集群的位置的 Docker v2-2 的容器镜像 registry，如以下 registry 之一：
++
+--
+** UnionTech Quay
+
+** JFrog Artifactory
+
+** Sonatype Nexus 仓库
+
+** Harbor
+--
++
+如果您有 UnionTech Quay 订阅，请参阅有关部署 UnionTech Quay 用于概念验证 的文档，或使用 Quay Operator。
+
+* 必须将镜像存储库配置为共享镜像。例如，UnionTech Quay 仓库需要 机构 才能共享镜像。
+
+* 访问互联网来获取所需的容器镜像。
+
+include::modules/connected-to-disconnected-prepare-mirror.adoc[leveloffset=+1]
+include::modules/connected-to-disconnected-mirror-images.adoc[leveloffset=+1]
+
+include::modules/connected-to-disconnected-config-registry.adoc[leveloffset=+1]
+include::modules/connected-to-disconnected-verify.adoc[leveloffset=+1]
+include::modules/connected-to-disconnected-disconnect.adoc[leveloffset=+1]
+
+[注意]
+====
+当集群丢失了互联网连接时，Insights Operator 会降级。您可以通过临时禁用 Insights Operator 来避免这个问题，直到您可以恢复它。
+====
+
+include::modules/connected-to-disconnected-restore-insights.adoc[leveloffset=+1]
+include::modules/connected-to-disconnected-restore.adoc[leveloffset=+1]

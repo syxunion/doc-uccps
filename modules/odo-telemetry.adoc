@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/understanding-odo.adoc
+
+:_content-type: CONCEPT
+[id="odo-telemetry_{context}"]
+
+= odo 中的 Telemetry
+
+`odo` 会收集有关如何使用它的信息，包括操作系统、RAM、CPU、内核数量、`odo` 版本、错误、成功/失败以及 `odo` 命令完成所需的时间。
+
+您可以使用 `odo preference` 命令修改遥测同意：
+
+* `odo preference set ConsentTelemetry true` 代表同意遥测。
+* `odo preference unset ConsentTelemetry` 会禁用 Telemetry。
+* `odo preference view` 显示当前的首选项。

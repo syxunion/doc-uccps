@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="setting-quotas-across-multiple-projects"]
+= 跨越多个项目的资源配额
+include::_attributes/common-attributes.adoc[]
+:context: setting-quotas-across-multiple-projects
+
+toc::[]
+
+多项目配额由 `ClusterResourceQuota` 对象定义，允许在多个项目之间共享配额。对每个选定项目中使用的资源量进行合计，使用合计值来限制所有选定项目中的资源。
+
+本指南介绍了集群管理员如何在多个项目间设置和管理资源配额。
+
+include::modules/quotas-selecting-projects.adoc[leveloffset=+1]
+include::modules/quotas-viewing-clusterresourcequotas.adoc[leveloffset=+1]
+include::modules/quotas-selection-granularity.adoc[leveloffset=+1]

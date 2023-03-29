@@ -1,0 +1,27 @@
+////
+This CONCEPT module included in the following assemblies:
+-service_mesh/v1x/ossm-architecture.adoc
+-service_mesh/v2x/ossm-architecture.adoc
+////
+
+:_content-type: CONCEPT
+[id="ossm-kiali-architecture_{context}"]
+= Kiali architecture
+
+Kiali 基于开源的 link:https://kiali.io/[Kiali 项目]。Kiali 由两个组件组成: Kiali 应用程序和 Kiali 控制台。
+
+* *Kiali 应用程序* (后端) – 该组件运行在容器应用程序平台中，并与服务网格组件进行通讯，检索和处理数据，并将这些数据提供给控制台。Kiali 应用程序不需要存储。当在集群中部署应用程序时，配置在 ConfigMaps 和 secret 中设置。
+
+* *Kiali 控制台* (前段) – Kiali 控制台是一个 Web 应用程序。Kiali 应用程序为 Kiali 控制台提供服务，控制台会查询后端数据并把数据提供给用户。
+
+另外，Kiali 依赖于由容器应用程序平台和 Istio 提供的外部服务和组件。
+
+* *Red Hat Service Mesh* (Istio) - Kiali 需要 Istio。Istio 是提供和控制服务网格的组件。虽然 Kiali 和 Istio 可以单独安装，但是 Kiali 需要 Istio。如果没有安装 Istio，则无法工作。Kiali 需要检索 Istio 数据和配置，这些数据和配置可以通过 Prometheus 和集群 API 获得。
+
+* *Prometheus* - 一个专用的 Prometheus 实例作为 {SMProductName} 安装的一部分被包括。启用 Istio 遥测时，指标数据存储在 Prometheus 中。Kiali 使用这个 Prometheus 数据来决定网状拓扑结构、显示指标数据、计算健康状况、显示可能的问题等等。Kiali 与 Prometheus 直接沟通，并假设 Istio Telemetry 使用的数据 schema。Istio 依赖于 Prometheus，Kiali 也依赖于 Prometheus。许多 Kiali 的功能在没有 Prometheus 的情况下将无法工作。
+
+* *Cluster API* - Kiali 使用 {product-title} (cluster API) API 来获取和解析服务网格配置。Kiali 通过查询集群 API 获取信息，如获取命名空间、服务、部署、pod 和其他实体的定义。Kiali 还提供查询来解析不同集群实体之间的关系。另外，还可以通过查询集群 API 以获取 Istio 配置，比如虚拟服务、目的规则、路由规则、网关、配额等等。
+
+* *Jaeger* -  Jaeger 是可选的，但会作为{SMProductName} 的一部分被默认安装。当您作为 {SMProductName}  安装的一部分安装 {JaegerShortName} 时Kiali 控制台会包括一个显示分布式追踪数据的标签页。请注意：如果禁用 Istio 的分布式追踪功能，则不会提供追踪数据。 另请注意，用户必须可以访问安装 {SMProductShortName} 的命名空间，才能查看追踪数据。
+
+* *Grafana* - Grafana 是可选的， 但作为 {SMProductName} 安装的一部分被默认安装。如果使用了 Grafana，Kiali 的 metrics 页会包括一个链接，用户可以使用它访问 Grafana 中相同的指标数据。请注意，用户必须可以访问安装 {SMProductShortName}  的命名空间，以便查看到 Grafana 仪表板的链接并查看 Grafana 数据。

@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// *  cli_reference/tkn_cli/op-tkn-reference.adoc
+
+[id="op-tkn-task-management_{context}"]
+= 任务管理命令
+
+== task
+管理任务。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn task -h
+----
+
+== task delete
+删除任务。
+
+.示例：从命名空间中删除 `mytask1` 和 `mytask2` 任务
+[source,terminal]
+----
+$ tkn task delete mytask1 mytask2 -n myspace
+----
+
+== task describe
+描述任务。
+
+.示例：描述命名空间中的 `mytask` 任务
+[source,terminal]
+----
+$ tkn task describe mytask -n myspace
+----
+
+== task list
+列出任务。
+
+.示例： 列出命名空间中的所有任务
+[source,terminal]
+----
+$ tkn task list -n myspace
+----
+
+== task logs
+显示任务日志。
+
+.示例：显示 `mytask` 任务的 `mytaskrun` 任务运行的日志
+[source,terminal]
+----
+$ tkn task logs mytask mytaskrun -n myspace
+----
+
+== task start
+启动一个任务。
+
+.示例： 在命名空间中启动 `mytask` 任务
+[source,terminal]
+----
+$ tkn task start mytask -s <ServiceAccountName> -n myspace
+----

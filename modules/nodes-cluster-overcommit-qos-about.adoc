@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-overcommit-qos-about_{context}"]
+= 了解过量使用和服务质量类
+
+当节点上调度了没有发出请求的 pod，或者节点上所有 pod 的限制总和超过了机器可用容量时，该节点处于过量使用状态。
+
+在过量使用环境中，节点上的 pod 可能会在任意给定时间点尝试使用超过可用量的计算资源。发生这种情况时，节点必须为 pod 赋予不同的优先级。有助于做出此决策的工具称为服务质量 (QoS) 类。
+
+对于每个计算资源，容器划分到三个 QoS 类中的一个，它们按照优先级降序排列：
+
+. 服务质量类
+[options="header",cols="1,1,5"]
+|===
+|优先级 |类名称 |描述
+
+|1 (最高)
+|*Guaranteed*
+|如果为所有资源设置了限制和可选请求（不等于 0）并且它们相等，则容器被归类为*Guaranteed*.
+
+|2
+|*Burstable*
+|如果为所有资源设置了请求和可选限制（不等于 0）并且它们不相等，则容器被归类为 *Burstable*.
+
+|3 (最低)
+|*BestEffort*
+|如果没有为任何资源设置请求和限制，则容器被归类为 *BestEffort*.
+|===
+
+内存是一种不可压缩的资源，因此在内存量较低的情况下，优先级最低的容器首先被终止：
+
+- *Guaranteed* 容器优先级最高，并且保证只有在它们超过限制或者系统遇到内存压力且没有优先级更低的容器可被驱除时，才会被终止。
+- *Burstable* 在遇到系统内存压力时，Burstable 容器如果超过其请求量并且不存在其他 *BestEffort* 容器，则有较大的可能会被终止。
+- *BestEffort* 容器被视为优先级最低。系统内存不足时，这些容器中的进程最先被终止。
+
+[id="qos-about-reserve_{context}"]
+== 了解如何为不同的服务质量层级保留内存
+
+您可以使用 `qos-reserved` 参数指定在特定 QoS 级别上 pod 要保留的内存百分比。此功能尝试保留请求的资源，阻止较低 QoS 类中的 pod 使用较高 QoS 类中 pod 所请求的资源。
+
+统信容器云管理平台 按照如下所示使用 `qos-reserved` 参数：
+
+- 值为 `qos-reserved=memory=100%` 时，阻止 `Burstable` 和 `BestEffort` QoS 类消耗较高 QoS 类所请求的内存。这会增加 `BestEffort` 和 `Burstable` 工作负载上为了提高 Guaranteed 和 Burstable 工作负载的内存资源保障而遭遇 OOM 的风险。
+
+- 值为 `qos-reserved=memory=50%` 时，允许 Burstable 和 BestEffort QoS 类消耗较高 QoS 类所请求的内存的一半。
+
+- 值为 `qos-reserved=memory=0%`时，允许 Burstable 和 BestEffort QoS 类最多消耗节点的所有可分配数量（若可用），但会增加 Guaranteed 工作负载不能访问所请求内存的风险。此条件等同于禁用这项功能。

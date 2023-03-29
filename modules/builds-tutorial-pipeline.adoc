@@ -1,0 +1,220 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-tutorial-pipeline_{context}"]
+= Pipeline 构建教程
+
+[重要]
+====
+Pipeline 构建策略在 统信容器云管理平台 4 中弃用。基于 Tekton 的 统信容器云管理平台 Pipelines 中带有等效且改进的功能。
+
+统信容器云管理平台 上的 Jenkins 镜像被完全支持，用户可以按照 Jenkins 用户文档在作业中定义 `jenkinsfile`，或者将其存储在 Source Control Management 系统中。
+====
+
+本例演示如何创建 统信容器云管理平台 Pipeline，以使用 `nodejs-mongodb.json` 模板构建、部署和验证 `Node.js/MongoDB` 应用程序。
+
+.流程
+
+. 创建 Jenkins master：
++
+[source,terminal]
+----
+  $ oc project <project_name>
+----
++
+选择要使用的项目，或使用 `oc new-project <project_name>` 创建一个新项目。
++
+[source,terminal]
+----
+  $ oc new-app jenkins-ephemeral <2>
+----
++
+如果要使用持久性存储，请改用 `jenkins-persistent`。
++
+. 使用以下内容，创建名为 `nodejs-sample-pipeline.yaml` 的文件：
++
+[注意]
+====
+这将创建一个 BuildConfig 对象，它将使用 Jenkins Pipeline 策略来构建、部署和扩展 `Node.js/MongoDB` 示例应用程序。
+====
++
+[source,yaml]
++
+----
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "nodejs-sample-pipeline"
+spec:
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfile: <pipeline content from below>
+    type: JenkinsPipeline
+----
++
+. 使用 `jenkinsPipelineStrategy` 创建 `BuildConfig` 对象后，通过使用内联 `jenkinsfile` 告知管道做什么：
++
+[注意]
+====
+本例没有为应用程序设置 Git 存储库。
+
+以下 `jenkinsfile` 内容使用 统信容器云管理平台 DSL 以 Groovy 语言编写。在本例中，请使用 YAML Literal Style 在 `BuildConfig` 中包含内联内容，但首选的方法是使用源存储库中的 `jenkinsfile`。
+====
++
+[source,groovy]
+----
+def templatePath = 'https://raw.githubusercontent.com/openshift/nodejs-ex/master/openshift/templates/nodejs-mongodb.json' <1>
+def templateName = 'nodejs-mongodb-example' <2>
+pipeline {
+  agent {
+    node {
+      label 'nodejs' <3>
+    }
+  }
+  options {
+    timeout(time: 20, unit: 'MINUTES') <4>
+  }
+  stages {
+    stage('preamble') {
+        steps {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject() {
+                        echo "Using project: ${openshift.project()}"
+                    }
+                }
+            }
+        }
+    }
+    stage('cleanup') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.selector("all", [ template : templateName ]).delete() <5>
+                  if (openshift.selector("secrets", templateName).exists()) { <6>
+                    openshift.selector("secrets", templateName).delete()
+                  }
+                }
+            }
+        }
+      }
+    }
+    stage('create') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.newApp(templatePath) <7>
+                }
+            }
+        }
+      }
+    }
+    stage('build') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  def builds = openshift.selector("bc", templateName).related('builds')
+                  timeout(5) { <8>
+                    builds.untilEach(1) {
+                      return (it.object().status.phase == "Complete")
+                    }
+                  }
+                }
+            }
+        }
+      }
+    }
+    stage('deploy') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  def rm = openshift.selector("dc", templateName).rollout()
+                  timeout(5) { <9>
+                    openshift.selector("dc", templateName).related('pods').untilEach(1) {
+                      return (it.object().status.phase == "Running")
+                    }
+                  }
+                }
+            }
+        }
+      }
+    }
+    stage('tag') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.tag("${templateName}:latest", "${templateName}-staging:latest") <10>
+                }
+            }
+        }
+      }
+    }
+  }
+}
+----
+<1> 要使用的模板的路径。
+<2> 要创建的模板的名称。
+<3> 启动 `node.js` 代理 pod 以针对其运行此构建。
+<4> 为此管道设置 20 分钟超时。
+<5> 使用此模板标签删除所有内容。
+<6> 使用此模板标签删除任何 secret。
+<7> 从 `templatePath` 创建一个新应用程序。
+<8> 等待最多五分钟以完成构建。
+<9> 等待最多五分钟以完成部署。
+<10> 如果其余部分都成功，则将 `$ {templateName}:latest` 镜像标记为 `$ {templateName}-staging:latest`。stage 环境的管道 BuildConfig 可以监控 `$ {templateName}-staging:latest` 镜像更改，并将它部署到 stage 环境中。
++
+[注意]
+====
+上例使用 declarative pipeline 风格编写，但较旧的 scripted pipeline 风格也受到支持。
+====
++
+. 在 统信容器云管理平台 集群中创建管道 `BuildConfig`：
++
+[source,terminal]
+----
+$ oc create -f nodejs-sample-pipeline.yaml
+----
++
+.. 如果您不想自行创建文件，可以通过运行以下命令来使用 Origin 存储库中的示例：
++
+[source,terminal]
+----
+$ oc create -f https://raw.githubusercontent.com/openshift/origin/master/examples/jenkins/pipeline/nodejs-sample-pipeline.yaml
+----
++
+. 启动管道：
++
+[source,terminal]
+----
+$ oc start-build nodejs-sample-pipeline
+----
++
+[注意]
+====
+此外，也可以通过 统信容器云管理平台 Web 控制台启动管道，方法是导航到 Builds -> Pipeline 部分并点击 *Start Pipeline*，或者访问 Jenkins 控制台，再导航到您创建的管道并点击 *Build Now*。
+====
++
+管道启动之后，您应该看到项目中执行了以下操作：
++
+* 在 Jenkins 服务器上创建了作业实例。
+* 如果管道需要，启动一个代理 pod。
+* 管道在代理 Pod 上运行，如果不需要代理，则管道在 master 上运行。
+** 将删除之前创建的具有 `template=nodejs-mongodb-example` 标签的所有资源。
+** 从 `nodejs-mongodb-example` 模板创建一个新应用程序及其所有相关资源。
+** 使用 `nodejs-mongodb-example BuildConfig` 启动构建。
+*** 管道将等待到构建完成后触发下一阶段。
+** 使用 `nodejs-mongodb-example` 部署配置启动部署。
+*** 管道将等待到部署完成后触发下一阶段。
+** 如果构建和部署都成功，则 `nodejs-mongodb-example:latest` 镜像将标记为 `nodejs-mongodb-example:stage`。
+* 如果管道需要，则代理 pod 会被删除。
++
+[注意]
+====
+视觉化管道执行的最佳方法是在 统信容器云管理平台 Web 控制台中查看它。您可以通过登录 Web 控制台并导航到  Builds -> Pipelines 来查看管道。
+====

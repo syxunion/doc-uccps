@@ -1,0 +1,10 @@
+// Text snippet included in the following modules:
+//
+// * modules/monitoring-enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: SNIPPET
+
+[注意]
+====
+自定义 Prometheus 实例和通过 Operator Lifecycle Manager (OLM) 安装的 Prometheus Operator 可能会导致用户定义的工作负载监控（如果启用）出现问题。自定义 Prometheus 实例在 统信容器云管理平台 中不受支持。
+====

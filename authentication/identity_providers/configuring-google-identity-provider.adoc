@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="configuring-google-identity-provider"]
+= 配置 Google 身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-google-identity-provider
+
+toc::[]
+
+配置 google 身份提供程序，使用 Google 的 OpenID Connect 集成。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-secret.adoc[leveloffset=+1]
+
+include::modules/identity-provider-google-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]

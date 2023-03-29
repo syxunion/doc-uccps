@@ -1,0 +1,34 @@
+// Module included in the following assemblies
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: REFERENCE
+[id="serverless-url-scheme-external-routes_{context}"]
+= 为外部路由设置 URL 方案
+// should probably be a procedure, but this is out of scope for the abstracts PR
+
+用于增强安全性，外部路由的 URL 方案默认为 HTTPS。这个方案由 `KnativeServing` 自定义资源 (CR) spec 中的 `default-external-scheme` 键决定。
+
+.默认规格
+[source,yaml]
+----
+...
+spec:
+  config:
+    network:
+      default-external-scheme: "https"
+...
+----
+
+您可以通过修改 `default-external-scheme` 键来覆盖默认的 spec 以使用 HTTP：
+
+.HTTP 覆盖规格
+[source,yaml]
+----
+...
+spec:
+  config:
+    network:
+      default-external-scheme: "http"
+...
+----

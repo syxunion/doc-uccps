@@ -1,0 +1,69 @@
+:_content-type: ASSEMBLY
+:context: nodes-cluster-overcommit
+[id="nodes-cluster-overcommit"]
+= 配置集群以将 pod 放置到过量使用的节点上
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+
+
+处于 _过量使用_ 状态时，容器计算资源请求和限制的总和超过系统中可用的资源。例如，您可以在一个开发环境中使用过量使用功能，因为在这种环境中可以接受以牺牲保障性能来换取功能的情况。
+
+容器可以指定计算资源的请求（request）和限值（limit）。请求用于调度容器，以提供最低服务保证。限值用于约束节点上可以消耗的计算资源数量。
+
+调度程序会尝试优化集群中所有节点的计算资源使用。它将 pod 放置到特定的节点上，同时考虑 pod 的计算资源请求和节点的可用容量。
+
+统信容器云管理平台 管理员可以控制过量使用的程度，并管理节点上的容器密度。您可以使用 ClusterResourceOverride Operator 配置集群一级的过量使用，以覆盖开发人员容器上设置的请求和限值之间的比例。与 xref:#nodes-cluster-node-overcommit_nodes-cluster-overcommit[节点过度使用] and xref:../../applications/deployments/managing-deployment-processes.adoc#deployments-setting-resources_deployment-operations[项目内存以及 CPU 限值和默认值], y一同使用，您可以调整资源限值和请求，以达到所需的过量使用程度。
+
+[注意]
+====
+在 统信容器云管理平台 中，您必须启用集群级别的过量使用。节点过量使用功能会被默认启用。请参阅
+xref:#nodes-cluster-overcommit-node-disable_nodes-cluster-overcommit[禁用节点过量使用]。
+====
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/nodes-cluster-overcommit-resource-requests.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-override.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-override-deploy-console.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-resource-override-deploy-cli.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-resource-configure.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-node-overcommit.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-overcommit-resources-containers.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-qos-about.adoc[leveloffset=+2]
+
+include::modules/nodes-qos-about-swap.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-configure-nodes.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-enforcing.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-resources.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-overcommit-node-disable.adoc[leveloffset=+2]
+
+include::modules/nodes-cluster-project-overcommit.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-overcommit-project-disable.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+[id="nodes-cluster-overcommit-addtl-resources"]
+== 其他资源
+
+* xref:../../applications/deployments/managing-deployment-processes.adoc#deployments-triggers_deployment-operations[设置部署资源].
+* xref:../../nodes/nodes/nodes-nodes-resources-configuring.adoc#nodes-nodes-resources-configuring-setting_nodes-nodes-resources-configuring[为节点分配资源].

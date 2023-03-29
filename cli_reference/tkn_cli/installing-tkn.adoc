@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id='installing-tkn']
+= 安装 tkn
+include::_attributes/common-attributes.adoc[]
+:context: installing-tkn
+
+toc::[]
+
+通过一个终端，使用 `tkn` CLI 管理 UnionTech Uccps Pipelines。下面的部分论述了如何在不同的平台中安装 `tkn`。
+
+在 统信容器云管理平台 web 控制台中，点右上角的 *?* 图标并选  *Command Line Tools*.
+
+// Install tkn on Linux
+include::modules/op-installing-tkn-on-linux.adoc[leveloffset=+1]
+
+// Install tkn on Linux using RPM
+include::modules/op-installing-tkn-on-linux-using-rpm.adoc[leveloffset=+1]

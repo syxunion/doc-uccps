@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-view_{context}"]
+= 查看默认的 Ingress Controller
+
+Ingress Operator 是 统信容器云管理平台 的一个核心功能，开箱即用。
+
+每个 统信容器云管理平台 新安装都有一个名为 default 的 `ingresscontroller`。它可以通过额外的 Ingress Controller 来补充。如果删除了默认的 `ingresscontroller`，Ingress Operator 会在一分钟内自动重新创建。
+
+.流程
+
+* 查看默认的 Ingress Controller：
++
+[source,terminal]
+----
+$ oc describe --namespace=openshift-ingress-operator ingresscontroller/default
+----

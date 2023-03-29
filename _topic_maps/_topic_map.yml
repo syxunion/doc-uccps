@@ -1,0 +1,1242 @@
+# This configuration file dictates the organization of the topic groups and
+# topics on the main page of the doc site for this branch. Each record
+# consists of the following:
+#
+# ---                                  <= Record delimiter
+# Name: Origin of the Species          <= Display name of topic group
+# Dir:  origin_of_the_species          <= Directory name of topic group
+# Topics:
+#   - Name: The Majestic Marmoset      <= Topic name
+#     File: the_majestic_marmoset      <= Topic file under group dir +/-
+#   - Name: The Curious Crocodile      <= Topic 2 name
+#     File: the_curious_crocodile      <= Topic 2 file
+#   - Name: The Numerous Nematodes     <= Sub-topic group name
+#     Dir: the_numerous_nematodes      <= Sub-topic group dir
+#     Topics:
+#       - Name: The Wily Worm          <= Sub-topic name
+#         File: the_wily_worm          <= Sub-topic file under <group dir>/<subtopic dir>
+#       - Name: The Acrobatic Ascarid  <= Sub-topic 2 name
+#         File: the_acrobatic_ascarid  <= Sub-topic 2 file under <group dir>/<subtopic dir>
+#
+# The ordering of the records in this document determines the ordering of the
+# topic groups and topics on the main page.
+
+---
+Name: 关于文档
+Dir: welcome
+Topics:
+- Name: Welcome
+  File: index
+---
+Name: 安装后配置
+Dir: post_installation_configuration
+Topics:
+- Name: Overview
+  Distros: openshift-enterprise
+  File: index
+- Name: Configuring a private cluster
+  Distros: openshift-enterprise,openshift-origin
+  File: configuring-private-cluster
+- Name: Machine 配置任务
+  File: machine-configuration-tasks
+- Name: Cluster 任务
+  File: cluster-tasks
+- Name: Node tasks
+  File: node-tasks
+- Name: Network 配置
+  File: network-configuration
+- Name: Storage 配置
+  File: storage-configuration
+- Name: Preparing for users
+  File: preparing-for-users
+- Name: Configuring alert notifications
+  File: configuring-alert-notifications
+- Name: Converting a connected cluster to a disconnected cluster
+  File: connected-to-disconnected
+---
+Name: Web 控制台
+Dir: web_console
+Topics:
+- Name: 访问 Web 控制台
+  File: web-console
+- Name: 使集群 dashboard 获取集群信息
+  File: using-dashboard-to-get-cluster-information
+- Name: Adding user preferences
+  File: adding-user-preferences
+  Distros: openshift-enterprise,openshift-origin
+- Name: 在统信容器云管理平台中配置 Web 控制台
+  File: configuring-web-console
+  Distros: openshift-enterprise,openshift-origin
+- Name: 在统信容器云管理平台中定制 Web 控制台
+  File: customizing-the-web-console
+  Distros: openshift-enterprise,openshift-origin
+- Name: 统信容器云管理平台 Web 控制台中添加动态插件
+  File: dynamic-plug-ins
+  Distros: openshift-enterprise,openshift-origin
+- Name: Web 终端
+  File: odc-about-web-terminal
+  Distros: openshift-enterprise,openshift-online
+- Name: 在统信容器云管理平台中禁用 Web 控制台
+  File: disabling-web-console
+  Distros: openshift-enterprise,openshift-origin
+- Name: 在 web 控制台中创建快速启动指南
+  File: creating-quick-start-tutorials
+  Distros: openshift-enterprise,openshift-origin
+---
+Name: CLI 工具
+Dir: cli_reference
+Topics:
+- Name: 统信容器云管理平台 CLI 工具概述
+  File: index
+- Name: Uccps CLI (oc)
+  Dir: openshift_cli
+  Topics:
+  - Name: Uccps CLI（oc）
+    File: getting-started-cli
+  - Name: 配置 Uccps CLI
+    File: configuring-cli
+  - Name: 管理 CLI 配置集
+    File: managing-cli-profiles
+  - Name: 使用插件扩展 Uccps CLI
+    File: extending-cli-plugins
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Uccps CLI 开发人员命令参考
+    File: developer-cli-commands
+  - Name: Uccps CLI 管理员命令参考
+    File: administrator-cli-commands
+    Distros: openshift-enterprise,openshift-origin
+  - Name: oc 和 kubectl 命令的使用方法
+    File: usage-oc-kubectl
+- Name: 开发人员 CLI (odo)
+  Dir: developer_cli_odo
+  Topics:
+  - Name: odo 发行标记
+    File: odo-release-notes
+  - Name: 了解 odo
+    File: understanding-odo
+  - Name: 安装 odo
+    File: installing-odo
+  - Name: 配置 odo CLI
+    File: configuring-the-odo-cli
+  - Name: odo CLI 参考指南
+    File: odo-cli-reference
+- Name: 用于 Uccps Serverless 的 Knative CLI（kn）
+  File: kn-cli-tools
+  Distros: openshift-enterprise,openshift-origin
+- Name: Pipelines CLI (tkn)
+  Dir: tkn_cli
+  Distros: openshift-enterprise
+  Topics:
+  - Name: 安装 tkn
+    File: installing-tkn
+  - Name: 配置 tkn
+    File: op-configuring-tkn
+  - Name: Uccps Pipelines tkn 参考
+    File: op-tkn-reference
+- Name: opm CLI
+  Dir: opm
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 安装 opm CLI
+    File: cli-opm-install
+  - Name: opm CLI 参考
+    File: cli-opm-ref
+- Name: Operator SDK
+  Dir: osdk
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 安装 Operator SDK CLI
+    File: cli-osdk-install
+  - Name: Operator SDK CLI 参考
+    File: cli-osdk-ref
+---
+Name: 认证和授权
+Dir: authentication
+Topics:
+- Name: Overview
+  File: index
+- Name: Understanding authentication
+  File: understanding-authentication
+  Distros: openshift-enterprise,openshift-origin,openshift-online
+- Name: 配置内部 OAuth 服务器
+  File: configuring-internal-oauth
+- Name: 配置 OAuth 客户端
+  File: configuring-oauth-clients
+- Name: 管理用户拥有的 OAuth 令牌
+  File: managing-oauth-access-tokens
+  Distros: openshift-enterprise,openshift-origin
+- Name: 了解 identity-provider 配置
+  File: understanding-identity-provider
+  Distros: openshift-enterprise,openshift-origin
+- Name: 配置 identity-providers
+  Dir: identity_providers
+  Topics:
+  - Name: 配置 HTPasswd 身份提供程序
+    File: configuring-htpasswd-identity-provider
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置 Keystone 身份提供程序
+    File: configuring-keystone-identity-provider
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置 LDAP 身份提供程序
+    File: configuring-ldap-identity-provider
+  - Name: Configuring a basic authentication identity provider
+    File: configuring-basic-authentication-identity-provider
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Configuring a request header identity provider
+    File: configuring-request-header-identity-provider
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置 GitHub 或 GitHub Enterprise 身份提供程序
+    File: configuring-github-identity-provider
+  - Name: 配置 GitLab 身份提供程序
+    File: configuring-gitlab-identity-provider
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置 Google 身份提供程序
+    File: configuring-google-identity-provider
+  - Name: 配置 OpenID Connect 身份提供程序
+    File: configuring-oidc-identity-provider
+- Name: 使用 RBAC 定义和应用权限
+  File: using-rbac
+- Name: 移除 kubeadmin 用户
+  File: remove-kubeadmin
+  Distros: openshift-enterprise,openshift-origin
+#- Name: Configuring LDAP failover
+#  File: configuring-ldap-failover
+- Name: 了解并创建 service accounts
+  File: understanding-and-creating-service-accounts
+- Name: 在应用程序中使用 service accounts
+  File: using-service-accounts-in-applications
+- Name: 使用服务帐户作为 OAuth 客户端
+  File: using-service-accounts-as-oauth-client
+- Name: Scoping tokens
+  File: tokens-scoping
+- Name: 使用绑定的 service account 令牌
+  File: bound-service-account-tokens
+- Name: Managing security context constraints
+  File: managing-security-context-constraints
+  Distros: openshift-enterprise,openshift-origin
+- Name: 模拟 system:admin 用户
+  File: impersonating-system-admin
+  Distros: openshift-enterprise,openshift-origin
+- Name: 同步 LDAP 组
+  File: ldap-syncing
+  Distros: openshift-enterprise,openshift-origin
+- Name: 管理 cloud provider 凭证
+  Dir: managing_cloud_provider_credentials
+  Topics:
+  - Name: 关于 Cloud Credential Operator
+    File: about-cloud-credential-operator
+  - Name: 使用 mint 模式
+    File: cco-mode-mint
+  - Name: 使用 passthrough 模式
+    File: cco-mode-passthrough
+  - Name: 使用手动模式
+    File: cco-mode-manual
+  - Name: 使用 AWS 安全令牌服务的手动模式
+    File: cco-mode-sts
+---
+Name: 网络
+Dir: networking
+Topics:
+- Name: 了解网络 networking
+  File: understanding-networking
+- Name: 统信容器云管理平台中的 Cluster Network Operator
+  File: cluster-network-operator
+  Distros: openshift-enterprise,openshift-origin
+- Name: 统信容器云管理平台中的 DNS Operator
+  File: dns-operator
+  Distros: openshift-enterprise,openshift-origin
+- Name: 统信容器云管理平台 中的 Ingress Operator
+  File: ingress-operator
+  Distros: openshift-enterprise,openshift-origin
+- Name: 配置 Ingress Controller 端点发布策略
+  File: nw-ingress-controller-endpoint-publishing-strategies
+  Distros: openshift-enterprise,openshift-origin
+- Name: Verifyingconnectivity endpoint
+  File: verifying-connectivity-endpoint
+- Name: 更改集群网络的 MTU
+  File: changing-cluster-network-mtu
+- Name: test 配置节点端口服务范围
+  File: configuring-node-port-service-range
+- Name: 配置 IP 故障转义
+  File: configuring-ipfailover
+- Name: 使用 SCTP
+  File: using-sctp
+  Distros: openshift-enterprise,openshift-origin
+- Name: 网络策略
+  Dir: network_policy
+  Topics:
+  - Name: 关于 network 策略
+    File: about-network-policy
+  - Name: 登录 network 策略
+    File: logging-network-policy
+  - Name: 创建 network 策略
+    File: creating-network-policy
+  - Name: 查看 network 策略
+    File: viewing-network-policy
+  - Name: 编辑 network 策略
+    File: editing-network-policy
+  - Name: 删除 network 策略
+    File: deleting-network-policy
+  - Name: 为项目定义一个 network 策略
+    File: default-network-policy
+  - Name: 配置 Multitenant-Network 策略
+    File: multitenant-network-policy
+- Name: 多网络
+  Dir: multiple_networks
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 了解 Multiple-Networks
+    File: understanding-multiple-networks
+  - Name: 配置额外的 network
+    File: configuring-additional-network
+  - Name: About virtual routing and forwarding
+    File: about-virtual-routing-and-forwarding
+  - Name: Configuring multi-network policy
+    File: configuring-multi-network-policy
+  - Name: 将 pod 附加到额外网络
+    File: attaching-pod
+  - Name: 从额外网络中删除 pod
+    File: removing-pod
+  - Name: 编辑额外的 network
+    File: edit-additional-network
+  - Name: 删除额外的 network
+    File: remove-additional-network
+  - Name: 为 VRF 分配从属网络
+    File: assigning-a-secondary-network-to-a-vrf
+- Name: OpenShift SDN 默认 CNI 网络供应商
+  Dir: openshift_sdn
+  Topics:
+  - Name: 关于 OpenShift SDN 默认 CNI 网络供应商
+    File: about-openshift-sdn
+  - Name: 为项目配置出口 IP
+    File: assigning-egress-ips
+    Distros: openshift-origin,openshift-enterprise
+  - Name: 为项目配置出口防火墙
+    File: configuring-egress-firewall
+  - Name: 查看项目出口防火墙
+    File: viewing-egress-firewall
+  - Name: 为项目编辑出口防火墙
+    File: editing-egress-firewall
+  - Name: 从项目中删除出口防火墙
+    File: removing-egress-firewall
+  - Name: 使用出口路由器 pod 的注意事项
+    File: using-an-egress-router
+  - Name: 以重定向模式部署出口路由器 pod
+    File: deploying-egress-router-layer3-redirection
+  - Name: 以 HTTP 代理模式部署出口路由器 pod
+    File: deploying-egress-router-http-redirection
+  - Name: 以 DNS 代理模式部署出口路由器 pod
+    File: deploying-egress-router-dns-redirection
+  - Name: 从配置映射配置出口路由器 pod 目的地列表
+    File: configuring-egress-router-configmap
+  - Name: 为项目启用多播
+    File: enabling-multicast
+    Distros: openshift-origin,openshift-enterprise
+  - Name: 为项目禁用多播
+    File: disabling-multicast
+    Distros: openshift-origin,openshift-enterprise
+  - Name: 使用 OpenShift SDN 配置网络隔离
+    File: multitenant-isolation
+    Distros: openshift-origin,openshift-enterprise
+  - Name: 配置 kube-proxy
+    File: configuring-kube-proxy
+    Distros: openshift-enterprise,openshift-origin
+- Name: OVN-Kubernetes 默认 CNI 网络供应商
+  Dir: ovn_kubernetes_network_provider
+  Distros: openshift-origin,openshift-enterprise
+  Topics:
+  - Name: 关于 OVN-Kubernetes 默认 Container Network Interface (CNI) 网络供应商
+    File: about-ovn-kubernetes
+  - Name: 从 OpenShift SDN 集群网络供应商迁移
+    File: migrate-from-openshift-sdn
+  - Name: 回滚到 OpenShift SDN 网络供应商
+    File: rollback-to-openshift-sdn
+  - Name: 转换为 IPv4/IPv6 双栈网络
+    File: converting-to-dual-stack
+  - Name: IPsec 加密配置
+    File: about-ipsec-ovn
+  - Name: 为项目配置出口防火墙
+    File: configuring-egress-firewall-ovn
+  - Name: 查看项目的出口防火墙
+    File: viewing-egress-firewall-ovn
+  - Name: 为项目编辑出口防火墙
+    File: editing-egress-firewall-ovn
+  - Name: 从项目中删除出口防火墙
+    File: removing-egress-firewall-ovn
+  - Name: 配置出口 IP 地址
+    File: configuring-egress-ips-ovn
+  - Name: 分配出口 IP 地址
+    File: assigning-egress-ips-ovn
+  - Name: 使用出口路由器 pod 的注意事项
+    File: using-an-egress-router-ovn
+  - Name: 以重定向模式部署出口路由器 pod
+    File: deploying-egress-router-ovn-redirection
+  - Name: 为项目启用多播
+    File: enabling-multicast
+    Distros: openshift-origin,openshift-enterprise,openshift-webscale
+  - Name: 为项目禁用多播
+    File: disabling-multicast
+    Distros: openshift-origin,openshift-enterprise,openshift-webscale
+  - Name: 跟踪网络流
+    File: tracking-network-flows
+  - Name: 配置混合联网
+    File: configuring-hybrid-networking
+- Name: 配置路由
+  Dir: routes
+  Topics:
+  - Name: Route 配置
+    File: route-configuration
+  - Name: Secured Route
+    File: secured-routes
+- Name: 配置集群入口流量
+  Dir: configuring_ingress_cluster_traffic
+  Topics:
+  - Name: Overview
+    File: overview-traffic
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 为服务配置 ExternalIP
+    File: configuring-externalip
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用 Ingress Controller 配置集群入口流量
+    File: configuring-ingress-cluster-traffic-ingress-controller
+  - Name: 使用 Load-balancer 配置集群入口流量
+    File: configuring-ingress-cluster-traffic-load-balancer
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用网络负载平衡器在 AWS 上配置集群入口流量
+    File: configuring-ingress-cluster-traffic-aws-network-load-balancer
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 为服务外部 IP 配置 ingress 集群流量
+    File: configuring-ingress-cluster-traffic-service-external-ip
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用 NodePort 配置集群入口流量
+    File: configuring-ingress-cluster-traffic-nodeport
+    Distros: openshift-enterprise,openshift-origin
+  # Kubernetes NMState (TECHNOLOGY PREVIEW)
+- Name: Enable cluster wide proxy
+  File: enable-cluster-wide-proxy
+  Distros: openshift-enterprise,openshift-origin
+- Name: 配置自定义 PKI
+  File: configuring-a-custom-pki
+  Distros: openshift-enterprise,openshift-origin
+- Name: UStack 负载均衡
+  File: load-balancing-openstack
+- Name: 将 secondary-interfaces 指标与网络附加关联
+  File: associating-secondary-interfaces-metrics-to-network-attachments
+---
+Name: 存储
+Dir: storage
+Topics:
+- Name: storage 概述
+  File: index
+  Distros: openshift-enterprise,openshift-origin,openshift-online
+- Name: 了解 Ephemeral Storage
+  File: understanding-ephemeral-storage
+  Distros: openshift-enterprise,openshift-origin,openshift-online
+- Name: 了解 persistent storage
+  File: understanding-persistent-storage
+  Distros: openshift-enterprise,openshift-origin,openshift-online
+- Name: 配置持久性存储
+  Dir: persistent_storage
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 使用 Cinder 的持久性存储
+    File: persistent-storage-cinder
+  - Name: 使用 Fibre Channel 持久性存储
+    File: persistent-storage-fibre
+  - Name: 使用 FlexVolume 的持久性存储
+    File: persistent-storage-flexvolume
+  - Name: 使用 hostPath 的持久性存储
+    File: persistent-storage-hostpath
+  - Name: 使用 iSCSI 的持久性存储
+    File: persistent-storage-iscsi
+  - Name: 使用 local storage 的持久性存储
+    File: persistent-storage-local
+  - Name: NFS 的持久性存储
+    File: persistent-storage-nfs
+  - Name: 使用 Uccp Container Storage
+    File: persistent-storage-ocs
+  - Name: 使用 VMware vSphere 卷的持久性存储
+    File: persistent-storage-vsphere
+- Name: 使用 Container Storage Interface (CSI)
+  Dir: container_storage_interface
+  Topics:
+  - Name: 配置 CSI 卷
+    File: persistent-storage-csi
+  - Name: CSI inline 临时卷
+    File: ephemeral-storage-csi-inline
+  - Name: 共享资源 CSI Driver Operator
+    File: ephemeral-storage-shared-resource-csi-driver-operator
+  - Name: CSI 卷快照
+    File: persistent-storage-csi-snapshots
+  - Name: CSI 卷克隆
+    File: persistent-storage-csi-cloning
+  - Name: AliCloud Disk CSI Driver Operator
+    File: persistent-storage-csi-alicloud-disk
+  - Name: OpenStack Cinder CSI Driver Operator
+    File: persistent-storage-csi-cinder
+  - Name: OpenStack Manila CSI Driver Operator
+    File: persistent-storage-csi-manila
+  - Name: VMware vSphere CSI Driver Operator
+    File: persistent-storage-csi-vsphere
+- Name: 扩展 persistent volumes
+  File: expanding-persistent-volumes
+  Distros: openshift-enterprise,openshift-origin
+- Name: Dynamic provisioning
+  File: dynamic-provisioning
+  Distros: openshift-enterprise,openshift-origin
+---
+Name: 容器镜像仓库
+Dir: registry
+Topics:
+- Name: Overview
+  File: index
+- Name: 统信容器云管理平台中的 Image Registry Operator
+  File: configuring-registry-operator
+  Distros: openshift-origin
+- Name: 设置和配置 registry
+  Dir: configuring_registry_storage
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 为 OpenStack 用户置备的基础架构配置
+    File: configuring-registry-storage-openstack-user-infrastructure
+  - Name: 为有栈配置 registry
+    File: configuring-registry-storage-osp
+  - Name: 为裸机配置 registry
+    File: configuring-registry-storage-baremetal
+- Name: 访问 registry
+  File: accessing-the-registry
+- Name: 开放 registry
+  File: securing-exposing-registry
+  Distros: openshift-enterprise,openshift-origin
+---
+Name: CI/CD
+Dir: cicd
+Topics:
+- Name: CI/CD 概述
+  File: index
+- Name: 构建
+  Dir: builds
+  Distros: openshift-enterprise,openshift-origin,openshift-online
+  Topics:
+  - Name: 了解 Image 构建
+    File: understanding-image-builds
+  - Name: 了解 buildconfigs
+    File: understanding-buildconfigs
+  - Name: Creating build inputs
+    File: creating-build-inputs
+  - Name: Managing build output
+    File: managing-build-output
+  - Name: Use build strategies
+    File: build-strategies
+  - Name: 使用 Buildah 自定义镜像构建
+    File: custom-builds-buildah
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Performing and configuring basic builds
+    File: basic-build-operations
+    Distros: openshift-enterprise,openshift-origin,openshift-online
+  - Name: Triggering and modifying builds
+    File: triggering-builds-build-hooks
+    Distros: openshift-enterprise,openshift-origin,openshift-online
+  - Name: Performing advanced builds
+    File: advanced-build-operations
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 在构建中使用 Red Hat 订阅
+    File: running-entitled-builds
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Securing builds by strategy
+    File: securing-builds-by-strategy
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Build configuration resources
+    File: build-configuration
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Troubleshooting builds
+    File: troubleshooting-builds
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Setting up additional trusted certificate authorities for builds
+    File: setting-up-trusted-ca
+    Distros: openshift-enterprise,openshift-origin
+- Name: Migrating from Jenkins to Tekton
+  Dir: jenkins-tekton
+  Topics:
+  - Name: Migrating from Jenkins to Tekton
+    File: migrating-from-jenkins-to-tekton
+- Name: Pipelines
+  Dir: pipelines
+  Distros: openshift-enterprise
+  Topics:
+  - Name: OpenShift Pipelines release notes
+    File: op-release-notes
+  - Name: Understanding OpenShift Pipelines
+    File: understanding-openshift-pipelines
+  - Name: Installing OpenShift Pipelines
+    File: installing-pipelines
+  - Name: Uninstalling OpenShift Pipelines
+    File: uninstalling-pipelines
+  - Name: Creating CI/CD solutions for applications using OpenShift Pipelines
+    File: creating-applications-with-cicd-pipelines
+  - Name: Managing non-versioned and versioned cluster tasks
+    File: managing-nonversioned-and-versioned-cluster-tasks
+  - Name: Using Tekton Hub with OpenShift Pipelines
+    File: using-tekton-hub-with-openshift-pipelines
+  - Name: Using Pipelines as Code
+    File: using-pipelines-as-code
+  - Name: Working with OpenShift Pipelines using the Developer perspective
+    File: working-with-pipelines-using-the-developer-perspective
+  - Name: Reducing resource consumption of OpenShift Pipelines
+    File: reducing-pipelines-resource-consumption
+  - Name: Setting compute resource quota for OpenShift Pipelines
+    File: setting-compute-resource-quota-for-openshift-pipelines
+  - Name: Automatic pruning of task run and pipeline run
+    File: automatic-pruning-taskrun-pipelinerun
+  - Name: Using pods in a privileged security context
+    File: using-pods-in-a-privileged-security-context
+  - Name: Securing webhooks with event listeners
+    File: securing-webhooks-with-event-listeners
+  - Name: Authenticating pipelines using git secret
+    File: authenticating-pipelines-using-git-secret
+  - Name: Using Tekton Chains for OpenShift Pipelines supply chain security
+    File: using-tekton-chains-for-openshift-pipelines-supply-chain-security
+  - Name: Viewing pipeline logs using the OpenShift Logging Operator
+    File: viewing-pipeline-logs-using-the-openshift-logging-operator
+  - Name: Unprivileged building of container images using Buildah
+    File: unprivileged-building-of-container-images-using-buildah
+- Name: GitOps
+  Dir: gitops
+  Distros: openshift-enterprise
+  Topics:
+  - Name: OpenShift GitOps release notes
+    File: gitops-release-notes
+  - Name: Understanding OpenShift GitOps
+    File: understanding-openshift-gitops
+  - Name: Installing OpenShift GitOps
+    File: installing-openshift-gitops
+  - Name: Uninstalling OpenShift GitOps
+    File: uninstalling-openshift-gitops
+  - Name: Setting up a new Argo CD instance
+    File: setting-up-argocd-instance
+  - Name: Configuring an OpenShift cluster by deploying an application with cluster configurations
+    File: configuring-an-openshift-cluster-by-deploying-an-application-with-cluster-configurations
+  - Name: Deploying a Spring Boot application with Argo CD
+    File: deploying-a-spring-boot-application-with-argo-cd
+  - Name: Argo CD custom resource properties
+    File: argo-cd-custom-resource-properties
+  - Name: Monitoring application health status
+    File: health-information-for-resources-deployment
+  - Name: Configuring SSO for Argo CD using Dex
+    File: configuring-sso-on-argo-cd-using-dex
+  - Name: Configuring SSO for Argo CD using Keycloak
+    File: configuring-sso-for-argo-cd-using-keycloak
+  - Name: Configuring Argo CD RBAC
+    File: configuring-argo-cd-rbac
+  - Name: Running Control Plane Workloads on Infra nodes
+    File: run-gitops-control-plane-workload-on-infra-nodes
+  - Name: Sizing requirements for GitOps Operator
+    File: about-sizing-requirements-gitops
+---
+Name: 镜像
+Dir: openshift_images
+Topics:
+- Name: Overview
+  File: index
+- Name: Cluster Samples Operator 概述
+  File: configuring-samples-operator
+  Distros: openshift-enterprise,openshift-origin
+- Name: 使用带有备用 registry 的 Cluster Samples Operator
+  File: samples-operator-alt-registry
+  Distros: openshift-enterprise,openshift-origin
+- Name: Create Image
+  File: create-images
+- Name: Manage Image
+  Dir: managing_images
+  Topics:
+  - Name: Overview
+    File: managing-images-overview
+  - Name: Tagging 镜像
+    File: tagging-images
+  - Name: Image pull policy
+    File: image-pull-policy
+  - Name: 使用镜像拉取 secret
+    File: using-image-pull-secrets
+- Name: 管理 imagestreams
+  File: image-streams-manage
+  Distros: openshift-enterprise,openshift-origin
+- Name: Kubernetes 资源使用镜像流
+  File: using-imagestreams-with-kube-resources
+  Distros: openshift-enterprise,openshift-origin
+- Name: imagestream 改变时触发更新
+  File: triggering-updates-on-imagestream-changes
+  Distros: openshift-enterprise,openshift-origin
+- Name: Image configuration resources
+  File: image-configuration
+  Distros: openshift-enterprise,openshift-origin
+- Name: 使用模板 Using Templates
+  File: using-templates
+- Name: 使用 Ruby on Rails
+  File: templates-using-ruby-on-rails
+- Name: 使用 images
+  Dir: using_images
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 使用镜像概述 Using image overview
+    File: using-images-overview
+  - Name: Jenkins 镜像配置
+    File: images-other-jenkins
+  - Name: Jenkins 代理
+    File: images-other-jenkins-agent
+  - Name: Source-to-image
+    File: using-s21-images
+  - Name: 自定义 S2i 镜像
+    File: customizing-s2i-imagesName
+---
+Name: 构建应用程序
+Dir: applications
+Topics:
+- Name: 项目
+  Dir: projects
+  Topics:
+  - Name: Working with projects
+    File: working-with-projects
+  - Name: Creating a project as another user
+    File: creating-project-other-user
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Configuring project creation
+    File: configuring-project-creation
+    Distros: openshift-enterprise,openshift-origin
+- Name: Create applications
+  Dir: creating_applications
+  Topics:
+  - Name: 使用开发者视角创建应用程序
+    File: odc-creating-applications-using-developer-perspective
+  - Name: 从已安装的 OPERATOR 创建应用程序
+    File: creating-apps-from-installed-operators
+  - Name: 使用 CLI 创建应用程序
+    File: creating-applications-using-cli
+- Name: Viewing application composition using the Topology view
+  File: odc-viewing-application-composition-using-topology-view
+- Name: Use Helm charts
+  Dir: working_with_helm_charts
+  Topics:
+  - Name: 了解 Helm
+    File: understanding-helm
+  - Name: 安装 Helm
+    File: installing-helm
+  - Name: 配置自定义 Helm Chart 仓库
+    File: configuring-custom-helm-chart-repositories
+  - Name: 使用 Helm 发行版本
+    File: odc-working-with-helm-releases
+- Name: Deployment
+  Dir: deployments
+  Topics:
+  - Name: 了解部署和部署配置对象
+    File: what-deployments-are
+  - Name: 管理部署过程
+    File: managing-deployment-processes
+  - Name: 使用部署策略
+    File: deployment-strategies
+  - Name: 使用基于路由的部署策略
+    File: route-based-deployment-strategies
+- Name: Quotas
+  Dir: quotas
+  Distros: openshift-origin,openshift-enterprise
+  Topics:
+  - Name: 项目的资源配额
+    File: quotas-setting-per-project
+  - Name: 跨越多个项目的资源配额
+    File: quotas-setting-across-multiple-projects
+    Distros: openshift-enterprise,openshift-origin
+- Name: 在 App 中使用 ConfigMap
+  File: config-maps
+- Name: 使用开发人员视角监视 Project 和 App 指标
+  File: odc-monitoring-project-and-application-metrics-using-developer-perspective
+- Name: 监控 App 健康
+  File: application-health
+- Name: 编辑 App
+  File: odc-editing-applications
+- Name: Pruning objects to reclaim resources
+  File: pruning-objects
+  Distros: openshift-origin,openshift-enterprise
+- Name: Idling applications
+  File: idling-applications
+  Distros: openshift-origin,openshift-enterprise
+- Name: 删除 App
+  File: odc-deleting-applications
+  Distros: openshift-origin,openshift-enterprise
+---
+Name: Machine 管理
+Dir: machine_management
+Topics:
+- Name: Machine 管理概述
+  File: index
+- Name: 创建机器集
+  Dir: creating_machinesets
+  Distros: openshift-origin,openshift-enterprise
+  Topics:
+  - Name: OpenStack 上创建机器集
+    File: creating-machineset-osp
+- Name: machine set 手动扩展 
+  File: manually-scaling-machineset
+- Name: machine set 修改
+  File: modifying-machineset
+- Name: Del Machine
+  File: deleting-machine
+- Name: Cluster 应用自动扩展
+  File: applying-autoscaling
+- Name: Creating infrastructure machine sets
+  File: creating-infrastructure-machinesets
+- Name: RHEL 计算机器 添加到集群中
+  File: adding-rhel-compute
+  Distros: openshift-enterprise
+- Name: 在集群中添加更多 RHEL 计算机器
+  File: more-rhel-compute
+  Distros: openshift-enterprise
+- Name: User-provisioned infrastructure
+  Dir: user_infra
+  Topics:
+  - Name: 使用用户置备的基础架构在集群中添加计算机器
+    File: adding-compute-user-infra-general
+  - Name: 在裸机中添加计算机器
+    File: adding-bare-metal-compute-user-infra
+- Name: Deploying machine health checks
+  File: deploying-machine-health-checks
+---
+Name: Nodes
+Dir: nodes
+Topics:
+- Name: Node Overviews
+  File: index
+- Name: 使用 pods
+  Dir: pods
+  Topics:
+  - Name: 关于 pods
+    File: nodes-pods-using
+  - Name: 查看 pods
+    File: nodes-pods-viewing
+  - Name: Pod 配置集群
+    File: nodes-pods-configuring
+    Distros: openshift-enterprise,openshift-origin
+  - Name: Pod 自动横向扩展
+    File: nodes-pods-autoscaling
+  - Name: Pod 垂直自动扩展自动调整 pod 资源级别
+    File: nodes-pods-vertical-autoscaler
+  - Name: 为 Pod 提供敏感数据
+    File: nodes-pods-secrets
+  - Name: 创建和使用配置映射
+    File: nodes-pods-configmaps
+  - Name: 使用设备管理器使设备对节点可用
+    File: nodes-pods-plugins
+    Distros: openshift-enterprise,openshift-origin
+  - Name: pod 调度决策中纳入 pod 优先级
+    File: nodes-pods-priority
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用节点选择器将 pod 放置到特定节点
+    File: nodes-pods-node-selectors
+    Distros: openshift-enterprise,openshift-origin
+- Name: 控制节点上的 pod 放置（调度）
+  Dir: scheduling
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 使用调度程序控制 pod 放置
+    File: nodes-scheduler-about
+  - Name: 使用调度程序配置集调度 pod
+    File: nodes-scheduler-profiles
+  - Name: 使用关联性和反关联性规则相对于其他 pod 放置 pod
+    File: nodes-scheduler-pod-affinity
+  - Name: 使用节点关联性规则控制节点上的 pod 放置
+    File: nodes-scheduler-node-affinity
+  - Name: pod 放置到过量使用的节点
+    File: nodes-scheduler-overcommit
+  - Name: 使用节点污点控制 pod 放置
+    File: nodes-scheduler-taints-tolerations
+  - Name: 使用节点选择器将 pod 放置到特定节点
+    File: nodes-scheduler-node-selectors
+  - Name: 使用 pod 拓扑分布限制控制 pod 放置
+    File: nodes-scheduler-pod-topology-spread-constraints
+  - Name: 运行自定义调度程序
+    File: nodes-custom-scheduler
+  - Name: 使用 descheduler 驱除 pod
+    File: nodes-descheduler
+  - Name: Secondary scheduler
+    Dir: secondary_scheduler
+    Topics:
+    - Name: 二级调度概述
+      File: index
+    - Name: 使用二级调度程序调度 pod
+      File: nodes-secondary-scheduler-configuring
+    - Name: 卸载 Secondary Scheduler Operator
+      File: nodes-secondary-scheduler-uninstalling
+- Name: 使用作业 和 DaemonSets
+  Dir: jobs
+  Topics:
+  - Name: 使用 daemonset 在节点上自动运行后台任务
+    File: nodes-pods-daemonsets
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用任务在 Pod 中运行任务
+    File: nodes-nodes-jobs
+- Name: Working with node 
+  Dir: nodes
+  Distros: openshift-enterprise,openshift-origin
+  Topics:
+  - Name: 查看和列出集群中的节点
+    File: nodes-nodes-viewing
+  - Name: 操作节点
+    File: nodes-nodes-working
+  - Name: 管理节点
+    File: nodes-nodes-managing
+  - Name: 管理每个节点的 pod 数量上限
+    File: nodes-nodes-managing-max-pods
+  - Name: Node Tuning Operator 的使用
+    File: nodes-node-tuning-operator
+  - Name: 使用 Poison Pill Operator 修复节点
+    File: eco-poison-pill-operator
+  - Name: 使用 Node Health Check Operator 部署节点健康检查
+    File: eco-node-health-check-operator
+  - Name: 使用 Node Maintenance Operator 将节点置于维护模式
+    File: eco-node-maintenance-operator
+  - Name: 了解节点重新引导
+    File: nodes-nodes-rebooting
+  - Name: 使用垃圾回收释放节点资源
+    File: nodes-nodes-garbage-collection
+  - Name: 为集群中的节点分配资源
+    File: nodes-nodes-resources-configuring
+  - Name: 为集群中的节点分配特定 CPU
+    File: nodes-nodes-resources-cpus
+  - Name: 为 kubelet 启用 TLS 安全配置集
+    File: nodes-nodes-tls
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 机器配置守护进程指标
+    File: nodes-nodes-machine-config-daemon-metrics
+  - Name: 创建基础架构节点
+    File: nodes-nodes-creating-infrastructure-nodes
+- Name: Working with containers
+  Dir: containers
+  Topics:
+  - Name: 使用容器
+    File: nodes-containers-using
+  - Name: 在部署 pod 前使用初始容器来执行任务
+    File: nodes-containers-init
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用卷来持久保留容器数据
+    File: nodes-containers-volumes
+  - Name: 使用投射卷来映射卷
+    File: nodes-containers-projected-volumes
+  - Name: 允许容器消耗 API 对象
+    File: nodes-containers-downward-api
+  - Name: 将文件复制到统信容器云管理平台容器或从中复制
+    File: nodes-containers-copying-files
+  - Name: 在统信容器云管理平台容器中执行远程命令
+    File: nodes-containers-remote-commands
+  - Name: 使用端口转发访问容器中的应用程序
+    File: nodes-containers-port-forwarding
+  - Name: 在容器中使用 sysctl
+    File: nodes-containers-sysctls
+- Name: Working with clusters
+  Dir: clusters
+  Topics:
+  - Name: 查看统信容器云管理平台集群中的系统事件信息
+    File: nodes-containers-events
+  - Name: 分析集群资源级别
+    File: nodes-cluster-resource-levels
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 使用限制范围限制资源消耗
+    File: nodes-cluster-limit-ranges
+  - Name: 配置集群内存以满足容器内存和风险要求
+    File: nodes-cluster-resource-configure
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置集群内存以满足容器内存和风险要求
+    File: nodes-cluster-overcommit
+    Distros: openshift-enterprise,openshift-origin
+  - Name: 配置集群以将 pod 放置到过量使用的节点上
+    File: nodes-cluster-cgroups-okd
+    Distros: openshift-origin
+  - Name: 使用 FeatureGate 启用统信容器云管理平台功能
+    File: nodes-cluster-enabling-features
+    Distros: openshift-enterprise,openshift-origin
+- Name: 在网络边缘使用远程 worker 节点
+  Dir: edge
+  Distros: openshift-enterprise
+  Topics:
+  - Name: 在网络边缘使用远程 worker 节点
+    File: nodes-edge-remote-workers
+---
+Name: 监控
+Dir: monitoring
+Topics:
+- Name: Monitoring 概述
+  File: monitoring-overview
+- Name: monitoring stack 配置
+  File: configuring-the-monitoring-stack
+- Name: Monitoring 对用户定义的项目可用
+  File: enabling-monitoring-for-user-defined-projects
+- Name: Alert 对用户定义的项目可用
+  File: enabling-alert-routing-for-user-defined-projects
+- Name: metrics 管理
+  File: managing-metrics
+- Name: metrics targets 管理
+  File: managing-metrics-targets
+- Name: Alerts 管理
+  File: managing-alerts
+- Name: Monitor 仪表盘查看
+  File: reviewing-monitoring-dashboards
+- Name: monitoring UIs 和 APIs
+  File: accessing-third-party-monitoring-uis-and-apis
+- Name: monitoring 问题排查
+  File: troubleshooting-monitoring-issues
+---
+Name: 备份和恢复
+Dir: backup_and_restore
+Topics:
+- Name: backup 和 restore 概述
+  File: index
+- Name: gracefully 关闭集群
+  File: graceful-cluster-shutdown
+- Name: gracefully 重启集群
+  File: graceful-cluster-restart
+- Name: 应用程序备份和恢复
+  Dir: application_backup_and_restore
+  Topics:
+  - Name: OADP 功能和插件
+    File: oadp-features-plugins
+- Name: Control plane 备份和恢复
+  Dir: control_plane_backup_and_restore
+  Topics:
+  - Name: etcd 数据恢复
+    File: backing-up-etcd
+  - Name: 替换不健康的 etcd 成员
+    File: replacing-unhealthy-etcd-member
+  - Name: 灾难恢复
+    Dir: disaster_recovery
+    Topics:
+    - Name: About disaster recovery
+      File: about-disaster-recovery
+    - Name: Restoring to a previous cluster state 
+      File: scenario-2-restoring-cluster-state
+    - Name: control plane 证书已过期的情况下恢复
+      File: scenario-3-expired-certs
+---
+Name: Service Mesh
+Dir: service_mesh
+Topics:
+- Name: Service Mesh 2.x
+  Dir: v2x
+  Topics:
+  - Name: 关于 Service Mesh
+    File: ossm-about
+  - Name: 服务网格架构
+    File: ossm-architecture
+  - Name: 服务网格部署模型
+    File: ossm-deployment-models
+  - Name: Service Mesh 和 的不同
+    File: ossm-vs-community
+  - Name: 准备安装服务网格
+    File: preparing-ossm-installation
+  - Name: 准备安装 Operators
+    File: installing-ossm
+  - Name: 创建 ServiceMeshControlPlane
+    File: ossm-create-smcp
+  - Name: 在服务网格中添加服务
+    File: ossm-create-mesh
+  - Name: 启用sidecar 注入
+    File: prepare-to-deploy-applications-ossm
+  - Name: 管理用户和配置集
+    File: ossm-profiles-users
+  - Name: 安全性 
+    File: ossm-security
+  - Name: 流量管理
+    File: ossm-traffic-manage
+  - Name: 指标，日志和追踪
+    File: ossm-observability
+  - Name: 性能和可扩展性
+    File: ossm-performance-scalability
+  - Name: 为生产环境配置服务网格
+    File: ossm-deploy-production
+  - Name: 扩展
+    File: ossm-extensions
+  - Name: 使用 3scale WebAssembly
+    File: ossm-threescale-webassembly-module
+  - Name: 使用 3scale Istio 适配器
+    File: threescale-adapter
+  - Name: 服务网格故障排除
+    File: ossm-troubleshooting-istio
+  - Name: Control plane 配置参考
+    File: ossm-reference-smcp
+  - Name: Kiali 配置参考
+    File: ossm-reference-kiali
+  - Name: Jaeger 配置参考
+    File: ossm-reference-jaeger
+  - Name: 卸载服务网格
+    File: removing-ossm
+---
+Name: 分布式追踪
+Dir: distr_tracing
+Topics:
+- Name: Distributed tracing 发行标记 
+  File: distributed-tracing-release-notes
+- Name: Distrbute Tracing  架构
+  Dir: distr_tracing_arch
+  Topics:
+  - Name: 分布式追踪架构
+    File: distr-tracing-architecture
+- Name: 分布式追踪安装
+  Dir: distr_tracing_install
+  Topics:
+  - Name: Distrabute tracing 安装
+    File: distr-tracing-installing
+  - Name: Distrabute tracing 的部署和配置
+    File: distr-tracing-deploying-jaeger
+  - Name: Distribute Tracing 卸载
+    File: distr-tracing-removing
+---
+Name: 无服务器
+Dir: serverless
+Topics:
+- Name: Discover
+  Dir: discover
+  Topics:
+  - Name: 关于 Uccps Serverless
+    File: about-serverless
+  - Name: 关于 OpenShift Serverless Functions
+    File: serverless-functions-about
+  - Name: 事件源
+    File: knative-event-sources
+  - Name: 代理
+    File: serverless-brokers
+  - Name: 频道和订阅
+    File: serverless-channels
+- Name: 安装
+  Dir: install
+  Topics:
+  - Name: 安装 Serverless Operator
+    File: install-serverless-operator
+  - Name: 安装 Knative Serving
+    File: installing-knative-serving
+  - Name: 安装 Knative Eventing
+    File: installing-knative-eventing
+  - Name: 删除 Uccps  Serverless
+    File: removing-openshift-serverless
+# Knative kn CLI
+- Name: Knative CLI
+  Dir: cli_tools
+  Topics:
+  - Name: 安装 Knative CLI
+    File: installing-kn
+  - Name: 配置 Knative CLI
+    File: advanced-kn-config
+  - Name: Knative CLI 插件
+    File: kn-plugins
+  - Name: Knative Serving CLI 命令
+    File: kn-serving-ref
+  - Name: Knative Eventing CLI 命令
+    File: kn-eventing-ref
+  - Name: 功能命令
+    File: kn-func-ref
+- Name: Develop
+  Dir: develop
+  Topics:
+  - Name: Serverless 应用程序
+    File: serverless-applications
+  - Name: 自动扩展
+    File: serverless-autoscaling-developer
+  - Name: Traffic 管理
+    File: serverless-traffic-management
+  - Name: 路由
+    File: serverless-configuring-routes
+  - Name: 事件 sink
+    File: serverless-event-sinks
+  - Name: 事件交付
+    File: serverless-event-delivery
+  - Name: 列出事件源和事件源类型
+    File: serverless-listing-event-sources
+  - Name: 创建 API 服务器源
+    File: serverless-apiserversource
+  - Name: 创建 ping 源
+    File: serverless-pingsource
+  - Name: 自定义事件源
+    File: serverless-custom-event-sources
+  - Name: 创建频道
+    File: serverless-creating-channels
+  - Name: 创建和管理订阅
+    File: serverless-subs
+# Brokers
+  - Name: 创建代理
+    File: serverless-using-brokers
+# Triggers
+  - Name: 触发器
+    File: serverless-triggers
+  - Name: 使用 Knative Kafka
+    File: serverless-kafka-developer
+# Admin guide
+- Name: 管理
+  Dir: admin_guide
+  Topics:
+  - Name: Global Configuration
+    File: serverless-configuration
+    # Eventing
+  - Name: 配置 Knative Kafka
+    File: serverless-kafka-admin
+  - Name: 管理员视角的 Serverless 组件
+    File: serverless-admin-perspective
+    # Ingress options
+  - Name: Serverless with servicemesh
+    File: serverless-ossm-setup
+    # Metrics
+  - Name: Serverless 管理人员指标
+    File: serverless-admin-metrics
+    # HA
+  - Name: High availability
+    File: serverless-ha
+- Name: Monitor
+  Dir: monitor
+  Topics:
+  # logging
+  - Name: 在 Uccps Serverless 中使用 Uccps Logging
+    File: cluster-logging-serverless
+  # Metrics
+  - Name: Serverless 开发人员指标
+    File: serverless-developer-metrics
+# Tracing
+- Name: Tracing
+  File: serverless-tracing
+# Security
+- Name: Security
+  Dir: security
+  Topics:
+  - Name: 配置 TLS 身份验证
+    File: serverless-config-tls
+  - Name: 为 Knative 服务配置 JSON Web 令牌身份验证
+    File: serverless-ossm-with-kourier-jwt
+  - Name: 为 Knative 服务配置自定义域
+    File: serverless-custom-domains
+# Functions
+- Name: Functions
+  Dir: functions
+  Topics:
+  - Name: 设置无服务器功能
+    File: serverless-functions-setup
+  - Name: 功能入门
+    File: serverless-functions-getting-started
+  - Name: On-cluster 功能构建和部署
+    File: serverless-functions-on-cluster-builds
+  - Name: 开发 Quarkus 功能
+    File: serverless-developing-quarkus-functions
+  - Name: 开发 Node.js functions
+    File: serverless-developing-nodejs-functions
+  - Name: 开发 TypeScript functions
+    File: serverless-developing-typescript-functions
+  - Name: 使用 Knative Eventing 的功能
+    File: serverless-functions-eventing
+  - Name: func.yaml 中的功能项目配置
+    File: serverless-functions-yaml
+  - Name: 从功能访问 secret 和配置映射
+    File: serverless-functions-accessing-secrets-configmaps
+  - Name: 在功能中添加注解
+    File: serverless-functions-annotations
+  - Name: 功能开发参考指南
+    File: serverless-functions-reference-guide
+# Integrations
+- Name: 集成
+  Dir: integrations
+  Topics:
+  - Name: 将 Serverless 与成本管理服务集成
+    File: serverless-cost-management-integration
+  - Name: 使用无服务器应用程序的 NVIDIA GPU 资源
+    File: gpu-resources

@@ -1,0 +1,12 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-mapping-rules-object_{context}"]
+= The 3scale WebAssembly module mapping_rules object
+
+`mapping_rules` 对象是 `service` 对象的一部分。它指定一组 REST 路径模式和相关 3scale 指标，并在模式匹配时指定要使用的递增数。
+
+如果 `system` 顶级对象中没有提供动态配置，则需要该值。如果对象在 `system` 条目外提供，则首先评估 `mapping_rules` 对象。
+
+`mapping_rules` 是一个数组对象。该数组的每个元素都是 `mapping_rule` 对象。传入请求上评估的匹配映射规则提供了一组 3scale `methods` ，用于授权并向 APIManager 报告。当多个匹配规则指代相同的 `methods`, 时，调用 3scale 时会有一个 `deltas` 的总结。例如，如果两个规则使用 `deltas` of 1 and 3, 1 和 3 将 Hits 方法增加两次，则报告至 3scale 的 Hits 的单一方法条目的 `delta` 为 4。

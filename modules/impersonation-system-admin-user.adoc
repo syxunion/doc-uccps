@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * users_and_roles/impersonating-system-admin.adoc
+
+:_content-type: PROCEDURE
+[id="impersonation-system-admin-user_{context}"]
+= 模拟 system:admin 用户
+
+您可以授予用户权限来模拟 `system:admin`，这将使它们获得集群管理员权限。
+
+.流程
+
+* 要授予用户权限来模拟 `system:admin`，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create clusterrolebinding <any_valid_name> --clusterrole=sudoer --user=<username>
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来授予模拟 `system:admin` 的权限：
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: <any_valid_name>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sudoer
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: <username>
+----
+====

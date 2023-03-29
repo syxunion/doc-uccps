@@ -1,0 +1,146 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-csi-snapshots-create_{context}"]
+= 创建卷快照
+
+当您创建 `VolumeSnapshot` 对象时，统信容器云管理平台会创建一个卷快照。
+
+
+.先决条件
+* 登陆到一个正在运行的统信容器云管理平台集群。
+* 使用支持 `VolumeSnapshot` 对象的 CSI 驱动程序创建的 PVC。
+* 用于置备存储后端的存储类。
+* 您要对其进行快照的 PVC 没有被任何 pod 使用。
++
+[注意]
+====
+如果 pod 正在使用，则不要为 PVC 创建卷快照。这样做可能会导致数据崩溃，因为 PVC 没有被静默（暂停）。确保首先停止正在运行的 pod，以确保快照的一致性。
+====
+
+.流程
+
+动态创建卷快照：
+
+. 使用以下 YAML 描述的 `VolumeSnapshotClass` 对象创建一个文件：
+
++
+.volumesnapshotclass.yaml
+[source,yaml]
+----
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: csi-hostpath-snap
+driver: hostpath.csi.k8s.io <1>
+deletionPolicy: Delete
+----
++
+<1> 用于创建此 `VolumeSnapshotClass` 对象快照的 CSI 驱动程序名称。该名称必须与存储类的 `Provisioner` 字段相同，它负责正在进行快照的 PVC。
+
+. 运行以下命令，创建上一步中保存的对象：
++
+[source,terminal]
+----
+$ oc create -f volumesnapshotclass.yaml
+----
+
+. 创建 `VolumeSnapshot` 对象：
+
++
+.volumesnapshot-dynamic.yaml
+[source,yaml]
+----
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: mysnap
+spec:
+  volumeSnapshotClassName: csi-hostpath-snap <1>
+  source:
+    persistentVolumeClaimName: myclaim <2>
+----
++
+<1> 卷快照对特定类的请求。如果 `volumeSnapshotClassName` 设置不存在，且有默认的卷快照类，则会创建一个带有默认卷快照类名称的快照。但如果该字段不存在且不存在默认卷快照类，则不会创建快照。
++
+<2> 绑定到持久性卷的 `PersistentVolumeClaim` 对象的名称。这指定了您要对什么创建快照。动态置备快照需要这个信息。
+
+. 运行以下命令，创建上一步中保存的对象：
++
+[source,terminal]
+----
+$ oc create -f volumesnapshot-dynamic.yaml
+----
+
+
+手动置备快照：
+
+. 除了以上定义卷快照类外，还需要提供 `volumeSnapshotContentName` 参数的值作为快照的源。
++
+.volumesnapshot-manual.yaml
+[source,yaml]
+----
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: snapshot-demo
+spec:
+  source:
+    volumeSnapshotContentName: mycontent <1>
+----
+<1> 预置备快照需要 `volumeSnapshotContentName` 参数。
+
+. 运行以下命令，创建上一步中保存的对象：
++
+[source,terminal]
+----
+$ oc create -f volumesnapshot-manual.yaml
+----
+
+.验证
+在集群中创建快照后，会提供有关快照的详情。
+
+. 运行以下命令显示所创建的卷快照详情：
++
+[source,terminal]
+----
+$ oc describe volumesnapshot mysnap
+----
++
+以下示例显示有关 `mysnap` 卷快照的详细信息：
++
+.volumesnapshot.yaml
+[source,yaml]
+----
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: mysnap
+spec:
+  source:
+    persistentVolumeClaimName: myclaim
+  volumeSnapshotClassName: csi-hostpath-snap
+status:
+  boundVolumeSnapshotContentName: snapcontent-1af4989e-a365-4286-96f8-d5dcd65d78d6 <1>
+  creationTime: "2020-01-29T12:24:30Z" <2>
+  readyToUse: true <3>
+  restoreSize: 500Mi
+----
+<1> 指向控制器创建的实际存储内容的指针。
+<2> 创建快照的时间。快照包含在这个指定时间点上可用的卷内容。
+<3> 如果该值设为 `true`，则快照可用来恢复为一个新 PVC。
+  +
+如果该值设为 `false`，则创建快照。但是，存储后端需要执行额外的任务来使快照可用，以便将其恢复为新卷。例如: Amazon Elastic Block Store 数据可能被移到不同的、更低成本的位置，这个过程可能需要几分钟时间。
+
+. 要验证卷快照是否已创建，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get volumesnapshotcontent
+----
++
+显示指向实际内容的指针。如果 `boundVolumeSnapshotContentName` 字段已被填充，则代表一个 `VolumeSnapshotContent` 对象已存在，快照被创建。
+
+. 要验证快照是否已就绪，请确认 `VolumeSnapshot` 带有 `readyToUse: true`。

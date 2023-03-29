@@ -1,0 +1,127 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-volumes-updating_{context}"]
+= 更新 pod 中的卷和卷挂载
+
+您可以修改 pod 中的卷和卷挂载。
+
+.流程
+
+使用 `--overwrite` 选项更新现有卷：
+
+[source,terminal]
+----
+$ oc set volume <object_type>/<name> --add --overwrite [options]
+----
+
+例如：
+
+* 使用现有持久性卷声明 *pvc1* 替换复制控制器 *r1* 的现有卷 *v1*：
++
+[source,terminal]
+----
+$ oc set volume rc/r1 --add --overwrite --name=v1 --type=persistentVolumeClaim --claim-name=pvc1
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来替换卷：
+
+.使用名为 pvc1的持久性卷声明的复制控制器示例
+[%collapsible]
+=====
+[source,yaml]
+----
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: example-1
+  namespace: example
+spec:
+  replicas: 0
+  selector:
+    app: httpd
+    deployment: example-1
+    deploymentconfig: example
+  template:
+    metadata:
+      labels:
+        app: httpd
+        deployment: example-1
+        deploymentconfig: example
+    spec:
+      volumes:
+        - name: v1 <1>
+          persistentVolumeClaim:
+            claimName: pvc1
+      containers:
+        - name: httpd
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: v1
+              mountPath: /data
+----
+<1> 将持久卷声明设置为 `pvc1`。
+=====
+====
+
+* 将卷 *v1* 的 `DeploymentConfig` *d1* 挂载点更改为 */opt*：
++
+[source,terminal]
+----
+$ oc set volume dc/d1 --add --overwrite --name=v1 --mount-path=/opt
+----
++
+[提示]
+====
+您还可以应用以下 YAML 以更改挂载点：
+
+.将挂载点设置为 opt 的部署配置示例。
+[%collapsible]
+=====
+[source,yaml]
+----
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: example
+  namespace: example
+spec:
+  replicas: 3
+  selector:
+    app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      volumes:
+        - name: volume-pppsw
+          emptyDir: {}
+        - name: v2
+          persistentVolumeClaim:
+            claimName: pvc1
+        - name: v1
+          persistentVolumeClaim:
+            claimName: pvc1
+      containers:
+        - name: httpd
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts: <1>
+            - name: v1
+              mountPath: /opt
+----
+<1> 将挂载点设置为 `/opt`。
+=====
+====

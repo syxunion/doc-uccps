@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="secondary-scheduler-configuring"]
+= 使用二级调度程序调度 pod
+include::_attributes/common-attributes.adoc[]
+:context: secondary-scheduler-configuring
+
+您可以通过安装 Secondary Scheduler Operator、部署二级调度程序，并在 pod 定义中设置二级调度程序，在 统信容器云管理平台 中运行自定义二级调度程序。
+
+toc::[]
+
+// Installing the {secondary-scheduler-operator}
+include::modules/nodes-secondary-scheduler-install-console.adoc[leveloffset=+1]
+
+// Deploying a secondary scheduler
+include::modules/nodes-secondary-scheduler-configuring-console.adoc[leveloffset=+1]
+
+// Scheduling a pod using the secondary scheduler
+include::modules/nodes-secondary-scheduler-pod-console.adoc[leveloffset=+1]

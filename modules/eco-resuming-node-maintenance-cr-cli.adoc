@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+//nodes/nodes/eco-node-maintenance-operator.adoc
+
+:_content-type: PROCEDURE
+[id="eco-resuming-node-from-maintenance-mode-with-cr_{context}"]
+= 使用 CLI 从维护模式恢复节点
+
+您可以通过删除 `NodeMaintenance` CR，从 `NodeMaintenance CR` 启动的维护模式恢复节点。
+
+.先决条件
+
+* 安装 统信容器云管理平台 CLI  `oc`.
+* 以具有 `cluster-admin` 权限的用户身份登录集群。
+
+.流程
+
+* 节点维护任务完成后,删除活跃的 `NodeMaintenance` CR:
++
+[source,terminal]
+----
+$ oc delete -f nodemaintenance-cr.yaml
+----
++
+.输出示例
++
+[source,terminal]
+----
+nodemaintenance.nodemaintenance.medik8s.io "maintenance-example" deleted
+----

@@ -1,0 +1,25 @@
+:_content-type: PROCEDURE
+[id="ossm-routing-bookinfo-applying_{context}"]
+= Applying a virtual service
+
+在以下流程中，虚拟服务通过应用为微服务设定默认版本的虚拟服务，将所有流量路由到每个微服务的 `v1` 。
+
+.流程
+
+. 应用虚拟服务。
++
+[source,bash,subs="attributes"]
+----
+$ oc apply -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/networking/virtual-service-all-v1.yaml
+----
+
+. 要验证是否应用了虚拟服务，请使用以下命令显示定义的路由：
++
+[source,terminal]
+----
+$ oc get virtualservices -o yaml
+----
++
+该命令返回一个 `kind: VirtualService`  资源，采用 YAML 格式。
+
+您已将 Service Mesh 配置为路由到 Bookinfo 微服务的 v1 版本，包括 `reviews` 服务版本 1。

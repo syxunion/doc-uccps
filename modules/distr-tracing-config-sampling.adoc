@@ -1,0 +1,95 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-sampling_{context}"]
+= 分布式追踪抽样配置选项
+
+{JaegerName} 可用于定义抽样策略，以提供给已经被配置为使用远程 sampler 的 tracer。
+
+虽然生成了所有 trace，但只有几个会被抽样。对某个 trace 进行抽样会标记该 trace 用于进一步处理和存储。
+
+
+当服务收到不包含 trace 上下文的请求时，客户端会启动新的 trace，为它分配一个随机 trace ID，并根据当前安装的抽样策略做出抽样决定。抽样决定被传播到 trace 中的所有后续请求，以便其他服务不会再次做出抽样决定。
+
+分布式追踪平台库支持以下抽样：
+
+* *Probabilistic* - sampler 做出一个随机抽样决定，其抽样的概率等于 `sampling.param` 属性的值。例如，使用 `sampling.param=0.1` 代表大约为 10 个 trace 抽样 1 次。
+
+* *Rate Limiting* - sampler 使用泄漏存储桶速率限制器来确保 trace 使用某种恒定速率进行抽样。例如，使用 `sampling.param=2.0` 抽样请求，速率为每秒 2 个 trace。
+
+.Jaeger 抽样选项
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|spec:
+ sampling:
+  options: {}
+    default_strategy:
+    service_strategy:
+|定义用于追踪的抽样策略的配置选项。
+|
+|如果没有提供配置，Collector 会返回默认的概率抽样策略，所有服务都为 0.001(0.1%)概率。
+
+|default_strategy:
+  type:
+service_strategy:
+  type:
+|要使用的抽样策略。请参阅上述描述
+|有效值是 `probabilistic`, 和 `ratelimiting`.
+|`probabilistic`
+
+|default_strategy:
+  param:
+service_strategy:
+  param:
+|所选抽样策略的参数。
+|小数值和整数值 (0, .1, 1, 10)
+|1
+|===
+
+这个示例定义了一种概率性的默认抽样策略，trace 实例被抽样的几率为 50%。
+
+.概率抽样示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: with-sampling
+spec:
+  sampling:
+    options:
+      default_strategy:
+        type: probabilistic
+        param: 0.5
+      service_strategies:
+        - service: alpha
+          type: probabilistic
+          param: 0.8
+          operation_strategies:
+            - operation: op1
+              type: probabilistic
+              param: 0.2
+            - operation: op2
+              type: probabilistic
+              param: 0.4
+        - service: beta
+          type: ratelimiting
+          param: 5
+----
+
+如果没有用户提供的配置，分布式追踪平台将使用以下设置：
+
+.默认抽样
+[source,yaml]
+----
+spec:
+  sampling:
+    options:
+      default_strategy:
+        type: probabilistic
+        param: 1
+----

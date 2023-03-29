@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+// * openshift_images/create-images.adoc
+
+[id="images-create-metadata_{context}"]
+= 包括镜像中的元数据
+
+定义镜像元数据有助于 统信容器云管理平台 更好地使用您的容器镜像，允许 统信容器云管理平台 使用您的镜像为开发人员创造更好的体验。例如，您可以添加元数据以提供有用的镜像描述，或针对可能也需要的其他镜像提供建议。
+
+本主题仅定义当前用例集所需的元数据。以后可能还会添加其他元数据或用例。
+
+== 定义镜像元数据
+您可使用 `Dockerfile` 中的 `LABEL` 指令来定义镜像元数据。标签与环境变量的相似之处在于标签是附加到镜像或容器中的键值对。标签与环境变量的不同之处在于标签对运行中的应用程序不可见，可用于快速查找镜像和容器。
+
+有关 LABEL 指令的更多信息，请参阅 Docker 文档。
+
+标签名称通常具有命名空间。命名空间会进行相应设置，以反映将要提取和使用标签的项目。对于 统信容器云管理平台，命名空间应设置为 io.Uccps；而对于 Kubernet，命名空间应设置为 io.k8s。
+
+有关格式的详细信息，请参阅 Docker 自定义元数据文档。
+
+.Supported Metadata
+[cols="3a,8a",options="header"]
+|===
+
+|变量 |描述
+
+|`io.openshift.tags`
+|T该标签包含一个标签列表，以逗号分隔的字符串值的列表表示。标签是将容器镜像归类到广泛功能区域的方法。标签有助于 UI 和生成工具在应用程序创建过程中建议相关容器镜像。
+----
+LABEL io.openshift.tags   mongodb,mongodb24,nosql
+----
+
+|`io.openshift.wants`
+|指定标签列表，如果您未向容器镜像附带给定标签，则生成工具和 UI 可使用该列表提供相关建议。例如，如果容器镜像需要 mysql 和 redis，而您未向容器镜像附带 redis 标签，则 UI 可能会建议您将此镜像添加到部署中。
+
+----
+LABEL io.openshift.wants   mongodb,redis
+----
+
+|`io.k8s.description`
+|该标签可用于向容器镜像用户提供有关此镜像所提供服务或功能的更详细信息。然后 UI 可结合使用此描述与容器镜像名称，为最终用户提供更人性化的信息。
+
+----
+LABEL io.k8s.description The MySQL 5.5 Server with master-slave replication support
+----
+
+|`io.openshift.non-scalable`
+|镜像可以使用此变量来表明它不支持扩展。UI 然后将这一信息传达给该镜像的用户。不可扩展表示 replicas 值的最初设置不应超过 1。
+
+----
+LABEL io.openshift.non-scalable     true
+----
+
+|`io.openshift.min-memory` and `io.openshift.min-cpu`
+|该标签建议容器镜像正常工作可能需要的资源量。UI 可能会警告用户：部署此容器镜像可能会超出其用户配额。值必须与 Kubernetes 数量兼容。
+
+----
+LABEL io.openshift.min-memory 16Gi
+LABEL io.openshift.min-cpu     4
+----
+
+|===

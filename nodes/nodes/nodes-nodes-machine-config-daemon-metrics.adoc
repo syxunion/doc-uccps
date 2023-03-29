@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="machine-config-daemon-metrics"]
+= 机器配置守护进程指标
+include::_attributes/common-attributes.adoc[]
+:context: machine-config-operator
+
+Machine Config Daemon 是 Machine Config Operator 的一部分。它可在集群的每个节点中运行。Machine Config Daemon 管理每个节点上的配置更改和更新。
+
+include::modules/machine-config-daemon-metrics.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* 请参阅 xref:../../monitoring/monitoring-overview.adoc#monitoring-overview[监控概述].

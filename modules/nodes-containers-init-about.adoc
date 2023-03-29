@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-init.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-init-about_{context}"]
+= 了解初始容器
+
+您可以在部署 pod 的其余部分之前，使用初始容器资源来执行任务。
+
+pod 可以同时包含初始容器和应用程序容器。借助初始容器，您可以重新整理设置脚本和绑定代码。
+
+初始容器可以：
+
+* 包含并运行出于安全考虑而不应包括在应用容器镜像中的实用程序。
+* 包含不出现在应用程序镜像中的设置的实用程序或自定义代码。例如，不需要仅仅为了在设置过程中使用 sed、awk、python 或 dig 等工具而使用 FROM 从其他镜像生成一个镜像。
+* 使用 Linux 命名空间，以便使用与应用程序容器不同的文件系统，如访问应用程序容器无法访问的 Secret。
+
+各个初始容器必须成功完成，然后下一个容器才能启动。因此，初始容器提供了一种简单的方法来阻止或延迟应用程序容器的启动，直至满足一定的前提条件。
+
+例如，您可以通过如下一些方式来使用初始容器：
+
+* 通过类似以下示例的 shell 命令，等待创建服务：
++
+[source,terminal]
+----
+for i in {1..100}; do sleep 1; if dig myservice; then exit 0; fi; done; exit 1
+----
+
+* 使用类似以下示例的命令，从 Downward API 将此 pod 注册到远程服务器：
++
+[source,terminal]
+----
+$ curl -X POST http://$MANAGEMENT_SERVICE_HOST:$MANAGEMENT_SERVICE_PORT/register -d ‘instance=$()&ip=$()’
+----
+
+* 通过类似 sleep 60 的命令，等待一段时间后再启动应用程序容器。
+
+* 将一个 git 存储库克隆到卷中。
+
+* 将值放在配置文件中，并且运行模板工具为主应用程序容器动态生成配置文件。例如，将 POD_IP 值放在配置中，并且使用 Jinja 生成主应用程序配置文件。
+
+如需更多信息，请参阅 Kubernetes 文档。

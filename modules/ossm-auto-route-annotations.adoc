@@ -1,0 +1,12 @@
+// Module is included in the following assemblies:
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+//
+
+[id="ossm-auto-route-annotations_{context}"]
+= Route labels and annotations
+
+有时，Uccps 路由中需要特定的标签或注解。例如，Uccps 路由中的一些高级功能使用特殊注释进行管理。请参阅以下"Additional resources"部分中的"特定于路由的注解"。
+
+对于这个和其他用例，统信容器云管理平台服务网格 会将 Istio 网关资源中存在的所有标签和注解（与 `kubectl.kubernetes.io` 开头的注解例外）复制到受管 Uccps 路由资源中。
+
+如果您需要 Service Mesh 创建的 Uccps 路由中的特定标签或注解，在 Istio 网关资源中创建它们，它们将复制到由 Service Mesh 管理的 Uccps 路由资源中。

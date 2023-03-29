@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-autoscaling-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-autoscaling-maxscale-kn_{context}"]
+= 使用 Knative CLI 设置 max-scale 注解
+
+使用 Knative  (`kn`) CLI 设置 `max-scale` 注解，比直接修改 YAML 文件提供了一个更精简且直观的用户界面。您可以使用带有 `--scale-max` 标志的 `kn service` 命令为服务创建或修改 `max-scale` 值。
+
+.先决条件
+
+* 在集群中安装了 Knative Serving。
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+* 使用 `--scale-max` 标志设置服务的最大副本数：
++
+[source,terminal]
+----
+$ kn service create <service_name> --image <image_uri> --scale-max <integer>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn service create example-service --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest --scale-max 10
+----

@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-alert-routing-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="disabling-alert-routing-for-user-defined-projects_{context}"]
+= 为用户定义的项目禁用警报路由
+
+[role="_abstract"]
+如果为用户定义的项目启用了警报路由，您可以禁用它。通过这样做，您可以防止具有 **alert-routing-edit** 角色的用户在 Alertmanager 中配置用户定义的项目的警报路由。
+
+[注意]
+====
+默认禁用用户定义的项目的警报路由。如果没有启用该功能，则不需要禁用它。
+====
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 您已为用户定义的项目启用了警报路由。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps  CLI (`oc`).
+
+.流程
+
+. 编辑 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
++
+. 在 `data/config.yaml` 中，将 `alertmanagerMain` 键下的 `enableUserAlertmanagerConfig`  的值改为 `false` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+    alertmanagerMain:
+      enableUserAlertmanagerConfig: false <1>
+----
+<1> 当设置为 `false` 时， `enableUserAlertmanagerConfig` 参数禁用集群中用户定义的项目的警报路由。
++
+. 保存文件以使改变生效。自动禁用用户定义的项目的警报路由。

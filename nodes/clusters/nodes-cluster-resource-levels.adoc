@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+:context: nodes-cluster-resource-levels
+[id="nodes-cluster-resource-levels"]
+= 估算 统信容器云管理平台 节点可以容纳的 pod 数量
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+作为集群管理员，您可以使用集群容量工具来查看可以调度的 pod 数，以便在资源耗尽前增加当前的资源，并确保以后的 pod 能被调度。此容量来自于集群中的节点主机，包括 CPU、内存和磁盘空间等。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-cluster-resource-levels-about.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-levels-command.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-resource-levels-job.adoc[leveloffset=+1]
+
+

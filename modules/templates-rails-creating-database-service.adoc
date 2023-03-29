@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//  * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-creating-database-service_{context}"]
+= 创建数据库服务
+
+您的 Rails 应用程序需要一个正在运行的数据库服务。对于此服务，请使用 PostgreSQL 数据库镜像。
+
+要创建数据库服务，使用 `oc new-app` 命令。您必须将一些在数据库容器中使用的必要环境变量传递给此命令。设置用户名、密码和数据库名称需要这些环境变量。您可随意更改这些环境变量的值。变量如下：
+
+* POSTGRESQL_DATABASE
+* POSTGRESQL_USER
+* POSTGRESQL_PASSWORD
+
+设置这些变量可确保：
+
+* 存在具有指定名称的数据库。
+* 存在具有指定名称的用户。
+* 用户可使用指定密码访问指定数据库。
+
+.流程
+
+. 创建数据库服务：
++
+[source,terminal]
+----
+$ oc new-app postgresql -e POSTGRESQL_DATABASE=db_name -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password
+----
++
+若也要为数据库管理员设置密码，请将以下内容附加至上一命令中：
++
+[source,terminal]
+----
+-e POSTGRESQL_ADMIN_PASSWORD=admin_pw
+----
+
+. 监控进度：
++
+[source,terminal]
+----
+$ oc get pods --watch
+----

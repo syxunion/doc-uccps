@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="ephemeral-storage-csi-inline"]
+= CSI inline 临时卷
+include::_attributes/common-attributes.adoc[]
+:context: ephemeral-storage-csi-inline
+
+toc::[]
+
+借助容器存储接口（CSI）内联临时卷，您可以定义 Pod 规格，在 pod 部署时创建内联临时卷，并在 pod 销毁时删除它们。
+
+此功能仅可用于受支持的 Container Storage Interface (CSI) 驱动程序。
+
+
+include::modules/ephemeral-storage-csi-inline-overview.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-csi-inline-pod.adoc[leveloffset=+1]

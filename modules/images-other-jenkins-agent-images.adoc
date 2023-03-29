@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins-agent.adoc
+
+[id="images-other-jenkins-agent-images_{context}"]
+= Jenkins 代理镜像
+
+统信容器云管理平台 Jenkins 代理镜像在 Quay.io 或 registry.redhat.io 上提供。
+
+Jenkins 镜像通过 UnionTech Registry 提供：
+
+[source,terminal]
+----
+$ docker pull registry.redhat.io/openshift4/ose-jenkins:<v4.5.0>
+----
+
+[source,terminal]
+----
+$ docker pull registry.redhat.io/openshift4/jenkins-agent-nodejs-10-rhel7:<v4.5.0>
+----
+
+[source,terminal]
+----
+$ docker pull registry.redhat.io/openshift4/jenkins-agent-nodejs-12-rhel7:<v4.5.0>
+----
+
+[source,terminal]
+----
+$ docker pull registry.redhat.io/openshift4/ose-jenkins-agent-maven:<v4.5.0>
+----
+
+[source,terminal]
+----
+$ docker pull registry.redhat.io/openshift4/ose-jenkins-agent-base:<v4.5.0>
+----
+
+要使用这些镜像，您可直接从 Quay.io 或 registry.redhat.io 访问或将其推送(push)到 统信容器云管理平台 容器镜像 registry 中。

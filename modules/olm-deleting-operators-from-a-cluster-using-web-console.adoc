@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * operators/admin/olm-deleting-operators-from-a-cluster.adoc
+// * backup_and_restore/application_backup_and_restore/installing/uninstalling-oadp.adoc
+// * serverless/install/removing-openshift-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="olm-deleting-operators-from-a-cluster-using-web-console_{context}"]
+= 使用 Web 控制台从集群中删除 Operator
+
+集群管理员可以使用 Web 控制台从所选命名空间中删除已安装的 Operator。
+
+.先决条件
+
+- 使用具有 `cluster-admin` 权限的账户访问 {product-title} 集群 Web 控制台。
+
+
+.流程
+
+. 进入到 *Operators* → *安装的 Operators* 页面。
+
+. 在 *Filter by name* 字段中滚动或输入关键字以查找您要删除的 Operator。然后点它。
+
+. 在 *Operator 详情* 页面右侧，从 *Actions*  列表中选择 *卸载 Operator* 此时会显示
++
+*卸载 Operator?* 对话框。
+
+. 选择 *卸载* 来删除 Operator、Operator 部署和 pod。按照此操作，Operator 将停止运行，不再接收更新。
++
+[注意]
+====
+此操作不会删除 Operator 管理的资源，包括自定义资源定义 (CRD) 和自定义资源 (CR) 。Web 控制台和继续运行的集群资源启用的仪表板和导航项可能需要手动清理。要在卸载 Operator 后删除这些，您可能需要手动删除 Operator CRD.
+====

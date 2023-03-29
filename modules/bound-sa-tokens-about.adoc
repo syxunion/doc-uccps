@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * authentication/bound-service-account-tokens.adoc
+
+:_content-type: CONCEPT
+[id="bound-sa-tokens-about_{context}"]
+= 关于绑定服务帐户令牌
+
+您可以使用绑定服务帐户令牌来限制给定服务帐户令牌的权限范围。这些令牌受使用者和时间的限制。这有助于服务帐户到 IAM 角色的身份验证以及挂载到 pod 的临时凭证的生成。您可以使用卷投射和 TokenRequest API 来请求绑定的服务帐户令牌。

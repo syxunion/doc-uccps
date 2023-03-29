@@ -1,0 +1,61 @@
+:_content-type: ASSEMBLY
+[id="understanding-identity-provider"]
+= 了解身份提供程序配置
+include::_attributes/common-attributes.adoc[]
+:context: understanding-identity-provider
+
+toc::[]
+
+统信容器云管理平台 master 包含内置的 OAuth 服务器。开发人员和管理员获取 OAuth 访问令牌，以完成自身的 API 身份验证。
+
+作为管理员，您可以在安装集群后通过配置 OAuth 来指定身份提供程序。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+[id="supported-identity-providers"]
+== 支持的身份提供程序
+
+您可以配置以下类型的身份提供程序：
+
+[cols="2a,8a",options="header"]
+|===
+
+|用户身份提供程序
+|描述
+
+|xref:../authentication/identity_providers/configuring-htpasswd-identity-provider.adoc#configuring-htpasswd-identity-provider[htpasswd]
+|配置 `htpasswd` 身份提供程序，针对使用 `htpasswd` 生成的文件验证用户名和密码。
+
+|xref:../authentication/identity_providers/configuring-keystone-identity-provider.adoc#configuring-keystone-identity-provider[Keystone]
+|配置 `keystone` 身份提供程序，将统信容器云管理平台集群与 Keystone 集成以启用共享身份验证，用配置的 OpenStack Keystone v3 服务器将用户存储到内部数据库中。
+
+|xref:../authentication/identity_providers/configuring-ldap-identity-provider.adoc#configuring-ldap-identity-provider[LDAP]
+|配置 ldap 身份提供程序，使用简单绑定身份验证来针对 LDAPv3 服务器验证用户名和密码。
+
+|基本身份验证 (xref:../authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc#configuring-basic-authentication-identity-provider[Basic authentication])
+|配置 `basic-authentication` 身份提供程序，以便用户使用针对远程身份提供程序验证的凭证来登录 统信容器云管理平台。基本身份验证是一种通用后端集成机制。
+
+|请求标头 (xref:../authentication/identity_providers/configuring-request-header-identity-provider.adoc#configuring-request-header-identity-provider[Request header])
+|配置 `request-header` 身份提供程序，标识请求标头值中的用户，例如 `X-Remote-User`。它通常与设定请求标头值的身份验证代理一起使用。
+
+|xref:../authentication/identity_providers/configuring-github-identity-provider.adoc#configuring-github-identity-provider[GitHub 或 GitHub Enterprise]
+|配置 `github` 身份提供程序，针对 GitHub 或 GitHub Enterprise 的 OAuth 身份验证服务器验证用户名和密码。
+
+|xref:../authentication/identity_providers/configuring-gitlab-identity-provider.adoc#configuring-gitlab-identity-provider[GitLab]
+|配置 `gitlab` 身份提供程序，使用 GitLab.com 或任何其他 GitLab 实例作为身份提供程序。
+
+|xref:../authentication/identity_providers/configuring-google-identity-provider.adoc#configuring-google-identity-provider[Google]
+|配置 `google` 身份提供程序，使用 Google 的 OpenID Connect 集成。
+
+|xref:../authentication/identity_providers/configuring-oidc-identity-provider.adoc#configuring-oidc-identity-provider[OpenID Connect]
+|配置 `oidc` 身份提供程序，使用授权代码流与 OpenID Connect 身份提供程序集成。
+
+|===
+
+定义了身份提供程序后，可以使用 RBAC 来定义并应用权限。
+
+include::modules/authentication-remove-kubeadmin.adoc[leveloffset=+1]
+
+include::modules/identity-provider-parameters.adoc[leveloffset=+1]
+
+include::modules/identity-provider-default-CR.adoc[leveloffset=+1]

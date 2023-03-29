@@ -1,0 +1,584 @@
+:_content-type: ASSEMBLY
+:context: post-install-cluster-tasks
+[id="post-install-cluster-tasks"]
+= 安装后集群任务
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+安装 统信容器云管理平台 后，您可以按照自己的要求进一步扩展和自定义集群。
+
+[id="available_cluster_customizations"]
+== 可用的集群自定义
+
+大多数集群配置和自定义在 统信容器云管理平台 集群部署后完成。有若干 _配置资源_ 可用。
+
+[注意]
+====
+如果在 IBM Z 上安装集群，则不是所有功能都可用。
+====
+
+您可以修改配置资源来配置集群的主要功能，如镜像 registry、网络配置、镜像构建操作以及用户身份供应商。
+
+如需设置这些资源的当前信息，请使用 `oc explain` 命令，如 `oc explain builds --api-version=config.openshift.io/v1`
+
+[id="configuration-resources_{context}"]
+=== 集群配置资源
+
+
+[cols="2a,8a",options="header"]
+|===
+|资源名称
+|描述
+
+|`apiserver.config.openshift.io`
+|提供 API 服务器配置，如证书和证书颁发机构。
+
+|`authentication.config.openshift.io`
+|控制集群的身份提供程序和身份验证配置。
+
+|`build.config.openshift.io`
+|控制集群中所有构建的默认和强制配置。
+
+|`console.config.openshift.io`
+|配置 Web 控制台界面的行为，包括注销行为。
+
+|`featuregate.config.openshift.io`
+|启用 FeatureGates，以便您能使用技术预览功能。
+
+|`image.config.openshift.io`
+|配置应如何对待特定的镜像 registry（允许、禁用、不安全、CA 详情）。
+
+|`ingress.config.openshift.io`
+|与路由相关的配置详情,如路由 的默认域。
+
+|`oauth.config.openshift.io`
+|配置用户身份供应商，以及与内部 OAuth 服务器
+
+|`project.config.openshift.io`
+|配置项目的创建方式，包括项目模板。
+
+|`proxy.config.openshift.io`
+|定义需要外部网络访问的组件要使用的代理。注意：目前不是所有组件都会消耗这个值。
+
+|`scheduler.config.openshift.io`
+|配置 调度程序行为，如配置集和默认节点选择器。
+
+|===
+
+[id="operator-configuration-resources_{context}"]
+=== Operator 配置资源
+
+这些配置资源是集群范围的实例，即 `cluster`，控制归特定 Operator 所有的特定组件的行为。
+
+[cols="2a,8a",options="header"]
+|===
+|资源名称
+|描述
+
+|`consoles.operator.openshift.io`
+|控制控制台外观，如品牌定制
+
+|`config.imageregistry.operator.openshift.io`
+|配置内部镜像 registry 设置，如公共路由、日志级别、代理设置、资源约束、副本数和存储类型。
+
+|`config.samples.operator.openshift.io`
+|配置 Samples Operator，以控制在集群上安装哪些镜像流和模板示例。
+
+|===
+
+
+[id="additional-configuration-resources_{context}"]
+=== 其他配置资源
+
+这些配置资源代表一个特定组件的单一实例。在有些情况下，您可以通过创建多个资源实例来请求多个实例。在其他情况下，Operator 只消耗指定命名空间中的特定资源实例名称。如需有关如何和何时创建其他资源实例的详情，请参考具体组件的文档。
+
+[cols="2a,2a,2a,8a",options="header"]
+|===
+|资源名称
+|示例名称
+|命名空间
+|描述
+
+|`alertmanager.monitoring.coreos.com`
+|`main`
+|`openshift-monitoring`
+|控制 Alertmanager 部署参数。
+
+|`ingresscontroller.operator.openshift.io`
+|`default`
+|`openshift-ingress-operator`
+|配置 Ingress Operator 行为，如域、副本数、证书和控制器放置。
+
+|===
+
+
+[id="informational-resources_{context}"]
+=== 信息资源
+
+可以使用这些资源检索集群信息。有些配置可能需要您直接编辑这些资源。
+
+[cols="2a,2a,8a",options="header"]
+|===
+|资源名称 |实例名称 | 描述
+
+|`clusterversion.config.openshift.io`
+|`version`
+|在 统信容器云管理平台 1.2 中，不得自定义生产集群的 `ClusterVersion` 资源。相反，请按照流程更新集群。
+
+|`dns.config.openshift.io`
+|`cluster`
+|无法修改集群的 DNS 设置。您可以查看 DNS Operator 状态。
+
+|`infrastructure.config.openshift.io`
+|`cluster`
+|允许集群与其云供应商交互的配置详情。
+
+|`network.config.openshift.io`
+|`cluster`
+|无法在安装后修改集群网络。要自定义您的网络，请按照流程在安装过程中自定义网络。
+
+|===
+
+include::modules/images-update-global-pull-secret.adoc[leveloffset=+1]
+
+////
+[id="default-crds_{context}"]
+== Custom resources
+
+A number of Custom Resource Definitions (CRDs) are available for you to use to
+further tune your {product-title} deployment. You can deploy Custom Resources
+that are based on many of these CRDs to add more functionality to your
+{product-title} cluster.
+
+.Default CRDs
+[cols="2a,2a,8a,2a,2a",options="header"]
+|===
+|Name
+|Group
+|Description
+|Namespaced
+|Can deploy CR
+
+
+|Alertmanager
+|monitoring.coreos.com
+|
+|Namespaced
+|
+
+|Authentication
+|config.openshift.io
+|
+|Global
+|
+
+|Build
+|config.openshift.io
+|
+|Global
+|
+
+|CatalogSourceConfig
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|CatalogSource
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|ClusterAutoscaler
+|autoscaling.openshift.io
+|
+|Global
+|Yes
+
+|ClusterDNS
+|dns.openshift.io
+|
+|Global
+|
+
+|IngressController
+|operator.openshift.io
+|
+|Namespaced
+|
+
+|ClusterNetwork
+|network.openshift.io
+|
+|Global
+|
+
+|ClusterOperator
+|config.openshift.io
+|
+|Global
+|
+
+|ClusterOperator
+|operatorstatus.openshift.io
+|
+|Namespaced
+|
+
+|Cluster
+|machine.openshift.io
+|
+|Namespaced
+|
+
+|ClusterServiceVersion
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|ClusterVersion
+|config.openshift.io
+|
+|Global
+|
+
+|Config
+|imageregistry.operator.openshift.io
+|
+|Global
+|
+
+|Config
+|samples.operator.openshift.io
+|
+|Global
+|
+
+|Console
+|console.config.openshift.io
+|The top-level configuration for the web console.
+|Namespaced
+|The console CR is created by default with more or less empty values. It honors
+new values. If it is deleted, it recreates automatically.
+
+|ControllerConfig
+|machineconfiguration.openshift.io
+|
+|Global
+|
+
+|CredentialsRequest
+|cloudcredential.openshift.io
+|
+|Namespaced
+|
+
+|DNS
+|config.openshift.io
+|
+|Global
+|
+
+|EgressNetworkPolicy
+|network.openshift.io
+|
+|Namespaced
+|
+
+|HostSubnet
+|network.openshift.io
+|
+|Global
+|
+
+|Image
+|config.openshift.io
+|
+|Global
+|
+
+|Infrastructure
+|config.openshift.io
+|
+|Global
+|
+
+|Ingress
+|config.openshift.io
+|
+|Global
+|
+
+|InstallPlan
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|KubeControllerManager
+|operator.openshift.io
+|
+|Global
+|
+
+|KubeletConfig
+|machineconfiguration.openshift.io
+|
+|Global
+|
+
+|MachineAutoscaler
+|autoscaling.openshift.io
+|
+|Namespaced
+|Yes
+
+|MachineClass
+|machine.openshift.io
+|
+|Namespaced
+|
+
+|MachineConfigPool
+|machineconfiguration.openshift.io
+|
+|Global
+|
+
+|MachineConfig
+|machineconfiguration.openshift.io
+|
+|Global
+|
+
+|MachineDeployment
+|machine.openshift.io
+|
+|Namespaced
+|
+
+|MachineHealthCheck
+|healthchecking.openshift.io
+|
+|Namespaced
+|
+
+|Machine
+|machine.openshift.io
+|
+|Namespaced
+|
+
+|MachineSet
+|machine.openshift.io
+|
+|Namespaced
+|
+
+|MCOConfig
+|machineconfiguration.openshift.io
+|
+|Global
+|
+
+|NetNamespace
+|network.openshift.io
+|
+|Global
+|
+
+|NetworkAttachmentDefinition
+|k8s.cni.cncf.io
+|
+|Namespaced
+|
+
+|NetworkConfig
+|networkoperator.openshift.io
+|
+|Global
+|
+
+|Network
+|config.openshift.io
+|
+|Global
+|
+
+|OAuth
+|config.openshift.io
+|
+|Global
+|
+
+|OpenShiftAPIServer
+|operator.openshift.io
+|
+|Global
+|
+
+|OpenShiftControllerManagerOperatorConfig
+|openshiftcontrollermanager.operator.openshift.io
+|
+|Global
+|
+
+|OperatorGroup
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|Project
+|config.openshift.io
+|
+|Global
+|
+
+|Prometheus
+|monitoring.coreos.com
+|
+|Namespaced
+|
+
+|PrometheusRule
+|monitoring.coreos.com
+|
+|Namespaced
+|
+
+|ServiceCertSignerOperatorConfig
+|servicecertsigner.config.openshift.io
+|
+|Global
+|
+
+|ServiceMonitor
+|monitoring.coreos.com
+|
+|Namespaced
+|
+
+|Subscription
+|operators.coreos.com
+|
+|Namespaced
+|
+
+|===
+////
+
+[id="post-install-adjust-worker-nodes"]
+== 调整 worker 节点
+如果您在部署过程中错误地定义了 worker 节点的大小，可以通过创建一个或多个新机器集来调整它们，先对它们进行扩展，并缩小原始的机器集，然后再删除它们。
+
+include::modules/differences-between-machinesets-and-machineconfigpool.adoc[leveloffset=+2]
+
+include::modules/machineset-manually-scaling.adoc[leveloffset=+2]
+
+include::modules/machineset-delete-policy.adoc[leveloffset=+2]
+
+include::modules/nodes-scheduler-node-selectors-cluster.adoc[leveloffset=+2]
+
+[id="post-install-creating-infrastructure-machinesets-production"]
+== 为生产环境创建基础架构机器集
+
+您可以创建一个机器集来创建仅托管基础架构组件的机器，如默认路由器、集成的容器镜像 registry 和组件用于集群指标和监控。这些基础架构机器不会被计算为运行环境所需的订阅总数。
+
+在生产部署中，建议您至少部署三个机器集来容纳基础架构组件。Uccps Logging 和 UnionTech Uccps Service Mesh 部署 Elasticsearch，这需要三个实例安装到不同的节点上。这些节点都可以部署到不同的可用区以实现高可用性。这样的配置需要三个不同的机器集，每个可用区都有一个。在没有多个可用区的全局 Azure 区域，您可以使用可用性集来确保高可用性。
+
+有关基础架构节点以及可在基础架构节点上运行的组件的详情，请参考 创建基础架构机器集。
+
+有关可用于这些流程的机器集示例，请参阅为不同的云创建机器集。
+
+include::modules/machineset-creating.adoc[leveloffset=+2]
+
+include::modules/creating-an-infra-node.adoc[leveloffset=+2]
+
+include::modules/creating-infra-machines.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关在自定义池中分组 infra 机器的更多信息，请参阅使用机器配置池进行节点配置管理。
+
+[id="assigning-machine-set-resources-to-infra-nodes"]
+== 如需有关在自定义池中分组 infra 机器的更多信息，请参阅使用机器配置池进行节点配置管理。
+
+在创建了基础架构机器集后，`worker` 和 `infra` 角色将应用到新的 `infra` 节点。具有 `infra` 角色的节点不会计入运行环境所需的订阅总数中，即使也应用了 `worker` 角色。
+
+但是，当为 infra 节点分配 worker 角色时，用户工作负载可能会意外地分配给 infra 节点。要避免这种情况，您可以将污点应用到 infra 节点，并为您要控制的 pod 应用容限。
+
+include::modules/binding-infra-node-workloads-using-taints-tolerations.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需了解有关将 pod 调度到节点的信息，请参阅 xref:../nodes/scheduling/nodes-scheduler-about.adoc#nodes-scheduler-about[使用调度程序控制 pod 放置]。
+
+[id="moving-resources-to-infrastructure-machinesets"]
+== 将资源移到基础架构机器集
+
+默认情况下，您的集群中已部署了某些基础架构资源。您可将它们移至您创建的基础架构机器集。
+
+include::modules/infrastructure-moving-router.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-registry.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-monitoring.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-logging.adoc[leveloffset=+2]
+
+include::modules/cluster-autoscaler-about.adoc[leveloffset=+1]
+include::modules/cluster-autoscaler-cr.adoc[leveloffset=+2]
+:FeatureName: 集群自动扩展
+:FeatureResourceName: ClusterAutoscaler
+include::modules/deploying-resource.adoc[leveloffset=+2]
+
+include::modules/machine-autoscaler-about.adoc[leveloffset=+1]
+include::modules/machine-autoscaler-cr.adoc[leveloffset=+2]
+:FeatureName: 机器自动扩展
+:FeatureResourceName: MachineAutoscaler
+include::modules/deploying-resource.adoc[leveloffset=+2]
+
+[id="post-install-tp-tasks"]
+== 默认情况下，您的集群中已部署了某些基础架构资源。您可将它们移至您创建的基础架构机器集。
+
+您可以通过编辑 `FeatureGate` 自定义资源（CR）为集群中的所有节点开启当前技术预览功能的子集。
+
+include::modules/nodes-cluster-enabling-features-about.adoc[leveloffset=+2]
+include::modules/nodes-cluster-enabling-features-cli.adoc[leveloffset=+2]
+
+[id="post-install-etcd-tasks"]
+== etcd 任务
+备份 etcd、启用或禁用 etcd 加密或清除 etcd 数据。
+
+include::modules/about-etcd-encryption.adoc[leveloffset=+2]
+include::modules/enabling-etcd-encryption.adoc[leveloffset=+2]
+include::modules/disabling-etcd-encryption.adoc[leveloffset=+2]
+include::modules/backup-etcd.adoc[leveloffset=+2]
+include::modules/etcd-defrag.adoc[leveloffset=+2]
+include::modules/dr-restoring-cluster-state.adoc[leveloffset=+2]
+include::modules/dr-scenario-cluster-state-issues.adoc[leveloffset=+2]
+
+[id="post-install-pod-disruption-budgets"]
+== Pod 中断预算
+
+了解并配置 pod 中断预算。
+
+include::modules/nodes-pods-pod-disruption-about.adoc[leveloffset=+2]
+include::modules/nodes-pods-pod-disruption-configuring.adoc[leveloffset=+2]
+
+[id="post-install-must-gather-disconnected"]
+== 为断开连接的集群配置镜像流
+
+在断开连接的环境中安装 统信容器云管理平台 后，为 Cluster Samples Operator 和 `must-gather` 镜像流配置镜像流。
+
+include::modules/installation-images-samples-disconnected-mirroring-assist.adoc[leveloffset=+2]
+
+include::modules/installation-restricted-network-samples.adoc[leveloffset=+2]
+
+include::modules/installation-preparing-restricted-cluster-to-gather-support-data.adoc[leveloffset=+2]

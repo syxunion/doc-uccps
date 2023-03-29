@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-event-source-metrics_{context}"]
+= 事件源指标
+
+您可以使用以下指标验证事件是否从事件源发送到连接的事件接收器（sink）。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`event_count`
+|事件源发送的事件数。
+|计数
+|`broker_name`, `container_name`, `filter_type`, `namespace_name`, `response_code`, `response_code_class`, `trigger_name`, `unique_name`
+|整数 (无单位)
+
+|`retry_event_count`
+|事件源在最初发送失败后发送的重试事件数量。
+|计数
+|`event_source`, `event_type`, `name`, `namespace_name`, `resource_group`, `response_code`, `response_code_class`, `response_error`, `response_timeout` |整数 (无单位)
+|===

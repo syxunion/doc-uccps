@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-delete-buildconfig_{context}"]
+= 删除 BuildConfig
+
+您可以使用以下命令来删除 `BuildConfig`。
+
+.流程
+
+* 要删除 `BuildConfig`，请输入以下命令：
++
+[source,terminal]
+----
+$ oc delete bc <BuildConfigName>
+----
++
+这也会删除从此 `BuildConfig` 实例化的所有构建。
+
+* 要删除 `BuildConfig` 并保留从 `BuildConfig` 中初始化的构建，在输入以下命令时指定 `--cascade=false` 标志：
++
+[source,terminal]
+----
+$ oc delete --cascade=false bc <BuildConfigName>
+----

@@ -1,0 +1,68 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v2x/ossm-create-smcp.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-validate-control-plane-kiali_{context}"]
+= Validating your SMCP installation with Kiali
+
+您可以使用 Kiali 控制台验证 {SMProductShortName} 安装。Kiali 控制台提供了一种方式来验证您的  {SMProductShortName} 组件是否已正确部署和配置。
+
+.流程
+
+. 以具有 ’cluster-admin’ 权限的用户身份登录到 {product-title} web 控制台。
+
+. 进入  *网络* -> *路由*。
+
+. 在 *路由* 页面中，从 *Namespace* 菜单中选择 {SMProductShortName} control plane 项目，如 `istio-system` 。
++
+*位置* 列显示每个路由的链接地址。
++
+. 如果需要，使用过滤器查找 Kiali 控制台的路由。单击路由 *路由* 以启动控制台。
+
+. 单击  *Log In With Uccps*.
++
+第一次登录到 Kiali 控制台时，您会看到 *Overview* 页面，它会显示服务网格中您有权查看的所有命名空间。当 *Overview* 页中显示多个命名空间，Kiali 会首先显示具有健康或验证问题的命名空间。
++
+.Kiali Overview page
+image::ossm-kiali-overview.png[Kiali Overview page showing istio-system]
++
+每个命名空间的 tile 会显示标签数量、 *Istio 配置* 、和 *应用程序*  健康状态的数量，以及命名空间的 *流量* 如果您验证了控制台安装，且命名空间还没有添加到网格中，则可能无法显示 `istio-system`以外的任何数据。
+
+. Kiali 有四个仪表板，专门用于安装了 {SMProductShortName} control plane 的命名空间。 要查看这些仪表板，请点击 control plane 命名空间的标题  {kebab} 的 *Options* ，如 `istio-system`, 然后选择以下选项之一：
+
+** *Istio Mesh Dashboard*
+** *Istio Control Plane Dashboard*
+** *Istio Performance Dashboard*
+** *Istio Wasm Exetension Dashboard*
++
+.Grafana Istio Control Plane Dashboard
+image::ossm-grafana-control-plane-dashboard.png[Istio Control Plane Dashboard showing data for bookinfo sample project]
++
+Kiali 还会安装两个额外的 Grafana 仪表板，它们可从 Grafana *Home* 页面获得：
+** *Istio Workload Dashboard*
+** *Istio Service Dashboard*
++
+. 要查看  {SMProductShortName} control plane 节点，请点击  *Graph* 页面，从菜单中选择安装 `ServiceMeshControlPlane` 的命名空间，如 `istio-system`。
+
+.. 如有必要，请单击 *Display idle nodes*。
+
+.. 要了解更多有关 *Graph* 页面的信息，请点击  *Graph tour* 链接。
+
+.. 要查看网格拓扑，请从 *Namespace* 菜单中从 Service Mesh Member Roll 中选择一个或多个附加命名空间。
+
+. 要查看 `istio-system` 命名空间中的应用程序列表，请点击 *Applications* 页面。Kiali 显示应用程序的健康状况。
+
+.. 将鼠标指针悬停在信息图标上，以查看 *Details* 列中记下的任何其他信息。
+
+. 要在 `istio-system` 命名空间中查看工作负载列表，请点击 *Workloads* 页面。Kiali 显示工作负载的运行状况。
+
+.. 将鼠标指针悬停在信息图标上，以查看 *Details* 列中记下的任何其他信息。
+
+. 要查看 `istio-system`命名空间中的服务列表，点  *Services* 页面。Kiali 显示服务和配置的健康状态。
+
+.. 将鼠标指针悬停在信息图标上，以查看 *Details* 列中记下的任何其他信息。
+
+. 要查看 `istio-system` 命名空间中的 Istio Configuration 对象列表，点 *Istio Config* 页面。Kiali 显示配置的健康状况。
+
+.. 如果出现配置错误，点行，Kiali 会打开配置文件并突出显示错误。

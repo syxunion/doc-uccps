@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="converting-to-dual-stack"]
+= 转换为 IPv4/IPv6 双栈网络
+include::_attributes/common-attributes.adoc[]
+:context: converting-to-dual-stack
+
+toc::[]
+
+作为集群管理员，您可以将 IPv4 单栈集群转换为支持 IPv4 和 IPv6 地址系列的双网络集群网络。转换为双栈后，所有新创建的 pod 都启用了双栈。
+
+[注意]
+====
+仅在安装程序置备的基础架构中置备的集群上支持双栈网络。
+====
+
+include::modules/nw-dual-stack-convert.adoc[leveloffset=+1]

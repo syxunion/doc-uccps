@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/tkn_cli/installing-tkn.adoc
+
+:_content-type: PROCEDURE
+[id="installing-tkn-on-linux"]
+
+= 在 Linux 上安装 UnionTech Uccps Pipelines CLI（tkn）
+
+[role="_abstract"]
+对于 Linux 系统，您可以直接将 CLI 下载为 `tar.gz` 存档。
+
+.流程
+
+. 下载相关的 CLI。
+
+* Linux (x86_64, amd64)
+
+* Linux on IBM Z and LinuxONE (s390x)
+
+* Linux on IBM Power Systems (ppc64le)
+
+. 解包存档：
++
+[source,terminal]
+----
+$ tar xvzf <file>
+----
+
+. 把 `tkn` 二进制代码放到 `PATH` 中的一个目录下。
+
+. 运行以下命令可以查看 `PATH` 的值：
++
+[source,terminal]
+----
+$ echo $PATH
+----

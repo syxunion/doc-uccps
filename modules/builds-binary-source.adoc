@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-binary-source_{context}"]
+= 二进制（本地）来源
+
+从本地文件系统流传输内容到构建器称为 Binary 类型构建。对于此类构建，`BuildConfig.spec.source.type` 的对应值为 `Binary`。
+
+这种源类型的独特之处在于，它仅基于您对 `oc start-build` 的使用而加以利用。
+
+[注意]
+====
+二进制类型构建需要从本地文件系统流传输内容，因此无法自动触发二进制类型构建，如镜像更改触发器。这是因为无法提供二进制文件。同样，您无法从 web 控制台启动二进制类型构建。
+====
+
+要使用二进制构建，请使用以下选项之一调用 `oc start-build`：
+
+* `--from-file`: 指定的文件内容作为二进制流发送到构建器。您还可以指定文件的 URL。然后，构建器将数据存储在构建上下文顶端的同名文件中。
+
+* `--from-dir` 和 `--from-repo`: 内容存档下来，并作为二进制流发送给构建器。然后，构建器在构建上下文目录中提取存档的内容。使用 `--from-dir` 时，您还可以指定提取的存档的 URL。
+
+* `--from-archive`: 指定的存档发送到构建器，并在构建器上下文目录中提取。此选项与 `--from-dir` 的行为相同；只要这些选项的参数是目录，就会首先在主机上创建存档。
+
+在上方列出的每种情形中：
+
+* 如果 `BuildConfig` 已经定义了 `Binary` 源类型，它会有效地被忽略并且替换成客户端发送的内容。
+
+* 如果 `BuildConfig` 定义了 Git 源类型，则会动态禁用它，因为 `Binary` 和 `Git` 是互斥的，并且二进制流中提供给构建器的数据将具有优先权。
+
+您可以将 HTTP 或 HTTPS 方案的 URL 传递给 `--from-file` 和 `--from-archive`，而不传递文件名。将 -from-file 与 URL 结合使用时，构建器镜像中文件的名称由 web 服务器发送的 `Content-Disposition` 标头决定，如果该标头不存在，则由 URL 路径的最后一个组件决定。不支持任何形式的身份验证，也无法使用自定义 TLS 证书或禁用证书验证。
+
+使用 `oc new-build --binary =true` 时，该命令可确保强制执行与二进制构建关联的限制。生成的 `BuildConfig` 具有 Binary 源类型，这意味着为此 `BuildConfig` 运行构建的唯一有效方法是使用 `oc start-build` 和其中一个 `--from` 选项来提供必需的二进制数据。
+
+ifndef::openshift-online[]
+Dockerfile 和 `contextDir` 源选项对二进制构建具有特殊含义。
+
+Dockerfile 可以与任何二进制构建源一起使用。如果使用 Dockerfile 且二进制流是存档，则其内容将充当存档中任何 Dockerfile 的替代 Dockerfile。如果将 Dockerfile 与 `--from-file` 参数搭配 使用，且文件参数命名为 Dockerfile，则 Dockerfile 的值将替换二进制流中的值。
+endif::[]
+
+如果是二进制流封装提取的存档内容，contextDir 字段的值将解释为存档中的子目录，并且在有效时，构建器将在执行构建之前更改到该子目录。

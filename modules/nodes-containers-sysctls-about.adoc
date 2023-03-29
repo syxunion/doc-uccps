@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * nodes/containers/nodes-containers-sysctls.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-sysctls-about_{context}"]
+= 关于 sysctls
+
+在 Linux 中，管理员可通过 sysctl 接口在运行时修改内核参数。参数可通过 */proc/sys/* 虚拟进程文件系统提供。这些参数涵盖了各种不同的子系统，例如：
+
+- kernel (通用前缀: *_kernel._*)
+- networking (通用前缀: *_net._*)
+- virtual memory (通用前缀: *_vm._*)
+- MDADM (通用前缀: *_dev._*)
+
+如需了解更多子系统，请参阅 Kernel 文档。要获取所有参数的列表，请运行：
+
+[source,terminal]
+----
+$ sudo sysctl -a
+----
+
+[[namespaced-vs-node-level-sysctls]]
+== 命名空间和节点级 sysctl
+
+许多 sysctl 在 Linux 内核中是有  _命名空间_ 的。这意味着您可以针对节点上的每个 pod 单独设置它们。sysctl 必须拥有命名空间，才能在 Kubernetes 内的 pod 上下文中访问它们。
+
+以下 sysctl 已知是拥有命名空间的：
+
+- *_kernel.shm*_*
+- *_kernel.msg*_*
+- *_kernel.sem_*
+- *_fs.mqueue.*_*
+
+另外，*net.* 组中的大多数 sysctl 都已知是拥有命名空间的。其命名空间的采用根据内核版本和发行方而有所不同。
+
+无命名空间的 sysctl 被视为节点级别，且必须由集群管理员手动设置，或者通过使用节点的底层 Linux 发行版，如修改 */etc/sysctls.conf* 文件，或者通过使用带有特权容器的守护进程集。您可以使用 Node Tuning Operator 来设置 _节点级别_ 的 sysctl。
+
+
+[注意]
+====
+可以考虑将带有特殊 sysctl 节点标记为污点。仅将 pod 调度到需要这些 sysctl 设置的节点。使用污点和容限功能来标记节点。
+====
+
+[[safe-vs-unsafe-sysclts]]
+== 安全与不安全 sysctl
+
+sysctl 划分为 _安全_ 和 _不安全_ sysctl。
+
+sysctl 若要被视为安全，必须使用正确的命名空间，且必须在同一节点的不同 pod 之间进行适当的隔离。也就是说，如果您为一个 pod 设置了 sysctl，它不得：
+
+- 影响节点上的其他任何 pod
+- 危害节点的健康
+- 获取超过 pod 资源限制的 CPU 或内存资源
+
+统信容器云管理平台 支持（或列入白名单）安全集合中的以下 sysctl：
+
+- *_kernel.shm_rmid_forced_*
+- *_net.ipv4.ip_local_port_range_*
+- *_net.ipv4.tcp_syncookies_*
+- *_net.ipv4.ping_group_range_*
+
+所有安全 sysctl 都默认启用。您可以通过修改 `Pod` 规格来在 pod 中使用 sysctl。
+
+任何未在 统信容器云管理平台 白名单中列出的 sysctl 都被视为对 统信容器云管理平台 而言不安全。请注意，仅拥有命名空间还不足以使 sysctl 被视为安全。
+
+所有不安全 sysctl 都默认禁用，集群管理员必须逐个节点手动启用它们。禁用了不安全 sysctl 的 Pod 会被调度，但不会启动。
+
+[source,terminal]
+----
+$ oc get pod
+----
+
+.输出示例
+[source,terminal]
+----
+NAME        READY   STATUS            RESTARTS   AGE
+hello-pod   0/1     SysctlForbidden   0          14s
+----

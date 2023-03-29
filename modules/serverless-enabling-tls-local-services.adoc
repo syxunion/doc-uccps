@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * /serverless/security/serverless-config-tls.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-enabling-tls-local-services_{context}"]
+= 为集群本地服务启用 TLS 身份验证
+
+对于集群本地服务，使用 Kourier 本地网关 `kourier-internal` 。如果要针对 Kourier 本地网关使用 TLS 流量，则必须在本地网关中配置您自己的服务器证书。
+
+.先决条件
+
+* 安装了统信容器云管理平台无服务器和 Knative Serving。
+* 有管理员权限。
+* 安装 Uccps (`oc`) CLI.
+
+.流程
+
+. 在 `knative-serving-ingress` 命名空间中部署服务器证书：
++
+[source,terminal]
+----
+$ export san="knative"
+----
++
+
+. 生成 root 密钥和证书：
++
+[source,terminal]
+----
+$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+    -subj '/O=Example/CN=Example' \
+    -keyout ca.key \
+    -out ca.crt
+----
+
+. 生成使用 SAN 验证的服务器密钥：
++
+[source,terminal]
+----
+$ openssl req -out tls.csr -newkey rsa:2048 -nodes -keyout tls.key \
+  -subj "/CN=Example/O=Example" \
+  -addext "subjectAltName = DNS:$san"
+----
+
+. 创建服务器证书：
++
+[source,terminal]
+----
+$ openssl x509 -req -extfile <(printf "subjectAltName=DNS:$san") \
+  -days 365 -in tls.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out tls.crt
+----
+
+. 为 Kourier 本地网关配置 secret：
+.. 从前面的步骤创建的证书，在 `knative-serving-ingress` 命名空间中部署 secret：
++
+[source,terminal]
+----
+$ oc create -n knative-serving-ingress secret tls server-certs \
+    --key=tls.key \
+    --cert=tls.crt --dry-run=client -o yaml | oc apply -f -
+----
+
+.. 更新 `KnativeServing` 自定义资源(CR) spec，以使用 Kourier 网关创建的 secret：
++
+.KnativeServing CR 示例
+[source,yaml]
+----
+...
+spec:
+  config:
+    kourier:
+      cluster-cert-secret: server-certs
+...
+----
+
+Kourier 控制器在不重启该服务的情况下设置证书，因此您不需要重启 pod。
+
+您可以通过端口 443 访问 Kourier 内部服务，方法是从客户端挂载并使用 `ca.crt`。

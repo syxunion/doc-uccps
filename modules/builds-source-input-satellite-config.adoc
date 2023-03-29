@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+//* builds/running-entitled-builds.adoc
+
+:_content-type: PROCEDURE
+[id="builds-source-input-satellite-config_{context}"]
+= 将 统信 Satellite 配置添加到构建中
+
+使用 统信 Satellite 安装内容的构建必须提供适当的配置，以便从 Satellite 存储库获取内容。
+
+.先决条件
+
+* 您必须提供或创建与 `yum` 兼容的存储库配置文件，该文件将从 Satellite 实例下载内容。
++
+.仓库配置示例
++
+[source,terminal]
+----
+[test-<name>]
+name=test-<number>
+baseurl = https://satellite.../content/dist/rhel/server/7/7Server/x86_64/os
+enabled=1
+gpgcheck=0
+sslverify=0
+sslclientkey = /etc/pki/entitlement/...-key.pem
+sslclientcert = /etc/pki/entitlement/....pem
+----
+
+.流程
+
+. 创建包含 Satellite 存储库配置文件的 `ConfigMap`:
++
+[source,terminal]
+----
+$ oc create configmap yum-repos-d --from-file /path/to/satellite.repo
+----
+
+. 将 Satellite 存储库配置和授权密钥添加为构建卷：
++
+[source,yaml]
+----
+strategy:
+  dockerStrategy:
+    from:
+      kind: ImageStreamTag
+      name: ubi:latest
+    volumes:
+    - name: yum-repos-d
+      mounts:
+      - destinationPath: /etc/yum.repos.d
+      source:
+        type: ConfigMap
+        configMap:
+          name: yum-repos-d
+    - name: etc-pki-entitlement
+      mounts:
+      - destinationPath: /etc/pki/entitlement
+      source:
+        type: Secret
+        secret:
+          secretName: etc-pki-entitlement
+----

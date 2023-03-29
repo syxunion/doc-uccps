@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="rhel-adding-node_{context}"]
+= 在集群中添加 UOS 计算机器
+
+您可以将使用 UnionTech Enterprise Linux 作为操作系统的计算机器添加到 统信容器云管理平台 1.2 集群中。
+
+.先决条件
+
+* 运行 playbook 的机器上已安装必需的软件包并且执行了必要的置。
+* UOS 主机已做好安装准备。
+
+.流程
+
+在为运行 playbook 而准备的机器上执行以下步骤：
+
+. 创建一个名为 `/<path>/inventory/hosts` 的 Ansible 清单文件，以定义您的计算机器主机和必要的变量：
++
+----
+[all:vars]
+ansible_user=root <1>
+#ansible_become=True <2>
+
+openshift_kubeconfig_path="~/.kube/config" <3>
+
+[new_workers] <4>
+mycluster-rhel8-0.example.com
+mycluster-rhel8-1.example.com
+----
+<1> 指定要在远程计算机器上运行 Ansible 任务的用户名。
+<2> 如果不将 root 指定为 `ansible_user`，您必须将 `ansible_become` 设置为 True，并为该用户分配 sudo 权限。
+<3> 指定集群的 kubeconfig 文件的路径和文件名。
+<4> 列出要添加到集群中的每台 RHEL 机器。必须为每个主机提供完全限定域名。此名称是集群用来访问机器的主机名，因此请设置用于访问机器的正确公共或私有名称。
+
+. 进入到 Ansible playbook 目录：
++
+[source,terminal]
+----
+$ cd /usr/share/ansible/openshift-ansible
+----
+
+. 运行 playbook：
++
+[source,terminal]
+----
+$ ansible-playbook -i /<path>/inventory/hosts playbooks/scaleup.yml <1>
+----
+<1> 对于 `<path>` ，指定您创建的 Ansible 库存文件的路径。

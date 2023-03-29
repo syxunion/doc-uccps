@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/route-based-deployment-strategies.adoc
+
+[id="deployments-graceful-termination_{context}"]
+= 恰当终止
+
+统信容器云管理平台 和 Kubernetes 会留出时间，让应用程序实例关机后再从负载均衡轮转中移除。但是，应用程序必须保证在用户退出前彻底终止用户连接。
+
+在关闭时，统信容器云管理平台 会向容器中的进程发送一个 TERM 信号。在接收 SIGTERM 时，应用程序代码停止接受新的连接。这样可确保负载均衡器将流量路由到其他活跃实例。然后，应用程序代码会等到所有开启的连接都关闭（或在下次机会出现时恰当终止独立的连接）后再退出。
+
+在恰当终止周期到期后，还未退出的进程会收到 KILL 信号，该信号会立即结束此进程。pod 或 pod 模板的 `terminationGracePeriodSeconds` 属性控制恰当终止期限（默认值 30 秒），并可根据需要自定义每个应用程序。

@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-subs.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-creating-subscriptions-odc_{context}"]
+= 使用 Web 控制台创建订阅
+
+创建频道和事件 sink 后，您可以创建一个订阅来启用事件交付。使用 OpenShift Container Platform Web 控制台提供了一个简化且直观的用户界面来创建订阅。
+
+.先决条件
+
+* {ServerlessOperatorName}、Knative Serving 和 Knative Eventing 已在 {product-title} 集群中安装。
+* 已登陆到 web 控制台。
+* 您已创建了事件 sink，如 Knative 服务以及频道。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+. 在 *开发者* 视角中，进入 *拓扑* 页面。
+
+. 使用以下方法之一创建订阅：
+
+.. 将鼠标悬停在您要为其创建订阅的频道上，并拖动箭头。此时会显示  *添加订阅* 选项。
++
+image::create-sub-ODC.png[Create a subscription for the channel]
++
+... 在 *Subscriber* 列表中选择您的接收器。
+... 点*Add*.
+.. 如果服务在与频道相同的命名空间或项目下的 *拓扑* 视图中可用，点击您要为该频道创建订阅的频道，并将箭头直接拖到服务以立即从频道创建订阅到该服务。
+
+.验证
+
+* 创建订阅后，您可以在 *拓扑* 视图中将频道连接到该服务的行显示为：
++
+image::verify-subscription-odc.png[Subscription in the Topology view]

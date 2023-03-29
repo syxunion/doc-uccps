@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+:_content-type: PROCEDURE
+[id="images-imagestream-remove-tag_{context}"]
+= 删除镜像流标签
+
+您可以从镜像流中删除旧标签。
+
+.流程
+
+* 从镜像流中删除旧标签：
++
+[source,terminal]
+----
+$ oc tag -d <image-name:tag>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc tag -d python:3.5
+----
++
+.输出示例
+[source,terminal]
+----
+Deleted tag default/python:3.5.
+----

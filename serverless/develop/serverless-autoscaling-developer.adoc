@@ -1,0 +1,39 @@
+:_content-type: ASSEMBLY
+[id="serverless-autoscaling-developer"]
+= 自动扩展
+include::_attributes/common-attributes.adoc[]
+:context: serverless-autoscaling-developer
+
+toc::[]
+
+Knative Serving 为应用程序提供自动扩展功能（或 autoscaling），以满足传入的需求。例如，如果应用程序没有流量，并且启用了缩减到零，Knative Serving 将应用程序缩减为零个副本。如果缩减到零，则应用程序会缩减到为集群中的应用程序配置的最小副本数。如果应用流量增加，也可以向上扩展副本来满足需求。
+
+ifdef::openshift-enterprise[]
+Knative 服务的自动扩展设置可以是由集群管理员配置的全局设置，或为单个服务配置每个修订设置。
+endif::[]
+
+您可以使用 {product-title} 控制台修改服务的每个修订设置，方法是修改服务的 YAML 文件，或使用 Knative (`kn`) CLI 修改服务。
+
+[注意]
+====
+您为服务设置的任何限制或目标均是针对应用程序的单个实例来衡量。例如，将 target 注解设置为 50 可将自动扩展器配置为缩放应用程序，以便每个修订一次处理 50 个请求。
+====
+
+[id="serverless-autoscaling-developer-scale-bounds"]
+== 扩展范围
+
+缩放范围决定了可在任意给定时间为应用程序服务的最小和最大副本数。您可以为应用设置规模绑定，以帮助防止冷启动和控制计算成本。
+
+// minscale docs
+include::modules/serverless-autoscaling-developer-minscale.adoc[leveloffset=+2]
+include::modules/serverless-autoscaling-minscale-kn.adoc[leveloffset=+3]
+
+// maxscale docs
+include::modules/serverless-autoscaling-developer-maxscale.adoc[leveloffset=+2]
+include::modules/serverless-autoscaling-maxscale-kn.adoc[leveloffset=+3]
+
+// concurrency
+include::modules/serverless-about-concurrency.adoc[leveloffset=+1]
+include::modules/serverless-concurrency-limits-configure-soft.adoc[leveloffset=+2]
+include::modules/serverless-concurrency-limits-configure-hard.adoc[leveloffset=+2]
+include::modules/serverless-target-utilization.adoc[leveloffset=+2]

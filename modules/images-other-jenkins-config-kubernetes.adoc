@@ -1,0 +1,167 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-config-kubernetes_{context}"]
+= 配置 Jenkins Kubernetes 插件
+
+统信容器云管理平台 Jenkins 镜像包含预装的 Kubernetes 插件，支持使用 Kubernes 和 统信容器云管理平台 在多个容器主机上动态置备 Jenkins 代理。
+
+为了使用 Kubernetes 插件，统信容器云管理平台 提供了适合用作 Jenkins 代理的镜像，包括 Base、Maven 和 Node.js 镜像。
+
+Maven 和 Node.js 代理镜像均会在 统信容器云管理平台 Jenkins 镜像的 Kubernetes 插件配置中自动配置为 Kubernetes Pod 模板镜像。该配置包含各个镜像的标签，可应用于 “Restrict where this project can be run” 设置下的任何 Jenkins 任务。如果应用了标签，任务将在运行相应代理镜像的 统信容器云管理平台 Pod 下运行。
+
+[重要]
+====
+在 统信容器云管理平台 1.2 及之后的版本中，使用 Kubernetes 插件运行 Jenkins 代理的建议模式是使用带有 `jnlp` 和 `sidecar` 容器的 pod 模板。`jnlp` 容器使用 统信容器云管理平台 Jenkins Base 代理镜像为构建启动一个单独的 pod。sidecar 容器镜像具有在启动的单独 pod 中以特定语言构建所需的工具。UnionTech Container Catalog 中的很多容器镜像会在 Uccps 命名空间中的示例镜像流中引用。统信容器云管理平台 Jenkins 镜像有两个名为 `java-build` 和 `nodejs-builder` 的 pod 模板，它演示了此方法。这两个 pod 模板使用 Uccps 命名空间中的 java 和 nodejs 镜像流提供的最新 `Java` 和 `NodeJS` 版本。
+
+在这个版本中，在 统信容器云管理平台 1.2 及更新的版本中，Jenkins 的 `non-sidecar maven` 和 `nodejs pod` 模板已弃用。计划在以后的发行版本中删除这些 pod 模板。程序错误修复和支持将在未来的生命周期结束时提供，之后不会进行新的功能增强。
+
+// Writer: This admonition is tied to the "Non-sidecar pod templates for Jenkins" deprecation item (JKNS-257) in the OpenShift 4.10 release notes. Update this admonition when this deprecation status eventually changes to "removed."
+====
+
+Jenkins 镜像还为 Kubernetes 插件提供附加代理镜像的自动发现和自动配置。
+
+使用 统信容器云管理平台 Sync 插件，Jenkins 启动上的 Jenkins 镜像会在其运行的项目中或插件配置中特别列出的项目中搜索以下内容：
+
+* 将标签 `role` 设置为 `jenkins-agent` 的镜像流。
+* 将注解 `role` 设置为 `jenkins-agent` 的镜像流标签。
+* 将标签 `role` 设置为 `jenkins-agent` 的配置映射。
+
+当找到具有适当标签的镜像流或带有适当注解的镜像流标签时，它会生成对应的 Kubernetes 插件配置，以便您可以将 Jenkins 任务分配在运行镜像流提供的容器镜像的 pod 中运行。
+
+镜像流或镜像流标签的名称和镜像引用映射到 Kubernetes 插件 pod 模板中的名称和镜像字段。您可以通过使用 `agent-label` 键在镜像流或镜像流标签对象上设置注解，来控制 Kubernetes 插件 pod 模板的标签字段。否则，名称将用作标签。
+
+[注意]
+====
+不要登录到 Jenkins 控制台并更改 pod 模板配置。如果您在创建 pod 模板后这样做，且 统信容器云管理平台 Sync 插件检测到与镜像流或镜像流标签关联的镜像已更改，则该插件会替换 pod 模板并覆盖这些配置更改。您无法将新配置与现有配置合并。
+
+如果您的配置需要更复杂的配置需求，请考虑配置映射方法。
+====
+
+当找到具有适当标签的配置映射时，它会假定配置映射的键值数据有效负载中的任何值均包含与 Jenkins 和 Kubernetes 插件 pod 模板的配置格式一致的 XML。使用配置映射而不是镜像流或镜像流标签的一个主要优点是，您可以控制 Kubernetes 插件 pod 模板的所有参数。
+
+.`jenkins-agent` 的配置映射示例
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jenkins-agent
+  labels:
+    role: jenkins-agent
+data:
+  template1: |-
+    <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+      <inheritFrom></inheritFrom>
+      <name>template1</name>
+      <instanceCap>2147483647</instanceCap>
+      <idleMinutes>0</idleMinutes>
+      <label>template1</label>
+      <serviceAccount>jenkins</serviceAccount>
+      <nodeSelector></nodeSelector>
+      <volumes/>
+      <containers>
+        <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          <name>jnlp</name>
+          <image>openshift/jenkins-agent-maven-35-centos7:v3.10</image>
+          <privileged>false</privileged>
+          <alwaysPullImage>true</alwaysPullImage>
+          <workingDir>/tmp</workingDir>
+          <command></command>
+          <args>${computer.jnlpmac} ${computer.name}</args>
+          <ttyEnabled>false</ttyEnabled>
+          <resourceRequestCpu></resourceRequestCpu>
+          <resourceRequestMemory></resourceRequestMemory>
+          <resourceLimitCpu></resourceLimitCpu>
+          <resourceLimitMemory></resourceLimitMemory>
+          <envVars/>
+        </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+      </containers>
+      <envVars/>
+      <annotations/>
+      <imagePullSecrets/>
+      <nodeProperties/>
+    </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+----
+
+以下示例显示了引用 Uccps 命名空间中镜像流的两个容器。一个容器处理作为 Jenkins 代理启动 Pod 的 JNLP 合同。其他容器使用带有工具的镜像，以特定的编码语言构建代码：
+
+[source,yaml]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jenkins-agent
+  labels:
+    role: jenkins-agent
+data:
+  template2: |-
+        <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+          <inheritFrom></inheritFrom>
+          <name>template2</name>
+          <instanceCap>2147483647</instanceCap>
+          <idleMinutes>0</idleMinutes>
+          <label>template2</label>
+          <serviceAccount>jenkins</serviceAccount>
+          <nodeSelector></nodeSelector>
+          <volumes/>
+          <containers>
+            <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+              <name>jnlp</name>
+              <image>image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest</image>
+              <privileged>false</privileged>
+              <alwaysPullImage>true</alwaysPullImage>
+              <workingDir>/home/jenkins/agent</workingDir>
+              <command></command>
+              <args>\$(JENKINS_SECRET) \$(JENKINS_NAME)</args>
+              <ttyEnabled>false</ttyEnabled>
+              <resourceRequestCpu></resourceRequestCpu>
+              <resourceRequestMemory></resourceRequestMemory>
+              <resourceLimitCpu></resourceLimitCpu>
+              <resourceLimitMemory></resourceLimitMemory>
+              <envVars/>
+            </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+            <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+              <name>java</name>
+              <image>image-registry.openshift-image-registry.svc:5000/openshift/java:latest</image>
+              <privileged>false</privileged>
+              <alwaysPullImage>true</alwaysPullImage>
+              <workingDir>/home/jenkins/agent</workingDir>
+              <command>cat</command>
+              <args></args>
+              <ttyEnabled>true</ttyEnabled>
+              <resourceRequestCpu></resourceRequestCpu>
+              <resourceRequestMemory></resourceRequestMemory>
+              <resourceLimitCpu></resourceLimitCpu>
+              <resourceLimitMemory></resourceLimitMemory>
+              <envVars/>
+            </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          </containers>
+          <envVars/>
+          <annotations/>
+          <imagePullSecrets/>
+          <nodeProperties/>
+        </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+----
+
+
+[注意]
+====
+如果您登录到 Jenkins 控制台并在创建 pod 模板后对 pod 模板配置进行进一步更改，且 统信容器云管理平台 Sync 插件检测到配置映射已更改，则该插件将替换 pod 模板并覆盖这些配置更改。您无法将新配置与现有配置合并。
+
+不要登录到 Jenkins 控制台并更改 pod 模板配置。如果您在创建 pod 模板后这样做，且 统信容器云管理平台 Sync 插件检测到与镜像流或镜像流标签关联的镜像已更改，则该插件会替换 pod 模板并覆盖这些配置更改。您无法将新配置与现有配置合并。
+
+如果您的配置需要更复杂的配置需求，请考虑配置映射方法。
+====
+
+安装后，统信容器云管理平台 Sync 插件会监控 统信容器云管理平台 的 API 服务器，以获取对镜像流、镜像流标签和配置映射的更新，并调整 Kubernetes 插件的配置。
+
+适用以下规则：
+
+* 从配置映射、镜像流或镜像流标签中删除标签或注解会导致从 Kubernetes 插件配置中删除任何现有的 `PodTemplate`。
+* 如果删除了这些对象，相应配置也会从 Kubernetes 插件中删除。
+* 无论是创建适当标记或注解的 `ConfigMap`、`ImageStream` 或 `ImageStreamTag` 对象，还是在最初创建后添加标签，都会导致在 Kubernetes-plugin 配置中创建 `PodTemplate`。
+* 对于按照配置映射表单排布的 `PodTemplate`，对 `PodTemplate` 的配置映射数据的更改将应用于 Kubernetes 插件配置中的 `PodTemplate` 设置，并在配置映射更改之间覆盖通过 Jenkins UI 对 `PodTemplate` 所做的任何更改。
+
+要将容器镜像用作 Jenkins 代理，镜像必须运行该代理作为入口点。如需了解更多详细信息，请参阅官方 Jenkins 文档。

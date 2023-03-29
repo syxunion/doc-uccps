@@ -1,0 +1,134 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-the-monitoring-stack_{context}"]
+= 配置监控堆栈
+
+在 统信容器云管理平台 1.2 中，您可以使用 `cluster-monitoring-config` 或 `user-workload-monitoring-config` `ConfigMap` 配置监控堆栈。配置配置映射配置 Cluster Monitoring Operator（CMO），CMO 会配置堆栈的组件。
+
+.先决条件
+
+* *如果要配置 统信容器云管理平台 核心监控组件：*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建`cluster-monitoring-config` `ConfigMap` 对象。
+* *如果您要配置用于监控用户定义的项目的组件：*:
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 编辑  `ConfigMap` 对象。
+** *要配置 统信容器云管理平台 核心监控组件：*:
+.. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap`对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+.. 将您的配置以键值对 `<component_name>:{nbsp}<component_configuration>` 的形式添加到 `data/config.yaml` 下
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    <component>:
+      <configuration_for_the_component>
+----
++
+相应地替换 `<component>` 和 `<configuration_for_the_component>` 。
++
+以下示例 `ConfigMap` 对象为 Prometheus 配置持久性卷声明（PVC）。这与只监控 统信容器云管理平台核心组件的 Prometheus 实例相关：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s: <1>
+      volumeClaimTemplate:
+        spec:
+          storageClassName: fast
+          volumeMode: Filesystem
+          resources:
+            requests:
+              storage: 40Gi
+----
+<1>定义 Prometheus 组件，后面几行则定义其配置。
+
+** *要配置用于监控用户定义的项目的组件：*:
+.. 在 `openshift-user-workload-monitoring` 项目中编辑 `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+.. 将您的配置以键值对 `<component_name>:{nbsp}<component_configuration>` 的形式添加到 `data/config.yaml` 下：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    <component>:
+      <configuration_for_the_component>
+----
++
+相应地替换 `<component>` 和  `<configuration_for_the_component>` 。
++
+以下示例 `ConfigMap` 对象为 Prometheus 配置数据保留周期和最低容器资源请求。这与仅监控用户定义的项目的 Prometheus 实例相关：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus: <1>
+      retention: 24h <2>
+      resources:
+        requests:
+          cpu: 200m <3>
+          memory: 2Gi <4>
+----
+<1> 定义 Prometheus 组件，后面几行则定义其配置。
+<2> 为监控用户定义的项目的 Prometheus 实例配置 24 小时的数据保留周期。
+<3> 为 Prometheus 容器定义最低 200 毫秒的资源请求。
+<4> 为 Prometheus 容器定义最低 2 GiB 内存的 Pod 资源请求。
++
+[注意]
+====
+Prometheus 配置映射组件在 `cluster-monitoring-config` `ConfigMap` 对象中被称为 `prometheusK8s` ，在 `user-workload-monitoring-config` `ConfigMap`  对象中称为 `prometheus` 。
+====
+
+. 保存文件以将更改应用到 `ConfigMap` 对象。受新配置影响的 Pod 会自动重启。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到  `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

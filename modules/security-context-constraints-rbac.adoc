@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-security-context-constraints.adoc
+
+[id="role-based-access-to-ssc_{context}"]
+= 基于角色的对安全性上下文限制的访问
+
+您可以将 SCC 指定为由 RBAC 处理的资源。这样，您可以将对 SCC 访问的范围限定为某一项目或整个集群。直接将用户、组或服务帐户分配给 SCC 可保留整个集群的范围。
+
+[注意]
+====
+您无法将 SCC 分配给在以下某一默认命名空间中创建的 Pod: `default`、`kube-system`、`kube-public`、`openshift-node`、`openshift-infra`、`openshift`。这些命名空间不应用于运行 pod 或服务。
+====
+
+要使您的角色包含对 SCC 的访问，请在创建角色时指定 scc 资源。
+
+[source,terminal]
+----
+$ oc create role <role-name> --verb=use --resource=scc --resource-name=<scc-name> -n <namespace>
+----
+
+这会生成以下角色定义：
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+...
+  name: role-name <1>
+  namespace: namespace <2>
+...
+rules:
+- apiGroups:
+  - security.openshift.io <3>
+  resourceNames:
+  - scc-name <4>
+  resources:
+  - securitycontextconstraints <5>
+  verbs: <6>
+  - use
+----
+<1> 角色的名称。
+<2> 所定义角色的命名空间。若未指定，则默认为 `default`。
+<3> 包含 `SecurityContextConstraints` 资源的 API 组。在 scc 指定为资源时自动定义。
+<4> 要访问的 SCC 的示例名称。
+<5> 允许用户在 `resourceNames` 字段中指定 SCC 名称的资源组名称。
+<6> 应用到角色的操作动词列表。
+
+当本地或集群角色具有这样的规则时，通过 RoleBinding 或 ClusterRoleBinding 与其绑定的主体可以使用用户定义的 SCC`scc-name`。
+
+[注意]
+====
+由于 RBAC 旨在防止升级，因此即使项目管理员也无法授予 SCC 访问权限。默认情况下，不允许他们对 SCC 资源使用操作动词 use，包括 `restricted` SCC。
+====

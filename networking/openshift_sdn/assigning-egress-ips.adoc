@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="assigning-egress-ips"]
+= 为项目配置出口 IP
+include::_attributes/common-attributes.adoc[]
+:context: egress-ips
+
+toc::[]
+
+[role="_abstract"]
+作为集群管理员，您可以配置 OpenShift SDN Container Network Interface(CNI)集群网络供应商，为项目分配一个或多个出口 IP 地址。
+
+include::modules/nw-egress-ips-about.adoc[leveloffset=+1]
+
+include::modules/nw-egress-ips-automatic.adoc[leveloffset=+1]
+
+include::modules/nw-egress-ips-static.adoc[leveloffset=+1]
+

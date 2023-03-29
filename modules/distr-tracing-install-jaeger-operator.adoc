@@ -1,0 +1,48 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-installing.adoc
+////
+
+:_content-type: PROCEDURE
+[id="distr-tracing-jaeger-operator-install_{context}"]
+= 安装 统信容器云管理平台分布式追踪扩展组件
+
+要安装 统信容器云管理平台分布式追踪平台，请使用 OperatorHub 安装 统信容器云管理平台分布式追踪 Operator。
+
+默认情况下，Operator 安装在 `openshift-operators` 项目中。
+
+.先决条件
+* 访问统信容器云管理平台web 控制台。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。如果使用角色的用户访问集群。
+* 如果需要持久性存储，则必须在安装 统信容器云管理平台分布式追踪 Operator 前安装 统信容器云管理平台搜索引擎。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台web 控制台。
+
+. 导航至 *Operators* -> *OperatorHub*.
+
+. 在过滤器中输入 *distributed tracing platform* 找到 统信容器云管理平台分布式追踪扩展组件。
+
+. 点由 *统信提供* 的 *统信容器云管理平台分布式追踪扩展组件* 来显示与 Operator 相关的信息。
+
+. 点 *安装*.
+
+. 在安装 Operator页中，选择 *stable* 更新频道。这可在发布新版本时自动更新您的 Operator。
+//If you select a maintenance channel, for example, *Stable*, you will receive bug fixes and security patches for the length of the support cycle for that version.
+
+. 安装模式选择集群中的 *所有命名空间 （默认）* 。这会在默认的 `openshift-operators` 7.项目中安装 Operator ，并使其可以被集群中的所有项目使用。
+
+* 接受默认的 *Automatic* 批准策略。默认情况下，当这个 Operator 的新版本可用时，Operator Lifecycle Manager(OLM)将自动升级 Operator 的运行实例，而无需人为干预。如果选择手动 更新，则当有新版 Operator 可用时，OLM 会创建更新请求。作为集群管理员，您必须手动批准该更新请求，才可将 Operator 更新至新版本。
++
+[注意]
+====
+*Manual* 批准策略需要具有适当凭证的用户批准 Operator 的安装和订阅过程。
+====
++
+
+. 点击 *安装*.
+
+. 导航到 *Operators* -> *安装的 Operators*.
+
+. 在 *安装的 Operators* 页面中 选择 `openshift-operators` 项目。等待 *统信容器云管理平台分布式追踪 Operator* 的状态显示为 "Succeeded" 状态，然后再继续。

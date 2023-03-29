@@ -1,0 +1,121 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+// NOTE: This module is included in the cco-mode-sts.adoc assembly, but is included past the secondary/temporary context established for the upgrade steps (sts-mode-upgrading). Thus the context evaluation for AWS is set to the temporary context rather than cco-mode-sts.
+
+ifeval::["{context}" == "sts-mode-upgrading"]
+:aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:google-cloud-platform:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="cco-ccoctl-upgrading_{context}"]
+= 使用 Cloud Credential Operator 实用程序升级 AWS 资源
+
+升级带有 AWS 安全令牌服务 (STS )手动模式配置的统信容器云管理平台集群的过程，与单独为其创建 AWS 资源的集群上进行安装相似。
+
+
+[NOTE]
+====
+默认情况下，`ccoctl` 在运行命令的目录中创建对象。要指定目录，使用 `--output-dir` 标志。此流程使用 `<path_to_ccoctl_output_dir>` 来引用这个位置。
+
+有些 ccoctl 命令会发出 AWS API 调用来创建或修改 AWS 资源。要将 JSON 文件放在本地文件系统中，请使用 `--dry-run` 标志。这些 JSON 文件可以检查或修改，然后使用 `--cli-input-json` 参数通过 AWS CLI 工具应用。
+====
+
+.先决条件
+
+* 获取您要升级到的版本的统信容器云管理平台发行镜像。
+
+* 从发行镜像中提取并准备 `ccoctl` 二进制文件。
+
+.流程
+
+. 从统信容器云管理平台发行镜像中提取 `CredentialsRequest` 自定义资源 (CR) 列表：
++
+[source,terminal]
+----
+$ oc adm release extract --credentials-requests \
+--cloud=aws \
+--to=<path_to_directory_with_list_of_credentials_requests>/credrequests \ 
+--quay.io/<path_to>/ocp-release:<version>
+----
++
+. 对于发行镜像中的每个 `CredentialsRequest`CR ，请确保集群中存在与 `spec.secretRef.namespace` 字段中的文本匹配的命名空间。此字段是保存凭证配置的生成的 secret 的位置。
++
+.`AWS CredentialsRequest` 对象示例
+[source,yaml]
+----
+apiVersion: cloudcredential.openshift.io/v1
+kind: CredentialsRequest
+metadata:
+  name: cloud-credential-operator-iam-ro
+  namespace: openshift-cloud-credential-operator
+spec:
+  secretRef:
+    name: cloud-credential-operator-iam-ro-creds
+    namespace: openshift-cloud-credential-operator
+  providerSpec:
+    apiVersion: cloudcredential.openshift.io/v1
+    kind: AWSProviderSpec
+    statementEntries:
+    - effect: Allow
+      action:
+      - iam:GetUser
+      - iam:GetUserPolicy
+      - iam:ListAccessKeys
+      resource: "*"
+----
++
+
+. 对于集群没有在 `spec.secretRef.namespace` 中指定的名称的命名空间的 `CredentialsRequest` CR，请创建命名空间：
++
+[source,terminal,subs="+quotes"]
+----
+$ oc create namespace <component_namespace>
+----
+
+. 使用 `ccoctl` 工具处理 `credrequests` 目录中的所有 `CredentialsRequest` 对象：
++
+[source,terminal,subs="+quotes"]
+----
+$ ccoctl aws create-iam-roles \
+--name <name> \
+--region=<aws_region> \
+--credentials-requests-dir=<path_to_directory_with_list_of_credentials_requests>/credrequests \
+--identity-provider-arn arn:aws:iam::<aws_account_id>:oidc-provider/<name>-oidc.s3.<aws_region>.amazonaws.com
+----
++
+其中：
++
+--
+** `<name>` 是用于标记为跟踪而创建的云资源的名称。对于升级，请使用与初始安装相同的值。
+** `<aws_account_id>` 是 AWS 帐户 ID。
+** `<aws_region>` 是创建云资源的 AWS 区域。
+--
++
+[注意]
+====
+对于使用其他 IAM API 端点的 AWS 环境（如 GovCloud），还必须使用 `--region` 参数指定您的区域。
+====
++
+对于每个 `CredentialsRequest` 对象，ccoctl 创建一个带有信任策略的 IAM 角色，该角色与指定的 OIDC 身份提供程序相关联，以及来自统信容器云管理平台发行镜像的每个 `CredentialsRequest` 对象中定义的权限策略。
+
+. 将 secret 应用到集群：
++
+[source,terminal]
+----
+$ ls <path_to_ccoctl_output_dir>/manifests/*-credentials.yaml | xargs -I{} oc apply -f {}
+----
+
+.验证
+
+您可以通过查询 AWS 来验证是否已创建 IAM 角色。如需更多信息，请参阅有关列出 IAM 角色的 AWS 文档。
+
+ifeval::["{context}" == "sts-mode-upgrading"]
+:!aws-sts:
+endif::[]
+ifeval::["{context}" == "cco-mode-gcp-workload-identity"]
+:!google-cloud-platform:
+endif::[]

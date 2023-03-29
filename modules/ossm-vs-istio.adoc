@@ -1,0 +1,166 @@
+////
+Module included in the following assemblies:
+-service_mesh/v2x/ossm-vs-community.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-vs-istio_{context}"]
+= Differences between Istio and {SMProductName}
+
+{SMProductShortName} 和 Istio 中的以下功能不同。
+
+[id="ossm-cli-tool_{context}"]
+== Command line tool
+
+{SMProductName} 的命令行工具是 `oc`.  {SMProductName} 不支持 `istioctl`.
+
+
+[id="ossm-installation-upgrade_{context}"]
+== Installation and upgrades
+
+{SMProductName} 不支持 Istio 安装配置集。
+
+{SMProductName} 不支持 service mesh 的 Canary 升级。
+
+
+[id="ossm-automatic-injection_{context}"]
+== Automatic injection
+
+上游 Istio 社区安装会在您标记的项目中自动将 sidecar 注入 pod。
+
+{SMProductName} 不会自动将 sidecar 注入任何 pod，但必须选择使用没有标记项目的注解注入。这个方法需要较少的权限，且不会与其他 {product-title} 功能（如 builder pod）冲突。要启用自动注入，请指定 `sidecar.istio.io/inject` 标签或注解，如 _自动 sidecar 注入_ 部分中所述。
+
+.sidecar 注入标签和注解设置
+[options="header"]
+[cols="a, a, a"]
+|===
+|
+|上游 Istio
+|{SMProductName}
+
+|命名空间标签
+|支持 "启用" and "禁用"
+|支持 "禁用"
+
+|Pod 标签
+|支持 "true" 和 "false"
+|支持 "true" 和 "false"
+
+|Pod 注解
+|只支持 "false"
+|支持 "true" 和 "false"
+|===
+
+
+[id="ossm-rbac_{context}"]
+== Istio Role Based Access Control features
+
+Istio 基于角色的访问控制 (RBAC) 提供了可用来控制对某个服务的访问控制机制。您可以根据用户名或者指定一组属性来识别对象，并相应地应用访问控制。
+
+上游 Istio 社区安装提供的选项包括：标头精确匹配、匹配标头中的通配符，或匹配标头中包括的特定前缀或后缀。
+
+{SMProductName} 使用正则表达式来扩展与请求标头匹配的功能。使用正则表达式指定 `request.regex.headers` 的属性键。
+
+.上游 Istio 社区匹配请求标头示例
+[source,yaml]
+----
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: httpbin-usernamepolicy
+spec:
+  action: ALLOW
+  rules:
+    - when:
+        - key: 'request.regex.headers[username]'
+          values:
+            - "allowed.*"
+  selector:
+    matchLabels:
+      app: httpbin
+----
+
+[id="ossm-openssl_{context}"]
+== OpenSSL
+
+{SMProductName} 将 BoringSSL 替换为 OpenSSL。 OpenSSL 是包含安全套接字层 (SSL) 和传输层 (TLS) 协议的开源实现的软件库。 {SMProductName} 二进制代码动态地将 OpenSSL 库（libssl 和 libcrypto）与底层的 Red Hat Enterprise Linux 操作系统进行链接。
+
+[id="ossm-external-workloads_{context}"]
+== External workloads
+
+{SMProductName} 不支持外部工作负载，如在裸机服务器上运行的虚拟机。
+
+[id="ossm-virtual-machine-support_{context}"]
+== Virtual Machine Support
+
+您可以使用 OpenShift Virtualization 将虚拟机部署到 OpenShift。然后，您可以将网格策略（如 mTLS 或 AuthorizationPolicy）应用到这些虚拟机，就像其它属于网格的 pod 一样。
+
+[id="ossm-component-modifications_{context}"]
+== Component modifications
+
+* _maistra-version_ 标签已添加到所有资源中。
+* 所有 Ingress 资源都已转换为 OpenShift Route 资源。
+* Grafana、分布式追踪(Jaeger)和 Kiali 会被默认启用，并通过 OpenShift 路由公开。
+* 已从所有模板中删除
+* `istio-multi` ServiceAccount 和 ClusterRoleBinding 已被删除，同时也删除了 `istio-reader` ClusterRole。
+
+[id="ossm-envoy-filters_{context}"]
+== Envoy filters
+
+{SMProductName}  不支持 `EnvoyFilter` 配置，除非明确记录。由于与底层 Envoy API 紧密耦合，因此无法保持向后兼容性。 `EnvoyFilter` 补丁对 Istio 生成的 Envoy 配置格式非常敏感。如果 Istio 生成的配置有变化，则代表可能会破坏 `EnvoyFilter` 的应用程序。
+
+[id="ossm-envoy-services_{context}"]
+== Envoy services
+
+{SMProductName} 不支持基于 QUIC 的服务。
+
+[id="ossm-cni_{context}"]
+== Istio Container Network Interface (CNI) plugin
+
+{SMProductName} 包括 CNI 插件，它为您提供了配置应用程序 pod 网络的替代方法。CNI 插件取代了 `init-container` 网络配置，无需通过提升权限授予服务帐户和项目对安全上下文约束(SCC)的访问。
+
+[id="ossm-global-mtls_{context}"]
+== Global mTLS settings
+{SMProductName} 创建一个 `PeerAuthentication` 资源，在网格内启用或禁用 Mutual TLS 身份验证 (mTLS)。
+
+[id="ossm-gateways_{context}"]
+== Gateways
+
+{SMProductName} 默认安装入口和出口网关。您可以使用以下设置在 `ServiceMeshControlPlane` (SMCP)资源中禁用网关安装：
+
+* `spec.gateways.enabled=false` 可禁用入口和出口网关。
+* `spec.gateways.ingress.enabled=false` 禁用入口网关。
+* `spec.gateways.egress.enabled=false`  禁用出口网关。
+
+[NOTE]
+====
+Operator 注解了默认网关，以指示它们由 {SMProductName} 生成并管理.
+====
+
+[id="ossm-multicluster-configuration_{context}"]
+== Multicluster configurations
+
+对多集群配置的 {SMProductName} 支持仅限于在多个集群间联合服务网格。
+
+[id="ossm-certificate-signing-request_{context}"]
+== Custom Certificate Signing Requests (CSR)
+
+您无法将 {SMProductName} 配置为通过 Kubernetes 证书颁发机构 (CA) 处理 CSR。
+
+[id="ossm-routes-gateways_{context}"]
+== Routes for Istio Gateways
+
+Istio 网关的 OpenShift 路由在 {SMProductName} 中被自动管理。每次在 service mesh 中创建、更新或删除 Istio 网关时，都会自动创建、更新或删除 OpenShift 路由。
+
+名为 Istio OpenShift Routing (IOR) 的 {SMProductName} control plane 组件可以用来同步网关路由。如需更多信息，请参阅自动路由创建。
+
+[id="ossm-catch-all-domains_{context}"]
+=== Catch-all domains
+不支持 Catch-all（"*"）。如果在网关定义中找到一个，{SMProductName} _将_ 创建路由，但会依赖于 OpenShift 来创建一个默认主机名。这意味着新创建的路由不是 catch all ("*") 路由，而是使用 `<route-name>[-<project>].<suffix>` 格式的主机名。
+
+[id="ossm-subdomains_{context}"]
+=== Subdomains
+支持子域 (例如："*.domain.com") 。但是，{product-title} 不默认启用此功能。这意味着，{SMProductName} _将_ 使用子域创建路由，但只有在 {product-title} 被配置为启用它时才有效。
+
+[id="ossm-tls_{context}"]
+=== Transport layer security
+支持传输层安全性（TLS）。这意味着，如果网关包含 `tls` 部分，OpenShift Route 将配置为支持 TLS。

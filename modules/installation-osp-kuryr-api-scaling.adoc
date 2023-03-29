@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * networking/load-balancing-openstack.adoc
+
+:_content-type: PROCEDURE
+[id="installation-osp-kuryr-api-scaling_{context}"]
+= 通过 Octavia 扩展使用 Kuryr 的集群
+
+如果您的集群使用 Kuryr，将集群的 API 浮动 IP 地址与预先存在的 Octavia 负载均衡器相关联。
+
+.先决条件
+
+* 统信容器云管理平台 集群使用 Kuryr。
+
+* Octavia 包括在您的 Uniontech UStack Platform（有栈）部署中。
+
+.流程
+
+. 可选：在命令行中，为了重新使用集群 API 浮动 IP 地址取消设置它：
++
+[source,terminal]
+----
+$ openstack floating ip unset $API_FIP
+----
+
+. 为创建的负载均衡器 VIP 添加未设置的 `API_FIP` 或一个新地址：
++
+[source,terminal]
+----
+$ openstack floating ip set --port $(openstack loadbalancer show -c <vip_port_id> -f value ${OCP_CLUSTER}-kuryr-api-loadbalancer) $API_FIP
+----
+
+您的集群现在使用 Octavia 进行负载平衡。
+
+[注意]
+====
+如果 Kuryr 使用 Octavia Amphora 驱动程序，则所有流量都通过单个 Amphora 虚拟机（VM）路由。
+
+您可以重复这个过程来创建其他负载均衡器，这样可降低瓶颈。
+====

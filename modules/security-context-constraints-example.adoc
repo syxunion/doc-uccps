@@ -1,0 +1,109 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-security-context-constraints.adoc
+
+[id="security-context-constraints-example_{context}"]
+= 安全性上下文约束示例
+
+以下示例演示了安全性上下文约束 (SCC) 格式和注解：
+
+.带注解的 `priviledged SCC`
+[source,yaml]
+----
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+allowPrivilegedContainer: true
+allowedCapabilities: <1>
+- '*'
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities: [] <2>
+fsGroup: <3>
+  type: RunAsAny
+groups: <4>
+- system:cluster-admins
+- system:nodes
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    kubernetes.io/description: 'privileged allows access to all privileged and host
+      features and the ability to run as any user, any group, any fsGroup, and with
+      any SELinux context.  WARNING: this is the most relaxed SCC and should be used
+      only for cluster administration. Grant with caution.'
+  creationTimestamp: null
+  name: privileged
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities: <5>
+- KILL
+- MKNOD
+- SETUID
+- SETGID
+runAsUser: <6>
+  type: RunAsAny
+seLinuxContext: <7>
+  type: RunAsAny
+seccompProfiles:
+- '*'
+supplementalGroups: <8>
+  type: RunAsAny
+users: <9>
+- system:serviceaccount:default:registry
+- system:serviceaccount:default:router
+- system:serviceaccount:openshift-infra:build-controller
+volumes:
+- '*'
+----
+
+<1> Pod 可以请求的功能列表。空列表表示不允许请求任何功能，而特殊符号 * 则允许任何功能。
+<2> 添加至任何 Pod 的附加功能列表。
+<3> `FSGroup` 策略，指明安全性上下文的允许值。
+<4> 可访问此 SCC 的组。
+<5> 从 pod 丢弃的功能列表。或者，指定 ALL 以丢弃所有功能。
+<6> `runAsUser` 策略类型，指明安全上下文的允许值。
+//could use the available strategies
+<7> `seLinuxContext` 策略类型，指明安全上下文的允许值。
+<8> `supplementalGroups` 策略，指明安全上下文的允许补充组。
+<9> 可访问此 SCC 的用户。
+
+The `users` and `groups` fields on the SCC control which users can access the
+SCC.
+By default, cluster administrators, nodes, and the build controller are granted
+access to the privileged SCC. All authenticated users are granted access to the
+restricted SCC.
+
+.无显式 runAsUser 设置
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext: <1>
+  containers:
+  - name: sec-ctx-demo
+    image: gcr.io/google-samples/node-hello:1.0
+----
+<1> 当容器或 Pod 没有指定应运行它的用户 ID 时，则生效的 UID 由发出此 Pod 的 SCC 决定。由于在默认情况下，受限 SCC 会授权给所有经过身份验证的用户，所以它可供所有用户和服务帐户使用，并在大多数情形中使用。受限 SCC 使用 `MustRunAsRange` 策略来约束并默认设定 `securityContext.runAsUser` 字段的可能值。准入插件会在当前项目上查找 `openshift.io/sa.scc.uid-range` 注解来填充范围字段，因为它不提供这一范围。最后，容器的 runAsUser 值等于这一范围中的第一个值，而这难以预测，因为每个项目都有不同的范围。
+
+
+.带有显式 `runAsUser` 设置
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:
+    runAsUser: 1000 <1>
+  containers:
+    - name: sec-ctx-demo
+      image: gcr.io/google-samples/node-hello:1.0
+----
+<1> 只有服务帐户或用户被授予对允许某一用户 ID 的 SCC 访问权限时，统信容器云管理平台 才会接受请求该用户 ID 的容器或 Pod。SCC 允许任意 ID、属于某一范围的 ID，或特定于请求的确切用户 ID。
+
+此配置对 SELinux、fsGroup 和补充组有效。

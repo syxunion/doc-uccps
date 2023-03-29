@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="adding-to-a-project_{context}"]
+= 添加到项目
+
+.流程
+
+. 在 Web 控制台导航菜单顶部的上下文选择器中，选择 *开发者*。
+
+. 点击 *+添加*
+
+. 在页面顶部，选择要添加到的项目的名称。
+
+. 单击添加到项目的方法，然后按照工作流操作。
+
+[注意]
+====
+您还可以使用快速搜索在拓扑中添加组件。
+====

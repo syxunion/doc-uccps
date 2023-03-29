@@ -1,0 +1,46 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-extensions-overview_{context}"]
+= WebAssembly modules overview
+
+WebAsembly 模块可以在很多平台上运行，包括代理，并有广泛语言支持、快速执行以及沙盒安全模型。
+
+{SMProductName} 扩展是 Envoy HTTP Filters，为它们提供广泛的功能：
+
+* 控制请求和响应的正文和标头。
+* 对不在请求路径中的服务（如认证或策略检查）的带外 HTTP 请求。
+* 用来相互通信的 sidechannel 数据存储和过滤器队列。
+
+
+编写 {SMProductName} 扩展有两个部分：
+
+. 您必须使用提供 proxy-wasm API 的 SDK 编写扩展，并将其编译到 WebAssembly 模块。
+. 然后，您必须将模块打包到容器中。
+
+.支持的语言
+
+您可以使用任何编译到 WebAssembly 字节码的语言来编写 Red Hat OpenShift Service Mesh 扩展，但以下语言具有公开 proxy-wasm API 的现有 SDK，以便直接使用它。
+
+.支持的语言
+|===
+| 语言 | Maintainer | 软件仓库
+
+| AssemblyScript
+| solo.io
+| link:https://github.com/solo-io/proxy-runtime[solo-io/proxy-runtime]
+
+| C++
+| proxy-wasm 团队（Istio 社区）
+| link:https://github.com/proxy-wasm/proxy-wasm-cpp-sdk[proxy-wasm/proxy-wasm-cpp-sdk]
+
+| Go
+| tetrate.io
+| link:https://github.com/tetratelabs/proxy-wasm-go-sdk[tetratelabs/proxy-wasm-go-sdk]
+
+| Rust
+| proxy-wasm 团队（Istio 社区）
+| link:https://github.com/proxy-wasm/proxy-wasm-rust-sdk[proxy-wasm/proxy-wasm-rust-sdk]
+|===

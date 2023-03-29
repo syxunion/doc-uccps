@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="ephemeral-storage-shared-resource-csi-driver-operator"]
+= 共享资源 CSI Driver Operator
+include::_attributes/common-attributes.adoc[]
+:context: ephemeral-storage-shared-resource-csi-driver-operator
+
+toc::[]
+
+
+[role="_abstract"]
+作为集群管理员，您可以在统信容器云管理平台中使用 Shared Resource CSI Driver 来置备包含 `Secret` 或 `ConfigMap` 对象的内联临时卷。这样，pod 和其他 `Kubernetes` 类型用来公开卷挂载，统信容器云管理平台构建可以安全地在集群中的任何命名空间中使用这些对象的内容。要达到此目的，目前有两种类型的共享资源： `Secret` 对象的 shared Secret 自定义资源，以及 `ConfigMap` 对象的         `SharedConfigMap` 自定义资源。
+
+// The Shared Resource CSI Driver in {product-title}, as opposed to the driver for upstream Kubernetes...
+
+
+[注意]
+====
+要启用共享资源 CSI 驱动程序，您必须使用功能门启用功能
+====
+
+include::modules/persistent-storage-csi-about.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-sharing-secrets-across-namespaces.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-using-a-sharedsecrets-resource-in-a-pod.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-sharing-configmaps-across-namespaces.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-using-a-sharedconfigmap-object-in-a-pod.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-additional-support-limitations-for-shared-resource-csi-driver.adoc[leveloffset=+1]
+
+include::modules/ephemeral-storage-additional-details-about-volumeattributes-on-shared-resource-pod-volumes.adoc[leveloffset=+1]

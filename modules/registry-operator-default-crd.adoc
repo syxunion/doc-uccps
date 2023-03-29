@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring-registry-operator.adoc
+
+
+:_content-type: PROCEDURE
+[id="registry-operator-default-crd_{context}"]
+= 使用 CRD 启用 Image Registry 默认路由
+
+在统信容器云管理平台中 Registry Operator 控制 `registry` 的功能。这个 Operator 由 `configs.imageregistry.operator.openshift.io` CRD（Custom Resource Definition）定义。
+
+如果您需要自动启用Image Registry默认路由，请对 Image Registry Operator CRD 进行 patch 处理。
+
+.流程
+
+* 对 Image Registry Operator CRD 进行 patch 处理:
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"defaultRoute":true}}'
+----

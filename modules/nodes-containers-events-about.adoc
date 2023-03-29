@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-events.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-events-about_{context}"]
+= 了解事件
+
+事件允许 统信容器云管理平台 以无关资源的方式记录实际事件的信息。它们还允许开发人员和管理员以统一的方式消耗系统组件的信息。

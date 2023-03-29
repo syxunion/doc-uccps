@@ -1,0 +1,227 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-autoscaling-creating-memory_{context}"]
+
+= 使用 CLI 根据内存使用率创建 pod 横向自动扩展对象
+
+使用 统信容器云管理平台 CLI，您可以创建一个 pod 横向自动扩展(HPA)来自动扩展现有的 `Deployment`, `DeploymentConfig`, `ReplicaSet`, `ReplicationController`, 或 `StatefulSet` 对象。HPA 扩展与该对象关联的 pod，以维护您指定的平均内存使用率（可以是直接值，也可以是请求的内存百分比）。
+
+[注意]
+====
+除非需要特定功能或由其他对象提供的行为，否则建议使用 `Deployment` 对象或 `ReplicaSet` 。
+====
+
+HPA 增加和减少最小和最大数量之间的副本数量，以维护所有 pod 的指定内存使用率。
+
+对于内存使用率，您可以指定 pod 的最小和最大数量，以及 pod 的目标平均内存使用率。如果未指定最小值，则 统信容器云管理平台 服务器会为 pod 赋予一个默认值。
+
+.先决条件
+
+要使用 pod 横向自动扩展，您的集群管理员必须已经正确配置了集群指标。您可以使用 `oc describe PodMetrics <pod-name>` 命令来判断是否已配置了指标。如果配置了指标，输出类似于以下示例，其中 Usage 下列出了 Cpu 和 Memory。
+
+[source,terminal]
+----
+$ oc describe PodMetrics openshift-kube-scheduler-ip-10-0-129-223.compute.internal -n openshift-kube-scheduler
+----
+
+.输出示例
+[source,text,options="nowrap"]
+----
+Name:         openshift-kube-scheduler-ip-10-0-129-223.compute.internal
+Namespace:    openshift-kube-scheduler
+Labels:       <none>
+Annotations:  <none>
+API Version:  metrics.k8s.io/v1beta1
+Containers:
+  Name:  wait-for-host-port
+  Usage:
+    Cpu:     0
+    Memory:  0
+  Name:      scheduler
+  Usage:
+    Cpu:     8m
+    Memory:  45440Ki
+Kind:        PodMetrics
+Metadata:
+  Creation Timestamp:  2020-02-14T22:21:14Z
+  Self Link:           /apis/metrics.k8s.io/v1beta1/namespaces/openshift-kube-scheduler/pods/openshift-kube-scheduler-ip-10-0-129-223.compute.internal
+Timestamp:             2020-02-14T22:21:14Z
+Window:                5m0s
+Events:                <none>
+----
+
+.流程
+
+根据内存使用率创建 pod 横向自动扩展：
+
+. 为以下之一创建一个 YAML 文件：
+
+** 要扩展特定内存值，请为现有对象创建类似如下的 `HorizontalPodAutoscaler`  对象：
++
+[source,yaml,options="nowrap"]
+----
+apiVersion: autoscaling/v2 <1>
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-resource-metrics-memory <2>
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1 <3>
+    kind: Deployment <4>
+    name: example <5>
+  minReplicas: 1 <6>
+  maxReplicas: 10 <7>
+  metrics: <8>
+  - type: Resource
+    resource:
+      name: memory <9>
+      target:
+        type: AverageValue <10>
+        averageValue: 500Mi <11>
+  behavior: <12>
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 60
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+      selectPolicy: Max
+----
+<1> 使用 `autoscaling/v2` API.
+<2> 指定此 pod 横向自动扩展对象的名称。
+<3> 指定要缩放对象的 API 版本。
+* 对于 `Deployment`, `ReplicaSet`, 或 `Statefulset` 对象，请使用 `apps/v1`。
+* 对于  `ReplicationController`，使用 `v1`.
+* 对于 `DeploymentConfig` ，使用`apps.openshift.io/v1`.
+<4> 指定对象类型。对象必须是  `Deployment`, `DeploymentConfig`, `ReplicaSet`, `ReplicationController`, 或 `StatefulSet`.
+<5> 指定要缩放的对象名称。对象必须存在。
+<6> 指定缩减时的最小副本数量。
+<7> 指定扩展时的最大副本数量。
+<8> 对于内存使用率，使用 metrics 参数。
+<9> 为内存使用率指定 memory 。
+<10> 将类型设置为 `AverageValue`.
+<11> 指定 `averageValue` 和一个特定的内存值。
+<12> 可选：指定一个扩展策略来控制扩展或缩减率。
+
+** 要缩放一个百分比，请为现有对象创建一个类似如下的  `HorizontalPodAutoscaler` 对象：
++
+[source,yaml,options="nowrap"]
+----
+apiVersion: autoscaling/v2 <1>
+kind: HorizontalPodAutoscaler
+metadata:
+  name: memory-autoscale <2>
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1 <3>
+    kind: Deployment <4>
+    name: example <5>
+  minReplicas: 1 <6>
+  maxReplicas: 10 <7>
+  metrics: <8>
+  - type: Deployment
+    resource:
+      name: memory <9>
+      target:
+        type: Utilization <10>
+        averageUtilization: 50 <11>
+  behavior: <12>
+    scaleUp:
+      stabilizationWindowSeconds: 180
+      policies:
+      - type: Pods
+        value: 6
+        periodSeconds: 120
+      - type: Percent
+        value: 10
+        periodSeconds: 120
+      selectPolicy: Max
+----
+<1> 使用 `autoscaling/v2` API.
+<2> 指定此 pod 横向自动扩展对象的名称。
+<3> 指定要缩放对象的 API 版本。
+* 对于 ReplicationController ，使用`v1`.
+* 对于 DeploymentConfig 使用 `apps.openshift.io/v1`.
+* 对于 Deployment, ReplicaSet, Statefulset 对象使用 `apps/v1`.
+<4> 指定对象类型。对象必须是  `Deployment`, `DeploymentConfig`, `ReplicaSet`, `ReplicationController`, 或 `StatefulSet`.
+<5> 指定要缩放的对象名称。对象必须存在。
+<6> 指定缩减时的最小副本数量。
+<7> 指定扩展时的最大副本数量。
+<8> 对于内存使用率，使用 metrics 参数。
+<9> 为内存使用率指定 memory 。
+<10> 设置  `Utilization`.
+<11> 为所有 pod 指定 `averageUtilization` 和一个目标平均内存利用率，以请求内存的百分比表示。目标 pod 必须配置内存请求。
+<12> 可选：指定一个扩展策略来控制扩展或缩减率。
+
+. 创建 Pod 横向自动扩展：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f hpa.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+horizontalpodautoscaler.autoscaling/hpa-resource-metrics-memory created
+----
+
+. 验证 pod 横向自动扩展是否已创建：
++
+[source,terminal]
+----
+$ oc get hpa hpa-resource-metrics-memory
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                          REFERENCE            TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+hpa-resource-metrics-memory   Deployment/example   2441216/500Mi   1         10        1          20m
+----
++
+[source,terminal]
+----
+$ oc describe hpa hpa-resource-metrics-memory
+----
++
+.输出示例
+[source,text]
+----
+Name:                        hpa-resource-metrics-memory
+Namespace:                   default
+Labels:                      <none>
+Annotations:                 <none>
+CreationTimestamp:           Wed, 04 Mar 2020 16:31:37 +0530
+Reference:                   Deployment/example
+Metrics:                     ( current / target )
+  resource memory on pods:   2441216 / 500Mi
+Min replicas:                1
+Max replicas:                10
+ReplicationController pods:  1 current / 1 desired
+Conditions:
+  Type            Status  Reason              Message
+  ----            ------  ------              -------
+  AbleToScale     True    ReadyForNewScale    recommended size matches current size
+  ScalingActive   True    ValidMetricFound    the HPA was able to successfully calculate a replica count from memory resource
+  ScalingLimited  False   DesiredWithinRange  the desired count is within the acceptable range
+Events:
+  Type     Reason                   Age                 From                       Message
+  ----     ------                   ----                ----                       -------
+  Normal   SuccessfulRescale        6m34s               horizontal-pod-autoscaler  New size: 1; reason: All metrics below target
+----

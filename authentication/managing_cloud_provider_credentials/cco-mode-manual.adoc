@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+[id="cco-mode-manual"]
+= 使用手动模式
+include::_attributes/common-attributes.adoc[]
+:context: cco-mode-manual
+
+toc::[]
+
+Alibaba Cloud、Amazon Web Services(AWS)、Microsoft Azure、IBM Cloud 和 Google Cloud Platform(GCP)支持手动模式。
+
+在手动模式中，用户管理云凭证而不是 Cloud Credential Operator（CCO）。要使用此模式，您必须检查发行镜像中用于运行或安装的统信容器云管理平台版本的 `CredentialsRequest` CR，在底层云供应商中创建对应的凭证，并在正确的命名空间中创建 Kubernetes Secret，以满足集群云供应商的所有 `CredentialsRequest` CR。
+
+使用手动模式可允许每个集群组件只拥有所需的权限，而无需在集群中存储管理员级别的凭证。此模式还需要连接到 AWS 公共 IAM 端点。但是，每次升级都必须手动将权限与新发行镜像协调。
+
+有关将云供应商配置为使用手动模式的详情，请参阅为 Alibaba Cloud、AWS、Azure、IBM Cloud 或 GCP 手动创建 RAM 资源。
+
+[id="manual-mode-sts-blurb"]
+== 使用 AWS STS 的手动模式
+
+您可以使用手动模式配置 AWS 集群，以使用 Amazon Web Services Secure Token Service（AWS STS）。借助这一配置，CCO 对不同组件使用临时凭证。
+
+include::modules/manually-maintained-credentials-upgrade.adoc[leveloffset=+1]

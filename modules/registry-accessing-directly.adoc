@@ -1,0 +1,114 @@
+// Module included in the following assemblies:
+//
+// * registry/accessing-the-registry.adoc
+
+:_content-type: PROCEDURE
+[id="registry-accessing-directly_{context}"]
+= 直接从集群访问registry
+
+您可以从集群内部访问registry。
+
+.流程
+
+通过使用内部路由从集群访问registry：
+
+. 使用节点地址来访问节点：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+[source,terminal]
+----
+$ oc debug nodes/<node_name>
+----
+
+. 要使用节点上的 `oc` 和 `podman` 等工具程序，请运行以下命令：
++
+[source,terminal]
+----
+sh-4.2# chroot /host
+----
++
+
+. 使用您的访问令牌登录到容器镜像registry：
++
+[source,terminal]
+----
+sh-4.2# oc login -u kubeadmin -p <password_from_install_log> https://api-int.<cluster_name>.<base_domain>:6443
+----
++
+[source,terminal]
+----
+sh-4.2# podman login -u kubeadmin -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000
+----
+
++
+您应该看到一条确认登录的消息，例如：
++
+[source,terminal]
+----
+Login Succeeded!
+----
++
+[注意]
+====
+用户名可以是任何值，令牌包含了所有必要的信息。如果用户名包含冒号，则会导致登录失败。
+
+因为 Image Registry Operator 创建了路由，所以它将与 `default-route-openshift-image-registry.<cluster_name>` 类似。
+====
++
+. 针对您的registry执行 `podman pull` 和 `podman push` 操作：
++
+[重要]
+====
+您可以抓取任意镜像，但是如果已添加了 *system:registry* 角色，则只能将镜像推送到您自己的registry中。
+====
++
+在以下示例中，使用：
++
+|====
+|组件 |值
+
+|*<registry_ip>*
+|`172.30.124.220`
+
+|*<port>*
+|`5000`
+
+|*<project>*
+|`openshift`
+
+|*<image>*
+|`image`
+
+|*<tag>*
+| 忽略 (默认为 `latest`)
+|====
+
+.. 抓取任意镜像：
++
+[source,terminal]
+----
+sh-4.2# podman pull name.io/image
+----
+
+.. 使用 `<registry_ip>:<port>/<project>/<image>`  格式标记（tag）新镜像。项目名称必须出现在这个 pull 规范中，以供统信容器云管理平台 把这个镜像正确放置在 registry 中，并在以后正确访问 registry 中的这个镜像：
++
+[source,terminal]
+----
+sh-4.2# podman tag name.io/image image-registry.openshift-image-registry.svc:5000/openshift/image
+----
++
+[注意]
+====
+您必须具有指定项目的 `system:image-builder` 角色，该角色允许用户写或推送镜像。否则，下一步中的 `podman push` 将失败。为了进行测试，您可以创建一个新项目来推送镜像。
+====
+
+.. 将新标记的镜像推送到 registry：
++
+[source,terminal]
+----
+sh-4.2# podman push image-registry.openshift-image-registry.svc:5000/openshift/image
+----

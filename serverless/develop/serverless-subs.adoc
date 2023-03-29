@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="serverless-subs"]
+= 创建和管理订阅
+include::_attributes/common-attributes.adoc[]
+:context: serverless-subs
+
+toc::[]
+
+创建频道和事件 sink 后，您可以创建一个订阅来启用事件交付。订阅是通过配置`Subscription`  对象创建的，它指定频道和接收器（也称为 订阅者）来发送事件。
+
+include::modules/serverless-creating-subscriptions-odc.adoc[leveloffset=+1]
+include::modules/serverless-creating-subscriptions-yaml.adoc[leveloffset=+1]
+include::modules/serverless-creating-subscriptions-kn.adoc[leveloffset=+1]
+// describe subs
+include::modules/serverless-describe-subs-kn.adoc[leveloffset=+1]
+// list subs
+include::modules/serverless-list-subs-kn.adoc[leveloffset=+1]
+// update subs
+include::modules/serverless-update-subscriptions-kn.adoc[leveloffset=+1]
+

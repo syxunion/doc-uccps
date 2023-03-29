@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+// * web_console/web-console.adoc
+
+:_content-type: CONCEPT
+[id="web-console-overview_{context}"]
+= 了解和访问Web控制台
+
+Web控制台作为一个pod 在主服务器（master）上运行。这个 pod 提供了运行Web控制台所需的静态环境。当使用 `openshift-install create cluster` 成功安装 统信容器云管理平台 后，在安装程序的 CLI 输出中找到已安装集群的 Web 控制台的 URL 及登录凭证。例如：
+
+[source,terminal]
+.输出示例
+----
+INFO Install complete!
+INFO Run 'export KUBECONFIG=<your working directory>/auth/kubeconfig' to manage the cluster with 'oc', the OpenShift CLI.
+INFO The cluster is ready when 'oc login -u kubeadmin -p <provided>' succeeds (wait a few minutes).
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.demo1.openshift4-beta-abcorp.com
+INFO Login to the console with user: kubeadmin, password: <provided>
+----
+
+使用这些信息登录并访问Web控制台。
+
+对于不是您安装的、已存在的集群，可以使用 `oc whoami --show-console` 查看 web 控制台 URL。

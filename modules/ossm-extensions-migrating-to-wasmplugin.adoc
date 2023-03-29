@@ -1,0 +1,25 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: PROCEDURE
+[id="ossm-extensions-migrating-to-wasmplugin_{context}"]
+= Migrating to `WasmPlugin` resources
+
+要将 WebAsembly 扩展从 `ServiceMeshExtension` API 升级到 `WasmPlugin` API，您需要重命名插件文件。
+
+.先决条件
+
+* `ServiceMeshControlPlane` 升级到 2.2 或更高版本。
+
+.流程
+
+. 更新您的容器镜像。如果插件已在容器内的 `/plugin.wasm` 中，则跳至下一步。如果没有：
+
+.. 确保插件文件名为 `plugin.wasm`。您需要将扩展文件命名为 `plugin.wasm`。
+
+.. 确保插件文件位于 root (/)目录中。您必须将扩展文件存储在容器文件系统的根目录中。
+
+.. 重新构建容器镜像并将其推送到容器 registry。
+
+. 删除 `ServiceMeshExtension` 资源，并创建一个 `WasmPlugin` 资源来引用您构建的新容器镜像。

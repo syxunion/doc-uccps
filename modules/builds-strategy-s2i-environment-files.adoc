@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-s2i-environment-files_{context}"]
+= 使用 Source-to-image 环境文件
+
+利用源代码构建，您可以在应用程序内设置环境值（每行一个），方法是在源存储库中的 `.s2i/environment` 文件中指定它们。此文件中指定的环境变量存在于构建过程和输出镜像。
+
+如果您在源存储库中提供 `.s2i/environment` 文件，则 source-to-image(S2I)会在构建期间读取此文件。这允许自定义构建行为，因为 `assembe` 脚本可能会使用这些变量。
+
+.流程
+
+例如，在构建期间禁用 Rails 应用程序的资产编译：
+
+* 在 `.s2i/environment` 文件中添加 `DISABLE_ASSET_COMPILATION=true`。
+
+除了构建之外，指定的环境变量也可以在运行的应用程序本身中使用。例如，使 Rails 应用程序在 development 模式而非 production 模式中启动：
+
+* 在 `.s2i/environment` 文件中添加 `RAILS_ENV=development`。
+
+
+使用镜像部分中提供了各个镜像支持的环境变量的完整列表。

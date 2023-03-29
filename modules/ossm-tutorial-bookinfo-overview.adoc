@@ -1,0 +1,25 @@
+////
+This CONCEPT module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+[id="ossm-tutorial-bookinfo-overview_{context}"]
+= Bookinfo example application
+
+您可以使用 Bookinfo 示例应用程序来测试 {product-title} 中的 {SMProductName} {SMProductVersion} 安装。
+
+Bookinfo 应用程序显示一本书的信息，类似于在线书店的单一目录条目。应用会显示一个页面，其中描述了图书详细信息（ISBN、页数和其他信息）以及图书的评论。
+
+Bookinfo 应用程序由这些微服务组成：
+
+* `productpage` 微服务调用 `details` 和 `reviews` 微服务来产生页面信息。
+* `details` 微服务包括了书的信息。
+* `reviews` 微服务包括了书的评论。它同时还会调用 `ratings` 微服务。
+* `ratings` 微服务包括了带有对本书的评论信息的评分信息。
+
+reviews 微服务有三个版本：
+
+* 版本 v1 不调用 `ratings` 服务。
+* 版本 v2 调用 `ratings` 服务，并以一到五个黑色星来代表对本书的评分。
+* 版本 v3 调用 `ratings` 服务，并以一到五个红色星来代表对本书的评分。

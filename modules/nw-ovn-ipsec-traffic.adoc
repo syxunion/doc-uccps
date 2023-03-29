@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ipsec-ovn.adoc
+
+[id="nw-ovn-ipsec-traffic_{context}"]
+= 使用 IPsec 加密的网络流量类型
+
+启用 IPsec 后，只有 pod 间的以下网络流量会被加密：
+
+* 集群网络的不同节点上的 pod 间的流量
+* 从主机网络上的 pod 流量到集群网络上的 pod
+
+以下流量流没有加密：
+
+* 集群网络上同一节点上的 pod 间的流量
+* 主机网络上的 pod 间的流量
+* 从集群网络上的 pod 流量到主机网络上的 pod

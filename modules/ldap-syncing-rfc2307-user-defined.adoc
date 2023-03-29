@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-rfc2307-user-defined_{context}"]
+= 使用 RFC2307 模式及用户定义的名称映射来同步组
+
+使用用户定义的名称映射同步组时，配置文件会更改为包含这些映射，如下所示。
+
+.使用 RFC 2307 模式及用户定义的名称映射的 LDAP 同步配置：`rfc2307_config_user_defined.yaml`
+[source,yaml]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+groupUIDNameMapping:
+  "cn=admins,ou=groups,dc=example,dc=com": Administrators <1>
+rfc2307:
+    groupsQuery:
+        baseDN: "ou=groups,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+    groupUIDAttribute: dn <2>
+    groupNameAttributes: [ cn ] <3>
+    groupMembershipAttributes: [ member ]
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+    userUIDAttribute: dn <4>
+    userNameAttributes: [ mail ]
+    tolerateMemberNotFoundErrors: false
+    tolerateMemberOutOfScopeErrors: false
+----
+<1> 用户定义的名称映射。
+<2> 唯一标识符属性，用于用户定义的名称映射中的键。将 DN 用于 groupUIDAttribute 时，您无法指定 groupsQuery 过滤器。若要进行精细过滤，请使用白名单/黑名单方法。
+<3> 如果其唯一标识符不在用户定义的名称映射中，用于指定统信容器云管理平台组的属性。
+<4> 唯一标识 LDAP 服务器上用户的属性。将 DN 用于 userUIDAttribute 时，您无法指定usersQuery 过滤器。若要进行精细过滤，请使用白名单/黑名单方法。
+
+.先决条件
+
+* 创建配置文件。
+
+.流程
+
+* 使用 `rfc2307_config_user_defined.yaml` 文件运行同步：
++
+[source,terminal]
+----
+$ oc adm groups sync --sync-config=rfc2307_config_user_defined.yaml --confirm
+----
++
+统信容器云管理平台 创建以下组记录作为上述同步操作的结果：
++
+.使用 `rfc2307_config_user_defined.yaml` 文件创建的统信容器云管理平台组
+[source,yaml]
+----
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  annotations:
+    openshift.io/ldap.sync-time: 2015-10-13T10:08:38-0400
+    openshift.io/ldap.uid: cn=admins,ou=groups,dc=example,dc=com
+    openshift.io/ldap.url: LDAP_SERVER_IP:389
+  creationTimestamp:
+  name: Administrators <1>
+users:
+- jane.smith@example.com
+- jim.adams@example.com
+----
+<1> 由用户定义的名称映射指定的组名称。

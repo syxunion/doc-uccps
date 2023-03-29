@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring_samples_operator.adoc
+
+
+:_content-type: PROCEDURE
+[id="samples-operator-crd_{context}"]
+= 访问 Cluster Samples Operator 配置
+
+您可以使用提供的参数编辑文件来配置 Cluster Samples Operator。
+
+.先决条件
+
+* 安装 Uccps CLI（oc）。
+
+.流程
+
+*  访问 Cluster Samples Operator 配置：
++
+[source, terminal]
+----
+$ oc edit configs.samples.operator.openshift.io/cluster -o yaml
+----
++
+Cluster Samples Operator 配置类似以下示例：
++
+[source,yaml]
+----
+apiVersion: samples.operator.openshift.io/v1
+kind: Config
+...
+----

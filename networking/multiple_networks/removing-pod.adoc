@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="removing-pod"]
+= 从额外网络中删除 pod
+include::_attributes/common-attributes.adoc[]
+:context: removing-pod
+
+toc::[]
+
+作为集群用户，您可以从额外网络中删除 pod。
+
+include::modules/nw-multus-remove-pod.adoc[leveloffset=+1]

@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-remote-commands.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-remote-commands-about_{context}"]
+= 在容器中执行远程命令
+
+CLI 中内置了对执行远程容器命令的支持。
+
+.流程
+
+在容器中运行命令：
+
+[source,terminal]
+----
+$ oc exec <pod> [-c <container>] <command> [<arg_1> ... <arg_n>]
+----
+
+例如：
+
+[source,terminal]
+----
+$ oc exec mypod date
+----
+
+.输出示例
+[source,terminal]
+----
+Thu Apr  9 02:21:53 UTC 2015
+----
+
+[重要]
+====
+为了安全起见，oc exec 命令在访问特权容器时无法工作，除非该命令由 cluster-admin 用户执行。
+====

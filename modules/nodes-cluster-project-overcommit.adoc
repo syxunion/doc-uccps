@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * nodes/clusters/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="nodes-cluster-project-overcommit_{context}"]
+= 项目级别限值
+
+为帮助控制过量使用，您可以设置每个项目的资源限值范围，为过量使用无法超过的项目指定内存和 CPU 限值，以及默认值。
+
+如需有关项目级别资源限值的信息，请参阅附加资源。
+
+另外，您可以为特定项目禁用过量使用。

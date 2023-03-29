@@ -1,0 +1,126 @@
+// Module included in the following assemblies:
+//
+// * networking/network_policy/multitenant-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+ifeval::[{product-version} >= 4.6]
+:ovn:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-networkpolicy-multitenant-isolation_{context}"]
+= 使用网络策略配置多租户隔离
+
+您可以配置项目，使其与其他项目命名空间中的 pod 和服务分离。
+
+.先决条件
+
+* 集群使用支持 `NetworkPolicy` 对象的集群网络供应商，如设置了 `mode: NetworkPolicy` 的 OpenShift SDN 网络供应商。此模式是 OpenShift SDN 的默认模式。
+* 已安装 Uccp CLI (`oc`).
+* 您可以使用具有 admin 权限的用户登陆到集群。
+
+.流程
+
+. 创建以下 `NetworkPolicy` 对象：
+.. 名为 `allow-from-openshift-ingress` 的策略。
++
+[source,terminal]
+----
+$ cat << EOF| oc create -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openshift-ingress
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          policy-group.network.openshift.io/ingress: ""
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF
+----
++
+[注意]
+====
+是 OpenShift SDN 的首选命名空间选择器标签。您可以使用 `network.openshift.io/policy-group: ingress` 命名空间选择器标签，但这是一个比较旧的用法。
+====
+.. 名为 `allow-from-openshift-monitoring` 的策略：
++
+[source,terminal]
+----
+$ cat << EOF| oc create -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openshift-monitoring
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: monitoring
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF
+----
+
+.. 名为 `allow-same-namespace` 的策略：
++
+[source,terminal]
+----
+$ cat << EOF| oc create -f -
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-same-namespace
+spec:
+  podSelector:
+  ingress:
+  - from:
+    - podSelector: {}
+EOF
+----
+
+. 可选： 要确认当前项目中存在网络策略，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe networkpolicy
+----
++
+.输出示例
+[source,text]
+----
+Name:         allow-from-openshift-ingress
+Namespace:    example1
+Created on:   2020-06-09 00:28:17 -0400 EDT
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      NamespaceSelector: network.openshift.io/policy-group: ingress
+  Not affecting egress traffic
+  Policy Types: Ingress
+
+
+Name:         allow-from-openshift-monitoring
+Namespace:    example1
+Created on:   2020-06-09 00:29:57 -0400 EDT
+Labels:       <none>
+Annotations:  <none>
+Spec:
+  PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+  Allowing ingress traffic:
+    To Port: <any> (traffic allowed to all ports)
+    From:
+      NamespaceSelector: network.openshift.io/policy-group: monitoring
+  Not affecting egress traffic
+  Policy Types: Ingress
+----

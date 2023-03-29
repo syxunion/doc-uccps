@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// applications/projects/working-with-projects.adoc
+
+:_content-type: PROCEDURE
+[id="viewing-a-project-using-the-CLI_{context}"]
+= 使用 CLI 查看项目
+
+查看项目时，只能看到根据授权策略您有权访问的项目。
+
+.流程
+
+. 要查看项目列表，请运行：
++
+[source,terminal]
+----
+$ oc get projects
+----
+
+. 您可以从当前项目更改到其他项目，以进行 CLI 操作。然后，所有操控项目范围内容的后续操作都会默认使用指定的项目：
++
+[source,terminal]
+----
+$ oc project <project_name>
+----

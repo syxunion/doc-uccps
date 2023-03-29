@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * disaster_recovery/scenario-2-restoring-cluster-state.adoc
+
+:_content-type: CONCEPT
+[id="dr-scenario-2-restoring-cluster-state-about_{context}"]
+= 关于恢复集群状态
+
+您可以使用 etcd 备份将集群恢复到以前的状态。在以下情况中可以使用这个方法进行恢复：
+
+* 集群丢失了大多数控制平面主机（仲裁丢失）。
+* 管理员删除了一些关键内容，必须恢复才能恢复集群。
+
+[警告]
+====
+在一个正在运行的集群中恢复到以前的集群状态是破坏性的，而不稳定的操作。这仅应作为最后的手段使用。
+
+如果您可以使用 Kubernetes API 服务器检索数据，则代表 etcd 可用，且您不应该使用 etcd 备份来恢复。
+====
+
+恢复 etcd 实际相当于把集群返回到以前的一个状态，所有客户端都会遇到一个有冲突的、并行历史记录。这会影响 kubelet、Kubernetes 控制器、SDN 控制器和持久性卷控制器等监视组件的行为。
+
+当 etcd 中的内容与磁盘上的实际内容不匹配时，可能会导致 Operator churn，从而导致 Kubernetes API 服务器、Kubernetes 控制器管理器、Kubernetes 调度程序和 etcd 的 Operator 在磁盘上的文件与 etcd 中的内容冲突时卡住。这可能需要手动操作来解决问题。
+
+在极端情况下，集群可能会丢失持久性卷跟踪，删除已不存在的关键工作负载，重新镜像机器，以及重写带有过期证书的 CA 捆绑包。

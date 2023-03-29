@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+
+[id="rbac-users_{context}"]
+= 用户
+
+统信容器云管理平台 中的用户是可以向统信容器云管理平台API 发出请求的实体。统信容器云管理平台 User 对象代表操作者，通过向它们或所在的组添加角色为其授予系统中的权限。通常，这代表与统信容器云管理平台交互的开发人员或管理员的帐户。
+
+可能存在的用户类型有几种：
+
+[cols="1,4",options="header"]
+|===
+
+|用户类型
+|描述
+
+|`常规用户`
+|这是大多数交互式统信容器云管理平台用户的类型。常规用户于第一次登录时在系统中自动创建，或者也可通过 API 创建。常规用户通过 User 对象表示。例如，`joe alice`
+
+|`系统用户`
+|许多系统用户在基础架构定义时自动创建，主要用于使基础架构与 API 安全地交互。这包括集群管理员（有权访问一切资源）、特定于一个节点的用户、供路由器和 registry 使用的用户，以及一些其他用户。最后，还有一种 anonymous 系统用户，默认供未经身份验证的请求使用。例如：`system:admin` `system:openshift-registry` `system:node:node1.example.com`
+
+|`服务账户`
+|服务帐户是与项目关联的特殊系统用户；有些是首次创建项目时自动创建的，而项目管理员则可为访问项目的内容创建更多的服务帐户。服务帐户通过 `ServiceAccount` 对象表示。例如：`system:serviceaccount:default:deployer` `system:serviceaccount:foo:builder`
+
+|===
+
+每一用户必须通过某种形式的身份验证才能访问 统信容器云管理平台。无身份验证或身份验证无效的 API 请求会被看作为由 anonymous 系统用户发出的请求。经过身份验证后，策略决定用户被授权执行的操作。

@@ -1,0 +1,106 @@
+// Module included in the following assemblies:
+//
+// * networking/load-balancing-openstack.adoc
+
+:_content-type: PROCEDURE
+[id="installation-osp-kuryr-octavia-configure_{context}"]
+= 使用带有 Kuryr SDN 的 Octavia OVN 负载均衡器供应商驱动
+
+如果您的 统信容器云管理平台 集群使用 Kuryr，并安装在稍后升级到 UStack  的 Uniontech UStack Platform（有栈）云上，您可以将其配置为使用 Octavia OVN 供应商驱动程序。
+
+[重要]
+====
+在更改供应商驱动程序后，Kuryr 会替换现有的负载均衡器。这个过程会产生一些停机时间。
+====
+
+.先决条件
+
+* 安装 UStack CLI `openstack`。
+
+* 已安装 统信容器云管理平台 CLI (`oc`)。
+
+* 验证 UStack 上 Octavia OVN 驱动程序是否启用。
++
+[提示]
+====
+要查看可用 Octavia 驱动程序列表，请在命令行中输入 `openstack loadbalancer provider list`。
+
+命令的输出中会显示 `ovn` 驱动。
+====
+
+.流程
+
+把 Octavia Amphora 供应商驱动改为 Octavia OVN:
+
+. 打开 `kuryr-config` ConfigMap。在命令行中运行：
++
+[source,terminal]
+----
+$ oc -n openshift-kuryr edit cm kuryr-config
+----
+
+. 在 ConfigMap 中，删除包含 `kuryr-octavia-provider: default` 的行。例如：
++
+[source,yaml]
+----
+...
+kind: ConfigMap
+metadata:
+  annotations:
+    networkoperator.openshift.io/kuryr-octavia-provider: default <1>
+...
+----
+<1> 删除这一行。集群将会重新生成，并带有 ovn 值。
++
+等待 Cluster Network Operator 检测修改并重新部署 `kuryr-controller` 和 `kuryr-cni` pod。这可能需要几分钟。
+
+. 验证 `kuryr-config` ConfigMap 注解是否带有 `ovn` 作为其值。在命令行中运行：
++
+[source,terminal]
+----
+$ oc -n openshift-kuryr edit cm kuryr-config
+----
++
+`ovn` 供应商值会在输出中显示：
++
+[source,yaml]
+----
+...
+kind: ConfigMap
+metadata:
+  annotations:
+    networkoperator.openshift.io/kuryr-octavia-provider: ovn
+...
+----
+
+. 验证 UStack 是否已重新创建其负载均衡器。
+
+.. 在命令行中运行：
++
+[source,terminal]
+----
+$ openstack loadbalancer list | grep amphora
+----
++
+此时会显示一个 Amphora 负载均衡器。例如：
++
+[source,terminal]
+----
+a4db683b-2b7b-4988-a582-c39daaad7981 | ostest-7mbj6-kuryr-api-loadbalancer  | 84c99c906edd475ba19478a9a6690efd | 172.30.0.1     | ACTIVE              | amphora
+----
+
+.. 输入以下内容查找 `ovn` 负载均衡器：
++
+[source,terminal]
+----
+$ openstack loadbalancer list | grep ovn
+----
++
+显示 `ovn` 类型的负载均衡器。例如：
++
+[source,terminal]
+----
+2dffe783-98ae-4048-98d0-32aa684664cc | openshift-apiserver-operator/metrics | 84c99c906edd475ba19478a9a6690efd | 172.30.167.119 | ACTIVE              | ovn
+0b1b2193-251f-4243-af39-2f99b29d18c5 | openshift-etcd/etcd                  | 84c99c906edd475ba19478a9a6690efd | 172.30.143.226 | ACTIVE              | ovn
+f05b07fc-01b7-4673-bd4d-adaa4391458e | openshift-dns-operator/metrics       | 84c99c906edd475ba19478a9a6690efd | 172.30.152.27  | ACTIVE              | ovn
+----

@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="pruning-objects"]
+= 修剪对象以重新声明资源
+include::_attributes/common-attributes.adoc[]
+:context: pruning-objects
+
+toc::[]
+
+随着时间推移，统信容器云管理平台中创建的 API 对象可通过常规用户操作（如构建和部署应用程序）积累到集群的 etcd 数据存储中。
+
+集群管理员可以周期性地从集群中修剪不再需要的旧版对象。例如，您可以通过修剪镜像来删除不再使用但仍然占用磁盘空间的旧镜像和旧层。
+
+include::modules/pruning-basic-operations.adoc[leveloffset=+1]
+include::modules/pruning-groups.adoc[leveloffset=+1]
+include::modules/pruning-deployments.adoc[leveloffset=+1]
+include::modules/pruning-builds.adoc[leveloffset=+1]
+
+
+include::modules/pruning-images.adoc[leveloffset=+1]
+include::modules/pruning-images-manual.adoc[leveloffset=+1]
+
+include::modules/pruning-hard-pruning-registry.adoc[leveloffset=+1]
+include::modules/pruning-cronjobs.adoc[leveloffset=+1]

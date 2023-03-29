@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-cancel-build_{context}"]
+= 取消构建
+
+您可以使用 Web 控制台或通过以下 CLI 命令来取消构建。
+
+.流程
+
+* 要手动取消构建，请输入以下命令：
++
+[source,terminal]
+----
+$ oc cancel-build <build_name>
+----

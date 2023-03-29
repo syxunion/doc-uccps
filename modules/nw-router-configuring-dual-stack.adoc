@@ -1,0 +1,77 @@
+// Module included in the following assemblies:
+//
+// * networking/routes/route-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-router-configuring-dual-stack_{context}"]
+= 为双栈网络配置 统信容器云管理平台 Ingress Controller
+
+如果您的 统信容器云管理平台 集群是为 IPv4 和 IPv6 双栈网络配置的，则 统信容器云管理平台 路由可从外部访问集群。
+
+Ingress Controller 会自动提供具有 IPv4 和 IPv6 端点的服务，但您可以为单堆栈或双栈服务配置 Ingress Controller。
+
+.先决条件
+
+* 您在裸机上部署了 统信容器云管理平台 集群。
+* 已安装 Uccp CLI (`oc`).
+
+.流程
+
+. 要使 Ingress Controller 为工作负载提供通过 IPv4/IPv6 的流量，您可以通过设置 `ipFamilies` 和 `ipFamilyPolicy` 字段来创建服务 YAML 文件，或通过设置 `ipFamilies` 和 `ipFamilyPolicy` 字段来修改现有服务 YAML 文件。例如：
++
+.服务 YAML 文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: yyyy-mm-ddT00:00:00Z
+  labels:
+    name: <service_name>
+    manager: kubectl-create
+    operation: Update
+    time: yyyy-mm-ddT00:00:00Z
+  name: <service_name>
+  namespace: <namespace_name>
+  resourceVersion: "<resource_version_number>"
+  selfLink: "/api/v1/namespaces/<namespace_name>/services/<service_name>"
+  uid: <uid_number>
+spec:
+  clusterIP: 172.30.0.0/16
+  clusterIPs: <1>
+  - 172.30.0.0/16
+  - <second_IP_address>
+  ipFamilies: <2>
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: RequireDualStack <3>
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetport: 8080
+  selector:
+    name: <namespace_name>
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadbalancer: {}
+----
+<1> 在双栈实例中，提供了两个不同的 `clusterIP`。
+<2> 对于单堆栈实例，输入 `IPv4` 或 `IPv6`。对于双栈实例，请输入 `IPv4` 和 `IPv6`。
+<3> 对于单堆栈实例，请输入 `SingleStack`。对于双栈实例，请输入 `RequireDualStack`。
++
+这些资源生成对应的端点。Ingress Controller 现在监视 `endpointslices`。
++
+. 要查看端点，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get endpoints
+----
++
+. 要查看 `endpointslices`，输入以下命令：
++
+[source,terminal]
+----
+$ oc get endpointslices
+----

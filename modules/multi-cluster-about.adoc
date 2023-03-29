@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * assemblies/web-console.adoc
+
+:_content-type: CONCEPT
+[id="multi-cluster-about_{context}"]
+= 多集群控制台
+
+多集群控制台为混合云控制台提供了一个一致的设计接口。如果启用此功能，您可以在同一个浏览器选项卡中在 Advanced Cluster Management(ACM)和集群控制台间切换。它提供简化且一致的设计，允许共享组件。

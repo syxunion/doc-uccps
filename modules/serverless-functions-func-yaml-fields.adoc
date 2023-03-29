@@ -1,0 +1,194 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-yaml.adoc
+
+:_content-type: REFERENCE
+[id="serverless-functions-func-yaml_{context}"]
+= func.yaml 中的可配置字段
+
+在创建、构建和部署您的功能时， `func.yaml` 中的许多字段会自动生成。但是，您也可以手动修改以更改操作，如函数名称或镜像名称。
+
+[id="serverless-functions-func-yaml-buildenvs_{context}"]
+== buildEnvs
+
+`buildEnvs` 字段允许您设置环境变量，供构建您的功能的环境使用。与使用 `envs` 设置的变量不同，使用 `buildEnv`  的变量集合在函数运行时不可用。
+
+您可以直接从值设置 `buildEnv` 变量。在以下示例中，名为 `EXAMPLE1` 的 `buildEnv` 变量被直接分配为 one 值：
+
+[source,yaml]
+----
+buildEnvs:
+- name: EXAMPLE1
+  value: one
+----
+
+您还可以从本地环境变量设置 `buildEnv` 变量。在以下示例中，名为 `EXAMPLE2` 的 `buildEnv` 变量被分配了 `LOCAL_ENV_VAR` 本地环境变量的值：
+
+[source,yaml]
+----
+buildEnvs:
+- name: EXAMPLE1
+  value: '{{ env:LOCAL_ENV_VAR }}'
+----
+
+[id="serverless-functions-func-yaml-envs_{context}"]
+== envs
+
+`envs` 字段允许您在运行时设置环境变量供您的功能使用。您可以通过几种不同方式设置环境变量：
+
+. 直接来自一个值。
+. 来自分配给本地环境变量的值）。如需更多信息，请参阅"引用来自 func.yaml 字段中的本地环境变量"。
+. 从存储在 secret 或配置映射中的键值对。
+. 您还可以导入存储在 secret 或配置映射中的所有键值对，其键用作所创建的环境变量的名称。
+
+这个示例演示了设置环境变量的不同方法：
+
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+envs:
+- name: EXAMPLE1 <1>
+  value: value
+- name: EXAMPLE2 <2>
+  value: '{{ env:LOCAL_ENV_VALUE }}'
+- name: EXAMPLE3 <3>
+  value: '{{ secret:mysecret:key }}'
+- name: EXAMPLE4 <4>
+  value: '{{ configMap:myconfigmap:key }}'
+- value: '{{ secret:mysecret2 }}' <5>
+- value: '{{ configMap:myconfigmap2 }}' <6>
+----
+<1> 直接从值设置的环境变量。
+<2> 从分配给本地环境变量的值设置的环境变量。
+<3> 从存储在 secret 中的键值对分配的环境变量。
+<4> 从配置映射中存储的键值对分配的环境变量。
+<5> 从 secret 的键值对导入的一组环境变量。
+<6> 从配置映射的键值对导入的一组环境变量。
+
+[id="serverless-functions-func-yaml-builder_{context}"]
+== builder
+
+`builder` 字段指定函数用于构建镜像的策略。它接受  `pack` 或 `s2i`.
+
+[id="serverless-functions-func-yaml-build_{context}"]
+== build
+
+`build` 字段指示如何构建函数。 `local` 值表示该函数在您的机器上本地构建。 `git` 值表示函数使用  `git` 字段中指定的值来在集群中构建。
+
+[id="serverless-functions-func-yaml-volumes_{context}"]
+== 卷
+
+`volumes` 字段允许您将 secret 和配置映射作为可在指定路径的函数访问的卷挂载，如下例所示：
+
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+volumes:
+- secret: mysecret <1>
+  path: /workspace/secret
+- configMap: myconfigmap <2>
+  path: /workspace/configmap
+----
+<1> `mysecret` secret 作为驻留于 `/workspace/secret` 的卷挂载。
+<2> `myconfigmap` 配置映射作为驻留于 `/workspace/configmap` 的卷挂载。
+
+[id="serverless-functions-func-yaml-options_{context}"]
+== 选项
+
+`options` 字段允许您修改部署的功能的 Knative Service 属性，如自动扩展。如果未设置这些选项，则使用默认的选项。
+
+这些选项可用：
+
+* `scale`
+** `min`: 最小副本数。必须是一个非负的整数。默认值为 0。
+** `max`: 最大副本数。必须是一个非负的整数。默认值为 0，这代表没有限制。
+** `metric`: 定义 Autoscaler 监视哪一指标类型。它可以被设置为 `concurrency`（默认），或 `rps`.
+** `target`: 建议根据同时传入的请求数量，何时向上扩展。 `target` 选项可以是大于 0.01 的浮点值。除非设置了 `options.resources.limits.concurrency` ，否则默认为 100，在这种情况下，目标默认为其值。
+** `utilization`: 向上扩展前允许的并发请求利用率百分比.它可以是 1 到 100 之间的一个浮点值。默认值为 70。
+* `resources`
+** `requests`
+*** `cpu`: 具有部署功能的容器的 CPU 资源请求。
+*** `memory`: 具有部署功能的容器的内存资源请求。
+** `limits`
+*** `cpu`: 具有部署功能的容器的 CPU 资源限值。
+*** `memory`: 具有部署功能的容器的内存资源限制。
+*** `concurrency`: 单个副本处理的并发请求的硬限制。它可以是大于或等于 0 的整数值，默认为 0 - 表示无限制。
+
+这是 scale 选项配置示例：
+
+[source,yaml]
+----
+name: test
+namespace: ""
+runtime: go
+...
+options:
+  scale:
+    min: 0
+    max: 10
+    metric: concurrency
+    target: 75
+    utilization: 75
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 256Mi
+      concurrency: 100
+----
+
+[id="serverless-functions-func-yaml-image_{context}"]
+== image
+
+`image` 字段在构建后为您的功能设置镜像名称。您可以修改此字段。如果您这样做，在下次运行 `kn func build` 或 `kn func deploy`, 时，功能镜像将使用新名称创建。
+
+[id="serverless-functions-func-yaml-imagedigest_{context}"]
+== imageDigest
+
+在部署函数时，`imageDigest` 字段包含镜像清单的 SHA256 哈希。不要修改这个值。
+
+[id="serverless-functions-func-yaml-labels_{context}"]
+== labels
+
+`labels` 字段允许您在部署的功能中设置标签。
+
+您可以直接从值设置标签。在以下示例中，带有 `role` 键的标签直接被分配了 `backend` 的值：
+
+[source,yaml]
+----
+labels:
+- key: role
+  value: backend
+----
+
+您还可以从本地环境变量设置标签。在以下示例中，为带有 `author` 键的标签分配 `USER` 本地环境变量的值：
+
+[source,yaml]
+----
+labels:
+- key: author
+  value: '{{ env:USER }}'
+----
+
+[id="serverless-functions-func-yaml-name_{context}"]
+== name
+
+`name` 字段定义您的函数的名称。该值在部署时用作 Knative 服务的名称。您可以更改此字段来重命名后续部署中的函数。
+
+[id="serverless-functions-func-yaml-namespace_{context}"]
+== namespace
+
+`namespace` 字段指定部署您的功能的命名空间。
+
+[id="serverless-functions-func-yaml-runtime_{context}"]
+== runtime
+
+`runtime` 字段指定您的功能的语言运行时，如 `python`.

@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+:_content-type: PROCEDURE
+[id="ossm-routing-sidecar_{context}"]
+= Configuring sidecars for traffic management
+
+默认情况下， {SMProductName} 配置每个 Envoy 代理，在其相关负载的所有端口上接收流量，并在转发流量时到达网格中的每个工作负载。您可以使用 sidecar 配置进行以下操作：
+
+* 微调 Envoy 代理接受的端口和协议集合。
+* 限制 Envoy 代理可访问的服务集合。
+
+[NOTE]
+====
+要优化服务网格的性能，请考虑限制 Envoy 代理配置。
+====
+
+在 Bookinfo 示例应用程序中，配置 Sidecar 以便所有服务都可以访问在同一命名空间和 control plane 中运行的其他服务。使用 {SMProductName} 策略和遥测功能需要这个 Sidecar 配置。
+
+.流程
+
+. 使用以下示例创建 YAML 文件，以指定您希望 sidecar 配置应用到特定命名空间中的所有工作负载。否则，使用 `workloadSelector` 选择特定的工作负载。
++
+.sidecar.yaml 示例
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Sidecar
+metadata:
+  name: default
+  namespace: bookinfo
+spec:
+  egress:
+  - hosts:
+    - "./*"
+    - "istio-system/*"
+----
+
+. 运行以下命令以应用 `sidecar.yaml`，其中 `sidecar.yaml` 是文件的路径。
++
+[source,terminal]
+----
+$ oc apply -f sidecar.yaml
+----
+
+. 运行以下命令，以验证 sidecar 是否已成功创建。
++
+[source,terminal]
+----
+$ oc get sidecar
+----

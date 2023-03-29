@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="odc-about-web-terminal"]
+= 关于 web 控制台中的 web 终端
+include::_attributes/common-attributes.adoc[]
+:context: odc-about-web-terminal
+
+toc::[]
+
+您可以在 web 控制台中启动内嵌的命令行终端实例。您必须首先安装 Web Terminal Operator 来使用 Web 终端。
+
+[注意]
+====
+集群管理员可以访问 统信容器云管理平台 4.7 及之后的版本中的 Web 终端。
+====
+
+此终端实例已预先安装与集群交互的通用 CLI 工具，如 `oc`、`kubectl`、`odo`、`kn`、`tkn`、`helm` 、 `kubens` 和 `kubectx`。它还包含正在处理的项目的上下文，并自动记录您使用凭证的项目。
+
+:FeatureName: Web 终端
+include::modules/odc-installing-web-terminal.adoc[leveloffset=+1]
+
+include::modules/odc-using-web-terminal.adoc[leveloffset=+1]
+
+include::modules/odc-uninstalling-web-terminal.adoc[leveloffset=+1]

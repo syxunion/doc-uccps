@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+[id="poison-pill-operator-remediate-nodes"]
+= 使用 Poison Pill Operator 修复节点
+include::_attributes/common-attributes.adoc[]
+:context: poison-pill-operator-remediate-nodes
+
+toc::[]
+
+您可以使用 Poison Pill Operator 自动重新引导不健康的节点。此补救策略可最小化有状态应用程序和 ReadWriteOnce (RWO) 卷的停机时间，并在发生临时故障时恢复计算容量。
+
+include::modules/eco-poison-pill-operator-about.adoc[leveloffset=+1]
+
+include::modules/eco-poison-pill-about-watchdog.adoc[leveloffset=+2]
+
+include::modules/eco-poison-pill-operator-installation-web-console.adoc[leveloffset=+1]
+
+include::modules/eco-poison-pill-operator-installation-cli.adoc[leveloffset=+1]
+
+include::modules/eco-configuring-machine-health-check-with-poison-pill.adoc[leveloffset=+1]
+
+include::modules/eco-poison-pill-operator-troubleshooting.adoc[leveloffset=+1]
+

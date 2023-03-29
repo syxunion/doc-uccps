@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+//*builds/build-strategies.adoc
+//*builds/understanding-image-builds
+
+[id="builds-strategy-docker-build_{context}"]
+= Docker 构建
+
+统信容器云管理平台 使用 Buildah 从 Dockerfile 构建容器镜像。有关使用 Dockerfile 构建容器镜像的更多信息，请参阅 Dockerfile 参考文档。
+
+[提示]
+====
+如果使用 buildArgs 数组设置 Docker 构建参数，请参阅 Dockerfile 参考文档中了解 ARG 和 FROM 如何交互。
+====

@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+// * service_mesh/v2x/ossm-deploy-mod-v2x.adoc
+
+[id="ossm-deploy-single-mesh_{context}"]
+= Single mesh deployment model
+
+最简单的 Istio 部署模型是一个网格。
+
+网格中的服务名称必须是唯一的，因为 Kubernetes 只允许一个服务在 `mynamespace` 命名空间中被命名为 `myservice` 但是，工作负载实例可以共享一个通用身份，因为服务帐户名称可以在同一个命名空间中的工作负载之间共享。

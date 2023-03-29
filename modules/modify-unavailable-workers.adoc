@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/recommended-host-practices.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="modify-unavailable-workers_{context}"]
+= 修改不可用 worker 节点的数量
+
+默认情况下，在对可用的 worker 节点应用 kubelet 相关的配置时，只允许一台机器不可用。对于大型集群来说，它可能需要很长时间才可以反映出配置的更改。在任何时候，您可以调整更新的机器数量来加快进程速度。
+
+.流程
+
+. 编辑 `worker` 机器配置池：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool worker
+----
+
+. 将 `maxUnavailable` 设置为您需要的值：
++
+[source,yaml]
+----
+spec:
+  maxUnavailable: <node_count>
+----
++
+[重要]
+====
+当设置该值时，请考虑无法使用的 worker 节点数量，而不影响在集群中运行的应用程序。
+====

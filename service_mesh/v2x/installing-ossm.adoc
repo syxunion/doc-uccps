@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="installing-ossm"]
+= Installing the Operators
+include::_attributes/common-attributes.adoc[]
+:context: installing-ossm
+
+toc::[]
+
+要安装  {SMProductName}，首先在 {product-title} 上安装所需的 Operator，然后创建一个 `ServiceMeshControlPlane` 资源来部署 control plane。
+
+[NOTE]
+====
+这一基本安装根据默认的 OpenShift 设置进行配置，不并是针对生产环境用途而设计的。  使用此默认安装验证您的安装，然后为特定环境配置服务网格.
+====
+
+.Prerequisites
+* 参阅 xref:../../service_mesh/v2x/preparing-ossm-installation.adoc#preparing-ossm-installation[准备安装 {SMProductName}] 的过程。
+* 具有 `cluster-admin` 角色的帐户。如果使用 {product-dedicated}，则必须有一个具有 `dedicated-admin` 角色的帐户。
+
+以下步骤演示了如何在 {product-title} 上安装 {SMProductName} 的基本实例。
+
+include::modules/ossm-installation-activities.adoc[leveloffset=+1]
+
+
+include::modules/ossm-install-ossm-operator.adoc[leveloffset=+1]
+

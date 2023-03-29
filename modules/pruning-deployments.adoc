@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-deployments_{context}"]
+= 修剪部署资源
+
+您可以修剪与系统不再需要的部署关联的资源，因为时间和状态。
+
+以下命令修剪与 `部署配置` 关联的复制控制器 ：
+
+[source,terminal]
+----
+$ oc adm prune deployments [<options>]
+----
+
+[注意]
+====
+	要修剪与 `Deployment` 对象关联的副本集，请使用 `--replica-sets` 标志。这个标志目前还是一个技术预览功能。
+====
+
+.`oc adm prune deployments` 标记
+[cols="4,8a",options="header"]
+|===
+
+|选项 |描述
+
+.^|`--confirm`
+|指明应该执行修剪，而不是空运行。
+
+.^|`--keep-complete=<N>`
+|对于 `部署配置`，保留状态为 `Complete` 且副本数为零的最后 N 个复制控制器。默认值为 `5`。
+
+.^|`--keep-failed=<N>`
+|对于 `部署配置`，保留状态为 `Failed` 的最后 `N` 复制控制器，副本数为零。默认值为 `1`。
+
+.^|`--keep-younger-than=<duration>`
+|不修剪存在时间没有超过 `<duration>`（相对于当前时间）的复制控制器。有效度量单位包括`纳秒(ns)`、`微秒 (us)`、`毫秒(ms)`、`秒(s)`、`分钟(m)和小时(h)`。默认值为 `60m`。
+
+.^|`--orphans`
+|修剪所有不再具有 `部署配置`、状态为 `Complete` 或 `Failed`、 副本数为零的复制控制器。
+
+.^|`--replica-sets=true\|false`
+|如果为 `true`，则修剪过程中包含副本集。默认值为 `false`。
+
+
+.流程
+
+. 要查看修剪操作要删除的内容，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm prune deployments --orphans --keep-complete=5 --keep-failed=1 \
+    --keep-younger-than=60m
+----
+
+. 要实际执行修剪操作，请添加 `--confirm` 标志：
++
+[source,terminal]
+----
+$ oc adm prune deployments --orphans --keep-complete=5 --keep-failed=1 \
+    --keep-younger-than=60m --confirm
+----

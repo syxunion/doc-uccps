@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="creating-custom-notification-banners_{context}"]
+= 创建自定义通知标语
+
+.先决条件
+
+* 您必须具有管理员特权。
+
+.流程
+
+. 在 *Administration* -> *Custom Resource Definitions* 点 *ConsoleNotification*。
+. 选择 *Instances* 标签页
+. 点击 *Create Console Notification* 并编辑文件：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: example
+spec:
+  text: This is an example notification message with an optional link.
+  location: BannerTop <1>
+  link:
+    href: 'https://www.example.com'
+    text: Optional link text
+  color: '#fff'
+  backgroundColor: '#0088ce'
+----
+<1> 有效的位置设置为 `BannerTop`、`BannerBottom` 和 `BannerTopBottom`。
+
+. 点 *Create* 以应用您的更改。

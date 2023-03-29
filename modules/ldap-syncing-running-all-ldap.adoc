@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing-groups.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-running-all-ldap_{context}"]
+= 将 LDAP 服务器与统信容器云管理平台同步
+
+您可以将 LDAP 服务器上的所有组与统信容器云管理平台同步。
+
+.先决条件
+
+* 创建同步配置文件。
+
+.流程
+
+* 将 LDAP 服务器上的所有组与统信容器云管理平台同步：
++
+[source,terminal]
+----
+$ oc adm groups sync --sync-config=config.yaml --confirm
+----
++
+[注意]
+====
+默认情况下，所有组同步操作都是空运行（dry-run），因此您必须在 `oc adm groups sync` 命令上设置 `--confirm` 标志，才能更改统信容器云管理平台组记录。
+====

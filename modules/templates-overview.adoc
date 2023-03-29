@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: CONCEPT
+[id="templates-overview_{context}"]
+= 了解模板
+
+模板描述了一组可参数化和处理的对象，用于生成对象列表，供 统信容器云管理平台 用于创建。可对模板进行处理，以创建您有权在项目中创建的任何内容，如服务、构建配置和部署配置。模板还可定义一系列标签（label），以应用到该模板中定义的每个对象。
+
+您可以使用 CLI 从模板创建对象列表，或者如果模板已上传至项目或全局模板库，则可使用 web 控制台来创建。
+
+//[role="_additional-resources"]
+//.Additional resources
+//For a curated set of templates, see the
+//link:https://github.com/openshift/library[OpenShift ImageStreams and Templates
+//library].

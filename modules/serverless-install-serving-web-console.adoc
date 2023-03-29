@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+//  * serverless/install/installing-knative-serving.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-install-serving-web-console_{context}"]
+= 使用 Web 控制台安装 Knative Serving
+
+安装 {ServerlessOperatorName} 后，使用 {product-title} 控制台安装 Knative Serving。您可以使用默认设置安装 Knative Serving，或者在 `KnativeServing` 自定义资源 (CR) 中配置更高级的设置。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 已登陆到 {product-title} web 控制台。
+* 已安装 {ServerlessOperatorName}.
+
+.流程
+
+. 在 {product-title} web console 控制台的 *Administrator* 视角中，进入 *Operators* -> *安装的 Operators*。
+
+. 检查页面顶部的 *项目* 下拉菜单是否已设置为 *Project: knative-serving*。
+
+. 点 {ServerlessOperatorName} 的 *提供的 APIs* 列表中的 *Knative Serving* 来进入 *Knative Serving* 选项卡。
+
+. 点 *Create Knative Serving*.
+
+. 在 *Create Knative Serving* 页中，您可以使用默认设置安装 Knative Serving。点 *Create* 。
++
+您还可以使用提供的表单或编辑 YAML 来修改 `KnativeServing` 对象来修改 Knative Serving 安装的设置。
+
+* 建议您在不需要完全控制 `KnativeServing` 对象创建的简单配置中使用该表单。
+
+* 对于更复杂的配置，建议编辑 YAML，这可以完全控制 `KnativeServing`  对象的创建。您可以通过点 *Create Knative Serving*  页右上角的 *edit YAML* 链接来访问 YAML。
++
+完成表单后，或者完成对 YAML 的修改后，点  *Create*　。
++
+
+. 安装 Knative Serving 后，会创建 `KnativeServing` 对象，并自动定向到 *Knative Serving*  选项卡。您可以在资源列表中看到 `knative-serving` 自定义资源。
+
+.验证
+
+. 在 `knative-serving` 选项卡中点 *Knative Serving* 自定义资源。
+
+. 您将被自动定向到 *Knative Serving Overview* 页面。
++
+image::serving-overview.png[Installed Operators page]
+
+. 向下滚动查看 *条件* 列表。
+
+. 您应该看到一个状况为 真 的条件列表，如示例镜像所示。
++
+image::serving-conditions-true.png[Conditions]
++
+[注意]
+====
+创建 Knative Serving 资源可能需要几秒钟时间。您可以在 Resources 选项卡中查看其状态。
+====
+
+. 如果条件状态为 *Unknown* or *假* ，请等待几分钟，然后在确认已创建资源后再重新检查。

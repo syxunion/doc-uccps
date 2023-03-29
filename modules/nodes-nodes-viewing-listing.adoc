@@ -1,0 +1,243 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-viewing.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-viewing-listing_{context}"]
+= 关于列出集群中的所有节点
+
+您可以获取集群中节点的详细信息。
+
+* 以下命令列出所有节点：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+以下示例是具有健康节点的集群：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                   STATUS    ROLES     AGE       VERSION
+master.example.com     Ready     master    7h        v1.23.0
+node1.example.com      Ready     worker    7h        v1.23.0
+node2.example.com      Ready     worker    7h        v1.23.0
+----
++
+以下示例是具有一个不健康节点的集群：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                   STATUS                      ROLES     AGE       VERSION
+master.example.com     Ready                       master    7h        v1.23.0
+node1.example.com      NotReady,SchedulingDisabled worker    7h        v1.23.0
+node2.example.com      Ready                       worker    7h        v1.23.0
+----
++
+触发 `NotReady` 状态的条件在本节中显示。
+
+* `-o wide` 选项提供有关节点的附加信息。
++
+[source,terminal]
+----
+$ oc get nodes -o wide
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                STATUS   ROLES    AGE    VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                                                       KERNEL-VERSION                 CONTAINER-RUNTIME
+master.example.com  Ready    master   171m   v1.23.0   10.0.129.108   <none>         UnionTech Enterprise Linux CoreOS 48.83.202103210901-0 (Ootpa)   4.18.0-240.15.1.el8_3.x86_64   cri-o://1.23.0-30.rhaos4.10.gitf2f339d.el8-dev
+node1.example.com   Ready    worker   72m    v1.23.0   10.0.129.222   <none>         UnionTech Enterprise Linux CoreOS 48.83.202103210901-0 (Ootpa)   4.18.0-240.15.1.el8_3.x86_64   cri-o://1.23.0-30.rhaos4.10.gitf2f339d.el8-dev
+node2.example.com   Ready    worker   164m   v1.23.0   10.0.142.150   <none>         UnionTech Enterprise Linux CoreOS 48.83.202103210901-0 (Ootpa)   4.18.0-240.15.1.el8_3.x86_64   cri-o://1.23.0-30.rhaos4.10.gitf2f339d.el8-dev
+----
+
+* 以下命令列出一个节点的相关信息：
++
+[source,terminal]
+----
+$ oc get node <node>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get node node1.example.com
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                   STATUS    ROLES     AGE       VERSION
+node1.example.com      Ready     worker    7h        v1.23.0
+----
+
+* 以下命令提供有关特定节点的更多详细信息，包括发生当前状况的原因：
++
+[source,terminal]
+----
+$ oc describe node <node>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe node node1.example.com
+----
++
+.输出示例
+[source,text]
+----
+Name:               node1.example.com <1>
+Roles:              worker <2>
+Labels:             beta.kubernetes.io/arch=amd64   <3>
+                    beta.kubernetes.io/instance-type=m4.large
+                    beta.kubernetes.io/os=linux
+                    failure-domain.beta.kubernetes.io/region=us-east-2
+                    failure-domain.beta.kubernetes.io/zone=us-east-2a
+                    kubernetes.io/hostname=ip-10-0-140-16
+                    node-role.kubernetes.io/worker=
+Annotations:        cluster.k8s.io/machine: opensh如果为t-machine-api/ahardin-worker-us-east-2a-q5dzc  <4>
+                    machineconfiguration.opensh如果为t.io/currentConfig: worker-309c228e8b3a92e2235edd544c62fea8
+                    machineconfiguration.opensh如果为t.io/desiredConfig: worker-309c228e8b3a92e2235edd544c62fea8
+                    machineconfiguration.opensh如果为t.io/state: Done
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Wed, 13 Feb 2019 11:05:57 -0500
+Taints:             <none>  <5>
+Unschedulable:      false
+Conditions:                 <6>
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  OutOfDisk        False   Wed, 13 Feb 2019 15:09:42 -0500   Wed, 13 Feb 2019 11:05:57 -0500   KubeletHasSufficientDisk     kubelet has sufficient disk space available
+  MemoryPressure   False   Wed, 13 Feb 2019 15:09:42 -0500   Wed, 13 Feb 2019 11:05:57 -0500   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Wed, 13 Feb 2019 15:09:42 -0500   Wed, 13 Feb 2019 11:05:57 -0500   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Wed, 13 Feb 2019 15:09:42 -0500   Wed, 13 Feb 2019 11:05:57 -0500   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            True    Wed, 13 Feb 2019 15:09:42 -0500   Wed, 13 Feb 2019 11:07:09 -0500   KubeletReady                 kubelet is posting ready status
+Addresses:   <7>
+  InternalIP:   10.0.140.16
+  InternalDNS:  ip-10-0-140-16.us-east-2.compute.internal
+  Hostname:     ip-10-0-140-16.us-east-2.compute.internal
+Capacity:    <8>
+ attachable-volumes-aws-ebs:  39
+ cpu:                         2
+ hugepages-1Gi:               0
+ hugepages-2Mi:               0
+ memory:                      8172516Ki
+ pods:                        250
+Allocatable:
+ attachable-volumes-aws-ebs:  39
+ cpu:                         1500m
+ hugepages-1Gi:               0
+ hugepages-2Mi:               0
+ memory:                      7558116Ki
+ pods:                        250
+System Info:    <9>
+ Machine ID:                              63787c9534c24fde9a0cde35c13f1f66
+ System UUID:                             EC22BF97-A006-4A58-6AF8-0A38DEEA122A
+ Boot ID:                                 f24ad37d-2594-46b4-8830-7f7555918325
+ Kernel Version:                          3.10.0-957.5.1.el7.x86_64
+ OS Image:                                Red Hat Enterprise Linux CoreOS 410.8.20190520.0 (Ootpa)
+ Operating System:                        linux
+ Architecture:                            amd64
+ Container Runtime Version:               cri-o://1.16.0-0.6.dev.rhaos4.3.git9ad059b.el8-rc2
+ Kubelet Version:                         v1.23.0
+ Kube-Proxy Version:                      v1.23.0
+PodCIDR:                                  10.128.4.0/24
+ProviderID:                               aws:///us-east-2a/i-04e87b31dc6b3e171
+Non-terminated Pods:                      (13 in total)  <10>
+  Namespace                               Name                                   CPU Requests  CPU Limits  Memory Requests  Memory Limits
+  ---------                               ----                                   ------------  ----------  ---------------  -------------
+  opensh如果为t-cluster-node-tuning-operator  tuned-hdl5q                            0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-dns                           dns-default-l69zr                      0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-image-registry                node-ca-9hmcg                          0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-ingress                       router-default-76455c45c-c5ptv         0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-machine-config-operator       machine-config-daemon-cvqw9            20m (1%)      0 (0%)      50Mi (0%)        0 (0%)
+  opensh如果为t-marketplace                   community-operators-f67fh              0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-monitoring                    alertmanager-main-0                    50m (3%)      50m (3%)    210Mi (2%)       10Mi (0%)
+  opensh如果为t-monitoring                    grafana-78765ddcc7-hnjmm               100m (6%)     200m (13%)  100Mi (1%)       200Mi (2%)
+  opensh如果为t-monitoring                    node-exporter-l7q8d                    10m (0%)      20m (1%)    20Mi (0%)        40Mi (0%)
+  opensh如果为t-monitoring                    prometheus-adapter-75d769c874-hvb85    0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-multus                        multus-kw8w5                           0 (0%)        0 (0%)      0 (0%)           0 (0%)
+  opensh如果为t-sdn                           ovs-t4dsn                              100m (6%)     0 (0%)      300Mi (4%)       0 (0%)
+  opensh如果为t-sdn                           sdn-g79hg                              100m (6%)     0 (0%)      200Mi (2%)       0 (0%)
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource                    Requests     Limits
+  --------                    --------     ------
+  cpu                         380m (25%)   270m (18%)
+  memory                      880Mi (11%)  250Mi (3%)
+  attachable-volumes-aws-ebs  0            0
+Events:     <11>
+  Type     Reason                   Age                From                      Message
+  ----     ------                   ----               ----                      -------
+  Normal   NodeHasSufficientPID     6d (x5 over 6d)    kubelet, m01.example.com  Node m01.example.com status is now: NodeHasSufficientPID
+  Normal   NodeAllocatableEnforced  6d                 kubelet, m01.example.com  Updated Node Allocatable limit across pods
+  Normal   NodeHasSufficientMemory  6d (x6 over 6d)    kubelet, m01.example.com  Node m01.example.com status is now: NodeHasSufficientMemory
+  Normal   NodeHasNoDiskPressure    6d (x6 over 6d)    kubelet, m01.example.com  Node m01.example.com status is now: NodeHasNoDiskPressure
+  Normal   NodeHasSufficientDisk    6d (x6 over 6d)    kubelet, m01.example.com  Node m01.example.com status is now: NodeHasSufficientDisk
+  Normal   NodeHasSufficientPID     6d                 kubelet, m01.example.com  Node m01.example.com status is now: NodeHasSufficientPID
+  Normal   Starting                 6d                 kubelet, m01.example.com  Starting kubelet.
+ ...
+----
+<1> 节点的名称。
+<2> 节点的角色，可以是 `master` 或 `worker`。
+<3> 应用到节点的标签。
+<4> 应用到节点的注解。
+<5> 应用到节点的污点。
+<6> 节点条件和状态。 `conditions` 小节列出了 `Ready`, `PIDPressure`, `PIDPressure`, `MemoryPressure`, `DiskPressure` 和 `OutOfDisk` 状态。本节稍后将描述这些条件。
+<7> 节点的 IP 地址和主机名。
+<8> pod 资源和可分配的资源。
+<9> 节点主机的相关信息。
+<10> 节点上的 pod。
+<11> 节点报告的事件。
+
+在显示的节点信息中，本节显示的命令输出中会出现以下节点状况：
+
+[discrete]
+[id="machine-health-checks-resource-conditions"]
+.节点状况
+[cols="3a,8a",options="header"]
+|===
+
+|条件 |描述
+
+|`Ready`
+|`true`，节点处于健康状态，并可以接受 pod。如果为 false，则节点处于不健康的状态，不接受 pod。如果为 unknown，代表节点控制器在 node-monitor-grace-period 时间内（默认为 40 秒）还没有收到来自节点的心跳信号。
+
+|`DiskPressure`
+|如果为 `true`, the disk capacity is low.
+
+|`MemoryPressure`
+|如果为 `true`，代表磁盘容量较低。
+
+|`PIDPressure`
+|如果为 `true` ，代表节点内存较低。
+
+|`OutOfDisk`
+|如果为 `true` ，代表节点上的可用空间不足，无法添加新 pod。
+
+|`NetworkUnavailable`
+| 如果为 `true`，代表节点的网络不会被正确配置。
+
+|`NotReady`
+|如果为 `true` ，代表一个底层组件（如容器运行时或网络）遇到了问题或尚未配置。
+
+|`SchedulingDisabled`
+|无法通过调度将 Pod 放置到节点上。
+
+|===

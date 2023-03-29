@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-kube-proxy.adoc
+
+:_content-type: CONCEPT
+[id="nw-kube-proxy-sync_{context}"]
+= 关于 iptables 规则同步
+
+同步周期决定 Kubernetes 网络代理 (kube-proxy) 在节点上同步 iptables 规则的频率。
+
+同步在发生以下事件之一时开始：
+
+* 发生某一事件，例如服务或端点添加到集群中或从集群中删除。
+* 距最后一次同步的时间已超过为 kube-proxy 定义的同步周期。

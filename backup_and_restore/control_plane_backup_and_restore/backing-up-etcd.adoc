@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="backup-etcd"]
+= 备份 etcd
+include::_attributes/common-attributes.adoc[]
+:context: backup-etcd
+
+toc::[]
+
+etcd 是统信容器云管理平台的以”键-值”形式进行的存储，它会保留所有资源对象的状态。
+
+定期备份集群的 etcd 数据，并在统信容器云管理平台环境以外的安全位置保存备份数据。不要在第一个证书轮转完成前（安装后的 24 小时内）进行 etcd 备份，否则备份将包含过期的证书。另外，建议您在非使用高峰时段对 etcd 进行备份，因为备份可能会影响到系统性能。
+
+确保升级集群后执行 etcd 备份。这很重要，因为当恢复集群时，必须使用从同一 z-stream 发行版本中获取的 etcd 备份。例如，统信容器云管理平台1.y.z 集群必须使用从 1.y.z 中获得的 etcd 备份。
+
+[重要]
+====
+通过在控制平面主机上执行一次备份脚本来备份集群的 etcd 数据。不要为每个控制平面主机进行备份。
+====
+
+在进行了 etcd 备份后，就可以 xref:../../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-2-restoring-cluster-state.adoc#dr-restoring-cluster-state[恢复到一个以前的集群状态]。
+
+// Backing up etcd data
+include::modules/backup-etcd.adoc[leveloffset=+1]

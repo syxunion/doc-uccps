@@ -1,0 +1,52 @@
+:_content-type: PROCEDURE
+[id="adding-helm-chart-repositories_{context}"]
+= 添加自定义 Helm Chart 仓库
+
+作为集群管理员，您可以将自定义 Helm Chart 存储库添加到集群中，并在 *开发者目录* 中启用从这些仓库中获得 Helm chart 的访问权限。
+
+.流程
+
+. 要添加新的 Helm Chart 仓库，您必须将 Helm Chart 仓库自定义资源（CR）添加到集群中。
++
+.Helm Chart 仓库 CR 示例
+
+[source,yaml]
+----
+apiVersion: helm.openshift.io/v1beta1
+kind: HelmChartRepository
+metadata:
+  name: <name>
+spec:
+ # optional name that might be used by console
+ # name: <chart-display-name>
+  connectionConfig:
+    url: <helm-chart-repository-url>
+----
++
+例如，要添加 Azure 示例 chart 存储库，请运行：
++
+[source,terminal]
+----
+$ cat <<EOF | oc apply -f -
+apiVersion: helm.openshift.io/v1beta1
+kind: HelmChartRepository
+metadata:
+  name: azure-sample-repo
+spec:
+  name: azure-sample-repo
+  connectionConfig:
+    url: https://raw.githubusercontent.com/Azure-Samples/helm-charts/master/docs
+EOF
+----
++
+. 导航到 web 控制台中的 *开发者目录*，以验证是否已显示 Helm chart 存储库中的 Helm chart。
++
+例如，使用 *Chart 仓库* 过滤器从仓库搜索 Helm chart。
++
+.Chart 软件仓库过滤器
+image::odc_helm_chart_repo_filter.png[]
++
+[注意]
+====
+如果集群管理员删除了所有 chart 仓库，则无法在 *+添加* 视图、*开发者目录* 和左面的导航面板中查看 Helm 选项。
+====

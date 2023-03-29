@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: CONCEPT
+[id="ossm-gateways_{context}"]
+= Using gateways
+
+您可以使用网关来管理入站和出站流量，以指定您想要进入或离开网格的流量。网关配置适用于在网格边缘运行的独立的 Envoy 代理，而不是与您的服务负载一同运行的 sidecar Envoy 代理。
+
+与控制进入系统的其他流量的机制不同，如 Kubernetes Ingress API，统信容器云管理平台服务网格 网关使用流量路由的完整能力和灵活性。
+
+统信容器云管理平台服务网格网关资源可以使用第 4 层负载均衡属性（如端口）来公开和配置 统信容器云管理平台服务网格 TLS 设置。您可以将常规 统信容器云管理平台服务网格 虚拟服务绑定到网关，并像服务网格中的其它数据平面流量一样管理网关流量，而不将应用程序层流量路由(L7)添加到相同的 API 资源中。
+
+网关主要用于管理入口流量，但您也可以配置出口网关。出口网关可让您为离开网格的流量配置专用退出节点。这可让您限制哪些服务可以访问外部网络，这会为您的服务网格增加安全控制。您还可以使用网关配置纯内部代理。
+
+.网关示例
+
+网关资源描述了在网格边缘运行的负载均衡器，接收进入或传出的 HTTP/TCP 连接。该规范描述应当公开的一组端口，要使用的协议类型，以及负载均衡器的 SNI 配置等。
+
+以下示例显示了外部 HTTPS 入口流量的网关配置示例：
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ext-host-gwy
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - ext-host.example.com
+    tls:
+      mode: SIMPLE
+      serverCertificate: /tmp/tls.crt
+      privateKey: /tmp/tls.key
+----
+
+这个网关配置允许来自 `ext-host.example.com` 的 HTTPS 流量通过端口 443 进入网格，但没有为流量指定路由。
+
+要指定路由并让网关按预期工作，还必须将网关绑定到虚拟服务。您可以使用虚拟服务的网关字段进行此操作，如下例所示：
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: virtual-svc
+spec:
+  hosts:
+  - ext-host.example.com
+  gateways:
+    - ext-host-gwy
+----
+
+然后，您可以使用外部流量的路由规则配置虚拟服务。

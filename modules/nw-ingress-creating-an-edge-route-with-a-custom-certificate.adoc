@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * ingress/routes.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-creating-an-edge-route-with-a-custom-certificate_{context}"]
+= 使用自定义证书创建边缘路由
+
+您可以通过 `oc create route` 命令，使用边缘 TLS 终止和自定义证书配置安全路由。使用边缘路由时，Ingress Controller 在将流量转发到目标 pod 之前终止 TLS 加密。该路由指定了 Ingress Controller 用于路由的 TLS 证书和密钥。
+
+.先决条件
+
+* 您必须在 PEM 编码文件中有一个证书/密钥对，其中的证书对路由主机有效。
+
+* 您可以在 PEM 编码文件中有一个单独的 CA 证书来补全证书链。
+
+* 您必须具有要公开的服务。
+
+[注意]
+====
+不支持密码保护的密钥文件。要从密钥文件中删除密码，使用以下命令：
+
+[source,terminal]
+----
+$ openssl rsa -in password_protected_tls.key -out tls.key
+----
+====
+
+.流程
+
+此流程使用自定义证书和边缘 TLS 终止创建 Route 资源。以下步骤假定证书/密钥对位于当前工作目录下的 `tls.crt` 和 `tls.key` 文件中。您也可以根据需要指定 CA 证书来补全证书链。替换 `tls.crt`、`tls.key` 和（可选）`ca.crt` 的实际路径名称。替换您要为 `frontend` 公开的服务名称。使用适当的主机名替换 `www.example.com`。
+
+* 使用边缘 TLS 终止和自定义证书，创建安全 Route 资源：
++
+[source,terminal]
+----
+$ oc create route edge --service=frontend --cert=tls.crt --key=tls.key --ca-cert=ca.crt --hostname=www.example.com
+----
++
+如果您检查生成的 `Route` 资源，它应该类似于如下：
++
+.安全路由 YAML 定义
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend
+spec:
+  host: www.example.com
+  to:
+    kind: Service
+    name: frontend
+  tls:
+    termination: edge
+    key: |-
+      -----BEGIN PRIVATE KEY-----
+      [...]
+      -----END PRIVATE KEY-----
+    certificate: |-
+      -----BEGIN CERTIFICATE-----
+      [...]
+      -----END CERTIFICATE-----
+    caCertificate: |-
+      -----BEGIN CERTIFICATE-----
+      [...]
+      -----END CERTIFICATE-----
+----
++
+如需了解更多选项，请参阅 `oc create route edge --help`。

@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-enabling-pvc-support_{context}"]
+= 启用 PVC 支持
+
+有些无服务器应用程序需要持久性数据存储。要做到这一点，您可以为 Knative 服务配置持久性卷声明 (PVC) 。
+
+.流程
+
+. 要启用 Knative Serving 使用 PVC 并写入它们，请修改 `KnativeServing` 自定义资源 (CR) 使其包含以下 YAML：
++
+.启用具有写入访问的 PVC
+[source,yaml]
+----
+...
+spec:
+  config:
+    features:
+      "kubernetes.podspec-persistent-volume-claim": enabled
+      "kubernetes.podspec-persistent-volume-write": enabled
+...
+----
++
+* The `kubernetes.podspec-persistent-volume-claim` 扩展控制持久性卷 (PV) 是否可以用于 Knative Serving。
+* The `kubernetes.podspec-persistent-volume-write` 扩展控制 Knative Serving 是否使用写入访问权限。
+
+. 要声明 PV，请修改您的服务使其包含 PV 配置。例如，您可能具有以下配置的持久性卷声明：
++
+[注意]
+====
+使用支持您请求的访问模式的存储类。例如，您可以使用 ReadWriteMany 访问模式的 ocs-storagecluster-cephfs 类。
+====
++
+.PersistentVolumeClaim 配置
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: example-pv-claim
+  namespace: my-ns
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ocs-storagecluster-cephfs
+  resources:
+    requests:
+      storage: 1Gi
+----
++
+在这种情况下，若要声明具有写访问权限的 PV，请修改服务，如下所示：
++
+.Knative 服务 PVC 配置
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  namespace: my-ns
+...
+spec:
+ template:
+   spec:
+     containers:
+         ...
+         volumeMounts: <1>
+           - mountPath: /data
+             name: mydata
+             readOnly: false
+     volumes:
+       - name: mydata
+         persistentVolumeClaim: <2>
+           claimName: example-pv-claim
+           readOnly: false <3>
+----
+<1> 卷挂载规格。
+<2> 持久性卷声明规格。
+<3> 启用只读访问的标记。
++
+[注意]
+====
+要在 Knative 服务中成功使用持久性存储，您需要额外的配置，如 Knative 容器用户的用户权限。
+====

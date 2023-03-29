@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// * applications/projects/configuring-project-creation.adoc
+
+:_content-type: PROCEDURE
+[id="customizing-project-request-message_{context}"]
+= 自定义项目请求消息功能
+
+当无法自助置备项目的开发人员或服务帐户使用 Web 控制台或 CLI 提出项目创建请求时，默认返回以下错误消息：
+
+[source,terminal]
+----
+You may not request a new project via this API.
+----
+
+集群管理员可以自定义此消息。您可以对这个消息进行自定义，以提供特定于您的组织的关于如何请求新项目的信息。例如：
+
+* To request a project, contact your system administrator at
+[x-]`projectname@example.com`.
+* To request a new project, fill out the project request form located at
+[x-]`https://internal.example.com/openshift-project-request`.
+
+自定义项目请求消息
+
+.流程
+
+. 使用 Web 控制台或 CLI 编辑项目配置资源。
+
+** 使用 Web 控制台：
+... 导航至 *管理员* -> *集群设置* 页面。
+... 单击 *配置* 以查看所有配置资源。
+... 找到 *项目* 的条目并点击 *编辑 YAML*.
+
+** 使用 CLI：
+... 以具有 `cluster-admin` 特权的用户身份登录。
+... 编辑 `project.config.openshift.io/cluster` 资源：
++
+[source,terminal]
+----
+$ oc edit project.config.openshift.io/cluster
+----
+
+. 更新 `spec` 部分，使其包含 `projectRequestMessage` 参数，并将值设为您的自定义消息：
++
+.带有自定义项目请求消息的项目配置资源
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Project
+metadata:
+  ...
+spec:
+  projectRequestMessage: <message_string>
+----
++
+例如：
+
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Project
+metadata:
+  ...
+spec:
+  projectRequestMessage: To request a project, contact your system administrator at projectname@example.com.
+----
+
+. 保存更改后，请尝试用无法自助置备项目的开发人员或服务帐户创建一个新项目，以验证是否成功应用了您的更改。

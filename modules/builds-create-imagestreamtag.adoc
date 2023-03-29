@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+//* builds/running-entitled-builds.adoc
+
+:_content-type: PROCEDURE
+[id="builds-create-imagestreamtag_{context}"]
+= 为红帽通用基础镜像创建镜像流标签
+
+要在构建中使用红帽订阅，您可以创建一个镜像流标签来引用通用基础镜像（UBI）。
+
+要让 UBI 在集群中的 *每个项目* 中都可用，您需要将镜像流标签添加到 `openshift` 命名空间中。否则，若要使其在 *一个特定项目* 中可用，您要将镜像流标签添加到该项目。
+
+以这种方式使用镜像流标签的好处是，根据安装 pull secret 中的 `registry.redhat.io` 凭证授予对 UBI 的访问权限，而不会向其他用户公开 pull secret。这比要求每个开发人员使用项目中的 `registry.redhat.io` 凭证安装 pull secret 更为方便。
+
+.流程
+
+* 要在 `openshift` 命名空间中创建 `ImageStreamTag`，因此所有项目中的开发人员可使用它，请输入：
++
+[source,terminal]
+----
+$ oc tag --source=docker registry.redhat.io/ubi8/ubi:latest ubi:latest -n openshift
+----
++
+[提示]
+====
+您还可以应用以下 YAML 在 `openshift` 命名空间中创建 `ImageStreamTag` ：
+[source,yaml]
+----
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ubi
+  namespace: openshift
+spec:
+  tags:
+  - from:
+      kind: DockerImage
+      name: registry.redhat.io/ubi8/ubi:latest
+    name: latest
+    referencePolicy:
+      type: Source
+----
+====
+
+* 要在单个项目中创建 `ImageStreamTag`，请输入：
++
+[source,terminal]
+----
+$ oc tag --source=docker registry.redhat.io/ubi8/ubi:latest ubi:latest
+----
++
+[提示]
+====
+您还可以应用以下 YAML 在单个项目中创建 `ImageStreamTag` ：
+[source,yaml]
+----
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ubi
+spec:
+  tags:
+  - from:
+      kind: DockerImage
+      name: registry.redhat.io/ubi8/ubi:latest
+    name: latest
+    referencePolicy:
+      type: Source
+----
+====

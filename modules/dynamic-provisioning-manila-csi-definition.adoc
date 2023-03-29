@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// * storage/dynamic-provisioning.adoc
+
+[id="openstack-manila-csi-definition_{context}"]
+= UStack Manila Container Storage Interface（CSI）对象定义
+
+安装后, OpenStack Manila CSI Driver Operator 和 ManilaDriver 会自动为所有可用 Manila 共享类型创建动态置备所需的存储类。

@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-admin-init-containers_{context}"]
+= 启用 init 容器
+
+Init 容器是 pod 中应用程序容器之前运行的专用容器。它们通常用于为应用程序实施初始化逻辑，其中可能包括运行设置脚本或下载所需的配置。您可以通过修改 `KnativeServing` 自定义资源 (CR) 来启用 init 容器用于 Knative 服务。
+
+[注意]
+====
+Init 容器可能会导致应用程序的启动时间较长，应该谨慎地用于无服务器应用程序，这应该经常被扩展或缩减。
+====
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+* 有集群管理员权限。
+
+.流程
+
+* 通过在 `KnativeServing` CR 中添加 `kubernetes.podspec-init-containers` 标记来启用 init 容器的使用：
++
+.KnativeServing CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    features:
+      kubernetes.podspec-init-containers: enabled
+...
+----

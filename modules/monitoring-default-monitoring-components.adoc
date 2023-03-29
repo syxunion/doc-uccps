@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * monitoring/monitoring-overview.adoc
+
+:_content-type: REFERENCE
+[id="default-monitoring-components_{context}"]
+= 默认监控组件
+
+默认情况下，统信容器云管理平台 1.2 监控堆栈包括以下组件：
+
+.默认监控堆栈组件
+[options="header"]
+|===
+
+|组件|描述
+
+|Cluster Monitoring Operator
+|Cluster Monitoring Operator (CMO) 是监控堆栈的核心组件。它负责部署和管理 Prometheus 实例、Thanos Querier、Telemeter 客户端和指标目标，并确保它们保持最新状态。CMO 由 Cluster Version Operator (CVO) 部署。
+
+|Prometheus Operator
+|openshift-monitoring 项目中的 Prometheus Operator (PO) 负责创建、配置和管理平台 Prometheus 实例和 Alertmanager 实例。它还会根据 Kubernetes 标签查询来自动生成监控目标配置。
+
+|Prometheus
+|Prometheus 是 统信容器云管理平台 监控堆栈所依据的监控系统。Prometheus 是一个时间序列数据库和用于指标的规则评估引擎。Prometheus 将警报发送到 Alertmanager 进行处理。
+
+|Prometheus Adapter
+|Prometheus Adapter（上图中的 PA）负责转换 Kubernetes 节点和 Pod 查询以便在 Prometheus 中使用。转换的资源指标包括 CPU 和内存使用率指标。Prometheus Adapter 会公开用于 Pod 横向自动扩展的集群资源指标 API。Prometheus Adapter 也用于 oc adm top nodes 和 oc adm top pods 命令。
+
+|Alertmanager
+|Alertmanager 服务处理从 Prometheus 接收的警报。Alertmanager 还负责将警报发送到外部通知系统。
+
+|`kube-state-metrics` 代理
+|kube-state-metrics 导出器代理（上图中的 KSM）将 Kubernetes 对象转换为 Prometheus 可使用的指标。
+
+|`openshift-state-metrics` 代理
+|openshift-state-metrics 导出器（上图中的 OSM）通过添加了对特定 统信容器云管理平台 资源的指标数据扩展了 kube-state-metrics。
+
+|`node-exporter` 代理
+|node-exporter 代理（上图中的 NE）负责收集有关集群中每个节点的指标。node-exporter 代理部署在每个节点上。
+
+|Thanos Querier
+|Thanos Querier 将 统信容器云管理平台 核心指标和用于用户定义项目的指标聚合在单个多租户接口下，并选择性地进行重复数据删除。
+
+|Grafana
+|Grafana 分析平台提供用于分析和直观呈现指标的仪表板。由监控堆栈提供的 Grafana 实例及其仪表板是只读的。
+
+|Telemeter Client
+|Telemeter Client 将数据的子部分从平台 Prometheus 实例发送到统信，以便为集群提供远程健康状态监控。
+
+|===
+
+监控堆栈中的所有组件都由堆栈监控，并在 统信容器云管理平台 更新时自动更新。
+
+[注意]
+====
+监控堆栈的所有组件都使用集群管理员集中配置的 TLS 安全配置集设置。如果您配置了使用 TLS 安全设置的监控堆栈组件，组件使用全局 统信容器云管理平台 apiservers.config.openshift.io/cluster 资源中的 `tlsSecurityProfile` 字段中已存在的 TLS 安全配置集设置。
+====

@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="manually-removing-cloud-creds_{context}"]
+= 删除云供应商凭证
+
+在以 mint 模式使用 Cloud Credential Operator（CCO）安装统信容器云管理平台集群后，您可以从集群中的 `kube-system` 命名空间中删除管理员级别的凭证 secret。只有在进行更改时（需要提高的权限，如升级），才需要管理员级别的凭证。
+
+[注意]
+====
+在非 z-stream 升级前，您必须使用管理员级别的凭证重新恢复凭证 secret。如果没有凭证，则可能会阻止升级。
+====
+
+.先决条件
+
+* 集群安装在支持从 CCO 中删除云凭证的平台上。支持的平台是 AWS 和 GCP。
+
+.流程
+
+. 在 web 控制台的 *管理员* 视角中，导航到 *工作负载*  -> *Secrets*.
+
+. 在 *Secrets* 页面的表中，找到您的云供应商的 root secret。
++
+[cols=2,options=header]
+|===
+|平台
+|Secret 名称
+
+|AWS
+|`aws-creds`
+
+|GCP
+|`gcp-credentials`
+
+|===
+
+. 点击与 secret 相同的行 {kebab} 中的 *选项* 菜单，然后选择 *删除 Secret*。

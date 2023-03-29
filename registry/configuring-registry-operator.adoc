@@ -1,0 +1,50 @@
+:_content-type: ASSEMBLY
+[id="configuring-registry-operator"]
+= 统信容器云管理平台中的 Image Registry Operator
+include::_attributes/common-attributes.adoc[]
+:context: configuring-registry-operator
+
+toc::[]
+
+[id="image-registry-on-cloud"]
+== 云平台和 OpenStack 上的镜像 registry
+
+Image Registry Operator 安装一个单独的统信容器云管理平台registry 实例，并对 registry 的所有配置进行管理（包括设置 registry 存储）。
+
+[注意]
+====
+只有在 AWS、GCP 、Azure 或 OpenStack 中安装一个由安装程序置备的基础架构集群时，存储才会被自动配置。
+
+在 AWS 或 Azure 上安装或升级安装程序置备的基础架构集群时，Image Registry Operator 会将 `spec.storage.managementState` 参数设置为 Managed。如果 `spec.storage.managementState` 参数设置为 `Unmanaged`，则 Image Registry Operator 不会执行与存储相关的操作。
+====
+
+当部署了control plane后，Operator 将会根据集群中的配置创建一个默认的 `configs.imageregistry.operator.openshift.io` 资源实例。
+
+如果没有足够的信息来定义完整的`configs.imageregistry.operator.openshift.io` 资源，则将定义不完整的资源，Operator 将更新资源状态以提供缺失的内容。
+
+Image Registry Operator在 `openshift-image-registry` 命名空间中运行，并管理该位置中的 registry 实例。registry的所有配置和工作负载资源都位于该命名空间中。
+
+
+[重要]
+====
+Image Registry Operator 管理修剪器的行为与在 Image Registry Operator 的 `ClusterOperator` 对象上指定的 `managementState` 关联。如果 Image Registry Operator 没有处于 `Managed` 状态，则镜像修剪器仍然可以被 Pruning 自定义资源配置和管理。
+
+但是，Image Registry Operator 的 `managementState` 会更改部署的镜像修剪器任务的行为：
+
+* `Managed`: 镜像修剪器的 `--prune-registry` 标志被设置为 `true`。
+* `Removed`: 镜像修剪器的 `--prune-registry` 标志被设置为 `false`，这意味着它只在 etcd 中修剪镜像元数据。
+* `Unmanaged`: 镜像修剪器的 `--prune-registry` 标志设置为 `false`。
+====
+
+[id="image-registry-on-bare-metal-vsphere"]
+== 裸机和 vSphere 上的镜像 registry
+
+include::modules/registry-removed.adoc[leveloffset=+2]
+
+include::modules/registry-operator-configuration-resource-overview.adoc[leveloffset=+1]
+
+include::modules/registry-operator-default-crd.adoc[leveloffset=+1]
+
+include::modules/images-configuration-cas.adoc[leveloffset=+1]
+
+include::modules/registry-operator-config-resources-storage-credentials.adoc[leveloffset=+1]

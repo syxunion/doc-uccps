@@ -1,0 +1,102 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-autoscaler-metrics_{context}"]
+= 自动缩放器指标
+
+自动缩放器组件会公开多个与每个修订版本自动扩展行为相关的指标。例如，在任何给定时间，您可以监控自动扩展尝试为服务分配的目标 pod 数量，在 stable 窗口中每秒请求平均数量，或者如果您使用 Knative pod 自动缩放器 (KPA) ，自动扩展是否处于 panic 模式。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`desired_pods`
+|自动缩放器尝试为服务分配的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`excess_burst_capacity`
+|过量激增容量在稳定窗口中提供。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`stable_request_concurrency`
+|每个通过稳定窗口观察到的 pod 的平均请求数。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`panic_request_concurrency`
+|每个观察到的 pod 的平均请求数通过 panic 窗口。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`target_concurrency_per_pod`
+|自动缩放器尝试发送到每个容器集的并发请求数。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`stable_requests_per_second`
+|通过 stable 窗口中每个观察到的 pod 的平均请求数每秒数。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`panic_requests_per_second`
+|每个通过 panic 窗口观察到的 pod 平均请求数每秒数。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`target_requests_per_second`
+|自动缩放器针对每个 Pod 的目标请求数。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`panic_mode`
+|如果自动扩展器处于 panic 模式，则这个值为 1，如果自动扩展器没有处于 panic 模式，则代表 0。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`requested_pods`
+|自动缩放器从 Kubernetes 集群请求的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`actual_pods`
+|分配且当前具有就绪状态的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`not_ready_pods`
+|处于未就绪状态的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`pending_pods`
+|当前待处理的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`terminating_pods`
+|当前终止的 pod 数量。
+|量表
+|`configuration_name`, `namespace_name`, `revision_name`, `service_name`
+|整数 （无单位）
+|===

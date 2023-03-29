@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="dr-restoring-cluster-state"]
+= 恢复到一个以前的集群状态
+include::_attributes/common-attributes.adoc[]
+:context: dr-restoring-cluster-state
+
+toc::[]
+
+为了将集群还原到以前的状态，您必须已通过创建快照 xref:../../../backup_and_restore/control_plane_backup_and_restore/backing-up-etcd.adoc#backing-up-etcd-data_backup-etcd[备份了 etcd 数据]。 您将需要使用此快照来还原集群状态。
+
+// About restoring to a previous cluster state
+include::modules/dr-restoring-cluster-state-about.adoc[leveloffset=+1]
+
+// Restoring to a previous cluster state
+include::modules/dr-restoring-cluster-state.adoc[leveloffset=+1]
+include::modules/dr-scenario-cluster-state-issues.adoc[leveloffset=+1]

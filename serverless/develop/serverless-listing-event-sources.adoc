@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="serverless-listing-event-sources"]
+= 列出事件源和事件源类型
+include::_attributes/common-attributes.adoc[]
+:context: serverless-listing-event-sources
+
+toc::[]
+
+可以查看存在的事件源或事件源类型的列表，也可以在 {product-title} 集群中使用。您可以使用 {product-title} Web 控制台中的 Knative (kn) CLI 或 *开发者视角* 列出可用事件源或事件源类型。
+
+include::modules/serverless-list-source-types-kn.adoc[leveloffset=+1]
+include::modules/serverless-list-source-types-odc.adoc[leveloffset=+1]
+// move ODC to own section?
+include::modules/serverless-list-source.adoc[leveloffset=+1]

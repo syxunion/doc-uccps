@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+//* builds/running-entitled-builds.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-enable-pulling-pushing_{context}"]
+= 启用拉取 (pull) 和推送 (push)
+
+您可以通过在构建配置中设置 pull secret 来启用拉取到私有 registry，也可以通过设置 push secret 来启用推送。
+
+.流程
+
+启用拉取到私有 registry：
+
+* 在构建配置中设置 pull secret。
+
+启用推送：
+
+ * 在构建配置中设置 push secret。
+
+////
+[NOTE]
+====
+This module needs specific instructions and examples. And needs to be used for Docker and S2I.
+====
+////

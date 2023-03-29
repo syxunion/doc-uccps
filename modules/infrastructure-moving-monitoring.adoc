@@ -1,0 +1,76 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating-infrastructure-machinesets.adoc
+
+:_content-type: PROCEDURE
+[id="infrastructure-moving-monitoring_{context}"]
+= 移动监控解决方案
+
+默认情况下，部署包含 Prometheus、Grafana 和 AlertManager 的 Prometheus Cluster Monitoring 堆栈来提供集群监控功能。它由 Cluster Monitoring Operator 进行管理。若要将其组件移到其他机器上，需要创建并应用自定义配置映射。
+ 
+.流程
+
+. 将以下 `ConfigMap` 定义保存为 `cluster-monitoring-configmap.yaml` 文件：
+
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |+
+    alertmanagerMain:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    prometheusK8s:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    prometheusOperator:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    grafana:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    k8sPrometheusAdapter:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    kubeStateMetrics:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    telemeterClient:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    openshiftStateMetrics:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    thanosQuerier:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+----
+运行此配置映射会强制将监控堆栈的组件重新部署到基础架构节点。
+
+. 应用新的配置映射：
++
+[source,terminal]
+----
+$ oc create -f cluster-monitoring-configmap.yaml
+----
+
+. 观察监控 pod 移至新机器：
++
+[source,terminal]
+----
+$ watch 'oc get pod -n openshift-monitoring -o wide'
+----
+
+. 如果组件没有移到 `infra` 节点，请删除带有这个组件的 pod:
++
+[source,terminal]
+----
+$ oc delete pod -n openshift-monitoring <pod>
+----
++
+已删除 pod 的组件在 infra 节点上重新创建。

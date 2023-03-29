@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="nodes-custom-scheduler"]
+= 运行自定义调度程序
+include::_attributes/common-attributes.adoc[]
+:context: nodes-custom-scheduler
+
+toc::[]
+
+您可以与默认调度程序一起运行多个自定义调度程序，并配置要用于每个 pod 的调度程序。
+
+[重要]
+====
+支持在 统信容器云管理平台 中使用自定义调度程序，但统信不直接支持自定义调度程序的功能。
+
+有关如何配置默认调度程序的详情，请参阅 xref:../../nodes/scheduling/nodes-scheduler-about.adoc#nodes-scheduler-about[使用调度程序控制 pod 放置].
+====
+
+要使用特定的调度程序调度给定 pod，在该 Pod 的规格中指定调度程序的名称。
+
+// Deploying a custom scheduler
+include::modules/nodes-custom-scheduler-deploying.adoc[leveloffset=+1]
+
+// Deploying pods using a custom scheduler
+include::modules/nodes-custom-scheduler-pods.adoc[leveloffset=+1]
+

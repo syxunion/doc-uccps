@@ -1,0 +1,52 @@
+:_content-type: PROCEDURE
+[id="registry-exposing-default-registry-manually_{context}"]
+= 手动公开默认 registry
+
+通过使用路由可以开放从外部访问统信容器云管理平台 registry的通道，用户不再需要从集群内部登录到默认的统信容器云管理平台registry。通过外部访问，您可以使用路由地址从集群外部登录 registry，并使用路由主机标记并推送到现有项目。
+
+.先决条件：
+
+* 以下的先决条件会被自动执行：
+** 部署 Registry Operator。
+** 部署 Ingress Operator。
+
+.流程
+
+您可以使用 `configs.imageregistry.operator.openshift.io` 资源中的 `defaultRoute` 参数来公开路由。
+
+使用 `defaultRoute` 公开 registry：
+
+. 将 `defaultRoute` 设为 `true`:
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+----
++
+. 获取默认 registry 路由：
++
+[source,terminal]
+----
+$ HOST=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+----
+
+. 获取 Ingress Operator 的证书：
++
+[source,terminal]
+----
+$ oc get secret -n openshift-ingress  router-certs-default -o go-template='{{index .data "tls.crt"}}' | base64 -d | sudo tee /etc/pki/ca-trust/source/anchors/${HOST}.crt  > /dev/null
+----
+
+. 使用以下命令启用集群的默认证书来信任路由：
++
+[source,terminal]
+----
+$ sudo update-ca-trust enable
+----
+
+. 使用默认路由通过 podman 登录：
++
+[source,terminal]
+----
+$ sudo podman login -u kubeadmin -p $(oc whoami -t) $HOST
+----

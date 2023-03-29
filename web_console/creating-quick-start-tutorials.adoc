@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+[id="creating-quick-start-tutorials"]
+= 在 web 控制台中创建快速启动指南
+include::_attributes/common-attributes.adoc[]
+:context: creating-quick-start-tutorials
+
+toc::[]
+
+如果您要为 统信容器云管理平台 Web 控制台创建快速启动指南，请按照以下步骤保留所有快速启动的用户体验。
+
+include::modules/understanding-quick-starts.adoc[leveloffset=+1]
+
+include::modules/quick-start-user-workflow.adoc[leveloffset=+1]
+
+include::modules/quick-start-components.adoc[leveloffset=+1]
+
+include::modules/contributing-quick-starts.adoc[leveloffset=+1]
+
+include::modules/understanding-quick-start-elements.adoc[leveloffset=+2]
+
+include::modules/quick-start-adding-custom-icon.adoc[leveloffset=+2]
+
+include::modules/quick-start-limiting-access.adoc[leveloffset=+2]
+
+include::modules/quick-starts-linking-to-others.adoc[leveloffset=+2]
+
+include::modules/quick-starts-supported-tags.adoc[leveloffset=+2]
+
+include::modules/quick-starts-highlighting-reference.adoc[leveloffset=+2]
+
+include::modules/quick-starts-accessing-and-executing-code-snippets.adoc[leveloffset=+2]
+
+include::modules/quick-start-content-guidelines.adoc[leveloffset=+1]
+
+[id="quick-start-tutorials-additional-resources"]
+[role="_additional-resources"]
+== 其他资源
+
+* 关于声音和音调的要求，请参考 PatternFly’s brand voice and tone guidelines。
+* 关于其他 UX 内容指南，请参考 PatternFly 的 UX 编写风格指南。

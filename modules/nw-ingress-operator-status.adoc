@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-operator-status_{context}"]
+= nw-ingress-operator-status.adoc
+
+您可以查看并检查 Ingress Operator 的状态。
+
+.流程
+
+* 查看您的 Ingress Operator 状态：
++
+[source,terminal]
+----
+$ oc describe clusteroperators/ingress
+----

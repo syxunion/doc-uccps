@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/route-based-deployment-strategies.adoc
+
+[id="deployments-ab-testing_{context}"]
+= A/B 部署
+
+A/B 部署策略允许您在生产环境中以有限的方式尝试应用程序的新版本。您可以指定生产版本获得大多数用户请求，同时让有限比例的请求进入新版本。
+
+Because you control the portion of requests to each version, as testing
+由于您掌控进入每个版本的请求比例，因此随着测试的推进，您可以增加进入新版本的请求的比例，最终停止使用旧版本。当您调整每个版本的请求负载时，可能需要扩展各个服务中的 pod 数，以提供预期的性能。
+
+除了升级软件外，您还可以使用此功能来试验用户界面的不同版本。由于部分用户会使用旧版本，而另外的一部分用户会使用新版本，因此您可以评估用户对不同版本的反应，以做出明智的设计决策。
+
+若要使此功能凑效，新旧两个版本必须足够相似，让两个版本能够同时运行。这常用于对程序错误修复的发布，也适用于新功能不会影响到旧功能的情况。各个版本需要支持 N-1 兼容性才能正常工作。
+
+统信容器云管理平台 通过 Web 控制台和 CLI 支持 N-1 兼容性。

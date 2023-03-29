@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+:_content-type: PROCEDURE
+[id="builds-gitconfig-file-secured-git_{context}"]
+= 从 .gitconfig 文件为安全 Git 创建 secret
+
+如果 Git 服务器使用双向 SSL 和用户名加密码进行保护，您必须将证书文件添加到源构建中，并在 `.gitconfig` 文件中添加对证书文件的引用。
+
+.先决条件
+
+* 您必须具有 Git 凭证。
+
+.流程
+
+将证书文件添加到源构建中，并在 `gitconfig` 文件中添加对证书文件的引用。
+
+. 将 `client.crt`、`cacert.crt` 和 `client.key` 文件添加到应用程序源代码的 `/var/run/secrets/openshift.io/source/` 目录中。
+
+. 在服务器的 `.gitconfig` 文件中，添加下例中所示的 [http] 部分：
++
+[source,terminal]
+----
+# cat .gitconfig
+----
++
+.输出示例
+[source,terminal]
+----
+[user]
+        name = <name>
+        email = <email>
+[http]
+        sslVerify = false
+        sslCert = /var/run/secrets/openshift.io/source/client.crt
+        sslKey = /var/run/secrets/openshift.io/source/client.key
+        sslCaInfo = /var/run/secrets/openshift.io/source/cacert.crt
+----
+
+. 创建 secret：
++
+[source,terminal]
+----
+$ oc create secret generic <secret_name> \
+--from-literal=username=<user_name> \ <1>
+--from-literal=password=<password> \ <2>
+--from-file=.gitconfig=.gitconfig \
+--from-file=client.crt=/var/run/secrets/openshift.io/source/client.crt \
+--from-file=cacert.crt=/var/run/secrets/openshift.io/source/cacert.crt \
+--from-file=client.key=/var/run/secrets/openshift.io/source/client.key
+----
+<1> 用户的 Git 用户名。
+<2> 此用户的密码。
+
+[重要]
+====
+为了避免必须再次输入密码，需要在构建中指定 source-to-image（S2I）镜像。但是，如果无法克隆存储库，您仍然必须指定用户名和密码才能推进构建。
+====
+
+[role="_additional-resources"]
+.其他资源
+
+* 应用程序源代码中的 `/var/run/secrets/openshift.io/source/` 文件夹。

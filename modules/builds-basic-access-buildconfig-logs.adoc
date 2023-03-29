@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-access-buildconfig-logs_{context}"]
+= 访问 BuildConfig 日志
+
+您可以使用 Web 控制台或 CLI 访问 `BuildConfig` 日志。
+
+.流程
+
+* 要输出 `BuildConfig` 的最新构建的日志，请输入以下命令：
++
+[source,terminal]
+----
+$ oc logs -f bc/<buildconfig_name>
+----

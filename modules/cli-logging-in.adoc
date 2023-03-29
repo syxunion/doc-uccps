@@ -1,0 +1,62 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/getting-started.adoc
+
+:_content-type: PROCEDURE
+[id="cli-logging-in_{context}"]
+= 登录到 Uccps CLI
+
+您可以登录到 Uccps CLI（oc）以访问和管理集群。
+
+.先决条件
+
+* 有访问 统信容器云管理平台 集群的权限。
+* 已安装 Uccps CLI（oc）。
+
+[注意]
+====
+要访问只能通过 HTTP 代理服务器访问的集群，可以设置 `HTTP_PROXY`、`HTTPS_PROXY` 和 `NO_PROXY` 变量。oc CLI 会使用这些环境变量以便所有与集群的通信都通过 HTTP 代理进行。
+
+只有在使用 HTTPS 传输时才会发送身份验证标头。
+====
+
+.流程
+
+. 输入 `oc login` 命令并传递用户名：
++
+[source,terminal]
+----
+$ oc login -u user1
+----
+
+. 提示时，请输入所需信息：
++
+.输出示例
+[source,terminal]
+----
+Server [https://localhost:8443]: https://openshift.example.com:6443 <1>
+The server uses a certificate signed by an unknown authority.
+You can bypass the certificate check, but any data you send to the server could be intercepted by others.
+Use insecure connections? (y/n): y <2>
+
+Authentication required for https://openshift.example.com:6443 (openshift)
+Username: user1
+Password: <3>
+Login successful.
+
+You don't have any projects. You can try to create a new project, by running
+
+    oc new-project <projectname>
+
+Welcome! See 'oc help' to get started.
+----
+<1> 输入 统信容器云管理平台 服务器的 URL。
+<2> 输入是否使用不安全的连接。
+<3> 输入用户密码。
+
+[注意]
+====
+如果登录到 web 控制台，您可以生成包含令牌和服务器信息的 `oc login` 命令。您可以使用命令来登录 统信容器云管理平台 CLI，而无需交互式的提示。要生成 命令，请从 web 控制台右上角的用户名下拉菜单中选择 *Copy login command*。
+====
+
+您现在可以创建项目或执行其他命令来管理集群。

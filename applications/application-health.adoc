@@ -1,0 +1,28 @@
+:_content-type: ASSEMBLY
+:context: application-health
+[id="application-health"]
+= 使用健康检查来监控应用程序的健康状态
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+	在软件系统中，组件可能会变得不健康，原因可能源自连接暂时丢失、配置错误或外部依赖项相关问题等临时问题。统信容器云管理平台 应用程序具有若干选项来探测和处理不健康的容器。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+
+include::modules/application-health-about.adoc[leveloffset=+1]
+
+include::modules/application-health-configuring.adoc[leveloffset=+1]
+
+include::modules/odc-monitoring-application-health-using-developer-perspective.adoc[leveloffset=+1]
+
+include::modules/odc-adding-health-checks.adoc[leveloffset=+1]
+
+include::modules/odc-editing-health-checks.adoc[leveloffset=+1]
+
+include::modules/odc-monitoring-health-checks.adoc[leveloffset=+1]

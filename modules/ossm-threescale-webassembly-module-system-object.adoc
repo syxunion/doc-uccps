@@ -1,0 +1,48 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-system-object_{context}"]
+= The 3scale WebAssembly module system object
+
+`system` 顶级对象指定如何访问特定帐户的 3scale 帐户管理 API。upstream 字段是对象最重要的部分。 `upstream` 对象是可选的，但建议使用，除非您要为 3scale WebAssembly 模块提供完全静态的配置，如果您不想提供到 3scale 的 system 组件的连接，则此选项是一个选项。
+
+当您在 `system` 对象之外提供静态配置对象时，静态配置对象始终优先。
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+  name: threescale-wasm-auth
+spec:
+  ...
+  config:
+    system:
+      name: saas_porta
+      upstream: <object>
+      token: myaccount_token
+      ttl: 300
+  ...
+----
+
+.`system` 对象字段
+|===
+|Name |描述 |必填
+
+a|`name`
+|3scale 服务的标识符，目前没有在别处引用。
+|选填
+
+a|`upstream`
+a|要联系的网络主机的详细信息。upstream 代表 3scale 帐户管理 API 主机，称为 system。
+|是
+
+a|`token`
+|具有读取权限的 3scale 个人访问令牌。
+|是
+
+a|`ttl`
+|在尝试获取新更改之前，将从此主机检索到的配置视为有效的最少秒数。默认为 600 秒（10 分钟）。注意：没有最大值，但模块通常会在此 TTL apsaps 之后合理时间段内获取任何配置。
+|选填
+|===

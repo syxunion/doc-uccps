@@ -1,0 +1,40 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-viewing-logs_{context}"]
+= Viewing logs in the Kiali console
+
+您可以在 Kiali 控制台中查看工作负载的日志。 *Workload Detail* 页面包含一个 *Logs* 选项卡，显示一个可显示应用程序和代理日志的统一日志视图。您可以选择在 Kiali 中显示日志的频率。
+
+要更改 Kiali 中显示的日志的日志级别，您可以更改工作负载或代理的日志配置。
+
+.先决条件
+
+* 安装和配置 Service Mesh。
+* 已安装并配置了 Kiali。
+* Kiali 控制台的地址。
+* 在网格中添加了应用程序或 Bookinfo 示例应用程序。
+
+.流程
+
+. 启动 Kiali 控制台。
+
+. 单击  *Log In With Uccps*.
++
+Kiali Overview 页面会显示添加到具有权限的网格中的命名空间。
++
+. 单击  *工作负载*.
+
+. 在 *工作负载* 页面中，从 *Namespace* 菜单中选择项目。
+
+. 如有必要，使用过滤器来查找您要查看的日志的工作负载。单击工作负载 *名称* 例如，单击  *ratings-v1*.
+
+. 在 *工作负载详情* 页面中，单击 *Logs* 选项卡来查看工作负载的日志。
+
+[TIP]
+====
+如果没有看到任何日志条目，您可能需要调整 Time Range 或 Refresh 间隔。
+====

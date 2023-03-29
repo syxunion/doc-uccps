@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-garbage-collection"]
+= 使用垃圾回收释放节点资源
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-configuring
+
+toc::[]
+
+作为管理员，您可以通过垃圾回收来释放资源，从而使用 统信容器云管理平台 确保节点高效运行。
+
+统信容器云管理平台 节点执行两种类型的垃圾回收：
+
+* 容器垃圾回收：移除已终止的容器。
+* 镜像垃圾回收：移除没有被任何正在运行的 pod 引用的镜像。
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-garbage-collection-containers.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-garbage-collection-images.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-garbage-collection-configuring.adoc[leveloffset=+1]

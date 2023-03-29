@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+//  * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-broker-backing-channel-default_{context}"]
+= 配置默认代理支持频道
+
+如果您使用基于频道的代理，您可以将代理的默认后备频道类型设置为 `InMemoryChannel` 或 `KafkaChannel`.
+
+.先决条件
+
+* 在 {product-title} 上具有管理员权限。
+* 在集群中安装了 {ServerlessOperatorName}  和 Knative Eventing。
+* 已安装 Uccps (`oc`) CLI.
+* 如果要使用 Kafka 频道作为默认后备频道类型，还必须在集群中安装 `KnativeKafka` CR 。
+
+.流程
+
+. 修改 `KnativeEventing` 自定义资源(CR)以添加 `config-br-default-channel` 配置映射的配置详情：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  config: <1>
+    config-br-default-channel:
+      channel-template-spec: |
+        apiVersion: messaging.knative.dev/v1beta1
+        kind: KafkaChannel <2>
+        spec:
+          numPartitions: 6 <3>
+          replicationFactor: 3 <4>
+----
+<1> `spec.config`中，您可以指定您要为修改的配置添加的配置映射。
+<2> 默认后备频道类型配置。在本例中，集群的默认频道实现是 `KafkaChannel`.
+<3> 支持代理的 Kafka 频道的分区数量。
+<4> 支持代理的 Kafka 频道的复制因素。
+
+. 应用更新的 `KnativeEventing` CR：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

@@ -1,0 +1,233 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/deploying-egress-router-layer3-redirection.adoc
+// * networking/openshift_sdn/deploying-egress-router-http-redirection.adoc
+// * networking/openshift_sdn/deploying-egress-router-dns-redirection.adoc
+
+// Conditional per flavor of Pod
+ifeval::["{context}" == "deploying-egress-router-layer3-redirection"]
+:redirect:
+:router-type: 重定向
+endif::[]
+ifeval::["{context}" == "deploying-egress-router-http-redirection"]
+:http:
+:router-type: HTTP
+endif::[]
+ifeval::["{context}" == "deploying-egress-router-dns-redirection"]
+:dns:
+:router-type: DNS
+endif::[]
+
+:egress-router-image-name: openshift4/ose-egress-router
+:egress-router-image-url: registry.redhat.io/{egress-router-image-name}
+
+ifdef::http[]
+:egress-http-proxy-image-name: openshift4/ose-egress-http-proxy
+:egress-http-proxy-image-url: registry.redhat.io/{egress-http-proxy-image-name}
+endif::[]
+ifdef::dns[]
+:egress-dns-proxy-image-name: openshift4/ose-egress-dns-proxy
+:egress-dns-proxy-image-url: registry.redhat.io/{egress-dns-proxy-image-name}
+endif::[]
+ifdef::redirect[]
+:egress-pod-image-name: openshift4/ose-pod
+:egress-pod-image-url: registry.redhat.io/{egress-pod-image-name}
+endif::[]
+
+// All the images are different for OKD
+ifdef::openshift-origin[]
+
+:egress-router-image-name: openshift/origin-egress-router
+:egress-router-image-url: {egress-router-image-name}
+
+ifdef::http[]
+:egress-http-proxy-image-name: openshift/origin-egress-http-proxy
+:egress-http-proxy-image-url: {egress-http-proxy-image-name}
+endif::[]
+ifdef::dns[]
+:egress-dns-proxy-image-name: openshift/origin-egress-dns-proxy
+:egress-dns-proxy-image-url: {egress-dns-proxy-image-name}
+endif::[]
+ifdef::redirect[]
+:egress-pod-image-name: openshift/origin-pod
+:egress-pod-image-url: {egress-pod-image-name}
+endif::[]
+
+endif::openshift-origin[]
+
+[id="nw-egress-router-pod_{context}"]
+=  {router-type} 出口路由器 pod 规格
+
+为 `Pod` 对象中的一个出口路由器 pod 定义其配置。以下 YAML 描述了以 {router-type} 模式配置出口路由器 pod 的字段：
+
+// Because redirect needs privileged access to setup `EGRESS_DESTINATION`
+// and the other modes do not, this ends up needing its own almost
+// identical Pod. It's not possible to use conditionals for an unequal
+// number of callouts.
+
+ifdef::redirect[]
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: egress-1
+  labels:
+    name: egress-1
+  annotations:
+    pod.network.openshift.io/assign-macvlan: "true" <1>
+spec:
+  initContainers:
+  - name: egress-router
+    image: {egress-router-image-url}
+    securityContext:
+      privileged: true
+    env:
+    - name: EGRESS_SOURCE <2>
+      value: <egress_router>
+    - name: EGRESS_GATEWAY <3>
+      value: <egress_gateway>
+    - name: EGRESS_DESTINATION <4>
+      value: <egress_destination>
+    - name: EGRESS_ROUTER_MODE
+      value: init
+  containers:
+  - name: egress-router-wait
+    image: {egress-pod-image-url}
+----
+<1> 该注解告知 统信容器云管理平台 在主网络接口控制器(NIC)上创建 macvlan 网络接口，并将 macvlan 接口移到 pod 的网络命名空间。您必须把 "true" 值包括在引号中。要让 统信容器云管理平台 在不同的 NIC 接口上创建 macvlan 接口，请将注解值设置为该接口的名称。例如： eth1。
+<2> 保留给出口路由器 pod 使用的物理网络的 IP 地址。可选：您可以包括子网长度（/24 后缀），以便正确路由到本地子网。如果没有指定子网长度，则出口路由器只能访问使用 EGRESS_GATEWAY 变量指定的主机，且子网上没有其他主机。
+<3> 值与节点使用的默认网关相同。
+<4> 将流量定向到的外部服务器。使用这个示例，连接到 pod 流量被重新定向到 `203.0.113.25`，源 IP 地址为 `192.168.12.99`。
+
+.出口路由器 pod 规格示例
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: egress-multi
+  labels:
+    name: egress-multi
+  annotations:
+    pod.network.openshift.io/assign-macvlan: "true"
+spec:
+  initContainers:
+  - name: egress-router
+    image: {egress-router-image-url}
+    securityContext:
+      privileged: true
+    env:
+    - name: EGRESS_SOURCE
+      value: 192.168.12.99/24
+    - name: EGRESS_GATEWAY
+      value: 192.168.12.1
+    - name: EGRESS_DESTINATION
+      value: |
+        80   tcp 203.0.113.25
+        8080 tcp 203.0.113.26 80
+        8443 tcp 203.0.113.26 443
+        203.0.113.27
+    - name: EGRESS_ROUTER_MODE
+      value: init
+  containers:
+  - name: egress-router-wait
+    image: {egress-pod-image-url}
+----
+endif::redirect[]
+
+// Many conditionals because DNS offers one additional env variable.
+
+ifdef::dns,http[]
+[source,yaml,subs="attributes+"]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: egress-1
+  labels:
+    name: egress-1
+  annotations:
+    pod.network.openshift.io/assign-macvlan: "true" <1>
+spec:
+  initContainers:
+  - name: egress-router
+    image: {egress-router-image-url}
+    securityContext:
+      privileged: true
+    env:
+    - name: EGRESS_SOURCE <2>
+      value: <egress-router>
+    - name: EGRESS_GATEWAY <3>
+      value: <egress-gateway>
+    - name: EGRESS_ROUTER_MODE
+ifdef::dns[]
+      value: dns-proxy
+endif::dns[]
+ifdef::http[]
+      value: http-proxy
+endif::http[]
+  containers:
+  - name: egress-router-pod
+ifdef::dns[]
+    image: {egress-dns-proxy-image-url}
+    securityContext:
+      privileged: true
+endif::dns[]
+ifdef::http[]
+    image: {egress-http-proxy-image-url}
+endif::http[]
+    env:
+ifdef::http[]
+    - name: EGRESS_HTTP_PROXY_DESTINATION <4>
+      value: |-
+        ...
+endif::http[]
+ifdef::dns[]
+    - name: EGRESS_DNS_PROXY_DESTINATION <4>
+      value: |-
+        ...
+    - name: EGRESS_DNS_PROXY_DEBUG <5>
+      value: "1"
+endif::dns[]
+    ...
+----
+<1> 该注解告知 统信容器云管理平台 在主网络接口控制器(NIC)上创建 macvlan 网络接口，并将 macvlan 接口移到 pod 的网络命名空间。您必须把 "true" 值包括在引号中。要让 统信容器云管理平台 在不同的 NIC 接口上创建 macvlan 接口，请将注解值设置为该接口的名称。例如： eth1。
+<2> 保留给出口路由器 pod 使用的物理网络的 IP 地址。可选：您可以包括子网长度（/24 后缀），以便正确路由到本地子网。如果没有指定子网长度，则出口路由器只能访问使用 EGRESS_GATEWAY 变量指定的主机，且子网上没有其他主机。
+<3> 值与节点使用的默认网关相同。
+ifdef::http[]
+<4> 一个字符串或 YAML 多行字符串指定如何配置代理。请注意，这作为 HTTP 代理容器中的环境变量指定，而不是与 init 容器中的其他环境变量指定。
+endif::http[]
+ifdef::dns[]
+<4> Specify a list of one or more proxy destinations.
+<5> Optional: Specify to output the DNS proxy log output to `stdout`.
+endif::dns[]
+endif::[]
+
+// unload flavors
+ifdef::redirect[]
+:!redirect:
+endif::[]
+ifdef::http[]
+:!http:
+endif::[]
+ifdef::dns[]
+:!dns:
+endif::[]
+ifdef::router-type[]
+:!router-type:
+endif::[]
+
+// unload images
+ifdef::egress-router-image-name[]
+:!egress-router-image-name:
+endif::[]
+ifdef::egress-router-image-url[]
+:!egress-router-image-url:
+endif::[]
+ifdef::egress-pod-image-name[]
+:!egress-pod-image-name:
+endif::[]
+ifdef::egress-pod-image-url[]
+:!egress-pod-image-url:
+endif::[]

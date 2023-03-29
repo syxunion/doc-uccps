@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-autoscaling-about.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-autoscaling-best-practices-hpa_{context}"]
+= 最佳实践
+
+.所有 pod 都必须配置资源请求
+HPA 根据 统信容器云管理平台 集群中观察的 pod 或内存使用率值做出缩放决定。利用率值计算为各个容器集的资源请求的百分比。缺少资源请求值可能会影响 HPA 的最佳性能。
+
+.配置冷却期
+在横向 pod 自动扩展过程中，可能会快速扩展事件，而不会造成时间差。配置 cool down 周期，以防止频繁的副本波动。您可以通过配置  `stabilizationWindowSeconds` 字段指定 cool down period。当用于扩展的指标保持波动时，stabilization 窗口用于限制副本数的波动。自动扩展算法使用这个窗口来推断以前的预期状态，并避免对工作负载扩展不需要的更改。
+
+例如，为 `scaleDown` 字段指定了 stabilization 窗口：
+
+[source,yaml]
+----
+behavior:
+  scaleDown:
+    stabilizationWindowSeconds: 300
+----
+
+在上例中，过去 5 分钟的所有所需状态都被视为。此近似滚动的最大值，避免让扩展算法频繁删除 pod，仅在稍后触发同等的 pod 重新创建。

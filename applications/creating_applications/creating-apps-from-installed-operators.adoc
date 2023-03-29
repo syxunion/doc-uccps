@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="creating-apps-from-installed-operators"]
+= 从已安装的 OPERATOR 创建应用程序
+include::_attributes/common-attributes.adoc[]
+:context: creating-apps-from-installed-operators
+
+toc::[]
+
+_Operators_ 是打包、部署和管理 Kubernetes 应用程序的方法。您可以使用集群管理员安装的 Operator 在 统信容器云管理平台 上创建应用程序。
+
+本指南为开发人员介绍如何使用 统信容器云管理平台 Web 控制台从已安装的 Operator 中创建应用程序。
+
+
+include::modules/olm-creating-etcd-cluster-from-operator.adoc[leveloffset=+1]

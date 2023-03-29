@@ -1,0 +1,92 @@
+:_content-type: REFERENCE
+[id="odo-registry_{context}"]
+= odo registry
+
+
+`odo` 使用可移植 _devfile_ 格式来描述组件。`odo` 可以连接到各种 devfile registry，以下载用于不同语言和框架的 devfile。
+
+您可以连接到公开可用的 devfile registry，也可以安装自己的 _安全 Registry_。
+
+您可以使用 `odo registry` 命令管理 `odo` 使用的 registry 来检索 devfile 信息。
+
+== 列出 registry
+
+要列出 `odo` 当前联系的 registry，请运行以下命令：
+
+[source,terminal]
+----
+$ odo registry list
+----
+
+.输出示例：
+[source,terminal]
+----
+NAME                       URL                             SECURE
+DefaultDevfileRegistry     https://registry.devfile.io     No
+----
+
+
+`DefaultDevfileRegistry` 是 odo 使用的默认 registry，它由 devfile.io 项目提供。
+
+== 添加 registry
+
+要添加 registry，请运行以下命令：
+
+[source,terminal]
+----
+$ odo registry add
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo registry add StageRegistry https://registry.stage.devfile.io
+New registry successfully added
+----
+
+
+如果要部署自己的安全 Registry，您可以指定个人访问令牌来使用 `--token` 标志向安全 registry 进行身份验证：
+
+[source,terminal]
+----
+$ odo registry add MyRegistry https://myregistry.example.com --token <access_token>
+New registry successfully added
+----
+
+== 删除 registry
+
+要删除 registry，请运行以下命令：
+
+[source,terminal]
+----
+$ odo registry delete
+----
+
+.输出示例：
+[source,terminal]
+----
+$ odo registry delete StageRegistry
+? Are you sure you want to delete registry "StageRegistry" Yes
+Successfully deleted registry
+----
+
+使用 `--force` （或 `-f`）标记强制删除 registry，而无需确认。
+
+== 更新 registry
+
+要更新已注册的 registry 的 URL 或已经注册的个人访问令牌，请运行以下命令：
+
+[source,terminal]
+----
+$ odo registry update
+----
+
+.输出示例：
+[source,terminal]
+----
+ $ odo registry update MyRegistry https://otherregistry.example.com --token <other_access_token>
+ ? Are you sure you want to update registry "MyRegistry" Yes
+ Successfully updated registry
+----
+
+使用 `--force` （或 `-f`）标记强制更新 registry，而无需确认。

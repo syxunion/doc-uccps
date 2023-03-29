@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-enable-scale-to-zero_{context}"]
+= 启用 scale-to-zero
+
+Knative Serving 为应用程序提供自动扩展功能（或 autoscaling），以满足传入的需求。您可以使用 `enable-scale-to-zero` spec，为集群中的应用程序全局启用或禁用 scale-to-zero。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+* 有集群管理员权限。
+
+* 使用默认的 Knative Pod Autoscaler。如果使用 Kubernetes Horizontal Pod Autoscaler，则缩减为零功能将不可用。
+
+.流程
+
+* 在 `KnativeServing` 自定义资源 (CR) 中修改`enable-scale-to-zero`
++
+.KnativeServing CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    autoscaler:
+      enable-scale-to-zero: "false" <1>
+----
+<1> `enable-scale-to-zero` spec 可以是 `"true"` 或  `"false"`。如果设置为 true，则会启用 scale-to-zero。如果设置为 false，应用程序将缩减至配置的最小扩展绑定。默认值为 `"true"`。

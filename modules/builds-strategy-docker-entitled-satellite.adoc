@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//* builds/running-entitled-builds.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-docker-entitled-satellite_{context}"]
+= 使用 统信 Satellite 订阅构建 Docker
+
+Docker 策略构建可以使用 统信 Satellite 软件仓库来安装订阅内容。
+
+.先决条件
+
+* 您已将授权密钥和 Satellite 存储库配置添加为构建卷。
+
+.流程
+
+使用以下示例 Dockerfile 来通过 Satellite 安装内容：
+
+[source,terminal]
+----
+FROM registry.redhat.io/ubi8/ubi:latest
+RUN dnf search kernel-devel --showduplicates && \
+        dnf install -y kernel-devel
+----

@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+:_content-type: PROCEDURE
+[id="nw-disabling-hsts_{context}"]
+= 根据每个路由禁用 HTTP 严格传输安全性
+
+要禁用 HTTP 严格传输安全性 (HSTS)，您可以将路由注解中的 `max-age` 值设置为 `0`。
+
+.先决条件
+
+* 您可以使用具有项目的管理员特权的用户登陆到集群。
+* 已安装 `oc` CLI.
+
+.流程
+
+* 要禁用 HSTS，请输入以下命令将路由注解中的 `max-age` 值设置为 `0` ：
++
+[source,terminal]
+----
+$ oc annotate route <route_name> -n <namespace> --overwrite=true "haproxy.router.openshift.io/hsts_header"="max-age=0"
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来创建配置映射：
+
+.根据每个路由禁用 HSTS 的示例
+[source,yaml]
+----
+metadata:
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=0
+----
+====
+
+* 要为命名空间中的每个路由禁用 HSTS，请输入 followinf 命令：
++
+[source,terminal]
+----
+$ oc annotate <route> --all -n <namespace> --overwrite=true "haproxy.router.openshift.io/hsts_header"="max-age=0"
+----
+
+.验证
+
+. 要查询所有路由的注解，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get route  --all-namespaces -o go-template='{{range .items}}{{if .metadata.annotations}}{{$a := index .metadata.annotations "haproxy.router.openshift.io/hsts_header"}}{{$n := .metadata.name}}{{with $a}}Name: {{$n}} HSTS: {{$a}}{{"\n"}}{{else}}{{""}}{{end}}{{end}}{{end}}'
+----
++
+.输出示例
+[source,terminal]
+----
+Name: routename HSTS: max-age=0
+----

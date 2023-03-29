@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-oauth-clients.adoc
+
+[id="oauth-default-clients_{context}"]
+= 默认 OAuth 客户端
+
+启动统信容器云管理平台API 时会自动创建以下 OAuth 客户端：
+
+[cols="2,3",options="header"]
+|===
+
+|OAuth 客户端 |使用方法
+
+|`openshift-browser-client`
+|使用可处理交互式登录的用户代理，在 `<namespace_route>/oauth/token/request` 请求令牌。 ^[1]^
+
+|`openshift-challenging-client`
+|使用可处理 `WWW-Authenticate` 质询的用户代理来请求令牌。
+
+|===
+[.注意]
+--
+1. `<namespace_route>`  是指命名空间路由。运行以下命令可以找到：
++
+[source,terminal]
+----
+$ oc get route oauth-openshift -n openshift-authentication -o json | jq .spec.host
+----
+--

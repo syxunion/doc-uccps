@@ -1,0 +1,317 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-vertical-autoscaler.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-vertical-autoscaler-using-about_{context}"]
+= 关于使用 Vertical Pod Autoscaler Operator
+
+要使用 Vertical Pod Autoscaler Operator（vpa），您需要为集群中的工作负载对象创建 VPA 自定义资源（CR）。VPA 学习并应用与该工作负载对象关联的 pod 的最佳 CPU 和内存资源。您可以使用 VPA 与部署、有状态集、作业、守护进程集、副本集或复制控制器工作负载对象一起使用。VPA CR 必须与您要监控的 pod 位于同一个项目中。
+
+您可以使用 VPA CR 关联一个工作负载对象，并指定 VPA 使用什么模式运行：
+
+* `Auto` 和 `Recreate` 模式会在 pod 生命周期内自动应用 VPA 对 CPU 和内存建议。VPA 会删除项目中任何与建议不兼容的 pod。当由工作负载对象重新部署时，VPA 会在其建议中更新新 pod。
+* `Initial` 模式仅在创建 pod 时自动应用 VPA 建议。
+* `Off` 模式只提供推荐的资源限制和请求信息，用户可以手动应用其中的建议。off 模式不会更新 pod。
+
+您还可以使用 CR 使特定容器不受 VPA 评估和更新的影响。
+
+例如，pod 具有以下限制和请求：
+
+[source,yaml]
+----
+resources:
+  limits:
+    cpu: 1
+    memory: 500Mi
+  requests:
+    cpu: 500m
+    memory: 100Mi
+----
+
+在创建了一个设置为 auto 的 VPA 后，VPA 会了解资源使用情况并删除 pod。重新部署时，pod 会使用新的资源限值和请求：
+
+[source,yaml]
+----
+resources:
+  limits:
+    cpu: 50m
+    memory: 1250Mi
+  requests:
+    cpu: 25m
+    memory: 262144k
+----
+
+您可以使用以下命令查看 VPA 建议：
+
+[source,terminal]
+----
+$ oc get vpa <vpa-name> --output yaml
+----
+
+几分钟后，输出显示 CPU 和内存请求的建议，如下所示：
+
+.输出示例
+[source,yaml]
+----
+...
+status:
+...
+  recommendation:
+    containerRecommendations:
+    - containerName: frontend
+      lowerBound:
+        cpu: 25m
+        memory: 262144k
+      target:
+        cpu: 25m
+        memory: 262144k
+      uncappedTarget:
+        cpu: 25m
+        memory: 262144k
+      upperBound:
+        cpu: 262m
+        memory: "274357142"
+    - containerName: backend
+      lowerBound:
+        cpu: 12m
+        memory: 131072k
+      target:
+        cpu: 12m
+        memory: 131072k
+      uncappedTarget:
+        cpu: 12m
+        memory: 131072k
+      upperBound:
+        cpu: 476m
+        memory: "498558823"
+...
+----
+
+输出显示推荐的资源、目标、最低推荐资源、`lowerBound`, 最高推荐资源、 `upperBound`,以及最新资源建议和 `uncappedTarget`.
+
+VPA 使用 lessBound 和 upperBound 值来确定一个 pod 是否需要更新。如果 pod 的资源请求低于 lowerBound 值，或高于 upperBound 值，则 VPA 会终止 pod，并使用 target 值重新创建 pod。
+
+[id="nodes-pods-vertical-autoscaler-using-one-pod_{context}"]
+== 更改 VPA 最小值
+
+默认情况下，工作负载对象必须至少指定两个副本，以便 VPA 自动删除和更新其 pod。因此，VPA 不会自动执行指定少于两个副本的工作负载对象。如果 pod 由 VPA 外部的一些进程重启，VPA 会从这些工作负载对象更新的新 pod。您可以通过修改 VerticalPodAutoscalerController 自定义资源（CR）中的 minReplicas 参数来更改此集群范围的最小值。
+
+例如，如果您将 minReplicas 设置为 3，则 VPA 不会为指定少于三个副本的工作负载对象删除和更新 pod。
+
+[注意]
+====
+如果将 minReplicas 设置为 1，则 VPA 可以为只指定一个副本的工作负载对象删除唯一的 pod。只有在 VPA 删除 pod 以调整其资源时，您的工作负载可以允许停机时，才应使用此设置来使用一个副本对象。为了避免使用一个副本的对象出现不必要的停机时间，将带有 podUpdatePolicy 设置的 VPA CR 配置为 Initial，这只有在 VPA 外部的一些进程重启时，或状态为 Off 时才重启。这可让您在适合的时间手动更新 pod。
+====
+
+.`VerticalPodAutoscalerController` 对象示例
+[source,yaml]
+----
+apiVersion: autoscaling.openshift.io/v1
+kind: VerticalPodAutoscalerController
+metadata:
+  creationTimestamp: "2021-04-21T19:29:49Z"
+  generation: 2
+  name: default
+  namespace: openshift-vertical-pod-autoscaler
+  resourceVersion: "142172"
+  uid: 180e17e9-03cc-427f-9955-3b4d7aeb2d59
+spec:
+  minReplicas: 3 <1>
+  podMinCPUMillicores: 25
+  podMinMemoryMb: 250
+  recommendationOnly: false
+  safetyMarginFraction: 0.15
+----
+
+<1> 指定 VPA 中要操作的工作负载对象中的最小副本数。VPA 不会自动删除任何小于最小副本的对象。
+
+[id="nodes-pods-vertical-autoscaler-using-auto_{context}"]
+== 自动应用 VPA 建议
+要使用 VPA 来自动更新 pod，为特定工作负载对象创建一个 VPA CR，并将 updateMode 设置为 `Auto` 或 `Recreate`.
+
+当为工作复杂对象创建 pod 时，VPA 会持续监控容器以分析其 CPU 和内存需求。VPA 会删除任何不满足 VPA 对 CPU 和内存的建议的 pod。重新部署后，pod 根据 VPA 建议使用新的资源限值和请求，并遵循您的应用程序的 pod 中断预算。建议被添加到 VPA CR 的 status 字段中以进行引用。
+
+[注意]
+====
+默认情况下，工作负载对象必须至少指定两个副本，以便 VPA 自动删除其 pod。指定了比这个最小值更少的副本数的工作负载对象不会被删除。如果您手动删除这些 pod，当工作负载对象重新部署 pod 时，VPA 会使用其建议更新新的 pod。您可以通过修改 VerticalPodAutoscalerController 对象来更改这个最小值，如更改 VPA 最小值所示。
+====
+
+.Auto 模式的 VPA CR 示例
+[source,yaml]
+----
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       Deployment <1>
+    name:       frontend <2>
+  updatePolicy:
+    updateMode: "Auto" <3>
+----
+<1> 您希望此 VPA CR 管理的工作负载对象类型。
+<2> 您希望此 VPA CR 管理的工作负载对象名称。
+<3> 将模式设置为 `Auto` 或 `Recreate`:
+* `Auto`. 分配创建 pod 的资源请求，并在请求的资源与新建议有很大不同时终止这些 Pod 来更新现存的 pod。
+* `Recreate`. VPA 分配创建 pod 的资源请求，并在请求的资源与新建议有很大不同时终止这些 Pod 来更新现存的 pod。这个模式应该很少使用，只有在需要确保每当资源请求改变时 pod 就需要重启时才使用。
+
+[注意]
+====
+在 VPA 可以决定推荐的资源并对新 pod 应用推荐前，pod 必须已在运行。
+====
+
+[id="nodes-pods-vertical-autoscaler-using-pod_{context}"]
+== 在创建 pod 时自动应用 VPA 建议
+要仅在 pod 首次部署时使用 VPA 来应用推荐的资源，为特定的工作负载对象创建一个 VPA CR，将 updateMode 设置为 Initial。
+
+然后，手动删除与您要使用 VPA 建议的工作负载对象关联的 pod。在 Initial 模式中，VPA 不会删除 pod，也不会更新 pod，它会学习新的资源建议。
+
+.Initial 模式的 VPA CR 示例
+[source,yaml]
+----
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       Deployment <1>
+    name:       frontend <2>
+  updatePolicy:
+    updateMode: "Initial" <3>
+----
+<1> 您希望此 VPA CR 管理的工作负载对象类型。
+<2> 您希望此 VPA CR 管理的工作负载对象名称。
+<3> 将模式设置为 Initial。VPA 在 pod 创建时分配资源，在 pod 生命周期中不会更改资源。
+
+[注意]
+====
+在 VPA 可以决定推荐的资源并对新 pod 应用推荐前，项目中必须已有已在运行的 pod。
+====
+
+[id="nodes-pods-vertical-autoscaler-using-manual_{context}"]
+== 手动应用 VPA 建议
+
+要使用 VPA 来仅决定推荐的 CPU 和内存值而不进行实际的应用，对特定的工作负载创建一个 VPA CR，把 updateMode 设置为 off。
+
+当为该工作负载对象创建 pod 时, VPA 会分析容器的 CPU 和内存需求，并在 VPA CR 的 status 字段中记录推荐。VPA 会提供新的资源建议，但不会更新 pod。
+
+.使用 Off 模式的 VPA CR 示例
+[source,yaml]
+----
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       Deployment <1>
+    name:       frontend <2>
+  updatePolicy:
+    updateMode: "Off" <3>
+----
+<1> 您希望此 VPA CR 管理的工作负载对象类型。
+<2> 您希望此 VPA CR 管理的工作负载对象名称。
+<3> 将模式设置为 `Off`.
+
+您可以使用以下命令查看建议。
+
+[source,terminal]
+----
+$ oc get vpa <vpa-name> --output yaml
+----
+
+根据建议，您可以编辑工作负载对象以添加 CPU 和内存请求，然后删除 pod 并使用推荐的资源重新部署 pod。
+
+[注意]
+====
+在 VPA 可以决定推荐的资源前，pod 必须已在运行。
+====
+
+[id="nodes-pods-vertical-autoscaler-using-exempt_{context}"]
+== 阻止容器特定容器应用 VPA 建议
+
+如果您的工作负载对象有多个容器，且您不希望 VPA 对所有容器进行评估并进行操作，请为特定工作负载对象创建一个 VPA CR，添加一个 resourcePolicy 已使特定容器不受 VPA 的影响。
+
+当 VPA 使用推荐的资源更新 pod 时，任何带有 resourcePolicy 的容器都不会被更新，且 VPA 不会对这些 pod 中的容器提供建议。
+
+[source,yaml]
+----
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vpa-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       Deployment <1>
+    name:       frontend <2>
+  updatePolicy:
+    updateMode: "Auto" <3>
+  resourcePolicy: <4>
+    containerPolicies:
+    - containerName: my-opt-sidecar
+      mode: "Off"
+----
+<1> 您希望此 VPA CR 管理的工作负载对象类型。
+<2> 您希望此 VPA CR 管理的工作负载对象名称。
+<3> 将模式设置为 `Auto`, `Recreate`, 或  `Off`. Recreate 模式应该很少使用，只有在需要确保每当资源请求改变时 pod 就需要重启时才使用。
+<4> 指定不受 VPA 影响的容器，将 mode 设置为 Off。
+
+例如，一个 pod 有两个容器，它们有相同的资源请求和限值：
+
+[source,yaml]
+----
+# ...
+spec:
+  containers:
+  - name: frontend
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 500m
+        memory: 100Mi
+  - name: backend
+    resources:
+      limits:
+        cpu: "1"
+        memory: 500Mi
+      requests:
+        cpu: 500m
+        memory: 100Mi
+# ...
+----
+
+在启用一个带有 backend 排除容器设置的 VPA CR 后，VPA 终止并使用推荐的资源重新创建 pod 的行为只适用于 frontend 容器。
+
+[source,yaml]
+----
+...
+spec:
+  containers:
+    name: frontend
+    resources:
+      limits:
+        cpu: 50m
+        memory: 1250Mi
+      requests:
+        cpu: 25m
+        memory: 262144k
+...
+    name: backend
+    resources:
+      limits:
+        cpu: "1"
+        memory: 500Mi
+      requests:
+        cpu: 500m
+        memory: 100Mi
+...
+----

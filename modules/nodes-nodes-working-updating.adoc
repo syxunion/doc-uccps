@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-working.adoc
+
+:_content-type: CONCEPT
+[id="nodes-nodes-working-updating_{context}"]
+= 了解如何更新节点上的标签
+
+您可以更新节点上的任何标签。
+
+节点标签不会在节点删除后保留，即使机器备份了节点也是如此。
+
+[注意]
+====
+对 `MachineSet` 对象的任何更改都不会应用到机器集拥有的现有机器。例如，对现有 `MachineSet` 对象编辑或添加的标签不会传播到与机器集关联的现有机器和节点。
+====
+
+* 以下命令在节点上添加或更新标签：
++
+[source,terminal]
+----
+$ oc label node <node> <key_1>=<value_1> ... <key_n>=<value_n>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc label nodes webconsole-7f7f6 unhealthy=true
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来应用标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: webconsole-7f7f6
+  labels:
+    unhealthy: 'true'
+----
+====
+
+* 以下命令更新命名空间中的所有 pod：
++
+[source,terminal]
+----
+$ oc label pods --all <key_1>=<value_1>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc label pods --all status=unhealthy
+----

@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-control-plane-deploy-operatorhub_{context}"]
+= Deploying the {SMProductShortName} control plane from the web console
+
+您可以使用 Web 控制台部署基本 `ServiceMeshControlPlane` 。在本例中， `istio-system` 是  {SMProductShortName}  项目的名称。 
+
+.Prerequisites
+
+* 必须安装 {SMProductName} 。
+* 具有 `cluster-admin` 角色的帐户。
+
+.Procedure
+
+. 以具有 `cluster-admin` 角色的用户身份登录到 {product-title} 控制台。
+
+. 创建一个名为 `istio-system` 的项目。
++
+.. 浏览至 *主页* -> *项目* 。
++
+.. 点击 *创建项目* 。
++
+.. 在  *Name* 字段中输入 `istio-system`。 `ServiceMeshControlPlane`  资源必须安装在独立于您的微服务和 Operator 的项目中。
+这些步骤使用 `istio-system` 作为示例，但您可以在任何项目中部署 {SMProductShortName} control plane， 只要它与包含您的服务的项目分开。
++
+.. 点 *创建*。
+
+. 导航到 *Operators* -> *安装的 Operators*。
+
+. 点 {SMProductName} Operator，然后点  *Istio Service Mesh Control Plane*。
+
+. 在 *Istio Service Mesh Control Plane* 选项卡中，点 *Create ServiceMeshControlPlane*。
+
+. 在 *创建 ServiceMeshControlPlane*  页面中， 接受默认的 {SMProductShortName} 版本，以利用该产品的最新版本中提供的功能。control plane 的版本决定了与 Operator 版本无关的可用功能。
++
+您可以在以后配置  `ServiceMeshControlPlane`  设置。
++
+.. 点 *创建*。 Operator 根据您的配置参数创建 pod、服务和 {SMProductShortName} 组件。
+
+. 要验证 control plane 是否已正确安装，请点击  *Istio Service Mesh Control Plane* 标签页。
++
+.. 点新的 control plane 的名称。
++
+.. 点 *Resources* 标签页来查看由 Operator 创建并配置的 {SMProductName} 资源。

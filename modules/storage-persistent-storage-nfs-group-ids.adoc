@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+// * storage/registry/configuring_registry_storage/configuring-registry-storage-baremetal.adoc
+
+[id=storage-persistent-storage-nfs-group-ids_{context}]
+= 组 ID
+
+用来控制 NFS 访问（假设不能在 NFS 导出中修改权限）的建议方法是使用附加组（supplemental group）。统信容器云管理平台中的附件组的功能是用于共享存储（NFS 是一个共享存储）。相对块存储（如 iSCSI），使用 fsGroup SCC 策略和在 Pod 的 securityContext 中的fsGroup 值。
+
+[注意]
+====
+在访问持久性存储时，一般情况下最好使用 supplemental 组 ID 而不是使用用户 ID。
+====
+
+示例中目标 NFS 目录上的组 ID 是 5555， Pod 可以使用 Pod 的 `securityContext` 定义中的 supplementalGroups 来设置组 ID。例如：
+
+[source,yaml]
+----
+spec:
+  containers:
+    - name:
+    ...
+  securityContext: <1>
+    supplementalGroups: [5555] <2>
+----
+<1> `securityContext` 必须在 pod 一级定义，而不是在某个特定容器中定义。
+<2> 为 pod 定义的 GID 数组。在这种情况下，是阵列中的一个元素。使用逗号将不同 GID 分开。
+
+假设没有可能满足 pod 要求的自定义 SCC，pod 可能与受限 SCC 匹配。这个 SCC 把 supplementalGroups 策略设置为 RunAsAny。这代表提供的任何组群 ID 都被接受，且不进行范围检查。
+
+因此，上面的 pod 可以通过，并被启动。但是，如果需要进行组 ID 范围检查，使用自定义 SCC 就是首选的解决方案。可创建一个定义了最小和最大组群 ID 的自定义 SCC，这样就会强制进行组 ID 范围检查，组 ID 5555 将被允许 。
+
+[注意]
+====
+要使用自定义 SCC，需要首先将其添加到适当的服务帐户（service account）中。例如，在一个特定项目中使用 `default` 服务账户（除非在 `Pod` 规格中指定了另外一个账户）。
+====

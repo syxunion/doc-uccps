@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="configuring-ingress-cluster-traffic-aws-network-load-balancer"]
+= 使用网络负载平衡器在 AWS 上配置集群入口流量
+include::_attributes/common-attributes.adoc[]
+:context: configuring-ingress-cluster-traffic-aws-network-load-balancer
+
+toc::[]
+
+统信容器云管理平台 提供了从集群外部与集群中运行的服务进行通信的方法。此方法使用 Network Load Balancer（NLB），它会将客户端的 IP 地址转发到节点。您可以在新的或现有 AWS 集群上配置 NLB。
+
+include::modules/nw-aws-replacing-clb-with-nlb.adoc[leveloffset=+1]
+
+

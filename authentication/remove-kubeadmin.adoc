@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="removing-kubeadmin"]
+= 移除 kubeadmin 用户
+include::_attributes/common-attributes.adoc[]
+:context: removing-kubeadmin
+
+toc::[]
+
+include::modules/authentication-kubeadmin.adoc[leveloffset=+1]
+
+include::modules/authentication-remove-kubeadmin.adoc[leveloffset=+1]

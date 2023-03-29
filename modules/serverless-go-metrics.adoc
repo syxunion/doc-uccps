@@ -1,0 +1,185 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-go-metrics_{context}"]
+= Go 运行时指标
+
+每个 Knative Serving control plane 进程会发出多个 Go 运行时内存统计 (MemStats) 。
+
+[注意]
+====
+每个指标的 name 标签是一个空标签。
+====
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`go_alloc`
+|分配的堆对象的字节数。这个指标与 `heap_alloc` 相同。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_total_alloc`
+|为堆对象分配的累积字节。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_sys`
+|从操作系统获得的内存总量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_lookups`
+|运行时执行的指针查找数量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_mallocs`
+|分配的堆对象的累计数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_frees`
+|已释放的堆对象的累计数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_alloc`
+|分配的堆对象的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_sys`
+|从操作系统获得的堆内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_idle`
+|空闲、未使用的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_in_use`
+|当前正在使用的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_released`
+|返回到操作系统的物理内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_heap_objects`
+|分配的堆对象数量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_stack_in_use`
+|堆栈中当前正在使用的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_stack_sys`
+|从操作系统获得的堆栈内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_mspan_in_use`
+|分配的 `mspan` 结构的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_mspan_sys`
+|从操作系统获得的用于 `mspan` 结构的内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_mcache_in_use`
+|分配的 `mcache`  结构的字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_mcache_sys`
+|从操作系统获取的用于 `mcache`  结构的内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_bucket_hash_sys`
+|分析 bucket 哈希表中的内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_gc_sys`
+|垃圾回收元数据中的字节内存数量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_other_sys`
+|其它非堆运行时分配的内存字节数。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_next_gc`
+|下一个垃圾回收周期的目标堆大小。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_last_gc`
+|最后一次垃圾回收完成的时间（Epoch 或 Unix 时间）。
+|量表
+|`name`
+|Nanoseconds
+
+|`go_total_gc_pause_ns`
+|自程序启动以来，垃圾回收的 stop-the-world 暂停的累积时间。
+|量表
+|`name`
+|Nanoseconds
+
+|`go_num_gc`
+|完成的垃圾回收周期数量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_num_forced_gc`
+|由于应用调用垃圾回收功能而强制执行的垃圾回收周期数量。
+|量表
+|`name`
+|整数 （无单位）
+
+|`go_gc_cpu_fraction`
+|程序启动后，被垃圾收集器使用的程序可用 CPU 时间的比例。
+|量表
+|`name`
+|整数 （无单位）
+|===

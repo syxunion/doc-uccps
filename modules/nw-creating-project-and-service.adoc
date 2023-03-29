@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.adoc
+
+:_content-type: PROCEDURE
+[id="nw-creating-project-and-service_{context}"]
+= 创建项目和服务
+
+如果您要公开的项目和服务尚不存在，请首先创建项目，再创建服务。
+
+如果项目和服务都已存在，跳到公开服务以创建路由这一步。
+
+.先决条件
+
+* 按照 oc CLI 并以一个集群管理员身份登陆。
+
+.流程
+
+. 运行 `oc new-project` 命令为您的服务创建一个新项目：
++
+[source,terminal]
+----
+$ oc new-project myproject
+----
+
+. 使用 `oc new-app` 命令来创建服务：
++
+[source,terminal]
+----
+$ oc new-app nodejs:12~https://github.com/sclorg/nodejs-ex.git
+----
+
+. 要验证该服务是否已创建，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get svc -n myproject
+----
++
+.输出示例
+[source,terminal]
+----
+NAME        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+nodejs-ex   ClusterIP   172.30.197.157   <none>        8080/TCP   70s
+----
++
+默认情况下，新服务没有外部 IP 地址。
+
+

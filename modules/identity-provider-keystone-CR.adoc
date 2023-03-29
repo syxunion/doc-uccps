@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-keystone-identity-provider.adoc
+
+[id="identity-provider-keystone-CR_{context}"]
+= Keystone CR 示例
+
+以下自定义资源 (CR) 显示 Keystone 身份提供程序的参数和可接受值。
+
+.Keystone CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: keystoneidp <1>
+    mappingMethod: claim <2>
+    type: Keystone
+    keystone:
+      domainName: default <3>
+      url: https://keystone.example.com:5000 <4>
+      ca: <5>
+        name: ca-config-map
+      tlsClientCert: <6>
+        name: client-cert-secret
+      tlsClientKey: <7>
+        name: client-key-secret
+----
+<1> 此提供程序名称作为前缀放在提供程序用户名前，以此组成身份名称。
+<2> 控制如何在此提供程序的身份和 `User` 对象之间建立映射。
+<3> Keystone 域名。在 Keystone 中，用户名是特定于域的。只支持一个域。
+<4> 用于连接到 Keystone 服务器的 URL（必需）。这必须使用 `https`。
+<5> 可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台 `ConfigMap`` 的引用，以用于验证所配置 URL 的服务器证书。
+<6> 可选：对包含客户端证书的统信容器云管理平台 `Secret`` 对象的引用，该证书在向所配置的 URL 发出请求时出示。
+<7> 对包含客户端证书密钥的统信容器云管理平台 `Secret`` 对象的引用。指定了 `tlsClientCert`` 时必需此项。

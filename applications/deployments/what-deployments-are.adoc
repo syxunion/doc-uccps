@@ -1,0 +1,57 @@
+:_content-type: ASSEMBLY
+[id="what-deployments-are"]
+= 了解部署和部署配置对象
+include::_attributes/common-attributes.adoc[]
+:context: what-deployments-are
+
+toc::[]
+
+统信容器云管理平台 中的 `部署` 和 `部署配置` API 对象提供了两个类似但不同的方法来对常见用户应用程序进行精细管理。由以下独立 API 对象组成：
+
+* `部署配置` 或 `部署`，各自将应用程序特定组件的所需状态描述为 pod 模板。
+* `部署配置` 对象涉及一个或多个 复制控制器，其中包含部署状态的时间点记录，作为 pod 模板。同样, 部署 对象涉及一个或多个 副本集。
+* 一个或多个 pod,表应用程序某一特定版本的实例。
+
+////
+Update when converted:
+[role="_additional-resources"]
+.Additional resources
+
+xref:../../applications/deployments/advanced_deployment_strategies.adoc#graceful-termination[graceful shutdown]
+xref:../../applications/basic_deployment_operations.adoc#triggers[Triggers]
+xref:../../applications/deployment_strategies.adoc#strategies[strategies]
+xref:../../applications/deployment_strategies.adoc#lifecycle-hooks[hooks]
+xref:../../applications/basic_deployment_operations.adoc#rolling-back-a-deployment[rollbacks]
+xref:../../applications/basic_deployment_operations.adoc#scaling[scaling]
+xref:../../dev_guide/pod_autoscaling.adoc#dev-guide-pod-autoscaling[autoscaling]
+////
+
+[id="what-deployments-are-build-blocks"]
+== 部署构建块
+
+部署 和部署配置分别通过使用原生 Kubernetes API 对象 `ReplicaSet`和 `ReplicationController` 来启用，作为构建块。
+
+用户不必操作复制控制器、副本集或 `部署配置` 对象或部署所拥有的 pod。部署系统可确保正确传播更改。
+
+[提示]
+====
+如果现有部署策略不适用于您的用例，而且必须在部署的生命周期内执行手动步骤，那么应考虑创建自定义部署策略。
+====
+
+以下部分详细介绍了这些对象。
+
+include::modules/deployments-replicationcontrollers.adoc[leveloffset=+2]
+include::modules/deployments-replicasets.adoc[leveloffset=+2]
+
+include::modules/deployments-deploymentconfigs.adoc[leveloffset=+1]
+include::modules/deployments-kube-deployments.adoc[leveloffset=+1]
+include::modules/deployments-comparing-deploymentconfigs.adoc[leveloffset=+1]
+////
+Update when converted:
+[role="_additional-resources"]
+.Additional resources
+
+- xref:../../dev_guide/managing_images.adoc#dev-guide-managing-images[Imagestreams]
+- xref:../../dev_guide/deployments/deployment_strategies.adoc#lifecycle-hooks[Lifecycle hooks]
+- xref:../../dev_guide/deployments/deployment_strategies.adoc#custom-strategy[Custom deployment strategies]
+////

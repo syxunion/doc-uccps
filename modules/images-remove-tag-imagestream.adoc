@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+// * openshift_images/tagging-images
+
+:_content-type: PROCEDURE
+[id="images-remove-tag-imagestream_{context}"]
+= 从镜像流中删除标签
+
+您可以从镜像流中删除标签。
+
+.流程
+
+* 要从镜像流运行中完全删除标签：
++
+[source,terminal]
+----
+$ oc delete istag/ruby:latest
+----
++
+或：
++
+[source,terminal]
+----
+$ oc tag -d ruby:latest
+----

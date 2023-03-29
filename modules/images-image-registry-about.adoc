@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.adoc
+
+[id="images-image-registry-about_{context}"]
+= 镜像 registry
+
+镜像 registry 是一个可存储和提供容器镜像的内容服务器。例如：
+
+[source,text]
+----
+registry.redhat.io
+----
+
+registry 包含一个或多个镜像存储库的集合，其中包含一个或多个标记的镜像。统信在 `registry.redhat.io` 上为订阅者提供了一个 registry。统信容器云管理平台 还可提供其内部 registry，用于管理自定义容器镜像。

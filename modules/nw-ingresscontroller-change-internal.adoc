@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+[id="nw-ingresscontroller-change-internal_{context}"]
+= 将 Ingress Controller 端点发布范围配置为 Internal
+
+当集群管理员在没有指定集群为私有的情况下安装新集群时，将默认 Ingress Controller 创建，并将 `scope` 设置为 `External`。集群管理员可以将 `External` 范围的 Ingress Controller 更改为 `Internal`。
+
+.先决条件
+
+.流程
+
+* 要将 `External` 范围的 Ingress Controller 更改为 `Internal`，请输入以下命令：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator patch ingresscontrollers/default --type=merge --patch='{"spec":{"endpointPublishingStrategy":{"type":"LoadBalancerService","loadBalancer":{"scope":"Internal"}}}}'
+----
++
+* 要检查 Ingress Controller 的状态，请输入以下命令：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator get ingresscontrollers/default -o yaml
+----
++
+* Progressing 状态条件指示您必须执行进一步的操作。例如，状态条件可以通过输入以下命令来指示需要删除该服务：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress delete services/router-default
+----
++
+* 如果删除了该服务，Ingress Operator 会重新创建为 Internal。

@@ -1,0 +1,181 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+// * scalability_and_performance/recommended-host-practices.adoc
+
+:_content-type: PROCEDURE
+[id="etcd-defrag_{context}"]
+= 分离 etcd 数据
+
+在导致磁盘碎片的事件后（如 etcd 历史记录紧凑）对 etcd 数据进行清理以回收磁盘空间。
+
+历史压缩将自动每五分钟执行一次，并在后端数据库中造成混乱。此碎片空间可供 etcd 使用，但主机文件系统不可用。您必须对碎片 etcd 进行碎片清除，才能使这个空间可供主机文件系统使用。
+
+碎片清理会自动发生，但您也可以手动触发它。
+
+[注意]
+
+====
+自动清理碎片非常适合大多数情况，因为 etcd operator 使用集群信息来确定用户最有效的操作。
+====
+
+[id="automatic-defrag-etcd-data_{context}"]
+== 自动清理
+
+etcd Operator 自动清理碎片磁盘。不需要人工干预。
+
+查看以下日志之一来验证碎片整理过程是否成功：
+
+* etcd 日志
+* cluster-etcd-operator pod
+* operator 状态错误日志
+
+
+.日志输出示例
+[source,terminal]
+[subs="+quotes"]
+----
+I0907 08:43:12.171919     
+defragcontroller.go:198 etcd member "ip-
+10-0-191-150.us-west-2.compute.internal"
+backend store fragmented: 39.33 %, dbSize:
+349138944
+----
+
+[id="manual-defrag-etcd-data_{context}"]
+== 手动清理
+
+//You can monitor the `etcd_db_total_size_in_bytes` metric to determine whether manual defragmentation is necessary.
+
+您可以监控 etcd_db_total_size_in_bytes 指标，以确定是否需要手动进行碎片整理。
+
+
+[警告]
+====
+分离 etcd 是一个阻止性操作。在进行碎片处理完成前，etcd 成员不会响应。因此，在每个下一个 pod 要进行碎片清理前，至少等待一分钟，以便集群可以恢复正常工作。
+====
+
+按照以下步骤对每个 etcd 成员上的 etcd 数据进行碎片处理。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 确定哪个 etcd 成员是领导成员，因为领导会进行最后的碎片处理。
+
+.. 获取 etcd pod 列表：
++
+[source,terminal]
+----
+$ oc get pods -n openshift-etcd -o wide | grep -v quorum-guard | grep etcd
+----
++
+.输出示例
+[source,terminal]
+----
+etcd-ip-10-0-159-225.example.redhat.com                3/3     Running     0          175m   10.0.159.225   ip-10-0-159-225.example.redhat.com   <none>           <none>
+etcd-ip-10-0-191-37.example.redhat.com                 3/3     Running     0          173m   10.0.191.37    ip-10-0-191-37.example.redhat.com    <none>           <none>
+etcd-ip-10-0-199-170.example.redhat.com                3/3     Running     0          176m   10.0.199.170   ip-10-0-199-170.example.redhat.com   <none>           <none>
+----
+
+.. 选择 pod 并运行以下命令来确定哪个 etcd 成员是领导：
++
+[source,terminal]
+----
+$ oc rsh -n openshift-etcd etcd-ip-10-0-159-225.example.redhat.com etcdctl endpoint status --cluster -w table
+----
++
+.输出示例
+[source,terminal]
+----
+Defaulting container name to etcdctl.
+Use 'oc describe pod/etcd-ip-10-0-159-225.example.redhat.com -n openshift-etcd' to see all of the containers in this pod.
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|         ENDPOINT          |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|  https://10.0.191.37:2379 | 251cd44483d811c3 |   3.4.9 |  104 MB |     false |      false |         7 |      91624 |              91624 |        |
+| https://10.0.159.225:2379 | 264c7c58ecbdabee |   3.4.9 |  104 MB |     false |      false |         7 |      91624 |              91624 |        |
+| https://10.0.199.170:2379 | 9ac311f93915cc79 |   3.4.9 |  104 MB |      true |      false |         7 |      91624 |              91624 |        |
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+----
++
+基于此输出的 `IS LEADER` 列，`https://10.0.199.170:2379` 端点是领导。与上一步输出匹配此端点，领导的 pod 名称为 `etcd-ip-10-0-199-170.example.redhat.com`。
+
+. 清理 etcd 成员。
+
+.. 连接到正在运行的 etcd 容器，传递 _不是_ 领导的 pod 的名称：
++
+[source,terminal]
+----
+$ oc rsh -n openshift-etcd etcd-ip-10-0-159-225.example.redhat.com
+----
+
+.. 取消设置 `ETCDCTL_ENDPOINTS` 环境变量：
++
+[source,terminal]
+----
+sh-4.4# unset ETCDCTL_ENDPOINTS
+----
+
+.. 清理 etcd 成员：
++
+[source,terminal]
+----
+sh-4.4# etcdctl --command-timeout=30s --endpoints=https://localhost:2379 defrag
+----
++
+.输出示例
+[source,terminal]
+----
+Finished defragmenting etcd member[https://localhost:2379]
+----
++
+如果发生超时错误，增加 `--command-timeout` 的值，直到命令成功为止。
+
+.. 验证数据库大小是否已缩小：
++
+[source,terminal]
+----
+sh-4.4# etcdctl endpoint status -w table --cluster
+----
++
+.输出示例
+[source,terminal]
+----
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|         ENDPOINT          |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|  https://10.0.191.37:2379 | 251cd44483d811c3 |   3.4.9 |  104 MB |     false |      false |         7 |      91624 |              91624 |        |
+| https://10.0.159.225:2379 | 264c7c58ecbdabee |   3.4.9 |   41 MB |     false |      false |         7 |      91624 |              91624 |        | <1>
+| https://10.0.199.170:2379 | 9ac311f93915cc79 |   3.4.9 |  104 MB |      true |      false |         7 |      91624 |              91624 |        |
++---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+----
+本例显示这个 etcd 成员的数据库大小现在为 41 MB，而起始大小为 104 MB。
+
+.. 重复这些步骤以连接到其他 etcd 成员并进行碎片处理。最后才对领导进行碎片清除。
++
+至少要在碎片处理操作之间等待一分钟，以便 etcd pod 可以恢复。在 etcd pod 恢复前，etcd 成员不会响应。
+
+. 如果因为超过空间配额而触发任何 `NOSPACE` 警告，请清除它们。
+
+.. 检查是否有 `NOSPACE` 警告：
++
+[source,terminal]
+----
+sh-4.4# etcdctl alarm list
+----
++
+.输出示例
+[source,terminal]
+----
+memberID:12345678912345678912 alarm:NOSPACE
+----
+
+.. 清理警告:
++
+[source,terminal]
+----
+sh-4.4# etcdctl alarm disarm
+----

@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/tracking-network-flows.adoc
+
+:_content-type: PROCEDURE
+[id="nw-network-flows-delete_{context}"]
+= 删除网络流收集器的所有目的地
+
+作为集群管理员，您可以配置 Cluster Network Operator（CNO）来停止将网络流元数据发送到网络流收集器。
+
+.先决 条件
+
+* 已安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+. 使用具有 `cluster-admin` 权限的用户登陆到集群。
++
+[source,terminal]
+----
+$ oc patch network.operator cluster --type='json' \
+    -p='[{"op":"remove", "path":"/spec/exportNetworkFlows"}]'
+----
++
+.输出示例
+[source,terminal]
+----
+network.operator.openshift.io/cluster patched
+----

@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="limiting-access-to-quick-starts_{context}"]
+= 限制对快速开始的访问
+
+并不是所有的快速开始都应该对所有人可用。YAML 文件的 `accessReviewResources` 部分提供限制对快速启动的访问的能力。
+
+只有有权创建 `HelmChartRepository` 资源的用户，才能访问快速开始，使用以下配置：
+
+[source,yaml]
+----
+accessReviewResources:
+  - group: helm.openshift.io
+    resource: helmchartrepositories
+    verb: create
+----
+
+只有用户具有列出 Operator 组和软件包清单（因此能够安装 Operator）时允许用户访问快速开始，使用以下配置：
+
+
+[source,yaml]
+----
+accessReviewResources:
+  - group: operators.coreos.com
+    resource: operatorgroups
+    verb: list
+  - group: packages.operators.coreos.com
+    resource: packagemanifests
+    verb: list
+----

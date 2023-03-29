@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-viewing-a-deployment_{context}"]
+= 查看部署
+
+您可以查看部署来获取应用程序所有可用修订的基本信息。
+
+.流程
+
+. 要显示所有最近为提供的 `部署配置` 创建的复制控制器的详细信息，包括任何当前运行的部署过程，请运行以下命令：
++
+[source,terminal]
+----
+$ oc rollout history dc/<name>
+----
+
+. 要查看修订的相关细节，请使用 `--revision` 标志：
++
+[source,terminal]
+----
+$ oc rollout history dc/<name> --revision=1
+----
+
+. 如需有关 `部署配置` 和最新修订的详细信息，请使用 `oc describe` 命令：
++
+[source,terminal]
+----
+$ oc describe dc <name>
+----

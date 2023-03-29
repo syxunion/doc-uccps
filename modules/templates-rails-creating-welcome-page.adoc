@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//  * openshift_images/templates-ruby-on-rails.adoc
+
+:_content-type: PROCEDURE
+[id="templates-rails-creating-welcome-page_{context}"]
+= 创建欢迎页面
+
+由于 Rails 4 在生产中不再提供静态 `public/index.html` 页面，您必须创建一个新的 root 页面。
+
+要想具有自定义欢迎页面，必须执行以下步骤：
+
+* 使用 index 操作创建控制器。
+* 为 welcome 控制器 index 操作创建 view 页面。
+* 使用所创建的 controller 和 view 创建一个提供应用程序 root 页面的路由。
+
+Rails 提供了一个生成器，用于完成您所有必要的步骤。
+
+.流程
+
+. 运行 Rails 生成器：
++
+[source,terminal]
+----
+$ rails generate controller welcome index
+----
++
+已创建所有必要文件。
+
+. 按如下方式编辑 `config/routes.rb` 文件中第 2 行：
++
+----
+root 'welcome#index'
+----
+
+. 运行 rails 服务器以验证页面是否可用：
++
+[source,terminal]
+----
+$ rails server
+----
++
+在浏览器中访问 http://localhost:3000 即可查看您的页面。如果没有看到该页面，请检查输出至服务器的日志进行调试。

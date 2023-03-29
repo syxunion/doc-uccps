@@ -1,0 +1,107 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-resources-configuring.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-resources-configuring-auto_{context}"]
+= 自动为节点分配资源
+
+统信容器云管理平台 可以自动决定与特定机器配置池关联的节点的最佳 system-reserved CPU 和内存资源，并在节点启动时使用这些值更新节点。
+
+要在节点上自动决定并分配 system-reserved 资源，请创建一个 KubeletConfig 自定义资源（CR）来设置 autoSizingReserved: true 参数。各个节点上的脚本根据每个节点上安装的 CPU 和内存容量，计算相应保留资源的最佳值。该脚本考虑了增加的容量要求保留资源的相应增加。
+
+自动确定最佳的 system-reserved 设置可确保集群高效运行，并防止因为 CRI-O 和 kubelet 等系统组件的资源丢失而出现节点故障，而无需手动计算和更新值
+
+此功能默认为禁用。
+
+.先决条件
+
+. 为您要配置的节点类型获取与静态 `MachineConfigPool` 对象关联的标签。执行以下步骤之一：
++
+查看机器配置池：
+[source,terminal]
+----
+$ oc describe machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+Name:         worker
+Namespace:
+Labels:       machineconfiguration.openshift.io/mco-built-in=
+              pools.operator.machineconfiguration.openshift.io/worker=
+Annotations:  <none>
+API Version:  machineconfiguration.openshift.io/v1
+Kind:         MachineConfigPool
+Metadata:
+ ...
+  creationTimestamp: 2019-02-08T14:52:39Z
+  generation: 1
+  labels:
+    pools.operator.machineconfiguration.openshift.io/worker: "" <1>
+ ...
+----
+<1> 如果添加了标签，它会出现在 labels 下。
++
+[提示]
+====
+如果标签不存在，则添加一个键/值对：
+
+----
+$ oc label machineconfigpool worker custom-kubelet=small-pods
+----
+====
+
+.流程
+
+. 为配置更改创建自定义资源（CR）：
++
+.资源分配 CR 的示例配置
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: dynamic-node <1>
+spec:
+  autoSizingReserved: true <2>
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/worker: "" <3>
+----
+<1> 为 CR 分配一个名称。
+<2> 将 `autoSizingReserved` 参数设置为 `true` 以允许 统信容器云管理平台 在与指定标签关联的节点上自动决定并分配 `system-reserved` 资源。要在这些节点上禁用自动分配，请将此参数设置为 false。
+<3> 指定机器配置池中的标签。
++
+前面的示例在所有 worker 节点上启用自动资源分配。统信容器云管理平台 排空节点、应用 kubelet 配置并重启节点。
+
+. 验证 system-reserved 值：
+登录到您配置的节点：
++
+[source,terminal]
+----
+$ oc debug node/<node_name>
+----
++
+查看 kubelet 进程的详情：
+[source,terminal]
+----
+$ ps -ef | grep kubelet
+----
++
+输出示例
++
+[source,terminal]
+----
+root        1613       1 11 06:49 ?        00:00:05 kubelet --config=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig --kubeconfig=/var/lib/kubelet/kubeconfig --container-runtime=remote --container-runtime-endpoint=/var/run/crio/crio.sock --runtime-cgroups=/system.slice/crio.service --node-labels=node-role.kubernetes.io/worker,node.openshift.io/os_id=rhcos --node-ip= --minimum-container-ttl-duration=6m0s --volume-plugin-dir=/etc/kubernetes/kubelet-plugins/volume/exec --cloud-provider=azure --cloud-config=/etc/kubernetes/cloud.conf --pod-infra-container-image=quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:7b8e2e2857d8ac3499c9eb4e449cc3296409f1da21aa21d0140134d611e65b84 --system-reserved=cpu=0.07,memory=2.5Gi --v=2
+----
++
+在上例中，worker 节点分配了 0.07 CPU 和 2.5 Gi 内存。显示最佳值可能需要几分钟时间。

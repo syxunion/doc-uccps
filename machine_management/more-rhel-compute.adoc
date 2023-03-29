@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="more-rhel-compute"]
+= 在 统信容器云管理平台 集群中添加更多 RHEL 计算机器
+include::_attributes/common-attributes.adoc[]
+:context: more-rhel-compute
+
+toc::[]
+
+如果 统信容器云管理平台 集群中已经包含 UnionTech OS Server 20(UOS20) 计算机器（也称为 worker），您可以向其中添加更多 RHEL 计算机器。
+
+include::modules/rhel-compute-overview.adoc[leveloffset=+1]
+
+include::modules/rhel-compute-requirements.adoc[leveloffset=+1]
+
+include::modules/csr-management.adoc[leveloffset=+2]
+
+[id="more-rhel-compute-preparing-image-cloud"]
+== 为云准备镜像
+
+需要 Amazon Machine Images（AMI），因为 AWS 无法直接使用各种镜像格式。您可以使用统信提供的 AMI，也可以手动导入您自己的镜像。AMI 必须在置备 EC2 实例前就存在。您必须列出 AMI ID，以便选择计算机器所需的正确 RHEL 版本。
+
+include::modules/rhel-preparing-node.adoc[leveloffset=+1]
+
+include::modules/rhel-worker-tag.adoc[leveloffset=+1]
+
+include::modules/rhel-adding-more-nodes.adoc[leveloffset=+1]
+
+include::modules/installation-approve-csrs.adoc[leveloffset=+1]
+
+include::modules/rhel-ansible-parameters.adoc[leveloffset=+1]

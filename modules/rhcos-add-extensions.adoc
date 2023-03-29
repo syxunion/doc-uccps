@@ -1,0 +1,112 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="rhcos-add-extensions_{context}"]
+
+= 为 Uswift 添加扩展
+Uswift 是基于容器的最小 UOS20 操作系统,旨在为所有平台的 统信容器云管理平台 集群提供一组通用的功能。通常不建议在 Uswift 系统中添加软件软件包，但 MCO 提供了一个 extensions（扩展） 功能，您可以使用 MCO 为 Uswift 节点添加一组最小的功能。
+
+目前，提供了以下扩展程序：
+
+* **usbguard**: 添加 `usbguard` 扩展可保护 Uswift 系统不受入侵 USB 设备的攻击。详情请查看 USBGuard。
+
+以下流程描述了如何使用机器配置为 Uswift 节点添加一个或多个扩展。
+
+.先决条件
+* 有一个正在运行的 统信容器云管理平台 集群（版本 1.2 或更高版本）。
+* 以具有管理特权的用户身份登录集群。
+
+.流程
+
+. 为扩展创建机器配置：创建一个 YAML 文件（如 `80-extensions.yaml`），其中包含 `MachineConfig` `extensions` 对象。本例告诉集群添加 `usbguard` 扩展。
++
+[source,terminal]
+----
+$ cat << EOF > 80-extensions.yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 80-worker-extensions
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+  extensions:
+    - usbguard
+EOF
+----
+
+. 将机器配置添加到集群。键入以下内容将机器配置添加到集群中：
++
+[source,terminal]
+----
+$ oc create -f 80-extensions.yaml
+----
++
+这会将所有 worker 节点设置为安装 `usbguard` 的 rpm 软件包。
+
+. 检查是否应用了扩展：
++
+[source,terminal]
+----
+$ oc get machineconfig 80-worker-extensions
+----
++
+.输出示例
++
+[source,terminal]
+----
+NAME                 GENERATEDBYCONTROLLER IGNITIONVERSION AGE
+80-worker-extensions                       3.2.0           57s
+----
+
+. 检查是否应用新机器配置，并且节点是否处于降级状态。它可能需要几分钟时间。worker 池将显示更新进行中，每台机器都成功应用了新机器配置：
++
+[source,terminal]
+----
+$ oc get machineconfigpool
+----
++
+.输出示例
++
+[source,terminal]
+----
+NAME   CONFIG             UPDATED UPDATING DEGRADED MACHINECOUNT READYMACHINECOUNT UPDATEDMACHINECOUNT DEGRADEDMACHINECOUNT AGE
+master rendered-master-35 True    False    False    3            3                 3                   0                    34m
+worker rendered-worker-d8 False   True     False    3            1                 1                   0                    34m
+----
+
+. 检查扩展。要检查是否应用了扩展，请运行：
++
+[source,terminal]
+----
+$ oc get node | grep worker
+----
++
+.输出示例
++
+[source,terminal]
+----
+NAME                                        STATUS  ROLES    AGE   VERSION
+ip-10-0-169-2.us-east-2.compute.internal    Ready   worker   102m  v1.23.0
+----
++
+[source,terminal]
+----
+$ oc debug node/ip-10-0-169-2.us-east-2.compute.internal
+----
++
+.输出示例
++
+[source,terminal]
+----
+...
+To use host binaries, run `chroot /host`
+sh-4.4# chroot /host
+sh-4.4# rpm -q usbguard
+usbguard-0.7.4-4.el8.x86_64.rpm
+----

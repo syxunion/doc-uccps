@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/edit-additional-network.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multus-edit-network_{context}"]
+= 修改额外网络附加定义
+
+作为集群管理员，您可以对现有额外网络进行更改。任何附加到额外网络的现有 pod 都不会被更新。
+
+.先决条件
+
+* 已为集群配置了额外网络。
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+要为集群编辑额外网络，请完成以下步骤：
+
+. 要为集群编辑额外网络，请完成以下步骤：
++
+[source,terminal]
+----
+$ oc edit networks.operator.openshift.io cluster
+----
+
+. 要为集群编辑额外网络，请完成以下步骤：
+
+. 保存您的更改，再退出文本编辑器以提交更改。
+
+. 保存您的更改，再退出文本编辑器以提交更改。
++
+[source,terminal]
+----
+$ oc get network-attachment-definitions <network-name> -o yaml
+----
++
+例如，以下控制台输出显示名为 `net1` 的 `NetworkAttachmentDefinition` 对象：
++
+[source,terminal]
+----
+$ oc get network-attachment-definitions net1 -o go-template='{{printf "%s\n" .spec.config}}'
+{ "cniVersion": "0.3.1", "type": "macvlan",
+"master": "ens5",
+"mode": "bridge",
+"ipam":       {"type":"static","routes":[{"dst":"0.0.0.0/0","gw":"10.128.2.1"}],"addresses":[{"address":"10.128.2.100/23","gateway":"10.128.2.1"}],"dns":{"nameservers":["172.30.0.10"],"domain":"us-west-2.compute.internal","search":["us-west-2.compute.internal"]}} }
+----

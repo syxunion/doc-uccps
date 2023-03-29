@@ -1,0 +1,40 @@
+:_content-type: PROCEDURE
+[id="helm-disabling-helm-chart-repositories_{context}"]
+= 禁用 Helm Chart 仓库
+
+您可以通过将 `HelmChartRepository` 自定义资源中的 disabled 属性设置为 `true`，从目录中的特定 Helm Chart 仓库禁用 Helm Charts。
+
+.流程
+
+* 要通过 CLI 禁用 Helm Chart 仓库，将 `disabled: true` 标志添加到自定义资源中。例如，要删除 Azure 示例 chart 存储库，请运行：
++
+----
+$ cat <<EOF | oc apply -f -
+apiVersion: helm.openshift.io/v1beta1
+kind: HelmChartRepository
+metadata:
+  name: azure-sample-repo
+spec:
+  connectionConfig:
+   url:https://raw.githubusercontent.com/Azure-Samples/helm-charts/master/docs
+  disabled: true
+EOF
+----
+
+*  使用 Web 控制台管理员视角禁用最近添加的 Helm Chart 仓库：
++
+. 进入 *自定义资源定义* 并搜索 `HelmChartRepository` 自定义资源。
+
+. 进入 *实例*，找到您要禁用的存储库，并点击其名称。
+
+. 进入 *YAML* 选项卡，在 `spec` 部分添加 `disabled: true` 标志，点 *Save*。
++
+.示例
+----
+spec:
+  connectionConfig:
+    url: <url-of-the-repositoru-to-be-disabled>
+  disabled: true
+----
++
+现在，这个仓库已被禁用，并不会出现在目录中。

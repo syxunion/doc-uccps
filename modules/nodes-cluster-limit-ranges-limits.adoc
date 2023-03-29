@@ -1,0 +1,211 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/limit-ranges.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-limit-ranges-limits_{context}"]
+= 关于组件限制
+
+以下示例显示每个组件的限制范围参数。为清楚起见，示例已被分隔。您可以根据需要为任何或所有组件创建一个 `LimitRange` 对象。
+
+[id="nodes-cluster-limit-container-limits"]
+== 容器限制
+
+通过限制范围，您可以指定 pod 中每个容器可以请求的特定项目的最小和最大 CPU 和内存。如果在项目中创建容器，则 `Pod` spec 中的容器 CPU 和内存请求必须符合 `LimitRange` 对象中设置的值。如果没有，则 pod 不会被创建。
+
+* 对于在 `LimitRange` 对象中指定的容器，容器 CPU 或内存请求和限制必须大于或等于 min 资源约束。
+
+* 容器 CPU 或内存请求和限制必须小于或等于 `LimitRange` 对象中指定的容器的 `max` 资源约束。
++
+如果 LimitRange` 对象定义了 max CPU，则不需要在 Pod spec 中定义 CPU 请求（request） 值。但您必须指定一个 CPU limit 值，它需要满足在限制范围中指定的最大 CPU 限值。
+
+* 容器限制与请求的比例必须小于或等于 `LimitRange` 对象中指定的容器的 maxLimitRequestRatio 值。
++
+如果 `LimitRange` 对象定义了 `maxLimitRequestRatio` 约束，则任何新容器都必须同时具有 `request` 和 `limit` 值。统信容器云管理平台 通过 limit 除以 request 来计算限制与请求的比率。这个值应该是大于 1 的非负整数。
++
+例如，如果容器的 `limit` 值中包括 `cpu: 500`， `request` 值中包括 `cpu: 100`，则 cpu 的限制与请求的比率是 5。这个比例必须小于或等于 `maxLimitRequestRatio`。
+
+如果 `Pod` spec 没有指定容器资源内存或限制，则将限制范围对象中指定的容器的 default 或 `defaultRequest CPU`` 和内存值分配给容器。
+
+.容器 LimitRange` 对象定义
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange`"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: "Container"
+      max:
+        cpu: "2" <2>
+        memory: "1Gi" <3>
+      min:
+        cpu: "100m" <4>
+        memory: "4Mi" <5>
+      default:
+        cpu: "300m" <6>
+        memory: "200Mi" <7>
+      defaultRequest:
+        cpu: "200m" <8>
+        memory: "100Mi" <9>
+      maxLimitRequestRatio:
+        cpu: "10" <10>
+----
+<1> `LimitRange` 对象的名称。
+<2> pod 中单个容器可以请求的最大 CPU 量。
+<3> pod 中单个容器可以请求的最大内存量。
+<4> pod 中单个容器可以请求的最小 CPU 量。
+<5> pod 中单个容器可以请求的最小内存量。
+<6> 如果未在 Pod spec 中指定，容器可以使用的默认 CPU 量。
+<7> 如果未在 Pod spec 中指定，容器可以使用的默认内存量。
+<8> 如果没有在 Pod spec 中指定，容器可以请求的默认 CPU 量。
+<9> 如果未在 Pod spec 中指定，容器可以请求的默认内存量。
+<10> 容器最大的限制与请求的比率。
+
+
+[id="nodes-cluster-limit-pod-limits"]
+== Pod 限值
+
+限制范围允许您为给定项目中所有 pod 的容器指定最小和最大 CPU 和内存限值。要在项目中创建容器，`Pod` spec 中的容器 CPU 和内存请求必须符合 `LimitRange` 对象中设置的值。如果没有，则 pod 不会被创建。
+
+如果 `Pod` spec 没有指定容器资源内存或限制，则将限制范围对象中指定的容器的 `default` 或 `defaultRequest` CPU 和内存值分配给容器。
+
+在 pod 中的所有容器中，需要满足以下条件：
+
+* 对于在 `LimitRange` 对象中指定的 pod，容器 CPU 或内存请求和限制必须大于或等于 min 资源约束。
+
+* 容器 CPU 或内存请求和限制必须小于或等于 `LimitRange` 对象中指定的 pod 的 max 资源约束。
+
+* 容器限制与请求的比例必须小于或等于 `LimitRange` 对象中指定的 maxLimitRequestRatio 约束。
+
+.Pod LimitRange 对象定义
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange`"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: "Pod"
+      max:
+        cpu: "2" <2>
+        memory: "1Gi" <3>
+      min:
+        cpu: "200m" <4>
+        memory: "6Mi" <5>
+      maxLimitRequestRatio:
+        cpu: "10" <6>
+----
+<1> 限制范围对象的名称。
+<2> pod 可在所有容器间请求的最大 CPU 量。
+<3> pod 可在所有容器间请求的最大内存量。
+<4> pod 可在所有容器间请求的最小 CPU 量。
+<5> pod 可在所有容器间请求的最小内存量。
+<6> 容器最大的限制与请求的比率。
+
+[id="nodes-cluster-limit-image-limits"]
+== 镜像限制
+
+`LimitRange` 对象允许您指定可推送到内部 registry 的镜像的最大大小。
+
+将镜像推送到内部 registry 时，需要满足以下条件：
+
+* 镜像的大小必须小于或等于 `LimitRange` 对象中指定的镜像的最大值。
+
+.镜像 `LimitRange`` 对象定义
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange`"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: openshift.io/Image
+      max:
+        storage: 1Gi <2>
+----
+<1> `LimitRange` 对象的名称。
+<2> 可以推送到内部 registry 的最大镜像大小。
+
+[NOTE]
+====
+要防止超过限制的 Blob 上传到 registry，则必须将 registry 配置为强制实施配额。
+====
+
+[警告]
+====
+在上传的镜像清单中，镜像大小并非始终可用。这对使用 Docker 1.10 或更高版本构建并推送到 v2 registry 的镜像来说尤为如此。如果这样的镜像使用旧的 Docker 守护进程拉取，由 registry 将镜像清单转换为 schema v1 时缺少了所有与大小相关的信息。镜像没有设置存储限制会阻止镜像被上传。
+
+link:https://github.com/openshift/origin/issues/7706[这个问题] 正在解决。
+====
+
+[id="nodes-cluster-limit-stream-limits"]
+== 镜像流限值
+
+`LimitRange` 对象允许您为镜像流指定限值。
+
+对于每个镜像流，需要满足以下条件：
+
+* The number of image tags in an `ImageStream` 规格中镜像标签的数量必须小于或等于 `LimitRange` 对象中的 `openshift.io/image-tags` 约束。
+
+* `ImageStream` 规格中对镜像的唯一引用数量必须小于或等于限制范围对象中的 `openshift.io/images` 约束。
+
+.镜像流 `LimitRange`` 对象定义
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange`"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: openshift.io/ImageStream
+      max:
+        openshift.io/image-tags: 20 <2>
+        openshift.io/images: 30 <3>
+----
+<1> `LimitRange` 对象的名称。
+<2> 镜像流 spec 中 `imagestream.spec.tags` 参数中唯一镜像标签的最大数量。
+<3> 镜像流 spec 中 `imagestream.status.tags` 参数中唯一镜像引用的最大数量。
+
+`openshift.io/image-tags` 资源代表唯一镜像引用。可能的引用是 `*ImageStreamTag*`, `*ImageStreamImage*` 和 `*DockerImage*`. 可以使用 `oc tag` 和 `oc import-image` 命令创建标签。内部和外部引用之间没有区别。但是， `ImageStream` 规格中标记的每个唯一引用仅计算一次。它不以任何方式限制推送到内部容器镜像 registry，但对标签限制很有用。
+
+`openshift.io/images` 资源代表镜像流状态中记录的唯一镜像名称。它允许对可以推送到内部 registry 的大量镜像进行限制。内部和外部引用无法区分。
+
+[id="nodes-cluster-limit-pvc-limits"]
+== 持久性卷声明（PVC）限制
+
+`LimitRange` 对象允许您限制持久性卷声明（PVC）中请求的存储。
+
+在一个项目中的所有持久性卷声明中，必须满足以下条件：
+
+* 持久性卷声明（PVC）中的资源请求必须大于或等于 `LimitRange` 对象中指定的 PVC 的 min 约束。
+
+* 持久性卷声明（PVC）中的资源请求必须小于或等于 `LimitRange` 对象中指定的 PVC 的 max 约束。
+
+.PVC `LimitRange` 对象定义
+
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "LimitRange`"
+metadata:
+  name: "resource-limits" <1>
+spec:
+  limits:
+    - type: "PersistentVolumeClaim"
+      min:
+        storage: "2Gi" <2>
+      max:
+        storage: "50Gi" <3>
+----
+<1> `LimitRange` 对象的名称。
+<2> 持久性卷声明中可请求的最小存储量。
+<3> 在持久性卷声明中请求的最大存储量。

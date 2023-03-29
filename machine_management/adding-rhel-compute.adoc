@@ -1,0 +1,29 @@
+:_content-type: ASSEMBLY
+[id="adding-rhel-compute"]
+= 在 统信容器云管理平台 集群中添加 RHEL 计算机器
+include::_attributes/common-attributes.adoc[]
+:context: adding-rhel-compute
+
+toc::[]
+
+在 统信容器云管理平台 中，您可以将 UnionTech OS Server 20(UOS20)计算机器添加到用户置备的基础架构集群或 x86_64 架构上的安装程序置备的基础架构集群中。您只能在计算机器上使用 RHEL 作为操作系统。
+
+include::modules/rhel-compute-overview.adoc[leveloffset=+1]
+
+include::modules/rhel-compute-requirements.adoc[leveloffset=+1]
+
+include::modules/csr-management.adoc[leveloffset=+2]
+
+include::modules/rhel-preparing-playbook-machine.adoc[leveloffset=+1]
+
+include::modules/rhel-preparing-node.adoc[leveloffset=+1]
+
+include::modules/rhel-worker-tag.adoc[leveloffset=+1]
+
+include::modules/rhel-adding-node.adoc[leveloffset=+1]
+
+include::modules/installation-approve-csrs.adoc[leveloffset=+1]
+
+include::modules/rhel-ansible-parameters.adoc[leveloffset=+1]
+
+include::modules/rhel-removing-rhcos.adoc[leveloffset=+2]

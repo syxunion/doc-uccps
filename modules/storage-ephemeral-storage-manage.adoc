@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// storage/understanding-persistent-storage.adoc[leveloffset=+1]
+
+[id=storage-ephemeral-storage-manage_{context}]
+= 临时存储管理
+
+集群管理员可以通过设置配额在非终端状态的所有 Pod 中定义临时存储的限制范围，及临时存储请求数量，来管理项目中的临时存储。开发人员也可以在 Pod 和容器级别设置这个计算资源的请求和限值。

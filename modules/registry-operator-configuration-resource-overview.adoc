@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring-registry-operator.adoc
+
+
+[id="registry-operator-configuration-resource-overview_{context}"]
+= Image Registry Operator 配置参数
+
+`configs.imageregistry.operator.openshift.io` 资源提供以下配置参数。
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`managementState`
+|`Managed`: Operator 在资源被更新时对 registry 进行相应更新。
+
+`Unmanaged`: Operator 忽略配置资源的改变。
+
+`Removed`: Operator 删除 registry 实例，并清除所有由 Operator 置备的存储。
+
+|`logLevel`
+|设置 `logLevel` 实例的 logLevel。默认为 `Normal`.
+
+`logLevel` 支持的值有：
+
+* `Normal`
+* `Debug`
+* `Trace`
+* `TraceAll`
+
+|`httpSecret`
+|安全上载时 registry 所需的值，默认生成。
+
+|`proxy`
+|定义在调用 master API 和上游 registry 时要使用的代理。
+
+|`storage`
+|`Storagetype`: 用于配置 registry 存储的详细信息，例如S3 bucket坐标。通常会被默认配置。
+
+|`readOnly`
+|registry 实例是否应该拒绝推送新镜像或删除现有镜像的尝试。
+
+|`requests`
+|API Request Limit 详情。控制在把请求放入队列前，registry 实例可以并行处理的请求数量。
+
+|`defaultRoute`
+|确定是否使用默认主机名定义外部路由。如果启用，该路由将会对加密进行重新加密。默认值为 `false`。
+
+|`routes`
+|要创建的其他路由。您需要提供路由的主机名和证书。
+
+|`replicas`
+|registry 的副本数量。
+
+|`disableRedirect`
+| 控制是否通过 registry 路由所有数据，而不是重定向到后端。默认值为 `false`。
+
+|`spec.storage.managementState`
+
+|在 AWS 或 Azure 的安装程序置备的基础架构中的新安装或升级的集群中，Image Registry Operator 会把 `spec.storage.managementState` 参数设置为 Managed。
+
+* `Managed`: 确定 Image Registry Operator 管理底层存储。如果 Image Registry Operator 的 `managementState` 被设置为 `Removed`，则存储将被删除。
+** 如果 `managementState` 设为 `Managed`，Image Registry Operator 会尝试对底层存储单元应用一些默认配置。例如，如果设置为 Managed，Operator 会尝试在 S3 存储桶上启用加密，然后提供给 registry。如果您不希望默认设置应用到您提供的存储中，请确保将 `managementState` 设置为 `Unmanaged`。
+* `Unmanaged`: 确定 Image Registry Operator 忽略存储设置。如果 Image Registry Operator 的 `managementState` 设置为 `Removed`，则存储不会被删除。如果您提供了底层存储单元配置，如存储桶或容器名称，并且 `spec.storage.managementState` 尚未设置为任何值，则 Image Registry Operator 会将其配置为 Unmanaged。
+
+
+
+|===

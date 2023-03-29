@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-oauth-access-tokens.adoc
+
+:_content-type: PROCEDURE
+[id="oauth-view-details-tokens_{context}"]
+= 查看用户拥有的 OAuth 访问令牌的详情
+
+您可以查看用户拥有的 OAuth 访问令牌的详情。
+
+.流程
+
+* 描述用户拥有的 OAuth 访问令牌的详情：
++
+[source,terminal]
+----
+$ oc describe useroauthaccesstokens <token_name>
+----
++
+.输出示例
+[source,terminal]
+----
+Name:                        <token_name> 
+Namespace:
+Labels:                      <none>
+Annotations:                 <none>
+API Version:                 oauth.openshift.io/v1
+Authorize Token:             sha256~Ksckkug-9Fg_RWn_AUysPoIg-_HqmFI9zUL_CgD8wr8
+Client Name:                 openshift-browser-client 
+Expires In:                  86400 
+Inactivity Timeout Seconds:  317 
+Kind:                        UserOAuthAccessToken
+Metadata:
+  Creation Timestamp:  2021-01-11T19:27:06Z
+  Managed Fields:
+    API Version:  oauth.openshift.io/v1
+    Fields Type:  FieldsV1
+    fieldsV1:
+      f:authorizeToken:
+      f:clientName:
+      f:expiresIn:
+      f:redirectURI:
+      f:scopes:
+      f:userName:
+      f:userUID:
+    Manager:         oauth-server
+    Operation:       Update
+    Time:            2021-01-11T19:27:06Z
+  Resource Version:  30535
+  Self Link:         /apis/oauth.openshift.io/v1/useroauthaccesstokens/<token_name>
+  UID:               f9d00b67-ab65-489b-8080-e427fa3c6181
+Redirect URI:        https://oauth-openshift.apps.example.com/oauth/token/display
+Scopes:
+  user:full 
+User Name:  <user_name> 
+User UID:   82356ab0-95f9-4fb3-9bc0-10f1d6a6a345
+Events:     <none>
+----

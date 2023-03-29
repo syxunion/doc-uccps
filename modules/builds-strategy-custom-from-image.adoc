@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+//* builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-custom-from-image_{context}"]
+= 使用 FROM 镜像进行自定义构建
+
+您可以使用 `customStrategy.from` 部分来指示要用于自定义构建的镜像。
+
+.流程
+
+* 设置 `customStrategy.from` 部分：
++
+[source,yaml]
+----
+strategy:
+  customStrategy:
+    from:
+      kind: "DockerImage"
+      name: "openshift/sti-image-builder"
+----

@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+[id="serverless-developing-quarkus-functions"]
+= 开发 Quarkus 功能
+:context: serverless-developing-quarkus-functions
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+After you have xref:../../serverless/functions/serverless-functions-getting-started.adoc#serverless-create-func-kn_serverless-functions-getting-started[创建 Quarkus 功能项目]后，您可以修改提供的模板文件，以将业务逻辑添加到您的功能中。这包括配置功能调用和返回的标头和状态代码。
+
+[id="prerequisites_serverless-developing-quarkus-functions"]
+== 先决条件
+
+* 在开发功能前，您必须完成 xref:../../serverless/functions/serverless-functions-setup.adoc#serverless-functions-setup[设置 OpenShift Serverless 功能中] 的设置步骤。
+
+// templates, invoking
+include::modules/serverless-quarkus-template.adoc[leveloffset=+1]
+include::modules/serverless-invoking-quarkus-functions.adoc[leveloffset=+1]
+include::modules/serverless-quarkus-cloudevent-attributes.adoc[leveloffset=+1]
+// return values
+include::modules/serverless-quarkus-function-return-values.adoc[leveloffset=+1]
+include::modules/serverless-functions-quarkus-return-value-types.adoc[leveloffset=+2]
+// testing
+include::modules/serverless-testing-quarkus-functions.adoc[leveloffset=+1]

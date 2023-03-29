@@ -1,0 +1,60 @@
+////
+This module included in the following assemblies:
+- /v2x/ossm-performance-scalability.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-recommended-resources_{context}"]
+= Setting limits on compute resources
+
+默认情况下,  `spec.proxy` 具有设置 `cpu: 10m` 和  `memory: 128M`。如果使用 Pilot， `spec.runtime.components.pilot` 具有相同的默认值。
+
+以下示例中的设置基于 1000 个服务以及每秒1000 个请求。您可以更改 `ServiceMeshControlPlane` 中的 `cpu` 和 `memory` 的值。
+
+.流程
+
+. 在 {product-title} web  控制台中，点击 *Operators* -> *安装的 Operators*.
+
+. 点 *项目* 菜单，选择安装  {SMProductShortName} control plane 的项目，如 *istio-system*.
+
+. 点  {SMProductName} Operator。在 *Istio Service Mesh Control Plane* 列中，点 `ServiceMeshControlPlane` 的名称，例如 `basic`.
+
+. 将独立 Jaeger 实例的名称添加到 `ServiceMeshControlPlane`.
++
+.. 点 *YAML* 标签。
++
+.. 在 `ServiceMeshControlPlane` 资源中设置 `spec.proxy.runtime.container.resources.requests.cpu` 和 `spec.proxy.runtime.container.resources.requests.memory` 的值。
++
+.ServiceMeshControlPlane 版本示例
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+  namespace: istio-system
+spec:
+  version: v{MaistraVersion}
+  proxy:
+    runtime:
+      container:
+        resources:
+          requests:
+            cpu: 600m
+            memory: 50Mi
+          limits: {}
+
+  runtime:
+    components:
+      pilot:
+        container:
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1.6Gi
+            limits: {}
+----
++
+.. 点 *保存*.
+
+. 点 *重新加载* 来验证 `ServiceMeshControlPlane` 资源已被正确配置。

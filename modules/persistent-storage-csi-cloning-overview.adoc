@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-cloning.adoc
+
+:_content-type: CONCEPT
+[id="persistent-storage-csi-cloning-overview_{context}"]
+= CSI 卷克隆概述
+
+容器存储接口 (CSI) 卷克隆代表着在特定时间点上，一个已存在的持久性卷的副本。
+
+卷克隆与卷快照类似，但效率更高。例如，集群管理员可以通过创建现有集群卷的另一个实例来复制集群卷。
+
+克隆会在后端设备上创建指定卷的副本，而不是创建一个新的空卷。在进行动态置备后，您可以像使用任何标准卷一样使用卷克隆。
+
+克隆不需要新的 API 对象。`PersistentVolumeClaim` 对象中现有的 `dataSource` 项应该可以接受同一命名空间中的一个已存在的 `PersistentVolumeClaim`。
+
+== 支持限制
+
+在默认情况下，统信容器云管理平台支持 CSI 卷克隆，但有以下限制：
+
+* 在默认情况下，统信容器云管理平台支持 CSI 卷克隆，但有以下限制：
+* 目标持久性卷声明 (PVC) 必须与源 PVC 位于同一个命名空间中。
+* 源和目标的存储类必须相同。
+* 仅支持 CSI 驱动程序。不支持 in-tree 和 FlexVolumes。
+* 统信容器云管理平台不包括任何 CSI 驱动程序。请使用由开源社区或存储供应商提供的 CSI 驱动程序。按照 CSI 驱动程序供应商的安装说明进行操作。
+* 特定的 CSI 驱动程序可能会还没有实现卷克隆功能。详情请查看 CSI 驱动程序文档。
+* 统信容器云管理平台1.2 支持 CSI 规范 版本 1.1.0。

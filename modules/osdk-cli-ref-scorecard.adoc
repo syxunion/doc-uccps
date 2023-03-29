@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-scorecard_{context}"]
+= scorecard
+
+`operator-sdk scorecard` 命令运行 scorecard 工具来验证 Operator 捆绑包并提供改进建议。该命令使用一个参数，可以是捆绑包镜像，也可以是包含清单和元数据的目录。如果参数包含镜像标签，则镜像必须远程存在。v
+
+.`scorecard` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`-c`, `--config` (string)
+|scorecard 配置文件的路径。默认路径为 `bundle/tests/scorecard/config.yaml`。
+
+|`-h`, `--help`
+|`scorecard`  命令的帮助输出。
+
+|`--kubeconfig` (string)
+|`kubeconfig` 文件的路径。
+
+|`-L`, `--list`
+|列出哪些测试可以运行。
+
+|`-n`, --namespace (string)
+|运行测试镜像的命名空间。
+
+|`-o`, `--output` (string)
+|结果的输出格式。可用值为 `text` （默认值）和 json。
+
+|`-l`, `--selector` (string)
+|标识选择器以确定要运行哪个测试。
+
+|`-s`, `--service-account` (string)
+|用于测试的服务帐户。默认值为 `default`。
+
+|`-x`, `--skip-cleanup`
+|运行测试后禁用资源清理。
+
+|`-w`, `--wait-time <duration>`
+|等待测试完成的时间，如 `35s`。默认值为 `30s`。
+
+|===

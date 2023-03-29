@@ -1,0 +1,69 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-jobs.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-jobs-creating_{context}"]
+= 创建作业
+
+您可以通过创建作业对象在 统信容器云管理平台 中创建作业。
+
+.流程
+
+创建作业：
+
+. 创建一个类似以下示例的 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  parallelism: 1    <1>
+  completions: 1    <2>
+  activeDeadlineSeconds: 1800 <3>
+  backoffLimit: 6   <4>
+  template:         <5>
+    metadata:
+      name: pi
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: OnFailure    <6>
+----
+<1> 可选：指定一个作业应并行运行多少个 pod 副本；默认与 `1`.
+* 对于非并行作业，请保留未设置。当取消设置时，默认为 `1`。
+<2> 可选：指定标记作业完成需要成功完成多少个 pod。
+* 对于非并行作业，请保留未设置。当取消设置时，默认为 `1`。
+* 对于具有固定完成计数的并行作业，请指定完成数。
+* 对于带有工作队列的并行作业，请保留 unset。当取消设置默认为 `parallelism` 值。
+<3> 可选：指定作业可以运行的最长持续时间。
+<4> 可选：指定作业的重试次数。此字段默认值为 6。
+<5> 指定控制器创建的 Pod 模板。
+<6> 指定 pod 的重启策略。
+* `Never` 不要重启作业。
+* `OnFailure` 。仅在失败时重启该任务。
+* `Always` 。总是重启该任务。
++
+如需了解 统信容器云管理平台 如何使用与失败容器相关的重启策略，请参阅 Kubernetes 文档中的示例状态。
+
+. 创建作业：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+[注意]
+====
+您还可以使用 `oc create job` ，在一个命令中创建并启动作业。以下命令会创建并启动一个与上个示例中指定的相似的作业：
+
+[source,terminal]
+----
+$ oc create job pi --image=perl -- perl -Mbignum=bpi -wle 'print bpi(2000)'
+----
+====

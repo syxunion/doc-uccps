@@ -1,0 +1,122 @@
+// Module included in the following assemblies:
+//
+// * networking/load-balancing-openstack.adoc
+
+:_content-type: PROCEDURE
+[id="installation-osp-kuryr-octavia-scale_{context}"]
+= 使用 UStack Octavia 为入站流量扩展
+
+您可以使用 Octavia 负载均衡器来扩展使用 Kuryr 的集群中的 Ingress 控制器。
+
+.先决条件
+
+* 统信容器云管理平台 集群使用 Kuryr。
+
+* Octavia 可用于您的 UStack 部署。
+
+.流程
+
+. 要复制当前的内部路由器服务，在命令行中输入：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress get svc router-internal-default -o yaml > external_router.yaml
+----
+
+. 在 `external_router.yaml` 文件中，将 `metadata.name` 和 `spec. type` 的值改为 `LoadBalancer`。
++
+[source,yaml]
+.Example router file
+----
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    ingresscontroller.operator.openshift.io/owning-ingresscontroller: default
+  name: router-external-default <1>
+  namespace: openshift-ingress
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  - name: metrics
+    port: 1936
+    protocol: TCP
+    targetPort: 1936
+  selector:
+    ingresscontroller.operator.openshift.io/deployment-ingresscontroller: default
+  sessionAffinity: None
+  type: LoadBalancer <2>
+----
+<1> 确保此值具有描述性，如 `router-external-default`。
+<2> 确定这个值是 LoadBalancer。
+
+[注意]
+====
+您可以删除与负载均衡相关的时间戳和其他信息。
+====
+
+. 在命令行中，从 `external_router.yaml` 文件创建服务：
++
+[source,terminal]
+----
+$ oc apply -f external_router.yaml
+----
+
+. 验证服务的外部 IP 地址是否与与负载均衡器关联的 IP 地址相同：
+.. 在命令行中检索服务的外部 IP 地址：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress get svc
+----
++
+[source,terminal]
+.输出示例
+----
+NAME                      TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                                     AGE
+router-external-default   LoadBalancer   172.30.235.33    10.46.22.161   80:30112/TCP,443:32359/TCP,1936:30317/TCP   3m38s
+router-internal-default   ClusterIP      172.30.115.123   <none>         80/TCP,443/TCP,1936/TCP                     22h
+----
+
+.. 检索负载均衡器的 IP 地址：
++
+[source,terminal]
+----
+$ openstack loadbalancer list | grep router-external
+----
++
+.输出示例
+[source,terminal]
+----
+| 21bf6afe-b498-4a16-a958-3229e83c002c | openshift-ingress/router-external-default | 66f3816acf1b431691b8d132cc9d793c | 172.30.235.33  | ACTIVE | octavia |
+----
+
+.. 验证您在前面的步骤中获取的地址是否在浮动 IP 列表中相互关联：
++
+[source,terminal]
+----
+$ openstack floating ip list | grep 172.30.235.33
+----
++
+.输出示例
+[source,terminal]
+----
+| e2f80e97-8266-4b69-8636-e58bacf1879e | 10.46.22.161 | 172.30.235.33 | 655e7122-806a-4e0a-a104-220c6e17bda6 | a565e55a-99e7-4d15-b4df-f9d7ee8c9deb | 66f3816acf1b431691b8d132cc9d793c |
+----
+
+现在，您可以使用 `EXTERNAL-IP` 值作为新的入口地址。
+
+
+[注意]
+====
+如果 Kuryr 使用 Octavia Amphora 驱动程序，则所有流量都通过单个 Amphora 虚拟机（VM）路由。
+
+您可以重复这个过程来创建其他负载均衡器，这样可降低瓶颈。
+====

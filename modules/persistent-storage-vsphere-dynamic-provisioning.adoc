@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-vsphere.adoc
+
+:_content-type: PROCEDURE
+[id="vsphere-dynamic-provisioning_{context}"]
+= 使用 UI 动态置备 VMware vSphere 卷
+
+统信容器云管理平台安装了一个默认的存储类，其名为 thin，使用 thin 磁盘格式置备卷。
+
+.先决条件
+
+* 当存储可以被挂载为统信容器云管理平台中的卷之前，它必须已存在于底层的存储系统中。
+
+.流程
+
+. 在统信容器云管理平台控制台中，点击 *存储* → *持久性卷存储*。
+
+. 在持久性卷声明概述页中，点 *创建持久性卷声明*。
+
+. 在接下来的页面中定义所需选项。
+
+.. 选择 `thin` 存储类。
+
+.. 输入存储声明的唯一名称。
+
+.. 选择访问模式来决定所创建存储声明的读写访问权限。
+
+.. 定义存储声明的大小。
+
+. 点击 *创建* 创建持久性卷声明，并生成一个持久性卷。

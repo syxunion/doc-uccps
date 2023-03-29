@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * applications/idling-applications.adoc
+
+:_content-type: PROCEDURE
+[id="idle-idling-applications_{context}"]
+= 闲置应用程序
+
+闲置应用程序包括查找与服务关联的可扩展资源（部署配置和复制控制器等）。闲置应用程序时会查找相关的服务，将其标记为空闲，并将资源缩减为零个副本。
+
+您可以使用 `oc idle` 命令来闲置单个服务，或使用 `--resource-names-file` 选项来闲置多个服务。
+
+[id="idle-idling-applications-single_{context}"]
+== 闲置一个服务
+
+.流程
+
+. 要闲置一个服务，请运行：
++
+[source,terminal]
+----
+$ oc idle <service>
+----
+
+[id="idle-idling-applications-multiple_{context}"]
+== 闲置多个服务
+
+如果应用程序横跨一个项目中的一组服务，闲置多个服务会很有用处；或者，可以将闲置多个服务与脚本结合使用，以便批量闲置同一项目中的多个应用程序。
+
+.流程
+
+. 创建一个包含服务列表的文件，每个服务各自列于一行。
+
+. 使用 `--resource-names-file` 选项闲置这些服务：
++
+[source,terminal]
+----
+$ oc idle --resource-names-file <filename>
+----
+
+[注意]
+====
+	`idle` 命令仅限于一个项目。若要闲置一个集群中的多个应用程序，可以分别对各个项目运行 `idle` 命令。
+====

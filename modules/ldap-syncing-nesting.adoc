@@ -1,0 +1,144 @@
+// Module included in the following assemblies:
+//
+// * authentication/ldap-syncing.adoc
+
+:_content-type: PROCEDURE
+[id="ldap-syncing-nesting_{context}"]
+== LDAP 嵌套成员资格同步示例
+
+统信容器云管理平台 中的组不嵌套。在消耗数据之前，LDAP 服务器必须平展组成员资格。Microsoft 的 Active Directory Server 通过 LDAP_MATCHING_RULE_IN_CHAIN 规则支持这一功能，其 OID 为 `1.2.840.113556.1.4.1941`。另外，使用此匹配规则时只能同步明确列在白名单中的组。
+
+本节中的示例使用了增强 Active Directory 模式，它将同步一个名为 `admins` 的组，该组有一个用户 `Jane` 和一个组 `otheradmins`。`otheradmins` 组具有一个用户成员：Jim。这个示例阐述了：
+
+* 如何将组和用户添加到 LDAP 服务器中。
+* LDAP 同步配置文件的概貌。
+* 同步之后统信容器云管理平台中会生成什么组记录。
+
+在增强 Active Directory 模式中，用户（`Jane` 和 `Jim`）和组都作为第一类条目存在于 LDAP 服务器中，组成员资格则存储在用户或组的属性中。以下 ldif 片段定义了这个模式的用户和组：
+
+.使用增强 Active Directory 模式和嵌套成员的 LDAP 条目： `increaseded_active_directory_nested.ldif`
+[source,ldif]
+----
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+ou: users
+
+dn: cn=Jane,ou=users,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: testPerson
+cn: Jane
+sn: Smith
+displayName: Jane Smith
+mail: jane.smith@example.com
+memberOf: cn=admins,ou=groups,dc=example,dc=com <1>
+
+dn: cn=Jim,ou=users,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: testPerson
+cn: Jim
+sn: Adams
+displayName: Jim Adams
+mail: jim.adams@example.com
+memberOf: cn=otheradmins,ou=groups,dc=example,dc=com 
+
+dn: ou=groups,dc=example,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=admins,ou=groups,dc=example,dc=com 
+objectClass: group
+cn: admins
+owner: cn=admin,dc=example,dc=com
+description: System Administrators
+member: cn=Jane,ou=users,dc=example,dc=com
+member: cn=otheradmins,ou=groups,dc=example,dc=com
+
+dn: cn=otheradmins,ou=groups,dc=example,dc=com 
+objectClass: group
+cn: otheradmins
+owner: cn=admin,dc=example,dc=com
+description: Other System Administrators
+memberOf: cn=admins,ou=groups,dc=example,dc=com 
+member: cn=Jim,ou=users,dc=example,dc=com
+----
+
+
+与 Active Directory 同步嵌套的组时，您必须提供用户条目和组条目的 LDAP 查询定义，以及在内部统信容器云管理平台组记录中代表它们的属性。另外，此配置也需要进行某些修改：
+
+- `oc adm groups sync` 命令必须明确将组列在白名单中。
+- 用户的 `groupMembershipAttributes` 必须包含 "memberOf:1.2.840.113556.1.4.1941:"，以遵守 LDAP_MATCHING_RULE_IN_CHAIN 规则。
+- `groupUIDAttribute` 必须设为 dn。
+- `groupsQuery`:
+  * 不得设置 `filter`。
+  * 必须设置有效的 `derefAliases`。
+  * 不应设置 `basedn`，因为此值将被忽略。
+  * 不应设置 `scope`，因为此值将被忽略。
+
+为明确起见，您在统信容器云管理平台中创建的组应尽可能将可分辨名称以外的属性用于面向用户或管理员的字段。例如，通过电子邮件标识统信容器云管理平台组的用户，并将该组的名称用作通用名称。以下配置文件创建了这些关系：
+
+.使用增强 Active Directory 模式和嵌套成员的 LDAP 同步配置： `increaseded_active_directory_config_nested.yaml`
+[source,yaml]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://LDAP_SERVICE_IP:389
+augmentedActiveDirectory:
+    groupsQuery: 
+        derefAliases: never
+        pageSize: 0
+    groupUIDAttribute: dn 
+    groupNameAttributes: [ cn ] 
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        filter: (objectclass=person)
+        pageSize: 0
+    userNameAttributes: [ mail ] 
+    groupMembershipAttributes: [ "memberOf:1.2.840.113556.1.4.1941:" ] 
+----
+
+
+.先决条件
+
+* 创建配置文件。
+
+.流程
+
+* 使用 `augmented_active_directory_config_nested.yaml` 文件运行同步：
+
+[source,terminal]
+----
+$ oc adm groups sync \
+    'cn=admins,ou=groups,dc=example,dc=com' \
+    --sync-config=augmented_active_directory_config_nested.yaml \
+    --confirm
+----
++
+[注意]
+====
+必须明确将 `cn=admins,ou=groups,dc=example,dc=com` 组列在白名单中。
+====
++
+统信容器云管理平台 创建以下组记录作为上述同步操作的结果：
++
+.使用 `augmented_active_directory_config_nested.yaml` 文件创建的统信容器云管理平台组
+[source,yaml]
+----
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  annotations:
+    openshift.io/ldap.sync-time: 2015-10-13T10:08:38-0400
+    openshift.io/ldap.uid: cn=admins,ou=groups,dc=example,dc=com 
+    openshift.io/ldap.url: LDAP_SERVER_IP:389 
+  creationTimestamp:
+  name: admins
+users: 
+- jane.smith@example.com
+- jim.adams@example.com
+----

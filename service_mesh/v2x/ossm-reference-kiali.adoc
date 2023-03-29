@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="kiali-config-ref"]
+= Kiali configuration reference
+include::_attributes/common-attributes.adoc[]
+:context: kiali-config-ref
+
+toc::[]
+
+当 Service Mesh Operator 创建 {SMProductShortName} Operator 时，它也会处理 Kiali 资源。然后，当 Kiali Operator 创建 Kiali 实例时会使用这个对象。
+
+// The following include statements pull in the module files for the assembly.
+include::modules/ossm-config-smcp-kiali.adoc[leveloffset=+1]
+
+include::modules/ossm-configuring-external-kiali.adoc[leveloffset=+1]

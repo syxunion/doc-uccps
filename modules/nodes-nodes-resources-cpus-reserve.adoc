@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-resources-cpus
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-resources-cpus-reserve_{context}"]
+= 为节点保留 CPU
+
+要明确定义为特定节点保留的 CPU 列表，请创建一个 `KubeletConfig` 自定义资源（CR）来定义 `reservedSystemCPUs` 参数。此列表替代了使用 `systemReserved` 和 `kubeReserved` 参数可能保留的 CPU。
+
+.流程
+
+. 为您要配置的节点类型获取与机器配置池（MCP）关联的标签：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool <name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe machineconfigpool worker
+----
++
+.输出示例
+[source,yaml]
+----
+Name:         worker
+Namespace:    
+Labels:       machineconfiguration.openshift.io/mco-built-in=
+              pools.operator.machineconfiguration.openshift.io/worker= <1>
+Annotations:  <none>
+API Version:  machineconfiguration.openshift.io/v1
+Kind:         MachineConfigPool
+...
+----
+<1> 获取 MCP 标签。
+
+. 为 `KubeletConfig CR` 创建 YAML 文件：
++
+[source,yaml]
+---- 
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: set-reserved-cpus <1>  
+spec:
+  kubeletConfig:
+    reservedSystemCPUs: "0,1,2,3" <2>
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/worker: "" <3>
+----
+<1> 为 CR 指定一个名称。
+<2> 为与 MCP 关联的节点指定您要保留的 CPU 的内核 ID。
+<3> 指定来自 MCP 的标签。
+
+. 创建 CR 对象。
++
+[source,terminal]
+----
+$ oc create -f <file_name>.yaml
+----
+

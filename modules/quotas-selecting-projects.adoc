@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-across-multiple-projects.adoc
+
+:_content-type: PROCEDURE
+[id="quotas-setting-projects_{context}"]
+= 在创建配额过程中选择多个项目
+
+	在创建配额时，您可以根据注解选择和/或标签选择来同时选择多个项目。
+
+.流程
+
+. 要根据注释选择项目，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create clusterquota for-user \
+     --project-annotation-selector openshift.io/requester=<user_name> \
+     --hard pods=10 \
+     --hard secrets=20
+----
++
+这会创建以下 `ClusterResourceQuota` 对象：
++
+[source,yaml]
+----
+apiVersion: quota.openshift.io/v1
+kind: ClusterResourceQuota
+metadata:
+  name: for-user
+spec:
+  quota: <1>
+    hard:
+      pods: "10"
+      secrets: "20"
+  selector:
+    annotations: <2>
+      openshift.io/requester: <user_name>
+    labels: null <3>
+status:
+  namespaces: <4>
+  - namespace: ns-one
+    status:
+      hard:
+        pods: "10"
+        secrets: "20"
+      used:
+        pods: "1"
+        secrets: "9"
+  total: <5>
+    hard:
+      pods: "10"
+      secrets: "20"
+    used:
+      pods: "1"
+      secrets: "9"
+----
+
+. 同样，若要根据标签选择项目，请运行以下命令：
++
+[source,terminal]
+----
+$  oc create clusterresourcequota for-name \//<1>
+    --project-label-selector=name=frontend \//<2>
+    --hard=pods=10 --hard=secrets=20
+----
++
+<1> `clusterresourcequota` 和 `clusterquota` 是同一命令的别名。`for-name` 是 `ClusterResourceQuota` 对象的名称。
+<2> 要根据标签选择项目，请使用 `--project-label-selector=key=value` 格式提供一个键值对。
++
+这会创建以下 `ClusterResourceQuota` 对象定义：
++
+[source,yaml]
+----
+apiVersion: quota.openshift.io/v1
+kind: ClusterResourceQuota
+metadata:
+  creationTimestamp: null
+  name: for-name
+spec:
+  quota:
+    hard:
+      pods: "10"
+      secrets: "20"
+  selector:
+    annotations: null
+    labels:
+      matchLabels:
+        name: frontend
+----

@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/configuring-private-cluster.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="private-clusters-setting-dns-private_{context}"]
+= 将 DNS 设置为私有
+
+部署集群后，您可以修改其 DNS 使其只使用私有区。
+
+.流程
+
+. 查看集群的 `DNS ` 自定义资源：
++
+[source,terminal]
+----
+$ oc get dnses.config.openshift.io/cluster -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: DNS
+metadata:
+  creationTimestamp: "2019-10-25T18:27:09Z"
+  generation: 2
+  name: cluster
+  resourceVersion: "37966"
+  selfLink: /apis/config.openshift.io/v1/dnses/cluster
+  uid: 0e714746-f755-11f9-9cb1-02ff55d8f976
+spec:
+  baseDomain: <base_domain>
+  privateZone:
+    tags:
+      Name: <infrastructure_id>-int
+      kubernetes.io/cluster/<infrastructure_id>: owned
+  publicZone:
+    id: Z2XXXXXXXXXXA4
+status: {}
+----
++
+请注意，`spec` 部分包含一个私有区和一个公共区。
+
+. 修补 `DNS` 自定义资源以删除公共区： 
++
+[source,terminal]
+----
+$ oc patch dnses.config.openshift.io/cluster --type=merge --patch='{"spec": {"publicZone": null}}'
+dns.config.openshift.io/cluster patched
+----
++
+因为 Ingress Controller 在创建 `Ingress` 对象时会参考 `DNS` 定义，因此当您创建或修改 `Ingress` 对象时，只会创建私有记录。
++
+[重要]
+====
+在删除公共区时，现有 Ingress 对象的 DNS 记录不会修改。
+====
+
+. 可选：查看集群的 `DNS` 自定义资源，并确认已删除公共区：
++
+[source,terminal]
+----
+$ oc get dnses.config.openshift.io/cluster -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: DNS
+metadata:
+  creationTimestamp: "2019-10-25T18:27:09Z"
+  generation: 2
+  name: cluster
+  resourceVersion: "37966"
+  selfLink: /apis/config.openshift.io/v1/dnses/cluster
+  uid: 0e714746-f755-11f9-9cb1-02ff55d8f976
+spec:
+  baseDomain: <base_domain>
+  privateZone:
+    tags:
+      Name: <infrastructure_id>-int
+      kubernetes.io/cluster/<infrastructure_id>-wfpg4: owned
+status: {}
+----

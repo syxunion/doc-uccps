@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * networking/using-sctp.adoc
+
+[id="nw-sctp-about_{context}"]
+= 支持 统信容器云管理平台 上的流控制传输协议 (SCTP)
+
+作为集群管理员，您可以在集群中的主机上启用 SCTP。在 UnionTech OS Cloud 20 (USwift) 上，SCTP 模块被默认禁用。
+
+SCTP 是基于信息的可靠协议，可在 IP 网络之上运行。
+
+启用后，您可以使用 SCTP 作为带有 pod、服务和网络策略的协议。`Service` 对象必须通过将 type 参数设置为 `ClusterIP` 或 `NodePort` 值来定义。
+
+[id="example_configurations_{context}"]
+== 使用 SCTP 协议的示例配置
+
+您可以通过将 pod 或服务对象中的 protocol 参数设置为 SCTP 来将 pod 或服务配置为使用 SCTP。
+
+在以下示例中，pod 被配置为使用 SCTP:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: project1
+  name: example-pod
+spec:
+  containers:
+    - name: example-pod
+...
+      ports:
+        - containerPort: 30100
+          name: sctpserver
+          protocol: SCTP
+----
+
+在以下示例中，服务被配置为使用 SCTP:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: project1
+  name: sctpserver
+spec:
+...
+  ports:
+    - name: sctpserver
+      protocol: SCTP
+      port: 30100
+      targetPort: 30100
+  type: ClusterIP
+----
+
+在以下示例中，NetworkPolicy 对象配置为对来自具有特定标签的任何 pod 的端口 80 应用 SCTP 网络流量：
+
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-sctp-on-http
+spec:
+  podSelector:
+    matchLabels:
+      role: web
+  ingress:
+  - ports:
+    - protocol: SCTP
+      port: 80
+----

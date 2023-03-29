@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-scale-to-zero-grace-period_{context}"]
+= 配置 scale-to-zero 宽限期
+
+Knative Serving 为应用程序提供自动缩放为零个 pod。您可以使用 `scale-to-zero-grace-period` spec 定义上限，Knative 在删除应用程序的最后一个副本前等待 scale-to-zero machinery 原位。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+* 有集群管理员权限。
+
+* 使用默认的 Knative Pod Autoscaler。如果使用 Kubernetes Horizontal Pod Autoscaler，则缩减为零功能将不可用。
+
+.流程
+
+* 在 `KnativeServing` 自定义资源 (CR) 中修改 `scale-to-zero-grace-period`
++
+.KnativeServing CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    autoscaler:
+      scale-to-zero-grace-period: "30s" <1>
+----
+<1> 宽限期（以秒为单位）。默认值为 30 秒。

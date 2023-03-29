@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// *nodes/nodes/eco-poison-pill-operator.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-machine-health-check-with-poison-pill_{context}"]
+= 配置机器健康检查以使用 Poison Pill Operator
+
+使用以下步骤将机器健康检查配置为使用 Poison Pill Operator 作为补救供应商。
+
+.先决条件
+
+* 安装 Uccps CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建一个 `PoisonPillRemediationTemplate` CR:
+
+.. 定义 `PoisonPillRemediationTemplate` CR:
++
+[source,yaml]
+----
+apiVersion: poison-pill.medik8s.io/v1alpha1
+kind: PoisonPillRemediationTemplate
+metadata:
+  namespace: openshift-machine-api
+  name: poisonpillremediationtemplate-sample
+spec:
+  template:
+    spec: {}
+----
+
+.. 要创建 `PoisonPillRemediationTemplate` CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create -f <ppr-name>.yaml
+----
+
+. 创建或更新 `MachineHealthCheck` CR 以指向 `PoisonPillRemediationTemplate` CR:
+
+.. 定义或更新 `MachineHealthCheck` CR:
++
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineHealthCheck
+metadata:
+  name: machine-health-check
+  namespace: openshift-machine-api
+spec:
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-machine-role: "worker"
+      machine.openshift.io/cluster-api-machine-type: "worker"
+  unhealthyConditions:
+  - type:    "Ready"
+    timeout: "300s" 
+    status: "False"
+  - type:    "Ready"
+    timeout: "300s" 
+    status: "Unknown"
+  maxUnhealthy: "40%" 
+  nodeStartupTimeout: "10m"    
+  remediationTemplate: <1>
+    kind: PoisonPillRemediationTemplate
+    apiVersion: poison-pill.medik8s.io/v1alpha1
+    name: poisonpillremediationtemplate-sample
+----
+<1> 指定补救模板的详细信息。
++
+.. 要创建 `MachineHealthCheck` CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+.. 要更新 `MachineHealthCheck` CR，请运行以下命令：
++
+[source,terminal]
+----
+$ oc apply -f <file-name>.yaml
+----
+
+

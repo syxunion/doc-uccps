@@ -1,0 +1,50 @@
+[id="applications-create-using-cli-template_{context}"]
+= 从模板创建应用程序
+
+您可以使用之前存储的模板或模板文件创建应用程序，方法是将模板名称指定为参数。例如，您可以存储一个示例应用程序模板，并使用它来创建应用程序。
+
+将应用程序模板上传到当前项目的模板库。以下示例从名为 `example/sample-app/application-template-stibuild.json` 的文件上传一个应用程序模板：
+
+[source,terminal]
+----
+$ oc create -f examples/sample-app/application-template-stibuild.json
+----
+
+然后，通过引用应用程序模板来创建新应用程序。在本例中，模板名称为 `ruby-helloworld-sample`:
+
+[source,terminal]
+----
+$ oc new-app ruby-helloworld-sample
+----
+
+要通过引用本地文件系统中的模板文件创建新应用程序，而无需首先将其保存到 统信容器云管理平台 中，使用 `-f|--file` 参数。例如：
+
+[source,terminal]
+----
+$ oc new-app -f examples/sample-app/application-template-stibuild.json
+----
+
+== 模板参数
+
+在基于模板创建应用程序时，请使用 `-p|--param` 参数来设置模板定义的参数值：
+
+[source,terminal]
+----
+$ oc new-app ruby-helloworld-sample \
+    -p ADMIN_USERNAME=admin -p ADMIN_PASSWORD=mypassword
+----
+
+您可以将参数保存到文件中，然后在实例化模板时通过 `--param-file` 来使用该文件。如果要从标准输入中读取参数，请使用 `--param-file=-`。以下是一个名为 `helloworld.params` 的示例文件：
+
+[source,terminal]
+----
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=mypassword
+----
+
+在实例化模板时引用文件中的参数：
+
+[source,terminal]
+----
+$ oc new-app ruby-helloworld-sample --param-file=helloworld.params
+----

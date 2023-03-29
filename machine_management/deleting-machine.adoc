@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="deleting-machine"]
+= 删除机器
+include::_attributes/common-attributes.adoc[]
+:context: deleting-machine
+
+toc::[]
+
+您可以删除特定的机器。
+
+include::modules/machine-delete.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+[id="additional-resources_unhealthy-etcd-member"]
+== 其他资源
+
+* xref:../backup_and_restore/control_plane_backup_and_restore/replacing-unhealthy-etcd-member.adoc[替换不健康的 etcd 成员]。

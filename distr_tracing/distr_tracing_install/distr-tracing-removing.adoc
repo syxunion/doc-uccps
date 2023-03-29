@@ -1,0 +1,31 @@
+:_content-type: ASSEMBLY
+[id="removing-distributed-tracing"]
+= 删除分布式追踪
+include::_attributes/common-attributes.adoc[]
+:context: removing-distributed-tracing
+
+toc::[]
+
+从统信容器云管理平台集群中删除 统信容器云管理平台分布式追踪的步骤如下：
+
+. 关闭任何 统信容器云管理平台分布式追踪pod。
+. 删除任何 统信容器云管理平台分布式追踪实例。
+. 删除 统信容器云管理平台分布式追踪 Operator。
+. 删除 统信容器云管理平台分布式追踪数据收集 Operator。
+
+include::modules/distr-tracing-removing-instance.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-removing-instance-cli.adoc[leveloffset=+1]
+
+
+== 删除统信容器云管理平台分布式追踪Operator
+
+.流程
+
+. 按照从集群中删除 Operator 的说明进行操作。
+
+* 删除 统信容器云管理平台分布式追踪 Operator。
+
+//* Remove the {OTELName} Operator.
+
+* 删除 统信容器云管理平台分布式追踪 Operator 后，请删除 统信容器云管理平台搜索引擎

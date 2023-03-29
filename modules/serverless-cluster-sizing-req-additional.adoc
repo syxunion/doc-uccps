@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * /serverless/install/install-serverless-operator.adoc
+
+:_content-type: REFERENCE
+[id="serverless-cluster-sizing-req-additional_{context}"]
+= 更复杂用例所需的额外资源
+
+对于更复杂的用例，如日志、 {product-title} 指标数据等，必须部署更多资源。对这类用例的推荐要求为 24 个 CPU 和 96GB 内存。
+
+如果您在集群中启用了高可用性 (HA) ，需要 0.5 - 1.5 个内核，每个 Knative Serving control plane 副本需要 200MB 到 2GB 内存。一些 Knative Serving 组件在默认情况下启用了 HA。您可以按照"配置高可用性副本"的文档禁用 HA。

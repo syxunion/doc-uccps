@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+:context: nodes-containers-using
+[id="nodes-containers-using"]
+= 了解容器
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+统信容器云管理平台 应用程序的基本单元称为容器。Linux 容器技术是一种轻量型机制，用于隔离运行中的进程，使它们只能跟指定的资源交互。
+
+许多应用程序实例可以在单一主机上的容器中运行，而且相互之间看不到对方的进程、文件和网络等。通常，每个容器都提供单一服务（通常称为“微服务”），如 Web 服务器或数据库，但容器可用于任意工作负载。
+
+多年来，Linux 内核一直在整合容器技术的能力。统信容器云管理平台 和 Kubernetes 增加了在多主机安装之间编排容器的功能。
+
+[discrete]
+[id="nodes-containers-memory"]
+== 关于容器和 RHEL 内核内存
+
+由于 UnionTech OS Server 20(UOS20)行为，CPU 使用率高的容器可能比预期消耗的内存多。较高的内存消耗可能是由 RHEL 内核中的 `kmem_cache` 造成的。RHEL 内核为每个 cgroup 创建一个 `kmem_cache`。为添加性能，`kmem_cache` 包含 `cpu_cache` 以及任何 NUMA 节点的节点缓存。这些缓存都消耗内核内存。
+
+保存在这些缓存中的内存量与系统使用的 CPU 数量成比例。因此，有大量 CPU 会导致更多的内核内存被保存在这些缓存中。这些缓存中有大量内核内存可导致 统信容器云管理平台 容器超过配置的内存限值，从而导致容器被终止。
+
+为了避免因为内核内存问题而丢失容器，请确保容器请求足够的内存。您可以使用以下公式来估算 `kmem_cache` 所消耗的内存数量，其中 nproc 是 nproc 命令报告的可用处理单元数。容器请求的下限应该是这个值加上容器内存要求：
+
+[source,terminal]
+----
+$(nproc) X 1/2 MiB
+----
+
+
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.

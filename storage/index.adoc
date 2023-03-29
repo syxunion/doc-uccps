@@ -1,0 +1,35 @@
+:_content-type: ASSEMBLY
+[id="storage-overview"]
+= 统信容器云管理平台存储概述
+include::_attributes/common-attributes.adoc[]
+:context: storage-overview
+
+toc::[]
+
+统信容器云管理平台支持多种存储类型，包括内部存储和云供应商。您可以在统信容器云管理平台集群中管理持久性和非持久性数据的容器存储。
+
+
+[id="storage-types"]
+== 存储类型
+
+统信容器云管理平台存储广泛分为两类，即临时存储和持久性存储。
+
+[id="ephemeral-storage"]
+=== 临时存储
+
+Pod 和容器具有临时或临时性，面向无状态应用。临时存储可让管理员和开发人员更好地管理其某些操作的本地存储。如需有关临时存储概述、类型和管理的更多信息，请参阅 xref:../storage/understanding-ephemeral-storage.adoc#understanding-ephemeral-storage[了解临时存储]。
+
+[id="persistent-storage"]
+=== 持久性存储
+
+容器中部署的有状态应用需要持久存储。统信容器云管理平台使用名为持久性卷(PV)的预置备存储框架来允许集群管理员置备持久性存储。这些卷中的数据可能超过单个 pod 的生命周期。开发人员可以使用持久性卷声明(PVC)来请求存储要求。如需有关持久性存储概述、配置和生命周期的更多信息，请参阅 xref:../storage/understanding-persistent-storage.adoc#understanding-persistent-storage[了解持久性存储]。
+
+[id="container-storage-interface"]
+== Container Storage Interface (CSI)
+
+CSI 是在不同容器编配(CO)系统中管理容器存储的 API 规范。您可以在容器原生环境中管理存储卷，而无需具体了解底层存储基础架构。使用 CSI 时，存储可在不同的容器编配系统中有效，无论您使用的存储供应商是什么。如需有关 CSI 的更多信息，请参阅 xref:../storage/container_storage_interface/persistent-storage-csi.adoc#persistent-storage-csi[使用容器存储接口(CSI)]。
+
+[id="dynamic-provisioning-overview"]
+== 动态置备
+
+通过动态置备，您可以按需创建存储卷，使集群管理员无需预置备存储。有关动态置备的更多信息，请参阅 xref:../storage/dynamic-provisioning.adoc#dynamic-provisioning[动态置备]。

@@ -1,0 +1,118 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-threescale-applying-external-service-entry-objects_{context}"]
+= Applying 3scale external ServiceEntry objects
+
+要让 `threescale-wasm-auth` 模块授权针对 3scale 的请求，该模块必须有权访问 3scale 服务。您可以通过应用外部 `ServiceEntry`  对象和用于 TLS 配置的对应的 `DestinationRule` 对象来在 统信容器云管理平台服务网格 中执行此操作，以使用 HTTPS 协议。
+
+自定义资源(CR)设置服务条目和目的地规则，以便从 Service Mesh 内安全访问 3scale 托管(SaaS)，用于服务管理 API 和帐户管理 API 的后端和系统组件。Service Management API 接收每个请求的授权状态查询。帐户管理 API 为您的服务提供 API 管理配置设置。
+
+.流程
+
+. 为 3scale 托管  *后端* 应用以下  `ServiceEntry` CR 和相关的  `DestinationRule` CR：
+.. 将 `ServiceEntry` CR 添加到名为 `service-entry-threescale-saas-backend.yml` 的文件：
++
+.ServiceEntry CR
+[source,terminal]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: service-entry-threescale-saas-backend
+spec:
+  hosts:
+  - su1.3scale.net
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+----
+.. 将 `DestinationRule` CR 添加到名为 `destination-rule-threescale-saas-backend.yml` 的文件：
++
+.DestinationRule CR
+[source,terminal]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: destination-rule-threescale-saas-backend
+spec:
+  host: su1.3scale.net
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      sni: su1.3scale.net
+----
+
+.. 运行以下命令，为 3scale 托管后端应用并保存外部  `ServiceEntry` CR：
++
+[source,terminal]
+----
+$ oc apply -f service-entry-threescale-saas-backend.yml
+----
+
+.. 运行以下命令，为 3scale Hosted 后端应用并保存外部 `DestinationRule` CR：
++
+[source,terminal]
+----
+$ oc apply -f destination-rule-threescale-saas-backend.yml
+----
+
+. 为 3scale 托管系统应用以下 `ServiceEntry` CR 和相关的  `DestinationRule` CR：
+.. 将 `ServiceEntry` CR 添加到名为 `service-entry-threescale-saas-system.yml` 的文件：
++
+.ServiceEntry CR
+[source,terminal]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: service-entry-threescale-saas-system
+spec:
+  hosts:
+  - multitenant.3scale.net
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+----
+.. 将 `DestinationRule` CR 添加到名为 `destination-rule-threescale-saas-system.yml` 的文件：
++
+.DestinationRule CR
+[source,terminal]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: destination-rule-threescale-saas-system
+spec:
+  host: multitenant.3scale.net
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      sni: multitenant.3scale.net
+----
+
+.. 运行以下命令，为 3scale 托管系统应用并保存外部 `ServiceEntry`  CR：
++
+[source,terminal]
+----
+$ oc apply -f service-entry-threescale-saas-system.yml
+----
+
+.. 运行以下命令，为 3scale Hosted 系统应用并保存外部 `DestinationRule` CR：
++
+[source,terminal]
+----
+$ oc apply -f <destination-rule-threescale-saas-system.yml>
+----
+
+或者，您可以部署一个mesh 3scale 服务。要部署 in-mesh 3scale 服务，请通过部署 3scale 并链接到部署来更改 CR 中服务的位置。
+

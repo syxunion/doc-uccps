@@ -1,0 +1,204 @@
+// Module included in the following assemblies:
+//* service_mesh/v2x/ossm-reference-kiali.adoc
+:_content-type: REFERENCE
+[id="ossm-smcp-kiali_{context}"]
+= Specifying Kiali configuration in the SMCP
+
+您可以在 `ServiceMeshControlPlane` 资源的 `addons` 部分配置 Kiali。默认情况下启用 Kiali 。要禁用 Kiali，将 `spec.addons.kiali.enabled` 设置为 `false`.
+
+您可以通过以下两种方式之一指定 Kiali 配置：
+
+* 在 `spec.addons.kiali.install` 下指定  `ServiceMeshControlPlane` 资源中的 Kiali 配置。这个方法有一些限制，因为 SMCP 中没有 Kiali 配置的完整列表。
+
+* 配置和部署 Kiali 实例，并将 Kiali 资源的名称指定为 `ServiceMeshControlPlane` 资源中的 `spec.addons.kiali.name` 的值。您必须在与 Service Mesh control plane 相同的命名空间中创建 CR，如 `istio-system`。如果存在与 `name` 值匹配的 Kiali 资源，control plane 将配置该 Kiali 资源以用于 control plane。这个方法可让您在 Kiali 资源中完全自定义 Kiali 配置。请注意，使用此方法，Kiali 资源的不同字段会被 Service Mesh Operator 覆盖，特别是 `accessible_namespaces` 列表，以及 Grafana、Prometheus 和追踪的端点。
+
+.Kiali 的 SMCP 参数示例
+[source,yaml]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  addons:
+    kiali:
+      name: kiali
+      enabled: true
+      install:
+        dashboard:
+          viewOnly: false
+          enableGrafana: true
+          enableTracing: true
+          enablePrometheus: true
+        service:
+          ingress:
+            contextPath: /kiali
+----
+
+.`ServiceMeshControlPlane` Kiali 参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+|spec:
+  addons:
+    kiali:
+      name:
+|Kiali 自定义资源的名称。如果存在与 `name` 值匹配的 Kiali CR，Service Mesh Operator 会将该 CR 用于安装。如果没有 Kiali CR，Operator 将使用这个 名称和 SMCP 中指定的配置选项创建一个。
+|字符串
+|`kiali`
+
+|kiali:
+  enabled:
+|这个参数启用或禁用 Kiali。默认情况下启用 Kiali 。
+|`true`/`false`
+|`true`
+
+|kiali:
+  install:
+|如果命名 Kiali 资源不存在，请安装 Kiali 资源。如果 `addons.kiali.enabled` 设为 `false` 则 `install` 部分会被忽略。
+|
+|
+
+|kiali:
+  install:
+    dashboard:
+|Kiali 提供的仪表板的配置参数。
+|
+|
+
+|kiali:
+  install:
+    dashboard:
+      viewOnly:
+|为 Kiali 控制台启用或禁用只读视图模式。启用只读视图模式时，用户无法使用 Kiali 控制台来更改 Service Mesh。
+|`true`/`false`
+|`false`
+
+|kiali:
+  install:
+    dashboard:
+      enableGrafana:
+|基于 `spec.addons.grafana` 配置的 Grafana 端点。
+|`true`/`false`
+|`true`
+
+|kiali:
+  install:
+    dashboard:
+      enablePrometheus:
+|基于 `spec.addons.prometheus` 配置的 Prometheus 端点。
+|`true`/`false`
+|`true`
+
+|kiali:
+  install:
+    dashboard:
+      enableTracing:
+|追踪根据 Jaeger 自定义资源配置配置的端点。
+|`true`/`false`
+|`true`
+
+|kiali:
+  install:
+    service:
+|与 Kiali 安装关联的 Kubernetes 服务的配置参数。
+|
+|
+
+|kiali:
+  install:
+    service:
+      metadata:
+|用于指定应用到资源的额外元数据。
+|N/A
+|N/A
+
+|kiali:
+  install:
+    service:
+      metadata:
+        annotations:
+|用于指定可应用到组件的服务的额外注解。
+|字符串
+|N/A
+
+|kiali:
+  install:
+    service:
+      metadata:
+        labels:
+|用于指定要应用到组件的服务的额外标签。
+|字符串
+|N/A
+
+|kiali:
+  install:
+    service:
+      ingress:
+|用于指定通过 Uccps Route 访问组件的服务的详细信息。
+|N/A
+|N/A
+
+|kiali:
+  install:
+    service:
+      ingress:
+        metadata:
+          annotations:
+|用于指定可应用到组件的服务入口的额外注解。
+|字符串
+|N/A
+
+|kiali:
+  install:
+    service:
+      ingress:
+        metadata:
+          labels:
+|用于指定可应用到组件的服务入口的额外标签。
+|字符串
+|N/A
+
+|kiali:
+  install:
+    service:
+      ingress:
+        enabled:
+|用于为与组件关联的服务自定义 Uccps Route。
+|`true`/`false`
+|`true`
+
+|kiali:
+  install:
+    service:
+      ingress:
+        contextPath:
+|用于指定服务的上下文路径。
+|字符串
+|N/A
+
+|install:
+  service:
+    ingress:
+      hosts:
+|用于为每个 Uccps 路由指定一个主机名。空主机名表示路由的默认主机名。
+|字符串
+|N/A
+
+|install:
+  service:
+    ingress:
+      tls:
+|用于为 Uccps 路由配置 TLS。
+|
+|N/A
+
+|kiali:
+  install:
+    service:
+      nodePort:
+|用于为组件的服务 `Values.<component>.service.nodePort.port` 指定 `nodePort` 。
+|整数
+|N/A
+|===

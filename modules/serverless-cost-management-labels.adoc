@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * /serverless/integrations/serverless-cost-management-integration.adoc
+
+:_content-type: REFERENCE
+[id="serverless-cost-management-labels_{context}"]
+= 使用标签进行成本管理查询
+
+标签（label）（在成本管理中也称为 tag ）可用于节点、命名空间或 pod。每个标签都是键和值对。您可以使用多个标签的组合来生成报告。
+
+标签从节点继承到命名空间，并从命名空间继承到 pod。但是，如果标签已在资源中已存在，则标签不会被覆盖。例如，Knative 服务具有默认的  `app=<revision_name>` 标签
+
+.Knative 服务默认标签示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+spec:
+...
+      labels:
+        app: <revision_name>
+...
+----
+
+如果您为命名空间定义标签，如 `app=my-domain`，在查询使用 `app=my-domain` 标签的应用程序时，成本管理服务不会考虑带有 `app=<revision_name>` 标签的 Knative 服务的成本。具有此标签的 Knative 服务的成本必须在 `app=<revision_name>` 标签下查询。

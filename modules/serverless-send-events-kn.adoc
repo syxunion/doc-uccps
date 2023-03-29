@@ -1,0 +1,54 @@
+:_content-type: PROCEDURE
+[id="serverless-send-events-kn_{context}"]
+= Sending events by using the kn-event plugin
+
+您可以使用 `kn event send` 命令来发送事件。事件可以发送到公开的地址，或发送到集群中的可寻址资源，如 Kubernetes 服务，以及 Knative 服务、代理和频道。命令使用与 `kn event build` 命令相同的 builder 接口。
+
+.先决条件
+
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+* 发送事件：
++
+[source,terminal]
+----
+$ kn event send --field <field-name>=<value> --type <type-name> --id <id> --to-url <url> --to <cluster-resource> --namespace <namespace>
+----
+where:
+** `--field` 标志将数据作为字段值对添加到事件中。您可以多次使用它。
+** `--type` 标志允许您指定指定事件类型的字符串。
+** `--id` 标志指定事件的 ID。
+** 如果您要将事件发送到公开的目的地，请使用 `--to-url` 标志指定 URL。
+** 如果要将事件发送到集群内Kubernetes 资源，请使用 `--to` 标志指定目的地。
+*** 使用 `<Kind>:<ApiVersion>:<name>` 格式指定 Kubernetes 资源。
+** `--namespace` 标志指定命名空间。如果省略，则会从当前上下文中获取命名空间。
++
+所有这些标志都是可选的，除了目的地规格外，您需要使用 `--to-url`  或 `--to`.
++
+以下示例显示向 URL 发送事件：
++
+.示例命令
+[source,terminal]
+----
+$ kn event send \
+    --field player.id=6354aa60-ddb1-452e-8c13-24893667de20 \
+    --field player.game=2345 \
+    --field points=456 \
+    --type org.example.gaming.foo \
+    --to-url http://ce-api.foo.example.com/
+----
++
+以下示例显示了将事件发送到 in-cluster 资源：
++
+.示例命令
+[source,terminal]
+----
+$ kn event send \
+    --type org.example.kn.ping \
+    --id $(uuidgen) \
+    --field event.type=test \
+    --field event.data=98765 \
+    --to Service:serving.knative.dev/v1:event-display
+----

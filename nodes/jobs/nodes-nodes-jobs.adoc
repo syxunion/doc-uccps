@@ -1,0 +1,55 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-jobs"]
+= 使用任务在 Pod 中运行任务
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-jobs
+
+toc::[]
+
+
+作业（job）在 统信容器云管理平台 集群中执行某项任务。
+
+作业会跟踪任务的整体进度，并使用活跃、成功和失败 pod 的相关信息来更新其状态。删除作业会清理它创建的所有 pod 副本。作业是 Kubernetes API 的一部分，可以像其他对象类型一样通过 oc 命令进行管理。
+
+.作业规格示例
+
+[source,yaml]
+----
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  parallelism: 1    <1>
+  completions: 1    <2>
+  activeDeadlineSeconds: 1800 <3>
+  backoffLimit: 6   <4>
+  template:         <5>
+    metadata:
+      name: pi
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: OnFailure    <6>
+----
+<1> 作业应并行运行的 pod 副本 。
+<2> pod 成功完成后需要标记为作业也完成。
+<3> 作业可以运行的最长时间。
+<4> 作业的重试次数。
+<5> 控制器创建的 pod 模板。
+<6> pod 的重启策略。
+
+如需有关作业的更多信息，请参阅 Kubernetes 文档。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-jobs-about.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-jobs-creating.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-jobs-creating-cron.adoc[leveloffset=+1]

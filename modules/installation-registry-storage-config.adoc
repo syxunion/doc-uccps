@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_aws/installing-aws-user-infra.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_aws/installing-restricted-networks-aws.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * installing/installing_bare_metal/installing-bare-metal-network-customizations.adoc
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * installing/installing_vmc/installing-vmc-customizations.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vmc/installing-vmc.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vmc/installing-restricted-networks-vmc.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned.adoc
+// * installing/installing_vsphere/installing-restricted-networks-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere.adoc
+// * installing/installing_vsphere/installing-restricted-networks-installer-provisioned-vsphere.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-baremetal.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-vsphere.adoc
+
+ifeval::["{context}" == "installing-aws-user-infra"]
+:aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws"]
+:aws:
+endif::[]
+
+:_content-type: CONCEPT
+[id="installation-registry-storage-config_{context}"]
+= 镜像 registry 存储配置
+
+ifdef::aws[]
+Amazon Web Services provides default storage, which means the Image Registry
+Operator is available after installation. However, if the Registry Operator
+cannot create an S3 bucket and automatically configure storage, you must
+manually configure registry storage.
+endif::aws[]
+ifndef::aws[]
+对于不提供默认存储的平台，Image Registry Operator 最初不可用。安装后，您必须将 registry 配置为使用存储，以便 Registry Operator 可用。
+endif::aws[]
+
+显示配置生产集群所需的持久性卷的说明。如果适用，显示有关将空目录配置为存储位置的说明，这仅适用于非生产集群。
+
+提供了在升级过程中使用 `Recreate` rollout 策略来允许镜像 registry 使用块存储类型的说明。
+
+ifeval::["{context}" == "installing-aws-user-infra"]
+:!aws:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-aws"]
+:!aws:
+endif::[]

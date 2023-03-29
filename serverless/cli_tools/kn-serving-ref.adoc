@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+[id="kn-serving-ref"]
+= Knative Serving CLI 命令
+include::_attributes/common-attributes.adoc[]
+:context: kn-serving-ref
+
+toc::[]
+
+您可以使用以下 Knative (`kn`) CLI 命令，在集群中完成 Knative Serving 任务。
+
+[id="kn-serving-ref-kn-service"]
+== kn service 命令
+
+您可以使用以下命令创建和管理 Knative 服务。
+
+include::modules/creating-serverless-apps-kn.adoc[leveloffset=+2]
+include::modules/kn-service-update.adoc[leveloffset=+2]
+include::modules/kn-service-apply.adoc[leveloffset=+2]
+include::modules/kn-service-describe.adoc[leveloffset=+2]
+
+// offline mode
+include::modules/kn-service-offline-about.adoc[leveloffset=+1]
+include::modules/kn-service-offline-create.adoc[leveloffset=+2]
+
+[id="kn-serving-ref-kn-container"]
+== kn 容器命令
+
+您可以使用以下命令在 Knative 服务规格中创建和管理多个容器。
+
+include::modules/serverless-kn-container.adoc[leveloffset=+2]
+
+[id="kn-serving-ref-domain-mapping"]
+== kn 域命令
+
+您可以使用下列命令创建和管理域映射。
+
+include::modules/serverless-create-domain-mapping-kn.adoc[leveloffset=+2]
+include::modules/serverless-manage-domain-mapping-kn.adoc[leveloffset=+2]

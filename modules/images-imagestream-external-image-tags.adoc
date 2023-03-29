@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+:_content-type: PROCEDURE
+[id="images-imagestream-external-image-tags_{context}"]
+= 为外部镜像添加标签
+
+您可为外部镜像添加标签。
+
+.流程
+
+* 通过使用 oc tag 命令执行所有标签相关操作，添加指向内部或外部镜像的标签：
++
+[source,terminal]
+----
+$ oc tag <repository/image> <image-name:tag>
+----
++
+例如，该命令可将 `docker.io/python:3.6.0` 镜像映射到 `python` 镜像流中的 `3.6` 标签。
++
+[source,terminal]
+----
+$ oc tag docker.io/python:3.6.0 python:3.6
+----
++
+.输出示例
+[source,terminal]
+----
+Tag python:3.6 set to docker.io/python:3.6.0.
+----
++
+如果外部镜像安全，则您必须创建带有凭证的 secret 以访问该 registry。

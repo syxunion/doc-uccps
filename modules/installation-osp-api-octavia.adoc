@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * networking/load-balancing-openstack.adoc
+
+[id="installation-osp-api-octavia_{context}"]
+= 使用 Octavia 为应用程序流量扩展集群
+
+在 Uniontech UStack Platform（有栈）上运行的 统信容器云管理平台 集群可以使用 Octavia 负载均衡服务在多个虚拟机（VM）或浮动 IP 地址间分配流量。这个功能减少了单一机器或地址生成的瓶颈。
+
+如果您的集群使用 Kuryr，Cluster Network Operator 会在部署时创建一个内部 Octavia 负载均衡器。您可以使用此负载均衡器进行应用程序网络扩展。
+
+如果您的集群没有使用 Kuryr，则需要创建自己的 Octavia 负载均衡器将其用于应用程序网络扩展。

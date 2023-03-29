@@ -1,0 +1,53 @@
+:_content-type: ASSEMBLY
+[id="serverless-kafka-developer"]
+= 使用 Knative Kafka
+include::_attributes/common-attributes.adoc[]
+:context: serverless-kafka-developer
+
+toc::[]
+
+Knative Kafka 提供集成选项，供您在 OpenShift Serverless 中使用支持的 Apache Kafka 消息流平台。Kafka 为事件源、频道、代理和事件 sink 功能提供选项。
+
+如果集群管理员安装了 KnativeKafka 自定义资源，则 OpenShift Serverless 安装中就会提供 Knative Kafka 功能。
+
+
+Knative Kafka 提供了额外的选项，例如：
+
+* Kafka 源
+* Kafka 频道
+* Kafka 代理
+* Kafka 接收器
+
+include::modules/serverless-kafka-event-delivery.adoc[leveloffset=+1]
+
+
+[id="serverless-kafka-developer-source"]
+== Kafka 源
+
+您可以创建一个 Kafka 源从 Apache Kafka 集群中读取事件，并将这些事件传递给接收器。您可以使用 OpenShift Container Platform Web 控制台、Knative (kn) CLI 或直接创建一个 `KafkaSource` 对象作为 YAML 文件并使用 OpenShift CLI (oc)来创建 Kafka 源。
+
+// dev console
+include::modules/serverless-kafka-source-odc.adoc[leveloffset=+2]
+// kn commands
+include::modules/serverless-kafka-source-kn.adoc[leveloffset=+2]
+include::modules/specifying-sink-flag-kn.adoc[leveloffset=+3]
+// YAML
+include::modules/serverless-kafka-source-yaml.adoc[leveloffset=+2]
+
+[id="serverless-kafka-developer-broker"]
+== Kafka 代理
+
+include::snippets/serverless-about-kafka-broker.adoc[]
+
+
+// Kafka channels
+include::modules/serverless-create-kafka-channel-yaml.adoc[leveloffset=+1]
+
+[id="serverless-kafka-developer-sink"]
+== Kafka 接收器
+
+如果集群管理员在集群中启用了 Kafka，则 Kafka sink 是事件 sink 类型。您可以使用 Kafka sink 将事件从事件源发送到 Kafka 主题。
+
+// Kafka sink
+include::modules/serverless-kafka-sink.adoc[leveloffset=+2]
+

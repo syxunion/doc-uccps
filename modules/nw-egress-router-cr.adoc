@@ -1,0 +1,110 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/deploying-egress-router-ovn-redirection.adoc
+
+ifeval::["{context}" == "deploying-egress-router-ovn-redirection"]
+:redirect:
+:router-type: redirect
+endif::[]
+:router-name: egress-router-{router-type}
+
+[id="nw-egress-router-ovn-cr_{context}"]
+= 出口路由器自定义资源
+
+在出口路由器自定义资源中定义出口路由器 pod 的配置。以下 YAML 描述了以重定向模式配置出口路由器的字段：
+
+// cluster-network-operator/manifests/0000_70_cluster-network-operator_01_egr_crd.yaml
+[source,yaml,subs="attributes+"]
+----
+apiVersion: network.operator.openshift.io/v1
+kind: EgressRouter
+metadata:
+  name: <egress_router_name>
+  namespace: <namespace>  <.>
+spec:
+  addresses: [  <.>
+    {
+      ip: "<egress_router>",  <.>
+      gateway: "<egress_gateway>"  <.>
+    }
+  ]
+  mode: Redirect
+  redirect: {
+    redirectRules: [  <.>
+      {
+        destinationIP: "<egress_destination>",
+        port: <egress_router_port>,
+        targetPort: <target_port>,  <.>
+        protocol: <network_protocol>  <.>
+      },
+      ...
+    ],
+    fallbackIP: "<egress_destination>" <.>
+  }
+----
+// openshift/api:networkoperator/v1/001-egressrouter.crd.yaml
+<.> Optional: 可选： `namespace` 字段指定要在其中创建出口路由器的命名空间。如果您没有在文件或命令行中指定值，则会使用 `default` 命名空间。
+
+<.> `address` 字段指定要在第二个网络接口上配置的 IP 地址。
+
+<.> `ip` 字段指定节点用于出口路由器 pod 的物理网络中保留源 IP 地址和子网掩码。使用 CIDR 表示法指定 IP 地址和网络掩码。
+
+<.> `gateway` 字段指定网络网关的 IP 地址。
+
+<.> 可选： `redirectRules` 字段指定出口目的地 IP 地址、出口路由器端口和协议的组合。到指定端口和协议中的出口路由器的传入连接路由到目标 IP 地址。
+
+<.> 可选： `targetPort` 字段指定目标 IP 地址上的网络端口。如果没有指定此字段，流量将路由到它到达的同一网络端口。
+
+<.> `protocol` 字段支持 TCP、UDP 或 SCTP。
+
+<.> 可选： `fallbackIP` 字段指定目标 IP 地址。如果没有指定任何重定向规则，出口路由器会将所有流量发送到这个回退 IP 地址。如果您指定了重定向规则，则出口路由器将任何与规则中定义的网络端口的连接发送到这个回退 IP 地址。如果没有指定此字段，出口路由器会拒绝与规则中没有定义的网络端口的连接。
+
+.出口路由器规格示例
+[source,yaml,subs="attributes+"]
+----
+apiVersion: network.operator.openshift.io/v1
+kind: EgressRouter
+metadata:
+  name: {router-name}
+spec:
+  networkInterface: {
+    macvlan: {
+      mode: "Bridge"
+    }
+  }
+  addresses: [
+    {
+      ip: "192.168.12.99/24",
+      gateway: "192.168.12.1"
+    }
+  ]
+  mode: Redirect
+  redirect: {
+    redirectRules: [
+      {
+        destinationIP: "10.0.0.99",
+        port: 80,
+        protocol: UDP
+      },
+      {
+        destinationIP: "203.0.113.26",
+        port: 8080,
+        targetPort: 80,
+        protocol: TCP
+      },
+      {
+        destinationIP: "203.0.113.27",
+        port: 8443,
+        targetPort: 443,
+        protocol: TCP
+      }
+    ]
+  }
+----
+
+// clear temporary attributes
+:!router-name:
+:!router-type:
+ifdef::redirect[]
+:!redirect:
+endif::[]

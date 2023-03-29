@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// storage/persistent_storage/persistent-storage-flexvolume.adoc
+
+:_content-type: CONCEPT
+[id="flexvolume-drivers_{context}"]
+= 关于 FlexVolume 驱动程序
+
+FlexVolume 驱动程序是一个可执行文件，它位于集群中所有节点的一个明确定义的目录中。统信容器云管理平台会在需要挂载或卸载由带有 `flexVolume` 的 `PersistentVolume` 对象代表的卷时调用 FlexVolume 驱动程序。
+
+[重要]
+====
+统信容器云管理平台不支持 FlexVolume 的 attach 和 detach 操作。
+====

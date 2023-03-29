@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * monitoring/reviewing-monitoring-dashboards.adoc
+
+:_content-type: PROCEDURE
+[id="reviewing-monitoring-dashboards-developer_{context}"]
+= 以开发者身份查看监控仪表盘
+
+在 *开发者* 视角中，您可以查看与所选项目相关的仪表板。您必须具有监控项目的访问权限，才能查看其仪表板信息。
+
+.先决条件
+
+* 对于您要查看仪表板的项目，您可以作为开发者或具有查看权限的用户访问集群。
+
+.流程
+
+. 在 统信容器云管理平台 web 控制台的 *开发者** 视角中，导航到 *Observe* -> *Dashboard*.
+
+. 2.在 *Project:* 列表中选择一个项目。
+
+. 从 *Dashboard* 下拉列表中选择一个仪表板，以查看过滤的指标。
++
+. 可选：在 *Time Range* 列表中为图形选择一个时间范围。
++
+** 选择预定义的时间段。
++
+** 通过选择 *Time Range* 列表中的 *Custom* 时间范围 来设置自定义时间范围。
++
+.. 输入或选择 *From* 和 *To* date and time。
++
+.. 单击 *Save* 以保存自定义时间范围。
+
+. 可选：选择一个 *Refresh Interval*。
+
+. 将鼠标悬停在仪表板中的每个图形上，以显示特定项目的详细信息。

@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="excluding-a-user-defined-project-from-monitoring_{context}"]
+= 将用户定义的项目从监控中排除
+
+用户工作负载监控中可以排除个别用户定义的项目。为此，只需将 `openshift.io/user-monitoring` 标签添加到项目的命名空间，值设为 `false` 。
+
+.流程
+
+. 将标签添加到项目命名空间：
++
+[source,terminal]
+----
+$ oc label namespace my-project 'openshift.io/user-monitoring=false'
+----
++
+. 要重新启用监控，请从命名空间中删除该标签：
++
+[source,terminal]
+----
+$ oc label namespace my-project 'openshift.io/user-monitoring-'
+----
++
+[注意]
+====
+如果项目有任何活跃的监控目标，Prometheus 可能需要几分钟时间在添加标签后停止提取它们。
+====

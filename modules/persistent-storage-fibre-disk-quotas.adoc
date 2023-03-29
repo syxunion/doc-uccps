@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * storage/persitent-storage/persistent_storage-fibre.adoc
+
+[id="enforcing-disk-quota_{context}"]
+= 强制磁盘配额
+使用 LUN 分区强制磁盘配额和大小限制。每个 LUN 都被映射到一个持久性卷，持久性卷必须使用唯一的名称。
+
+采用这种方法强制配额可让最终用户以特定数量（如 10Gi）请求持久性存储，并可与相等或更大容量的卷进行匹配。

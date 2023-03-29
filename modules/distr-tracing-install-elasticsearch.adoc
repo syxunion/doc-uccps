@@ -1,0 +1,52 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-installing.adoc
+////
+
+:_content-type: PROCEDURE
+[id="distr-tracing-operator-install-elasticsearch_{context}"]
+= 安装 统信容器云管理平台搜索引擎
+
+容器云管理平台分布式追踪平台部署使用内存存储，因为它旨在快速安装用于评估 统信容器云管理平台分布式追踪、提供演示或在测试环境中使用 统信容器云管理平台分布式追踪平台的用户。如果您计划在生产环境中使用 统信容器云管理平台分布式追踪平台，则必须安装并配置持久性存储选项，即 Elasticsearch。
+
+.先决条件
+* 访问统信容器云管理平台web 控制台。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。如果使用 统信容器云管理平台Dedicated，则必须有一个具有 dedicated-admin 角色的帐户。
+
+[注意]
+====
+如果您已经安装了 统信容器云管理平台搜索引擎 作为 统信容器云管理平台集群日志 的一部分，则不需要再次安装 统信容器云管理平台搜索引擎。统信容器云管理平台分布式追踪 Operator 使用已安装的 统信容器云管理平台搜索引擎 创建 Elasticsearch 实例。
+====
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台web 控制台。如果使用 统信容器云管理平台Dedicated，则必须有一个具有 dedicated-admin 角色的帐户。
+
+. 导航至  *Operators* -> *OperatorHub*.
+
+. 在过滤器框中键入 *Elasticsearch* 以找到 统信容器云管理平台搜索引擎。
+
+. 点由 *统信提供* 的 *统信容器云管理平台搜索引擎* 来显示有关 Operator 的信息。
+
+. 点击 *安装*.
+
+. 在安装 *安装 Operator* 页面, 选择 *stable* 更新频道。
+
+. 安装模式选择集群中的 *所有命名空间* （默认）。这会在默认的 `openshift-operators-redhat` 项目中安装 Operator，并使 Operator 可供集群中的所有项目使用。
++
+[注意]
+====
+Elasticsearch 安装需要 统信容器云管理平台搜索引擎 的  *openshift-operators-redhat* 命名空间。其他 统信容器云管理平台分布式追踪Operator 安装在 `openshift-operators` 。
+====
++
+
+* 接受默认的 *Automatic* 批准策略。默认情况下，当这个 Operator 的新版本可用时，Operator Lifecycle Manager(OLM)将自动升级 Operator 的运行实例，而无需人为干预。如果选择手动 更新，则当有新版 Operator 可用时，OLM 会创建更新请求。作为集群管理员，您必须手动批准该更新请求，才可将 Operator 更新至新版本。
++
+[注意]
+====
+*Manual* 批准策略需要具有适当凭证的用户批准 Operator 的安装和订阅过程。
+====
+
+. 点击 *安装*.
+
+. 在安装的 *安装 Operators* 页面中，选择 `openshift-operators-redhat` 项目。等待 统信容器云管理平台搜索引擎 的状态显示为 "InstallSucceeded" 后再继续进行操作。

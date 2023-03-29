@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-alert-routing-for-user-defined-projects.adoc
+
+:_content-type: CONCEPT
+[id="understanding-alert-routing-for-user-defined-projects_{context}"]
+= 了解用户定义的项目的警报路由
+
+[role="_abstract"]
+作为集群管理员，您可以为用户定义的项目启用警报路由。这样，您可以允许用户为用户定义的项目配置警报路由。然后，用户可以通过创建或编辑  `AlertmanagerConfig` 对象来创建和配置用户定义的警报路由。
+
+用户为用户定义的项目定义警报路由后，用户定义的警报将路由到 `openshift-monitoring` 命名空间中的 `alertmanager-main`。
+
+请注意用户定义的项目的警报路由的限制和功能：
+
+* 对于用户定义的警报规则，用户定义的路由范围到定义资源的命名空间。例如，命名空间 `ns1` 中的路由配置仅适用于同一命名空间中的 `PrometheusRules` 资源。
+
+* Cluster Monitoring Operator (CMO) 不会部署专用于用户定义的警报的第二个 Alertmanager 服务。集群管理员继续使用自定义 secret 或 统信容器云管理平台 Web 控制台继续定义主 Alertmanager 配置。
+
+* 当命名空间不包括在用户定义的监控中时，命名空间中的 `AlertmanagerConfig` 资源将成为 Alertmanager 配置的一部分。

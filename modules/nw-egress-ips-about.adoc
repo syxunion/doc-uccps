@@ -1,0 +1,301 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/assigning-egress-ips.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-egress-ips-ovn.adoc
+
+ifeval::["{context}" == "egress-ips"]
+:openshift-sdn:
+endif::[]
+ifeval::["{context}" == "configuring-egress-ips-ovn"]
+:ovn:
+endif::[]
+
+[id="nw-egress-ips-about_{context}"]
+= 出口 IP 地址架构设计和实施
+
+统信容器云管理平台 出口 IP 地址功能可确保来自一个或多个命名空间中的一个或多个 pod 的流量具有集群网络之外的服务具有一致的源 IP 地址。
+
+例如，您可能有一个 pod 定期查询托管在集群外服务器上的数据库。要强制对服务器进行访问要求，将数据包过滤设备配置为只允许来自特定 IP 地址的流量。为确保您可以可靠地允许从该特定 pod 访问服务器，您可以为向服务器发出请求的 pod 配置特定的出口 IP 地址。
+
+分配给命名空间的出口 IP 地址与用来向特定目的地发送流量的出口路由器不同。
+
+In some cluster configurations, application pods and ingress router pods run on the same node. If you configure an egress IP address for an application project in this scenario, the IP address is not used when you send a request to a route from the application project.
+
+ifdef::openshift-sdn[]
+出口 IP 地址作为额外 IP 地址在节点的主网络接口中使用，且必须与节点的主 IP 地址位于同一个子网中。不能为集群中的任何其他节点分配额外的 IP 地址。
+endif::openshift-sdn[]
+
+[重要]
+====
+不能在任何 Linux 网络配置文件中配置出口 IP 地址，比如 `ifcfg-eth0`.
+====
+
+[id="nw-egress-ips-platform-support_{context}"]
+== 平台支持
+
+下表概述了对不同平台中的出口 IP 地址功能的支持：
+
+[cols="1,1",options="header"]
+|===
+
+| 平台 | 支持
+
+| 裸机 | 是
+| VMware vSphere | 是
+| {rh-openstack-first} | 否
+| Amazon Web Services (AWS) | 是
+| Google Cloud Platform (GCP) | 是
+| Microsoft Azure | 是
+
+|===
+
+[重要]
+====
+在 Amazon Web Services(AWS)上置备的集群中不支持使用 EgressIP 功能将出口 IP 地址分配给 control plane 节点。
+====
+
+[id="nw-egress-ips-public-cloud-platform-considerations_{context}"]
+== 公共云平台注意事项
+
+对于在公共云基础架构上置备的集群，每个节点绝对的 IP 地址会有一个约束。如下公式描述了每个节点的可分配 IP 地址或 _IP 容量_ 上限：
+
+[source,text]
+----
+IP capacity = public cloud default capacity - sum(current IP assignments)
+----
+
+虽然 Egress IP 功能管理每个节点的 IP 地址容量，但在部署中计划这个约束非常重要。例如，对于在具有 8 个节点的裸机基础架构上安装的集群，您可以配置 150 个出口 IP 地址。但是，如果公共云提供商将 IP 地址容量限制为每个节点 10 个 IP 地址，则可分配 IP 地址总数仅为 80。为了在这个示例中获得相同的 IP 地址容量，您需要分配 7 个节点。
+
+要确认公共云环境中任何节点的 IP 容量和子网，您可以输入 `oc get node <node_name> -o yaml` 命令。`cloud.network.openshift.io/egress-ipconfig` 注解包括节点的容量和子网信息。
+
+注解值是一个带有单个对象的数组，其中包含为主网络接口提供以下信息的字段：
+
+* `interface`: 指定 AWS 和 Azure 上的接口 ID，以及 GCP 上的接口名称。
+* `ifaddr`: 为一个或多个 IP 地址系列指定子网掩码。
+* `capacity`: 指定节点的 IP 地址容量。在 AWS 上，IP 地址容量为每个 IP 地址系列提供。在 Azure 和 GCP 上，IP 地址容量同时包括 IPv4 和 IPv6 地址。
+
+以下示例演示了来自多个公共云提供商上节点的注解。注解被缩进以便于阅读。
+
+.AWS 上的 `cloud.network.openshift.io/egress-ipconfig` 注解示例
+[source,yaml]
+----
+cloud.network.openshift.io/egress-ipconfig: [
+  {
+    "interface":"eni-078d267045138e436",
+    "ifaddr":{"ipv4":"10.0.128.0/18"},
+    "capacity":{"ipv4":14,"ipv6":15}
+  }
+]
+----
+
+.GCP 上的 `cloud.network.openshift.io/egress-ipconfig` 注解示例
+[source,yaml]
+----
+cloud.network.openshift.io/egress-ipconfig: [
+  {
+    "interface":"nic0",
+    "ifaddr":{"ipv4":"10.0.128.0/18"},
+    "capacity":{"ip":14}
+  }
+]
+----
+
+以下小节描述了支持公共云环境的 IP 地址容量，用于容量计算。
+
+[id="nw-egress-ips-capacity-aws_{context}"]
+=== Amazon Web Services(AWS)IP 地址容量限制
+
+在 AWS 上，IP 地址分配的限制取决于配置的实例类型。如需更多信息，请参阅 每个实例类型的每个网络接口的 IP 地址
+
+[id="nw-egress-ips-capacity-gcp_{context}"]
+=== 在 AWS 上，IP 地址分配的限制取决于配置的实例类型。如需更多信息，请参阅 每个实例类型的每个网络接口的 IP 地址
+
+在 GCP 中，网络模型通过 IP 地址别名而不是 IP 地址分配来实施额外的节点 IP 地址。但是，IP 地址容量直接映射到 IP 别名容量。
+
+IP 别名分配存在以下容量限制：
+
+- IP 别名分配存在以下容量限制：
+- 对于每个 VPC，IP 别名的最大数量没有被指定，但 统信容器云管理平台 可扩展性测试显示最大为 15,000 个。
+
+如需更多信息，请参阅 Per instance 配额和 Alias IP 范围概述。
+
+[id="nw-egress-ips-capacity-azure_{context}"]
+=== Microsoft Azure IP 地址容量限制
+
+在 Azure 上，IP 地址分配有以下容量限制：
+
+- 对于每个 NIC，对于 IPv4 和 IPv6，可分配 IP 地址的最大数量为 256。
+- 对于每个虚拟网络，分配的 IP 地址的最大数量不能超过 65,536。
+
+
+
+ifdef::openshift-sdn[]
+[id="nw-egress-ips-limitations_{context}"]
+== 限制
+
+将出口 IP 地址与 OpenShift SDN 集群网络供应商搭配使用时会有以下限制：
+
+- 您不能在同一节点上同时使用手动分配和自动分配的出口 IP 地址。
+- 如果手动从 IP 地址范围分配出口 IP 地址，则不得将该范围用于自动 IP 分配。
+- 您不能使用 OpenShift SDN 出口 IP 地址在多个命名空间间共享出口 IP 地址。
+
+如果您需要在命名空间间共享 IP 地址，则 OVN-Kubernetes 集群网络供应商出口 IP 地址可以在多个命名空间中分散 IP 地址。
+
+
+[注意]
+====
+如果您以多租户模式使用 `OpenShift SDN`，则无法将出口 IP 地址与与其关联的项目附加到另一个命名空间的任何命名空间一起使用。例如，如果 `project1` 和 `project2` 通过运行 `oc adm pod-network join-projects --to=project1 project2` 命令被连接，则这两个项目都不能使用出口 IP 地址。
+====
+endif::openshift-sdn[]
+
+ifdef::ovn[]
+[id="nw-egress-ips-considerations_{context}"]
+== 将出口 IP 分配给 pod
+
+要将一个或多个出口 IP 分配给命名空间中的命名空间或特定 pod,必须满足以下条件：
+
+- 集群中至少有一个节点必须具有 `k8s.ovn.org/egress-assignable: ""` 标签。
+- 存在一个 `EgressIP` 对象定义一个或多个出口 IP 地址，用作从命名空间中离开集群的流量的源 IP 地址。
+
+[重要]
+====
+如果您在为出口 IP 分配标记集群中的任何节点之前创建 `EgressIP` 对象，统信容器云管理平台 可能会将每个出口 IP 地址分配给第一个节点，并使用 `k8s.ovn.org/egress-assignable: ""` 标签。
+
+要确保出口 IP 地址在集群中的不同节点广泛分发，请在创建任何 `EgressIP`` 对象前，始终将标签应用到您想托管出口 IP 地址的节点。
+====
+
+[id="nw-egress-ips-node-assignment_{context}"]
+== 将出口 IP 分配给节点
+
+在创建 EgressIP 对象时，以下条件适用于标记为 `k8s.ovn.org/egress-assignable: ""` 标签的节点：
+
+- 每次不会将出口 IP 地址分配给多个节点。
+- 出口 IP 地址可在可以托管出口 IP 地址的可用节点之间平衡。
+- 如果 `EgressIP` 对象中的 `spec.EgressIPs` 数组指定了多个 IP 地址，则适用以下条件：
+* 任何节点都不会托管超过一个指定的 IP 地址。
+* 流量在给定命名空间的指定 IP 地址之间大致相等。
+- 如果节点不可用，则会自动重新分配给它的所有出口 IP 地址，但符合前面描述的条件。
+
+当 Pod 与多个 EgressIP 对象的选择器匹配时，无法保证在 `EgressIP` 对象中指定的出口 IP 地址被分配为 pod 的出口 IP 地址。
+
+
+[id="nw-egress-ips-node-architecture_{context}"]
+== 出口 IP 地址配置架构图
+
+下图显示了出口 IP 地址配置。图中描述了，在一个集群的三个节点上运行的两个不同命名空间中的四个 pod。节点从主机网络上的 192.168.126.0/18 CIDR 块中分配 IP 地址。
+
+// Source: https://github.com/redhataccess/documentation-svg-assets/blob/master/for-web/121_OpenShift/121_OpenShift_engress_IP_Topology_1020.svg
+image::nw-egress-ips-diagram.svg[]
+
+Node 1 和 Node 3 都标记为 `k8s.ovn.org/egress-assignable: ""`，因此可用于分配出口 IP 地址。
+
+图中的横线描述了 pod1、pod2 和 pod 3 的流量流，通过 pod 网络来从 Node 1 和 Node 3 出口集群。当外部服务从示例 EgressIP 对象选择的任何 pod 接收流量时，源 IP 地址为 `192.168.126.10` 或 `192.168.126.102`。这两个节点之间流量大致平衡。
+
+图中的以下资源被详细描述：
+
+`Namespace` 对象::
++
+--
+命名空间在以下清单中定义：
+
+.命名空间对象
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: namespace1
+  labels:
+    env: prod
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: namespace2
+  labels:
+    env: prod
+----
+--
+
+`EgressIP` 对象::
++
+--
+以下 `EgressIP` 对象描述了一个配置，该配置选择将 `env` 标签设置为 `prod` 的任意命名空间中的所有 pod。所选 pod 的出口 IP 地址为 `192.168.126.10` 和 `192.168.126.102`。
+
+.`EgressIP` 对象
+[source,yaml]
+----
+apiVersion: k8s.ovn.org/v1
+kind: EgressIP
+metadata:
+  name: egressips-prod
+spec:
+  egressIPs:
+  - 192.168.126.10
+  - 192.168.126.102
+  namespaceSelector:
+    matchLabels:
+      env: prod
+status:
+  items:
+  - node: node1
+    egressIP: 192.168.126.10
+  - node: node3
+    egressIP: 192.168.126.102
+----
+
+对于上例中的配置，统信容器云管理平台 会为可用节点分配两个出口 IP 地址。status 字段显示是否以及在哪里分配了出口 IP 地址。
+--
+endif::ovn[]
+
+ifdef::openshift-sdn[]
+[id="automatic-manual-assignment-approaches"]
+== IP 地址分配方法
+
+您可以通过设置 `NetNamespace` 对象的 `egressIPs` 参数,将出口 IP 地址分配给命名空间。在出口 IP 地址与项目关联后，OpenShift SDN 允许您以两种方式为主机分配出口 IP 地址：
+
+* 在 _自动分配方法_中，给节点分配一个出口 IP 地址范围。
+* 在 _手动分配方法_ 中，给节点分配包含一个或多个出口 IP 地址的列表。
+
+请求出口 IP 地址的命名空间与可以托管那些出口 IP 地址的节点匹配，然后为那些节点分配出口 IP 地址。如果在 NetNamespace 对象中设置了 egressIPs 参数，但没有节点托管该出口 IP 地址，则会丢弃来自该命名空间的出口流量。
+
+节点高可用性是自动的。如果托管出口 IP 地址的节点不可访问，并且有可以托管那些出口 IP 地址的节点，那么出口 IP 地址将会移到新节点。当无法访问的托管原始出口 IP 地址的节点恢复正常后，出口 IP 地址>会自动转移，以在不同节点之间均衡出口 IP 地址。
+
+
+[id="considerations-automatic-egress-ips"]
+=== 使用自动分配的出口 IP 地址时的注意事项
+
+当对出口 IP 地址使用自动分配方法时，请注意以下事项：
+
+- 您可以设置每个节点的 `HostSubnet` 资源的 `egressCIDRs` 参数，以指明节点可以托管的出口 IP 地址范围。统信容器云管理平台 根据您指定的 IP 地址范围设置 `HostSubnet` 资源的 egressIPs 参数。
+
+使用自动分配模式时，支持每个命名空间具有一个出口 IP 地址。
+自动分配方法最适合安装在灵活地将额外IP地址与节点关联的环境中的集群。
+
+[id="considerations-manual-egress-ips"]
+=== 使用手动分配的出口IP地址时的注意事项
+
+这种方法允许您控制哪些节点可以托管出口 IP 地址。
+
+[注意]
+====
+如果在公共云基础架构上安装了集群，则必须确保为每个节点分配出口 IP 地址，以便有足够的备用容量来托管 IP 地址。如需更多信息，请参阅上一节中的"平台注意事项"。
+====
+
+当手动分配出口 IP 地址时，请考虑以下事项：
+
+- 您可以设置每个节点的 `HostSubnet` 资源的 `egressIPs` 参数，以指明节点可以托管的 IP 地址。
+- 每个 namespace 支持多个出口IP地址。
+
+如果命名空间有多个出口 IP 地址，且这些地址托管在多个节点上，则需要考虑以下额外的注意事项：
+
+- 如果 pod 位于托管出口 IP 地址的节点上，则该 pod 始终使用该节点上的出口 IP 地址。
+- 如果 pod 不在托管出口 IP 地址的节点上，则该 pod 会随机使用出口 IP 地址。
+endif::openshift-sdn[]
+
+ifdef::openshift-sdn[]
+:!openshift-sdn:
+endif::openshift-sdn[]
+ifdef::ovn[]
+:!ovn:
+endif::ovn[]

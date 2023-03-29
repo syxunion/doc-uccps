@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="configuring-multitenant-isolation"]
+= 使用 OpenShift SDN 配置网络隔离
+include::_attributes/common-attributes.adoc[]
+:context: multitenant-isolation
+
+toc::[]
+
+将集群配置为使用 OpenShift SDN CNI 插件的多租户隔离模式时，每个项目会被默认隔离。在多租户隔离模式下，不同项目中的 pod 或服务间不允许网络流量。
+
+您可以通过两种方式更改项目的多租户隔离行为：
+
+* 您可以接合一个或多个项目，允许不同项目中的 pod 和服务间的网络流量。
+
+* 您可以对项目禁用网络隔离。它可全局访问，接受所有其他项目中的 pod 和服务的网络流量。可全局访问的项目可以访问所有其他项目中的 pod 和服务。
+
+== 先决条件
+
+* 您必须将集群配置为以多租户隔离模式使用 OpenShift SDN Container Network Interface (CNI) 插件。
+
+include::modules/nw-multitenant-joining.adoc[leveloffset=+1]
+include::modules/nw-multitenant-isolation.adoc[leveloffset=+1]
+include::modules/nw-multitenant-global.adoc[leveloffset=+1]

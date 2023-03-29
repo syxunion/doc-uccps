@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-hostpath.adoc
+
+:_content-type: PROCEDURE
+[id="hostpath-static-provisioning_{context}"]
+= 静态置备 hostPath 卷
+
+使用 hostPath 卷的 pod 必须通过手动（静态）置备来引用。
+
+.流程
+
+. 定义持久性卷（PV）的名称。创建包含 PersistentVolume 对象定义的 `pv.yaml` 文件：
++
+[source,yaml]
+----
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: task-pv-volume <1>
+    labels:
+      type: local
+  spec:
+    storageClassName: manual <2>
+    capacity:
+      storage: 5Gi
+    accessModes:
+      - ReadWriteOnce <3>
+    persistentVolumeReclaimPolicy: Retain
+    hostPath:
+      path: "/mnt/data" <4>
+----
+<1> 卷的名称。持久性卷声明或 pod 识别它的名称。
+<2> 用于将持久性卷声明请求绑定到这个持久性卷。
+<3> 这个卷可以被一个单一的节点以 `read-write` 的形式挂载。
+<4> 配置文件指定卷在集群节点的 `/mnt/data` 中。不要挂载到容器 `root`、`/` 或主机和容器中相同的任何路径。这可能会导致您的主机系统损坏。使用 `/host`挂载主机是安全的。
+
+. 从该文件创建 PV：
++
+[source,terminal]
+----
+$ oc create -f pv.yaml
+----
+
+. 定义持久性卷声明（PVC）。创建包含 `PersistentVolumeClaim` 对象定义的 `pvc.yaml` 文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pvc-volume
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+----
+
+. 从文件创建 PVC：
++
+[source,terminal]
+----
+$ oc create -f pvc.yaml
+----

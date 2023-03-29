@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// *builds/troubleshooting-builds.adoc
+
+[id="builds-troubleshooting-service-certificate-generation_{context}"]
+= 服务证书生成失败
+
+如果您的资源访问请求遭到拒绝：
+
+问题::
+如果服务证书生成失败并显示以下信息（ 服务的 `service.beta.openshift.io/serving-cert-generation-error` 注解包含）：
+
+.输出示例
+[source,terminal]
+----
+secret/ssl-key references serviceUID 62ad25ca-d703-11e6-9d6f-0e9c0057b608, which does not match 77b6dd80-d716-11e6-9d6f-0e9c0057b60
+----
+
+解决方案::
+生成证书的服务不再存在，或者具有不同的 `serviceUID` 。您必须删除旧 secret 并清除服务上的以下注解 `service.beta.openshift.io/serving-cert-generation-error` 和 `service.beta.openshift.io/serving-cert-generation-error-num` 以强制重新生成证书：
+
+[source,terminal]
+----
+$ oc delete secret <secret_name>
+----
+
+[source,terminal]
+----
+$ oc annotate service <service_name> service.beta.openshift.io/serving-cert-generation-error-
+----
+
+[source,terminal]
+----
+$ oc annotate service <service_name> service.beta.openshift.io/serving-cert-generation-error-num-
+----
+
+[注意]
+====
+在用于移除注解的命令中，要移除的注解后面有一个 `-`。
+====

@@ -1,0 +1,50 @@
+// Module is included in the following assemblies:
+//
+// * serverless/monitor/serverless-serving-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-queue-proxy-metrics_{context}"]
+= 队列代理指标
+
+每个 Knative 服务都有一个代理容器，用于代理到应用程序容器的连接。报告多个用于队列代理性能的指标。
+
+您可以使用以下指标来测量请求是否排入代理端，并在应用一侧服务请求的实际延迟。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单元
+
+|`revision_request_count`
+|路由到 `queue-proxy` pod 的请求数。
+|计数
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`revision_request_latencies`
+|修订请求的响应时间。
+|Histogram
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`
+|Milliseconds
+
+|`revision_app_request_count`
+|路由到 user-container 容器集的请求数。
+|计数
+|`configuration_name`, `container_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`
+|整数 （无单位）
+
+|`revision_app_request_latencies`
+|修订应用程序请求的响应时间。
+|Histogram
+|`configuration_name`, `namespace_name`, `pod_name`, `response_code`, `response_code_class`, `revision_name`, `service_name`
+|Milliseconds
+
+|`revision_queue_depth`
+|当前在 serving 和 waiting 队列中的项的数量。如果配置了无限并发，则不会报告此指标。
+|量表
+|`configuration_name`, `event-display`, `container_name`, `namespace_name`, `pod_name`, `response_code_class`, `revision_name`, `service_name`
+|整数 （无单位）
+|===

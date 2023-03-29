@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="understanding-persistent-storage"]
+= 了解持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: understanding-persistent-storage
+
+toc::[]
+
+include::modules/storage-persistent-storage-overview.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-lifecycle.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-reclaim-manual.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-reclaim.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-pv.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-pvc.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-block-volume.adoc[leveloffset=+1]
+
+// As these volumes have transitioned to being tech preview per plugin,
+// this notice has been included in the previous module.
+// :FeatureName: Support for raw block volumes in the volume plugins listed above
+// include::snippets/technology-preview.adoc[leveloffset=+1]
+
+include::modules/storage-persistent-storage-block-volume-examples.adoc[leveloffset=+2]
+
+include::modules/storage-persistent-storage-fsGroup.adoc[leveloffset=+1]

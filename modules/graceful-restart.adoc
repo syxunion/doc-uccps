@@ -1,0 +1,153 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/graceful-cluster-restart.adoc
+
+:_content-type: PROCEDURE
+[id="graceful-restart_{context}"]
+= 重启集群
+
+您可以在集群被安全关闭后重启它。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 此流程假设您安全关闭集群。
+
+.流程
+
+. 启动所有依赖设备，如外部存储或 LDAP 服务器。
+
+. 启动所有集群机器。
++
+使用适合您的云环境的方法启动机器，例如从云供应商的 Web 控制台启动机器。
++
+等待大约 10 分钟，然后继续检查控制平面节点的状态。
+
+. 验证所有控制平面节点都已就绪。
++
+[source,terminal]
+----
+$ oc get nodes -l node-role.kubernetes.io/master
+----
++
+如果状态为 `Ready`，如以下输出中所示，则代表控制平面节点已就绪：
++
+[source,terminal]
+----
+NAME                           STATUS   ROLES    AGE   VERSION
+ip-10-0-168-251.ec2.internal   Ready    master   75m   v1.23.0
+ip-10-0-170-223.ec2.internal   Ready    master   75m   v1.23.0
+ip-10-0-211-16.ec2.internal    Ready    master   75m   v1.23.0
+----
+
+. 如果控制平面节点没有就绪，请检查是否有待批准的证书签名请求 (CSR)。
+
+.. 获取当前 CSR 列表。
++
+[source,terminal]
+----
+$ oc get csr
+----
+
+.. 查看一个 CSR 的详细信息以验证其是否有效：
++
+[source,terminal]
+----
+$ oc describe csr <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+.. 批准每个有效的 CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----
+
+. 在控制平面节点就绪后，验证所有 worker 节点是否已就绪。
++
+[source,terminal]
+----
+$ oc get nodes -l node-role.kubernetes.io/worker
+----
++
+如果状态为 `Ready`，如下所示，则代表 worker 节点已就绪：
++
+[source,terminal]
+----
+NAME                           STATUS   ROLES    AGE   VERSION
+ip-10-0-179-95.ec2.internal    Ready    worker   64m   v1.23.0
+ip-10-0-182-134.ec2.internal   Ready    worker   64m   v1.23.0
+ip-10-0-250-100.ec2.internal   Ready    worker   64m   v1.23.0
+----
+
+. 如果 worker 节点 未 就绪，请检查是否有待批准的证书签名请求(CSR)。
+
+.. 获取当前 CSR 列表。
++
+[source,terminal]
+----
+$ oc get csr
+----
+
+.. 查看一个 CSR 的详细信息以验证其是否有效：
++
+[source,terminal]
+----
+$ oc describe csr <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+.. 批准每个有效的 CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----
+
+. 验证集群是否已正确启动。
+
+.. 检查是否有降级的集群 Operator。
++
+[source,terminal]
+----
+$ oc get clusteroperators
+----
++
+确定没有 `DEGRADED` 条件为 `True` 的集群 Operator。
++
+[source,terminal]
+----
+NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                             4.10.0    True        False         False      59m
+cloud-credential                           4.10.0    True        False         False      85m
+cluster-autoscaler                         4.10.0    True        False         False      73m
+config-operator                            4.10.0    True        False         False      73m
+console                                    4.10.0    True        False         False      62m
+csi-snapshot-controller                    4.10.0    True        False         False      66m
+dns                                        4.10.0    True        False         False      76m
+etcd                                       4.10.0    True        False         False      76m
+...
+----
+
+.. 检查所有节点是否处于 `Ready` 状态：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+检查所有节点的状态是否为 `Ready`。
++
+[source,terminal]
+----
+NAME                           STATUS   ROLES    AGE   VERSION
+ip-10-0-168-251.ec2.internal   Ready    master   82m   v1.23.0
+ip-10-0-170-223.ec2.internal   Ready    master   82m   v1.23.0
+ip-10-0-179-95.ec2.internal    Ready    worker   70m   v1.23.0
+ip-10-0-182-134.ec2.internal   Ready    worker   70m   v1.23.0
+ip-10-0-211-16.ec2.internal    Ready    master   82m   v1.23.0
+ip-10-0-250-100.ec2.internal   Ready    worker   69m   v1.23.0
+----
+
+如果集群无法正确启动，您可能需要使用 etcd 备份来恢复集群。

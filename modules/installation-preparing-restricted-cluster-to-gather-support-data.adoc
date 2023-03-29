@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="installation-preparing-restricted-cluster-to-gather-support-data_{context}"]
+= 准备集群以收集支持数据
+
+使用受限网络的集群必须导入默认的 must-gather 镜像，以便为统信支持收集调试数据。在默认情况下，must-gather 镜像不会被导入，受限网络中的集群无法访问互联网来从远程存储库拉取最新的镜像。
+
+.流程
+
+. 如果您还没有将镜像 registry 的可信 CA 添加到集群的镜像配置对象中，作为 Cluster Samples Operator 配置的一部分，请执行以下步骤：
+.. 创建集群的镜像配置对象：
++
+[source,terminal]
+----
+$ oc create configmap registry-config --from-file=${MIRROR_ADDR_HOSTNAME}..5000=$path/ca.crt -n openshift-config
+----
+
+.. 在集群的镜像配置对象中，为镜像添加所需的可信 CA：
++
+[source,terminal]
+----
+$ oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-config"}}}' --type=merge
+----
+
+. 从您的安装有效负载中导入默认 `must-gather` 镜像：
++
+[source,terminal]
+----
+$ oc import-image is/must-gather -n openshift
+----
+
+在运行 `oc adm must-gather` 命令时，请使用 `--image` 标志并指向有效负载镜像，如下例所示：
+[source,terminal]
+----
+$ oc adm must-gather --image=$(oc adm release info --image-for must-gather)
+----

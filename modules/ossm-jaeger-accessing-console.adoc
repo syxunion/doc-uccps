@@ -1,0 +1,62 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+* service_mesh/v2x/ossm-troubleshooting-istio.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-accessing-jaeger-console_{context}"]
+= Accessing the Jaeger console
+
+要访问 Jaeger 控制台，您必须安装并配置了 {SMProductName}。
+
+安装过程会创建路由来访问 Jaeger 控制台。
+
+如果您知道 Jaeger 控制台的 URL，您可以直接访问它。如果您不知道 URL，请使用以下指示：
+
+.从 Uccps 控制台的步骤
+. 以具有 cluster-admin 权限的用户身份登录到 {product-title} web 控制台。
+
+. 进入 *网络* -> *路由*。
+
+. 在 *路由* 页面中，从 *命名空间* 菜单中选择 {SMProductShortName}  项目，如 istio-system。
++
+*位置*  列显示每个路由的链接地址。
++
+. 如有必要，使用过滤器来查找 `jaeger`  路由。单击路由 *位置* 以启动控制台。
+
+. 单击 *Log In With Uccps *.
+
+
+.Kiali 控制台的步骤
+
+. 启动 Kiali 控制台。
+
+. 单击左侧导航窗格中的 *Distributed Tracing* 。
+
+. 单击 *Log In With Uccps*.
+
+
+.通过 CLI 操作的步骤
+
+. 以具有 `cluster-admin` 角色的用户身份登录  {product-title} CLI I。
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:6443
+----
++
+. 要使用命令行查询路由详情，请输入以下命令。在本例中， `istio-system` 是 {SMProductShortName} control plane 命名空间。
++
+[source,terminal]
+----
+$ export JAEGER_URL=$(oc get route -n istio-system jaeger -o jsonpath='{.spec.host}')
+----
++
+. 启动浏览器并进入 ``\https://<JAEGER_URL>``，其中 `<JAEGER_URL>` 是您在上一步中发现的路由。
+
+. 使用您用于访问 {Product-title} 控制台的相同用户名和密码登录。
+
+. 如果您已将服务添加到服务网格中并生成了 trace，您可以使用过滤器和 *Find Traces* 按钮搜索 trace 数据。
++
+如果您要验证控制台安装，则不会显示 trace 数据。

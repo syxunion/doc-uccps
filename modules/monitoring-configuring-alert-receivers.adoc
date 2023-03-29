@@ -1,0 +1,70 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+// * post_installation_configuration/configuring-alert-notifications.adoc
+
+:_content-type: PROCEDURE
+[id="configuring-alert-receivers_{context}"]
+= 配置警报接收器
+
+您可以配置警报接收器，以确保了解集群出现的重要问题。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 在  *Administrator* 视角中，导航到 *Administration* -> *Cluster Settings* -> *Configuration* -> *Alertmanager*.
++
+[注意]
+====
+或者，您还可以通过 notification drawer 访问同一页面。选择 统信容器云管理平台 Web 控制台右上角的铃铛图标，并在 *AlertmanagerReceiverNotConfigured* 警报中选择 *Configure*。
+====
+
+. 在该页面的 *Receivers* 部分中选择 *Create Receiver*。
+
+. 在 *Create Receiver* 表单中，添加 *Receiver Name*，然后从列表中选择 *Receiver Type*。
+
+. 编辑接收器配置：
++
+* 对于 PagerDuty 接收器：
++
+.. 选择集成类型并添加 PagerDuty 集成密钥。
++
+.. 添加 PagerDuty 安装的 URL。
++
+.. 如果要编辑客户端和事件详情或严重性规格，请选择 *Show advanced configuration*。
++
+* 对于 Webhook 接收器：:
++
+.. 添加将 HTTP POST 请求发送到的端点。
++
+.. 如果要编辑将已解析的警报发送给接收器的默认选项，请选择 *Show advanced configuration*。
++
+* 对于电子邮件接收器：
++
+.. 添加要将通知发送到的电子邮件地址。
++
+.. 添加 SMTP 配置详情，包括发送通知的地址、用来发送电子邮件的智能主机和端口号、SMTP 服务器的主机名以及验证详情。
++
+.. 选择是否需要 TLS。
++
+.. 如果要将默认选项编辑为不向接收器发送已解析的警报，或编辑电子邮件通知正文配置，请选择 *Show advanced configuration*。
++
+* 对于 Slack 接收器：
++
+.. 添加 Slack Webhook 的 URL。
++
+.. 添加要将通知发送到的 Slack 频道或用户名。
++
+.. 如果要将默认选项编辑为不向接收器发送已解析的警报，或编辑图标和用户名配置，请选择 *Show advanced configuration*。您还可以选择是否查找并链接频道名称和用户名。
+
+. 默认情况下，如果触发的警报带有与所有选择器匹配的标签，将被发送到接收器。如果您希望触发的警报在发送到接收器之前具有完全匹配的标签值：
+.. 在表单的 *Routing Labels* 部分中添加路由标签名称和值。
++
+.. 如果想要使用正则表达式，请选择 *Regular Expression*。
++
+.. 选择 *Add Label* 来添加更多路由标签。
+
+. 4选择 *Create* 来创建接收器。

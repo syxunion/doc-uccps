@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * networking/cluster-network-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-cno-status_{context}"]
+= 查看 Cluster Network Operator 状态
+
+您可以使用 `oc describe` 命令来检查状态并查看 Cluster Network Operator 的详情。
+
+.流程
+
+* 运行以下命令，以查看 Cluster Network Operator 的状态：
++
+[source,terminal]
+----
+$ oc describe clusteroperators/network
+----

@@ -1,0 +1,58 @@
+:_content-type: PROCEDURE
+[id="ossm-security-min-max-tls_{context}"]
+== Setting the minimum and maximum protocol versions
+
+如果您的环境对服务网格中的加密流量有具体要求，可以通过在 {SMProductShortName} control plane  `spec.security.controlPlane.tls.minProtocolVersion` 或 `spec.security.controlPlane.tls.maxProtocolVersion` 来控制允许的加密功能。这些值在 Service Mesh control plane 资源中配置，定义网格组件在通过 TLS 安全通信时使用的最小和最大 TLS 版本。
+
+默认为 `TLS_AUTO` ，且不指定 TLS 版本。
+
+.有效值
+|===
+|值|描述
+
+|`TLS_AUTO`
+| default
+
+|`TLSv1_0`
+|TLS 版本 1.0
+
+|`TLSv1_1`
+|TLS 版本 1.1
+
+|`TLSv1_2`
+|TLS 版本 1.2
+
+|`TLSv1_3`
+|TLS 版本 1.3
+|===
+
+.流程
+
+. 登录到 web 控制台。
+
+. 点 *项目* 菜单，选择安装  {SMProductShortName} control plane 的项目，如 *istio-system*
+
+. 点 *Operators* -> *安装的 Operators*.
+
+. 点  *提供的 APIs* 下的 *Service Mesh Control Plane* 。
+
+. 点 `ServiceMeshControlPlane` 资源的名称，例如 `basic`。
+
+. 点  *YAML* 标签。
+
+. 在 YAML 编辑器中插入以下代码片段：将  `minProtocolVersion` 中的值替换为 TLS 版本值。在本例中，最小 TLS 版本设置为 `TLSv1_2`。
++
+.ServiceMeshControlPlane 代码片段
+[source,yaml]
+----
+kind: ServiceMeshControlPlane
+spec:
+  security:
+    controlPlane:
+      tls:
+        minProtocolVersion: TLSv1_2
+----
+
+. 点 *保存* 。
+
+. 单击 *刷新* 以验证更改是否已正确更新。

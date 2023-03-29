@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * monitoring/troubleshooting-monitoring-issues.adoc
+// * support/troubleshooting/investigating-monitoring-issues.adoc
+
+:_content-type: PROCEDURE
+[id="determining-why-prometheus-is-consuming-disk-space_{context}"]
+= 确定为什么 Prometheus 消耗大量磁盘空间
+
+开发人员可以使用键值对的形式为指标定义属性。潜在的键值对数量与属性的可能值数量对应。具有无限数量可能值的属性被称为未绑定属性。例如， `customer_id` 属性不绑定，因为它有无限多个可能的值。
+
+每个分配的键值对都有唯一的时间序列。在标签中使用许多未绑定属性可导致所创建的时间序列数量出现指数增加。这可能会影响 Prometheus 性能，并消耗大量磁盘空间。
+
+当 Prometheus 消耗大量磁盘时，您可以使用以下方法：
+
+* *检查正在收集的提取示例数量。* 
+
+* *检查 Prometheus UI 中的时间序列数据库（TSDB）* 状态以了解有关哪些标签创建最多时间序列的更多信息。这需要集群管理员特权。
+
+* *要减少创建的唯一时间序列数量* ，您可以减少分配给用户定义的指标的未绑定属性数量
++
+[注意]
+====
+使用绑定到一组有限可能值的属性可减少潜在的键-值对组合数量。
+====
++
+* *对可在用户定义的项目中提取的示例数量实施限制* 。这需要集群管理员特权。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 在 *Administrator* 视角中，导航到 *Observe* -> *Metrics*.
+
+. 在 *Expression* 字段中运行以下 Prometheus Query Language (PromQL) 查询。这会返回具有最高提取示例数的十个指标：
++
+[source,terminal]
+----
+topk(10,count by (job)({__name__=~".+"}))
+----
+
+. 如果指标的提取示例数大于预期，请检查分配给指标的未绑定标签值数量。
+** *如果指标与用户定义的项目相关*，请查看分配给您的工作负载的指标键-值对。它们通过应用程序级别的 Prometheus 客户端库实施。尝试限制标签中引用的未绑定属性数量。
+
+. 检查 Prometheus UI 中的 TSDB 状态。
+.. 在 *Administrator* 视角中，导航至 *Networking* -> *Routes*。
+.. 选择 *Project* 列表中的 `openshift-monitoring` 项目。 
+.. 选择 `prometheus-k8s`3)行中的 URL 来打开 Prometheus UI 的登录页面。
+.. 选择  *Log in with Uccps* 来使用您的 统信容器云管理平台 凭证进行登录。
+.. 在 Prometheus UI 中，进入到  *Status* -> *TSDB Status*。

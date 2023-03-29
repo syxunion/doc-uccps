@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/using-node-tuning-operator.adoc
+// * operators/operator-reference.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+ifeval::["{context}" == "cluster-operators-ref"]
+:operators:
+endif::[]
+ifeval::["{context}" == "node-tuning-operator"]
+:perf:
+endif::[]
+
+Node Tuning Operator 可以帮助您通过编排 TuneD 守护进程来管理节点级别的性能优化。大多数高性能应用程序都需要一定程度的内核级性能优化。Node Tuning Operator 为用户提供了一个统一的、节点一级的 sysctl 管理接口，并可以根据具体用户的需要灵活地添加自定义性能优化设置。
+
+Operator 将为 统信容器云管理平台 容器化 TuneD 守护进程作为一个 Kubernetes 守护进程集进行管理。它保证了自定义性能优化设置以可被守护进程支持的格式传递到在集群中运行的所有容器化的 TuneD 守护进程中。相应的守护进程会在集群的所有节点上运行，每个节点上运行一个。
+
+在发生触发配置集更改的事件时，或通过接收和处理终止信号安全终止容器化 TuneD 守护进程时，容器化 TuneD 守护进程所应用的节点级设置将被回滚。
+
+在版本 4.1 及更高版本中，统信容器云管理平台 标准安装中包含了 Node Tuning Operator。

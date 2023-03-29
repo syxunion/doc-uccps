@@ -1,0 +1,48 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-rebooting.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-rebooting-affinity_{context}"]
+= 使用 pod 反关联性重新引导节点
+
+Pod 反关联性和节点反关联性稍有不同。如果没有其他适当的位置来部署 pod，则可以违反节点反关联性。Pod 反关联性可以设置为必要的或偏好的。
+
+在这个版本中，如果只有两个基础架构节点可用，且一个节点被重新引导，容器镜像 registry Pod 将无法在另一个节点上运行。`oc get pods` 将 pod 报告为 unready，直到有合适的节点可用为止。一旦某个节点可用，并且所有 pod 恢复到就绪状态，下一个节点就可以重启。
+
+.流程
+
+使用 pod 反关联性重新引导节点：
+
+. 编辑节点规格以配置 pod 反关联性：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-antiaffinity
+spec:
+  affinity:
+    podAntiAffinity: <1>
+      preferredDuringSchedulingIgnoredDuringExecution: <2>
+      - weight: 100 <3>
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: registry <4>
+              operator: In <5>
+              values:
+              - default
+          topologyKey: kubernetes.io/hostname
+----
+<1> 用于配置 pod 反关联性的小节。
+<2> 定义偏好规则。
+<3> 为偏好规则指定权重。优先选择权重最高的节点。
+<4> 描述用来决定何时应用反关联性规则的 pod 标签。指定标签的键和值。
+<5> 运算符表示现有 pod 上的标签和新 pod 规格中 `matchExpression` 参数的值集合之间的关系。可以是 `In`, `NotIn`, `Exists`, 或 `DoesNotExist`.
++
+本例假定容器镜像 registry pod 具有 `registry=default` 标签。Pod 反关联性可以使用任何 Kubernetes 匹配表达式。
+
+. 在调度策略文件中启用 `MatchInterPodAffinity` 调度程序 predicate。
+. 对节点执行正常重启。

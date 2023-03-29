@@ -1,0 +1,131 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-custom-resources.adoc
+
+[id="ossm-deploying-jaeger_{context}"]
+= Deploying the distributed tracing platform
+
+分布式追踪平台具有预定义的部署策略。您可以在 Jaeger 自定义资源 (CR) 文件中指定部署策略。当您创建分布式追踪平台实例时，统信容器云管理平台分布式追踪扩展组件 会使用此配置文件创建部署所需的对象。
+
+The {JaegerName} Operator 目前支持以下部署策略：
+
+* *allInOne* （默认）- 此策略旨在用于开发、测试和演示目的，它不用于生产环境。主要的后端组件 Agent、Collector 和 Query 服务都打包成单个可执行文件，（默认）配置为使用内存存储。您可以在 SMCP 中配置此部署策略。
++
+[NOTE]
+====
+内存存储不是持久性的，这意味着如果 Jaeger 实例关闭、重启或被替换，您的 trace 数据将会丢失。此外，内存存储无法扩展，因为每个 Pod 都有自己的内存。对于持久性存储，您必须使用 production 或 streaming 策略，这些策略使用 Elasticsearch 作为默认存储。
+====
+
+* *production* - - production 策略主要用于生产环境，在生产环境中，对 trace 数据进行长期存储非常重要，同时需要更容易扩展和高度可用的构架。因此，每个后端组件都会单独部署。Agent 可以作为检测应用程序上的 sidecar 注入。Query 和 Collector 服务被配置为使用一个受支持的存储类型 - 当前为 Elasticsearch。可以根据性能和恢复能力的需要提供每个组件的多个实例。您可以在 SMCP 中配置此部署策略，但为了完全自定义，您必须在 Jaeger CR 中指定您的配置，并链接到 SMCP。
+
+* *streaming* - streaming 策略旨在通过提供 Collector 和 Elasticsearch 后端存储之间的流功能来增强 production 策略。这样做的好处是在高负载情况下降低后端存储压力，并允许其他 trace 后处理功能直接从流传输平台 (AMQ Streams/ Kafka) 中利用实时 span 数据。您无法在 SMCP 中配置此部署策略 ; 您必须配置 Jaeger CR 并链接到 SMCP。
+
+
+[id="ossm-deploying-jaeger-default_{context}"]
+== 默认分布式追踪平台部署
+
+如果没有指定 Jaeger 配置选项， `ServiceMeshControlPlane` 资源将默认使用 `allInOne` Jaeger 部署策略。使用默认的 `allInOne` 部署策略时，请将 `spec.addons.jaeger.install.storage.type`  设置为 `Memory`。您可接受默认选项，也可以在 `install` 中指定附加配置选项。
+
+.control plane 默认 Jaeger 参数(Memory)
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 10000
+    type: Jaeger
+  addons:
+    jaeger:
+      name: jaeger
+      install:
+        storage:
+          type: Memory
+----
+
+[id="ossm-deploying-jaeger-production-min_{context}"]
+== 生产环境分布式追踪平台部署（最小）
+
+要使用 `production` 部署策略的默认设置，请将 `spec.addons.jaeger.install.storage.type` 设置为 `Elasticsearch` ，并在 `install` 中指定额外的配置选项。请注意，SMCP 只支持配置 Elasticsearch 资源和镜像名称。
+
+.control plane 默认 Jaeger 参数 (Elasticsearch)
+[source,yaml, subs="attributes"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 10000
+    type: Jaeger
+  addons:
+    jaeger:
+      name: jaeger  #name of Jaeger CR
+      install:
+        storage:
+          type: Elasticsearch
+        ingress:
+          enabled: true
+  runtime:
+    components:
+      tracing.jaeger.elasticsearch: # only supports resources and image name
+        container:
+          resources: {}
+----
+
+
+[id="ossm-deploying-jaeger-production_{context}"]
+== 生产环境分布式追踪平台部署（完全自定义）
+
+SMCP 仅支持最小的 Elasticsearch 参数。要完全自定义生产环境并访问所有 Elasticsearch 配置参数，请使用 Jaeger 自定义资源 (CR) 来配置 Jaeger。
+
+创建并配置 Jaeger 实例，并将 `spec.addons.jaeger.name` 设置为 Jaeger 实例的名称，在本例中为 `MyJaegerInstance`.
+
+.带有链接 Jaeger production CR 的 control plane
+[source,yaml, subs="attributes"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 1000
+    type: Jaeger
+  addons:
+    jaeger:
+      name: MyJaegerInstance #name of Jaeger CR
+      install:
+        storage:
+          type: Elasticsearch
+        ingress:
+          enabled: true
+----
+
+[id="ossm-deploying-jaeger-streaming_{context}"]
+== 流 Jaeger 部署
+
+要使用 `streaming` 部署策略，请首先创建和配置 Jaeger 实例，然后将 `spec.addons.jaeger.name` 设置为 Jaeger 实例的名称，在本例中为 `MyJaegerInstance`.
+
+.带有链接 Jaeger streaming CR 的 control plane
+[source,yaml, subs="attributes"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 1000
+    type: Jaeger
+  addons:
+    jaeger:
+      name: MyJaegerInstance  #name of Jaeger CR
+----

@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-copying-files.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-copying-files-procedure_{context}"]
+= 将文件复制到容器或从容器中复制
+
+CLI 中内置了将本地文件复制到容器或从容器中复制文件的支持。
+
+.先决条件
+
+在使用 `oc rsync` 时，请注意以下几点：
+
+必须安装 rsync::
+`oc rsync` 命令将使用本地的 `rsync` 工具（如果存在于客户端机器和远程容器上）。
+
+如果本地或远程容器上找不到 `rsync`，则会在本地创建 *tar* 存档并发送到容器（在那里使用 *tar* 实用程序来解压文件）。如果远程容器中没有 *tar*，则复制会失败。
+
+*tar* 复制方法不提供与 `oc rsync` 相同的功能。例如，`oc rsync` 会在目的地目录不存在时创建这个目录，而且仅发送来源与目的地上不同的文件。
+
+[注意]
+====
+在 Windows 中，应当安装 `cwRsync` 客户端并添加到 PATH 中，以便与 `oc rsync` 命令搭配使用。
+====
+
+.流程
+
+* 将本地目录复制到 pod 目录：
++
+[source,terminal]
+----
+$ oc rsync <local-dir> <pod-name>:/<remote-dir> -c <container-name>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc rsync /home/user/source devpod1234:/src -c user-container
+----
+
+* 将 pod 目录复制到本地目录：
++
+[source,terminal]
+----
+$ oc rsync devpod1234:/src /home/user/source
+----
++
+.输出示例
+[source,terminal]
+----
+$ oc rsync devpod1234:/src/status.txt /home/user/
+----

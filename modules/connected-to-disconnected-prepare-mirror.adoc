@@ -1,0 +1,75 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/connected-to-disconnected.adoc
+
+:_content-type: PROCEDURE
+[id="connected-to-disconnected-prepare-mirror_{context}"]
+= 为镜像准备集群
+
+在断开集群的连接前，您必须镜像(mirror)或复制(mirror)或复制(mirror)或复制镜像(mirror) registry。要镜像镜像，您必须通过以下方法准备集群：
+
+* 将镜像 registry 证书添加到主机上的可信 CA 列表中。
+* 创建包含您的镜像 pull secret 的 `.dockerconfigjson` 文件，该文件来自 `cloud.openshift.com` 令牌。
+
+.流程
+
+. 配置允许镜像镜像的凭证：
+
+.. 将镜像 registry 的 CA 证书（采用简单 PEM 或 DER 文件格式）添加到可信 CA 列表中。例如：
++
+[source,terminal]
+----
+$ cp </path/to/cert.crt> /usr/share/pki/ca-trust-source/anchors/
+----
++
+--
+其中::
++
+`</path/to/cert.crt>`:: 指定本地文件系统中的证书路径。
+--
+
+.. 更新 CA 信任。例如，在 Linux 中：
++
+[source,terminal]
+----
+$ update-ca-trust
+----
+
+.. 从全局 pull secret 中提取 `.dockerconfigjson` 文件：
++
+[source,terminal]
+----
+$ oc extract secret/pull-secret -n openshift-config --confirm --to=. 
+----
++
+.输出示例
+[source,terminal]
+----
+.dockerconfigjson
+----
+
+.. 编辑 `.dockerconfigjson` 文件以添加您的镜像 registry 和身份验证凭证，并将它保存为新文件：
+// copied from olm-accessing-images-private-registries
++
+[source,terminal]
+----
+{"auths":{"<local_registry>": {"auth": "<credentials>","email": "you@example.com"}}},"<registry>:<port>/<namespace>/":{"auth":"<token>"}}}
+----
++
+其中：
++
+`<local_registry>`:: 指定 registry 域名，以及您的镜像 registry 用来提供内容的可选端口。
+`auth`:: 为您的镜像 registry 指定 base64 编码的用户名和密码。
+`<registry>:<port>/<namespace>`:: 指定镜像 registry 详情。
+`<token>`:: 为您的镜像 registry 指定 base64 编码的 `username:password`。
++
+例如：
++
+[source,terminal]
+----
+$ {"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0Y3UjhGOVZPT0lOMEFaUjdPUzRGTA==","email":"user@example.com"},
+"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGOVZPT0lOMEFaUGSTd4VGVGVUjdPUzRGTA==","email":"user@example.com"},
+"registry.connect.redhat.com"{"auth":"NTE3MTMwNDB8dWhjLTFEZlN3VHkxOSTd4VGVGVU1MdTpleUpoYkdjaUailA==","email":"user@example.com"},
+"registry.redhat.io":{"auth":"NTE3MTMwNDB8dWhjLTFEZlN3VH3BGSTd4VGVGVU1MdTpleUpoYkdjaU9fZw==","email":"user@example.com"},
+"registry.svc.ci.openshift.org":{"auth":"dXNlcjpyWjAwWVFjSEJiT2RKVW1pSmg4dW92dGp1SXRxQ3RGN1pwajJhN1ZXeTRV"},"my-registry:5000/my-namespace/":{"auth":"dXNlcm5hbWU6cGFzc3dvcmQ="}}}
+----

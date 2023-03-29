@@ -1,0 +1,475 @@
+// Module included in the following assemblies:
+//
+// * networking/changing-cluster-network-mtu.adoc
+
+:_content-type: PROCEDURE
+[id="nw-cluster-mtu-change_{context}"]
+= 更改集群 MTU
+
+作为集群管理员，您可以更改集群的最大传输单元(MTU)。当 MTU 更新推出时，集群中的迁移具有破坏性且节点可能会临时不可用。
+
+以下流程描述了如何使用机器配置、DHCP 或 ISO 更改集群 MTU。如果使用 DHCP 或 ISO 方法，则必须在安装集群后保留的配置工件来完成此流程。
+
+.Prerequisites
+
+* 已安装 Uccp (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+* 已为集群识别目标 MTU。正确的 MTU 因集群使用的集群网络供应商而异：
+** *OVN-Kubernetes*: 集群 MTU 必须设置为比集群中的最低硬件 MTU 值小 `100`。
+** *OpenShift SDN*: 集群 MTU 必须设置为比集群中的最低硬件 MTU 值小 `50`。
+
+.流程
+
+要增加或减少集群网络的 MTU，请完成以下步骤。
+
+. 要获得集群网络的当前 MTU，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe network.config cluster
+----
++
+.输出示例
+[source,text]
+----
+...
+Status:
+  Cluster Network:
+    Cidr:               10.217.0.0/22
+    Host Prefix:        23
+  Cluster Network MTU:  1400
+  Network Type:         OpenShiftSDN
+  Service Network:
+    10.217.4.0/23
+...
+----
+
+. 为硬件 MTU 准备配置：
+
+** 如果您的硬件 MTU 通过 DHCP 指定，请使用以下 dnsmasq 配置更新 DHCP 配置：
++
+[source,text]
+----
+dhcp-option-force=26,<mtu>
+----
++
+--
+其中：
+
+`<mtu>`:: 指定要公告的 DHCP 服务器的硬件 MTU。
+--
+
+** 如果使用 PXE 的内核命令行指定硬件 MTU，请相应地更新该配置。
+
+** 如果在 NetworkManager 连接配置中指定了硬件 MTU，请完成以下步骤。如果没有使用 DHCP、内核命令行或某种其他方法显式指定网络配置，则此方法是 统信容器云管理平台 的默认方法。集群节点必须全部使用相同的底层网络配置，才能使以下过程未经修改地工作。
+
+... 查找主网络接口：
+
+**** 如果使用 OpenShift SDN 集群网络供应商，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node_name> -- chroot /host ip route list match 0.0.0.0/0 | awk '{print $5 }'
+----
++
+--
+其中：
+
+`<node_name>`:: 指定集群中的节点的名称。
+--
+
+**** 如果使用 OVN-Kubernetes 集群网络供应商，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node_name> -- chroot /host nmcli -g connection.interface-name c show ovs-if-phys0
+----
++
+--
+其中：
+
+`<node_name>`:: 指定集群中的节点的名称。
+--
+
+... 要查找 NetworkManager 为上一命令返回的接口名称创建的连接配置集，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node_name> -- chroot /host nmcli c | grep <interface>
+----
++
+--
+其中：
+
+`<interface>`:: 指定主网络接口的名称。
+--
++
+.OpenShift SDN 的输出示例
+[source,text]
+----
+Wired connection 1  46da4a6a-xxxx-xxxx-xxxx-ac0ca900f213  ethernet  ens3
+----
++
+.没有原始连接配置的 OVN-Kubernetes 输出示例
+[source,text]
+----
+ovs-if-phys0        353774d3-0d3d-4ada-b14e-cd4d8824e2a8  ethernet       ens4
+ovs-port-phys0      332ef950-b2e5-4991-a0dc-3158977c35ca  ovs-port       ens4
+----
++
+--
+对于 OVN-Kubernetes 集群网络供应商，返回两个或三个连接管理器配置集。
+
+* 如果上一命令只返回两个配置集，则必须使用默认的 NetworkManager 连接配置作为模板。
+* 如果上一命令返回三个配置文件，使用名称不是 `ovs-if-phys0` 或 `ovs-port-phys0` 的配置集作为以下修改的模板：
+--
+
+... 要获得主网络接口的 NetworkManager 连接配置的文件名，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node_name> -- chroot /host nmcli -g UUID,FILENAME c show | grep <uuid> | cut -d: -f2
+----
++
+--
+其中：
+
+`<node_name>`:: 指定集群中的节点的名称。
+`<uuid>`:: 指定 NetworkManager 连接配置集的 UUID。
+--
++
+.输出示例
+[source,text]
+----
+/run/NetworkManager/system-connections/Wired connection 1.nmconnection
+----
+
+... 要从节点复制 NetworkManager 连接配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node_name> -- chroot /host cat "<profile_path>" > config.nmconnection
+----
++
+--
+其中：
+
+`<node_name>`:: 指定主网络接口的硬件 MTU。
+`<profile_path>`:: 指定上一步中 NetworkManager 连接的文件系统路径。
+--
++
+.NetworkManager 连接配置示例
+[source,ini]
+----
+[connection]
+id=Wired connection 1
+uuid=3e96a02b-xxxx-xxxx-ad5d-61db28678130
+type=ethernet
+autoconnect-priority=-999
+interface-name=enp1s0
+permissions=
+timestamp=1644109633
+
+[ethernet]
+mac-address-blacklist=
+
+[ipv4]
+dns-search=
+method=auto
+
+[ipv6]
+addr-gen-mode=stable-privacy
+dns-search=
+method=auto
+
+[proxy]
+
+[.nmmeta]
+nm-generated=true
+----
+
+... 编辑上一步中 `config.nmconnection` 文件中保存的 NetworkManager 配置文件：
++
+--
+**** 设置以下值：
+***** `802-3-ethernet.mtu`: 为系统的主网络接口指定 MTU。
+***** `connection.interface-name`: 可选：指定此配置适用的网络接口名称。
+***** `connection.autoconnect-priority`: 可选：考虑指定高于 `0` 的整数值，以确保这个配置集比其他配置集用于同一接口。如果使用 `OVN-Kubernetes` 集群网络供应商，这个值必须小于 `100`。
+**** 删除 `connection.uuid` 字段。
+**** 更改以下值：
+***** `connection.id`: 可选：指定不同的 NetworkManager 连接配置集名称。
+--
++
+.NetworkManager 连接配置示例
+[source,ini]
+----
+[connection]
+id=Primary network interface
+type=ethernet
+autoconnect-priority=10
+interface-name=enp1s0
+[802-3-ethernet]
+mtu=8051
+----
+
+.. 要对 MachineConfig 对象中包含的 NetworkManager 配置进行 base64 编码，请输入以下命令：
++
+[source,ini]
+----
+$ cat config.nmconnection | base64 -w0
+----
++
+.. 创建两个 MachineConfig 对象，一个用于 control plane 节点，另一个用于集群中的 worker 节点：
+
+...在 machine-config-control-plane.yaml 文件中创建以下 
+
+.MachineConfig 对象：
+[source,ini]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 01-control-plane-interface
+spec:
+  config:
+    ignition:
+      config: {}
+      security:
+        tls: {}
+      timeouts: {}
+      version: 2.2.0
+    networkd: {}
+    passwd: {}
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,<encoded_config>
+          verification: {}
+        filesystem: root
+        mode: 420
+        path: /etc/NetworkManager/system-connections/<connection_name>
+    systemd: {}
+----
++
+其中： ``
+
+`<encoded_config>`:: 指定更新的 NetworkManager 配置的 base64 编码。
+`<connection_name>`:: 指定主网络接口的 NetworkManager 连接名称。
+
+
+. 要开始 MTU 迁移，请输入以下命令指定迁移配置。Machine Config Operator 在集群中执行节点的滚动重启，以准备 MTU 更改。
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge --patch \
+  '{"spec": { "migration": { "mtu": { "network": { "from": <overlay_from>, "to": <overlay_to> } , "machine": { "to" : <machine_to> } } } } }'
+----
++
+--
+其中：``
+
+`<overlay_from>`:: 指定当前的集群网络 MTU 值。
+`<overlay_to>`:: 指定集群网络的目标 MTU。这个值相对于 `<machine_to>`，对于 OVN-Kubernetes，值必须小 `100`，OpenShift SDN 必须小 `50`。
+`<machine_to>`:: 指定底层主机网络上的主网络接口的 MTU。
+--
++
+.增加集群 MTU 的示例
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge --patch \
+  '{"spec": { "migration": { "mtu": { "network": { "from": 1400, "to": 9000 } , "machine": { "to" : 9100} } } } }'
+----
+
+. 当 MCO 更新每个机器配置池中的机器时，它会逐一重启每个节点。您必须等到所有节点都已更新。输入以下命令检查机器配置池状态：
++
+[source,terminal]
+----
+$ oc get mcp
+----
++
+成功更新的节点具有以下状态： `UPDATED=true`、`UPDATING=false`、`DEGRADED=false`。
++
+[注意]
+====
+默认情况下，MCO 会一次在一个池中更新一个机器，从而导致迁移总时间随着集群大小的增加而增加。
+====
+
+. 确认主机上新机器配置的状态：
+
+.. 要列出机器配置状态和应用的机器配置名称，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe node | egrep "hostname|machineconfig"
+----
++
+.输出示例
+[source,text]
+----
+kubernetes.io/hostname=master-0
+machineconfiguration.openshift.io/currentConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/desiredConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/reason:
+machineconfiguration.openshift.io/state: Done
+----
++
+验证以下语句是否正确：
++
+--
+* `machineconfiguration.openshift.io/state` 字段的值为 `Done`。
+* `machineconfiguration.openshift.io/currentConfig` 字段的值等于 `machineconfiguration.openshift.io/desiredConfig` 字段的值。
+--
+
+.. 要确认机器配置正确，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get machineconfig <config_name> -o yaml | grep ExecStart
+----
++
+这里的 `<config_name>` 是 `machineconfiguration.openshift.io/currentConfig` 字段中机器配置的名称。
++
+机器配置必须包括以下对 systemd 配置的更新：
++
+[source,plain]
+----
+ExecStart=/usr/local/bin/mtu-migration.sh
+----
+
+. 更新底层网络接口 MTU 值：
+
+** 如果使用 NetworkManager 连接配置指定新的 MTU，请输入以下命令。MachineConfig Operator 会自动执行集群中节点的滚动重启。
++
+[source,terminal]
+----
+$ for manifest in control-plane-interface worker-interface; do
+    oc create -f $manifest.yaml
+  done
+----
+
+** 如果使用 DHCP 服务器选项或内核命令行和 PXE 指定新 MTU，请为您的基础架构进行必要的更改。
+
+. 当 MCO 更新每个机器配置池中的机器时，它会逐一重启每个节点。您必须等到所有节点都已更新。输入以下命令检查机器配置池状态：
++
+[source,terminal]
+----
+$ oc get mcp
+----
++
+成功更新的节点具有以下状态： `UPDATED=true`、`UPDATING=false`、`DEGRADED=false`。
++
+[注意]
+====
+默认情况下，MCO 会一次在一个池中更新一个机器，从而导致迁移总时间随着集群大小的增加而增加。
+====
+
+. 确认主机上新机器配置的状态：
+
+.. 要列出机器配置状态和应用的机器配置名称，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe node | egrep "hostname|machineconfig"
+----
++
+.输出示例
+[source,text]
+----
+kubernetes.io/hostname=master-0
+machineconfiguration.openshift.io/currentConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/desiredConfig: rendered-master-c53e221d9d24e1c8bb6ee89dd3d8ad7b
+machineconfiguration.openshift.io/reason:
+machineconfiguration.openshift.io/state: Done
+----
++
+验证以下语句是否正确：
++
+--
+ * 验证以下语句是否正确：
+ * `machineconfiguration.openshift.io/currentConfig` 字段的值等于 `machineconfiguration.openshift.io/desiredConfig` 字段的值。
+--
+
+.. 要确认机器配置正确，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get machineconfig <config_name> -o yaml | grep path:
+----
++
+这里的 `<config_name>` 是 `machineconfiguration.openshift.io/currentConfig` 字段中机器配置的名称。
++
+如果成功部署机器配置，则前面的输出包含 `/etc/NetworkManager/system-connections/<connection_name>` 文件路径。
++
+机器配置不得包含 `ExecStart=/usr/local/bin/mtu-migration.sh` 行。
+
+. 要完成 MTU 迁移，请输入以下命令之一：
+** 如果使用 OVN-Kubernetes 集群网络供应商：
++
+[source,terminal]
++
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge --patch \
+  '{"spec": { "migration": null, "defaultNetwork":{ "ovnKubernetesConfig": { "mtu": <mtu> }}}}'
+----
++
+--
+其中：
+
+`<mtu>`:: 指定您使用 `<overlay_to>` 指定的新集群网络 MTU。
+--
+
+** 如果使用 OpenShift SDN 集群网络供应商：
++
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge --patch \
+  '{"spec": { "migration": null, "defaultNetwork":{ "openshiftSDNConfig": { "mtu": <mtu> }}}}'
+----
++
+--
+其中：
+
+`<mtu>`:: 指定您使用 `<overlay_to>` 指定的新集群网络 MTU。
+--
+
+.验证
+
+您可以验证集群中的节点是否使用上一步中指定的 MTU。
+
+. 要获得集群网络的当前 MTU，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe network.config cluster
+----
+
+. 获取节点的主网络接口的当前 MTU。
+
+.. 要列出集群中的节点，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get nodes
+----
+
+.. 要获取节点上主网络接口的当前 MTU 设置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc debug node/<node> -- chroot /host ip address show <interface>
+----
++
+其中：
++
+--
+`<node>`:: 指定上一步中的输出节点。
+`<interface>`:: 指定节点的主网络接口名称。
+--
++
+.输出示例
+[source,text]
+----
+ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 8051
+----

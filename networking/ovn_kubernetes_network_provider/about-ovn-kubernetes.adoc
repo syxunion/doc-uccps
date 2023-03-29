@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="about-ovn-kubernetes"]
+= 关于 OVN-Kubernetes 默认 Container Network Interface (CNI) 网络供应商
+include::_attributes/common-attributes.adoc[]
+:context: about-ovn-kubernetes
+
+toc::[]
+
+统信容器云管理平台 集群在 pod 和服务网络中使用虚拟网络。OVN-Kubernetes Container Network Interface (CNI) 插件是默认集群网络的一个网络供应商。OVN-Kubernetes 基于 Open Virtual Network（OVN），它提供了一个基于 overlay 的网络实现。使用 OVN-Kubernetes 网络供应商的集群还在每个节点上运行 Open vSwitch（OVS）。OVN 在每个节点上配置 OVS 来实现声明的网络配置。
+
+include::modules/nw-ovn-kubernetes-features.adoc[leveloffset=+1]
+
+include::modules/nw-ovn-kubernetes-matrix.adoc[leveloffset=+1]
+// This is a moving target; what is included isn't valid for 4.6
+//include::modules/nw-ovn-kubernetes-metrics.adoc[leveloffset=+1]
+
+include::modules/nw-ovn-kuberentes-limitations.adoc[leveloffset=+1]

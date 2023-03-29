@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * operators/understanding/olm-packaging-format.adoc
+// * cli_reference/opm/cli-opm-install.adoc
+
+:_content-type: CONCEPT
+[id="olm-about-opm_{context}"]
+= 关于 opm CLI
+
+`opm` CLI 工具由 Operator Framework 提供,用于 Operator 捆绑格式。您可以通过此工具从与软件存储库类似的 Operator 捆绑包列表中创建和维护 Operator 目录。其结果是一个容器镜像，它可以存储在容器的 registry 中，然后安装到集群中。
+
+目录包含一个指向 Operator 清单内容的指针数据库，可通过在运行容器镜像时提供的已包含 API 进行查询。在 统信容器云管理平台 中，Operator Lifecycle Manager (OLM) 可以引用由 `CatalogSource` 对象定义的目录源中的镜像，它会定期轮询镜像，以对集群上安装的 Operator 进行更新。

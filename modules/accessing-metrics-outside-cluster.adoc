@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="accessing-metrics-from-outside-cluster_{context}"]
+= 从集群外部访问自定义应用程序的指标
+
+了解如何在监控您自己的服务时从命令行查询 Prometheus 统计信息。您可以使用 `thanos-querier` 路由从集群外部访问监控数据。
+
+.先决条件
+
+* 您已按照用户定义的项目启用监控部署了自己的服务。
+
+.流程
+
+. 提取令牌以连接到 Prometheus：
++
+[source,terminal]
+----
+$ SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'`
+----
++
+[source,terminal]
+----
+$ TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d`
+----
+
+. 提取路由主机：
++
+[source,terminal]
+----
+$ THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'`
+----
+
+. 在命令行中查询您自己的服务的指标。例如：
++
+[source,terminal]
+----
+$ NAMESPACE=ns1
+----
++
+[source,terminal]
+----
+$ curl -X GET -kG "https://$THANOS_QUERIER_HOST/api/v1/query?" --data-urlencode "query=up{namespace='$NAMESPACE'}" -H "Authorization: Bearer $TOKEN"
+----
++
+输出将显示应用容器集已启动的时间。
++
+.输出示例
+[source,terminal]
+----
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","endpoint":"web","instance":"10.129.0.46:8080","job":"prometheus-example-app","namespace":"ns1","pod":"prometheus-example-app-68d47c4fb6-jztp2","service":"prometheus-example-app"},"value":[1591881154.748,"1"]}]}}
+----

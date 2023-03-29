@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="image-configuration"]
+= 镜像配置资源
+include::_attributes/common-attributes.adoc[]
+:context: image-configuration
+
+toc::[]
+
+使用以下流程配置镜像 registry。
+
+include::modules/images-configuration-parameters.adoc[leveloffset=+1]
+
+include::modules/images-configuration-file.adoc[leveloffset=+1]
+
+include::modules/images-configuration-allowed.adoc[leveloffset=+2]
+
+include::modules/images-configuration-blocked.adoc[leveloffset=+2]
+
+include::modules/images-configuration-insecure.adoc[leveloffset=+2]
+
+include::modules/images-configuration-shortname.adoc[leveloffset=+2]
+
+include::modules/images-configuration-cas.adoc[leveloffset=+2]
+
+include::modules/images-configuration-registry-mirror.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关全局 pull secret 的更多信息，请参阅 xref:../openshift_images/managing_images/using-image-pull-secrets.html#images-update-global-pull-secret_using-image-pull-secrets[更新全局集群 pull secret]。

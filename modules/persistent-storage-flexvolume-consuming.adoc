@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// storage/persistent_storage/persistent-storage-flexvolume.adoc
+
+:_content-type: PROCEDURE
+[id="flexvolume-driver-consuming_{context}"]
+= 使用 FlexVolume 驱动程序消耗存储
+
+统信容器云管理平台中的每个 `PersistentVolume` 都代表存储后端中的一个存储资产，例如一个卷。
+
+.流程
+* 使用 `PersistentVolume` 对象来引用已安装的存储。
+
+.使用 FlexVolume 驱动程序示例定义持久性卷对象
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001 <1>
+spec:
+  capacity:
+    storage: 1Gi <2>
+  accessModes:
+    - ReadWriteOnce
+  flexVolume:
+    driver: openshift.com/foo <3>
+    fsType: "ext4" <4>
+    secretRef: foo-secret <5>
+    readOnly: true <6>
+    options: <7>
+      fooServer: 192.168.0.1:1234
+      fooVolumeName: bar
+----
+<1> 卷的名称。这是如何通过持久性卷声明或从 pod 识别它。这个名称可以与后端存储中的卷的名称不同。
+<2> 为这个卷分配的存储量。
+<3> 驱动程序的名称。这个字段是必须的。
+<4> 卷中的文件系统。这个字段是可选的。
+<5> 对 secret 的引用。此 secret 中的键和值在调用时会提供给 FlexVolume 驱动程序。这个字段是可选的。
+<6> read-only 标记。这个字段是可选的。
+<7> FlexVolume 驱动程序的额外选项。除了用户在 options 字段中指定的标记外，以下标记还会传递给可执行文件：
+
+ "fsType":"<FS type>",
+ "readwrite":"<rw>",
+ "secret/key1":"<secret1>"
+ ...
+ "secret/keyN":"<secretN>"
+
+[注意]
+====
+secret 只会传递到 mount 或 unmount call-outs。
+====

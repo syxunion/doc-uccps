@@ -1,0 +1,94 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-waiting-for-readiness_{context}"]
+= 等待模板就绪
+
+模板创建者可指定：在服务目录、`Template Service Broker` 或 `TemplateInstance API` 进行的模板实例化被视为完成之前，应等待模板中的某些对象。
+
+要使用该功能，请使用以下注解在模板中标记一个或多个 `Build`, `BuildConfig`, `Deployment`, `DeploymentConfig`, `Job`, 或 `StatefulSet` 类型的对象：
+
+[source,text]
+----
+"template.alpha.openshift.io/wait-for-ready": "true"
+----
+
+直到标有注解的所有对象报告就绪时，模板实例化才算完成。同样，如果任何注解的对象报告失败，或者模板未能在一小时的固定超时内就绪，则模板实例化将失败。
+
+就实例化而言，各种对象类型的就绪和失败定义如下：
+
+[cols="1a,2a,2a", options="header"]
+|===
+
+| 类型
+| 就绪
+| 失败
+
+| `Build`
+| 对象报告阶段完成。
+| 对象报告阶段取消、错误或失败
+
+| `BuildConfig`
+| 最新关联构建对象报告阶段完成
+| 最新关联构建对象报告阶段取消、错误或失败
+
+| `Deployment`
+| 对象报告新副本集和部署可用。这遵循对象上定义的就绪探针。
+| 对象报告进度状况为 false。
+
+|`DeploymentConfig`
+| 对象报告新的复制控制器和部署可用。这遵循对象上定义的就绪探针。
+| 对象报告进度状况为 false。
+
+| `Job`
+| 对象报告完成。
+| 对象报告出现一个或多个故障。
+
+| `StatefulSet`
+| 对象报告所有副本就绪。这遵循对象上定义的就绪探针。
+| 不适用。
+|===
+
+以下是使用 `wait-for-ready` 注解的模板提取示例。更多示例可在 统信容器云管理平台 快速启动模板中找到。
+
+[source,yaml]
+----
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: my-template
+objects:
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    name: ...
+    annotations:
+      # wait-for-ready used on BuildConfig ensures that template instantiation
+      # will fail immediately if build fails
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    ...
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: ...
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    ...
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: ...
+  spec:
+    ...
+----
+
+.其他建议
+
+* 设置内存、CPU 和存储的默认大小，以确保您的应用程序获得足够资源使其平稳运行。
+
+* 如果要在主版本中使用该标签，请避免引用来自镜的 latest 标签。当新镜像被推送（push）到该标签时，这可能会导致运行中的应用程序中断。
+
+* 良好的模板可整洁地构建和部署，无需在部署模板后进行修改。

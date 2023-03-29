@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+:_content-type: PROCEDURE
+[id="images-other-jenkins-cross-project_{context}"]
+= 向 Jenkins 提供跨项目访问权限
+
+如果要在与您的项目不同的其他位置运行 Jenkins，则必须向 Jenkins 提供访问令牌来访问您的项目。
+
+.流程
+
+. 识别对 Jenkins 必须访问的项目具有适当访问权限的服务帐户的 secret：
++
+[source,terminal]
+----
+$ oc describe serviceaccount jenkins
+----
++
+.输出示例
+[source,terminal]
+----
+Name:       default
+Labels:     <none>
+Secrets:    {  jenkins-token-uyswp    }
+            {  jenkins-dockercfg-xcr3d    }
+Tokens:     jenkins-token-izv1u
+            jenkins-token-uyswp
+----
++
+这种情况下，secret 被命名为`jenkins-token-uyswp`.
+
+. 从 secret 中检索令牌：
++
+[source,terminal]
+----
+$ oc describe secret <secret name from above>
+----
++
+.输出示例
+[source,terminal]
+----
+Name:       jenkins-token-uyswp
+Labels:     <none>
+Annotations:    kubernetes.io/service-account.name=jenkins,kubernetes.io/service-account.uid=32f5b661-2a8f-11e5-9528-3c970e3bf0b7
+Type:   kubernetes.io/service-account-token
+Data
+====
+ca.crt: 1066 bytes
+token:  eyJhbGc..<content cut>....wRA
+----
++
+令牌参数包含 Jenkins 访问项目所需的令牌值。

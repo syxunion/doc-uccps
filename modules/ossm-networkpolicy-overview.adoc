@@ -1,0 +1,11 @@
+////
+This module included in the following assemblies:
+-service_mesh/v2x/ossm-traffic-manage.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-understanding-networkpolicy_{context}"]
+= Understanding network policies
+
+{SMProductName} 会在 {SMProductShortName} control plane  和应用程序命名空间中自动创建和管理大量 `NetworkPolicies` 资源。这是为了确保应用程序和 control plane 可以相互通信。
+
+例如，如果您已将 {product-title} 集群配置为使用 SDN 插件， {SMProductName} 会在每个成员项目中创建 `NetworkPolicy` 资源。这可让从其他网格成员和 control plane 对网格中的所有 pod 的入站网络数据。这也限制了到成员项目的入站网络数据。如果需要来自非成员项目的入站网络数据，则需要创建一个 `NetworkPolicy` 来允许这些流量通过。如果您从 Service Mesh 中删除命名空间，则此 `NetworkPolicy` 资源会从项目中删除。

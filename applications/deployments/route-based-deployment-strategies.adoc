@@ -1,0 +1,35 @@
+:_content-type: ASSEMBLY
+[id="route-based-deployment-strategies"]
+= 使用基于路由的部署策略
+include::_attributes/common-attributes.adoc[]
+:context: route-based-deployment-strategies
+
+toc::[]
+
+部署策略为应用程序的演进提供了一个途径。有些策略使用 `Deployment` 对象进行解析到应用程序的所有路由用户可见的更改。其他高级策略，例如本节中描述的策略，结合使用路由器功能和 `Deployment` 对象来影响特定的路由。
+
+////
+This link keeps breaking Travis for some reason.
+
+[NOTE]
+====
+See
+xref:../../applications/deployments/deployment-strategies.adoc#deployment-strategies[Using deployment strategies]
+for more on the basic strategy types.
+====
+////
+
+最常用的基于路由型策略是使用蓝绿部署。新版本（绿色版本）上线进行测试和评估，同时用户仍然使用稳定版本（蓝色版本）。准备就绪后，用户切换到绿色版本。如果出现问题，您可以切回到蓝色版本。
+
+一个常见的替代策略是使用同时活跃的 A/B 版本；一些用户使用一个版本，另一些用户使用另一个版本。这可用于试验用户界面变化和其他功能，以获取用户反馈。它还可用来在影响有限用户的生产环境中验证正确的操作。
+
+Canary 部署会测试新版本，但在检测到问题时，迅速回退到上一版本。这可以通过以上两个策略实现。
+
+基于路由的部署策略不会缩放服务中的 pod 数。要保持所需的性能特性，部署配置可能必须要扩展。
+
+include::modules/deployments-proxy-shards.adoc[leveloffset=+1]
+include::modules/deployments-n1-compatibility.adoc[leveloffset=+1]
+include::modules/deployments-graceful-termination.adoc[leveloffset=+1]
+include::modules/deployments-blue-green.adoc[leveloffset=+1]
+include::modules/deployments-ab-testing.adoc[leveloffset=+1]
+include::modules/deployments-ab-testing-lb.adoc[leveloffset=+2]

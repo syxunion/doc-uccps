@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// applications/application_life_cycle_management/odc-viewing-application-composition-using-topology-view.adoc
+
+:_content-type: PROCEDURE
+[id="odc-adding-components-to-an-existing-project_{context}"]
+= 将组件添加到现有项目
+
+.流程
+
+. 点击左侧导航面板旁边的 *添加至项目* (image:odc_add_to_project.png[title="Add to Project"]) 或按 kbd:[Ctrl+Space]。
+. 搜索组件并选择 *Create* 或按 *Enter* 将组件添加到项目中，并在拓扑 图形视图中查看它。
+
+.通过快速搜索添加组件
+image::odc_quick_search.png[]
+
+另外，您还可以通过右键单击拓扑 图形 视图中的上下文菜单中使用 *从Git导入*、*容器镜像*、*数据库*、*从开发者目录*、Operator支持的、*Helm Charts*、*样本* 或 *上传 JAR* 文件 选项来为您的项目添加组件。
+
+.用于添加服务的上下文菜单
+image::odc_context_project.png[]

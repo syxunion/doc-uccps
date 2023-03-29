@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="ossm-performance-scalability"]
+= Performance and scalability
+include::_attributes/common-attributes.adoc[]
+:context: performance-scalability
+
+toc::[]
+
+默认 `ServiceMeshControlPlane` 设置不适用于生产环境，它被设计为在一个默认的 {product-title} 安装中成功安装，默认的 统信容器云管理平台 安装是一个有限的资源环境。在验证了成功安装 SMCP 后，您应该修改 SMCP 中定义的设置以适应您的环境。
+
+// The following include statements pull in the module files that comprise the assembly.
+
+include::modules/ossm-recommended-resources.adoc[leveloffset=+1]
+
+include::modules/ossm-load-test-results.adoc[leveloffset=+1]
+

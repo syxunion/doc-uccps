@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-custom-strategy_{context}"]
+= Custom 策略
+
+使用 Custom 策略时，所有定义的输入 secret 和配置映射都位于 `/var/run/secrets/openshift.io/build` 目录中的构建器容器中。自定义构建镜像必须正确使用这些 secret 和配置映射。使用 Custom 策略时，您可以按照 Custom 策略选项中所述定义 secret。
+
+现有策略 secret 与输入 secret 之间没有技术差异。但是，构建器镜像可以区分它们并以不同的方式加以使用，具体取决于您的构建用例。
+
+输入 secret 始终挂载到 `/var/run/secrets/openshift.io/build` 目录中，或您的构建器可以解析 $BUILD 环境变量（包含完整构建对象）。
+
+[重要]
+====
+如果命名空间和节点上存在 registry 的 pull secret，构建会默认使用命名空间中的 pull secret。
+====

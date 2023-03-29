@@ -1,0 +1,134 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_bare_metal/installing-bare-metal.adoc
+// * installing/installing_bare_metal/installing-restricted-networks-bare-metal.adoc
+// * installing/installing_platform_agnostic/installing-platform-agnostic.adoc
+// * registry/configuring_registry_storage/configuring-registry-storage-baremetal
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+
+ifeval::["{context}" == "installing-ibm-z"]
+:ibm-z:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-ibm-z"]
+:ibm-z:
+:restricted:
+endif::[]
+ifeval::["{context}" == "installing-ibm-power"]
+:ibm-power:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-ibm-power"]
+:ibm-power:
+:restricted:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="registry-configuring-storage-baremetal_{context}"]
+ifndef::ibm-z,ibm-power[]
+= 为裸机和其他手动安装配置 registry 存储
+endif::ibm-z,ibm-power[]
+ifdef::ibm-z[]
+= Configuring registry storage for IBM Z
+endif::ibm-z[]
+ifdef::ibm-power[]
+= Configuring registry storage for IBM Power
+endif::ibm-power[]
+
+作为集群管理员，在安装后需要配置 registry 来使用存储。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您有一个
+ifndef::ibm-z,ibm-power[使用手动置备的 UnionTech OS Cloud 20（有燕）节点（如裸机）的集群。]
+ifdef::ibm-z[on IBM Z.]
+ifdef::ibm-power[on IBM Power.]
+ifndef::ibm-z[* You have provisioned persistent storage for your cluster, such as {rh-storage-first}.]
+ifdef::ibm-z[* You have provisioned persistent storage for your cluster.]
+* 已为集群置备了持久性存储，如 UnionTech Uccp Container Storage。
++
+[重要]
+====
+当您只有一个副本时，统信容器云管理平台 支持对镜像 registry 存储的 `ReadWriteOnce` 访问。要部署支持高可用性的镜像 registry，需要两个或多个副本，`ReadWriteMany` 访问。
+====
++
+* 必须具有 100Gi 容量。
+
+.流程
+
+. 要将 registry 配置为使用存储，请更改 `configs .imageregistry/cluster` 资源中的 `spec. storage.pvc`。
++
+[注意]
+====
+使用共享存储时，请查看您的安全设置以防止外部访问。
+====
+
+. 验证您没有 registry pod:
++
+[source,terminal]
+----
+$ oc get pod -n openshift-image-registry
+----
++
+[注意]
+====
+如果存储类型为 emptyDIR，则副本数不能大于 1。
+====
+
+. 检查 registry 配置：
++
+[source,terminal]
+----
+$ oc edit configs.imageregistry.operator.openshift.io
+----
++
+.输出示例
+[source,yaml]
+----
+storage:
+  pvc:
+    claim:
+----
++
+将 `claim` 字段留空以允许自动创建 `image-registry-storage` PVC。
++
+. 检查 `clusteroperator` 状态：
++
+[source,terminal]
+----
+$ oc get clusteroperator image-registry
+----
++
+. 确保 registry 设置为 managed，以启用镜像的构建和推送。
++
+* 运行：
++
+----
+$ oc edit configs.imageregistry/cluster
+----
++
+然后，更改行
++
+----
+managementState: Removed
+----
++
+至
++
+----
+managementState: Managed
+----
+
+ifeval::["{context}" == "installing-ibm-z"]
+:!ibm-z:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-ibm-z"]
+:!ibm-z:
+:!restricted:
+endif::[]
+ifeval::["{context}" == "installing-ibm-power"]
+:!ibm-power:
+endif::[]
+ifeval::["{context}" == "installing-restricted-networks-ibm-power"]
+:!ibm-power:
+:!restricted:
+endif::[]

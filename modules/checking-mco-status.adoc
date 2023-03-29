@@ -1,0 +1,123 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="checking-mco-status_{context}"]
+= 检查机器配置池状态
+
+要查看 Machine Config Operator、其子组件及其管理的资源的状态，请使用以下 `oc` 命令：
+
+.流程
+. 要查看集群中为每个池提供的 MCO 管理的节点数量，请输入：
++
+[source,terminal]
+----
+$ oc get machineconfigpool
+----
++
+.示例输出：
+[source,terminal]
+----
+NAME      CONFIG                    UPDATED  UPDATING   DEGRADED  MACHINECOUNT  READYMACHINECOUNT  UPDATEDMACHINECOUNT DEGRADEDMACHINECOUNT  AGE
+master    rendered-master-06c9c4…   True     False      False     3             3                  3                   0                     4h42m
+worker    rendered-worker-f4b64…    False    True       False     3             2                  2                   0                     4h42m
+----
+
++
+在以前的版本中有三个 `master` 节点和三个 `worker` 节点。所有机器都已更新，任何机器当前都被更新。因为所有节点都是 `Updated` 和 `Ready` 而没有 `Degraded`，所以您可以认定没有问题。
++
+. 要查看每个现有的 machineconfig，请键入：
++
+[source,terminal]
+----
+$ oc get machineconfigs
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                             GENERATEDBYCONTROLLER          IGNITIONVERSION  AGE
+00-master                        2c9371fbb673b97a6fe8b1c52...   3.2.0            5h18m
+00-worker                        2c9371fbb673b97a6fe8b1c52...   3.2.0            5h18m
+01-master-container-runtime      2c9371fbb673b97a6fe8b1c52...   3.2.0            5h18m
+01-master-kubelet                2c9371fbb673b97a6fe8b1c52…     3.2.0            5h18m
+...
+rendered-master-dde...           2c9371fbb673b97a6fe8b1c52...   3.2.0            5h18m
+rendered-worker-fde...           2c9371fbb673b97a6fe8b1c52...   3.2.0            5h18m
+----
+
+请注意，列为 `rendered` 的 `machineconfigs` 并不意味着会被修改或删除。它们在以后的某个时候会被隐藏。
+
+
+. 检查 worker 的状态（或更改为 master），以查看该节点池的状态：
+:
++
+[source,terminal]
+----
+$ oc describe mcp worker
+----
++
+.输出示例
+[source,terminal]
+----
+...
+  Degraded Machine Count:     0
+  Machine Count:              3
+  Observed Generation:        2
+  Ready Machine Count:        3
+  Unavailable Machine Count:  0
+  Updated Machine Count:      3
+Events:                       <none>
+----
++
+您可以查看特定机器配置的内容（本例中为 `01-master-kubelet`）。oc describe 命令的以下输出显示，这个 `machineconfig` 包含配置文件（`cloud.conf` 和 `kubelet.conf`），以及一个 systemd 服务（`Kubernetes Kubelet`）：
+
+[source,terminal]
+----
+$ oc describe machineconfigs 01-master-kubelet
+----
+
+.输出示例
+[source,terminal]
+----
+Name:         01-master-kubelet
+...
+Spec:
+  Config:
+    Ignition:
+      Version:  3.2.0
+    Storage:
+      Files:
+        Contents:
+          Source:   data:,
+        Mode:       420
+        Overwrite:  true
+        Path:       /etc/kubernetes/cloud.conf
+        Contents:
+          Source:   data:,kind%3A%20KubeletConfiguration%0AapiVersion%3A%20kubelet.config.k8s.io%2Fv1beta1%0Aauthentication%3A%0A%20%20x509%3A%0A%20%20%20%20clientCAFile%3A%20%2Fetc%2Fkubernetes%2Fkubelet-ca.crt%0A%20%20anonymous...
+        Mode:       420
+        Overwrite:  true
+        Path:       /etc/kubernetes/kubelet.conf
+    Systemd:
+      Units:
+        Contents:  [Unit]
+Description=Kubernetes Kubelet
+Wants=rpc-statd.service network-online.target crio.service
+After=network-online.target crio.service
+
+ExecStart=/usr/bin/hyperkube \
+    kubelet \
+      --config=/etc/kubernetes/kubelet.conf \ ...
+----
+
+如果应用的机器配置出现问题，您可以随时退出这一更改。例如，如果您运行 `oc create -f ./myconfig.yaml` 以应用机器配置，您可能需要输入以下命令来删除该机器配置：
+
+[source,terminal]
+----
+$ oc delete -f ./myconfig.yaml
+----
+
+如果这是唯一的问题，则受影响池中的节点应返回非降级状态。这会导致呈现的配置回滚到其之前更改的状态。
+
+如果在集群中添加自己的机器配置，您可以使用上例中显示的命令检查其状态以及应用到它们的池的相关状态。

@@ -1,0 +1,95 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="viewing-local-roles_{context}"]
+= 查看本地角色和绑定
+
+使用 oc describe 命令通过 oc CLI 来查看本地角色和绑定。
+
+.先决条件
+
+* 安装 oc CLI。
+* 获取查看本地角色和绑定的权限：
+
+** 在集群范围内绑定了 cluster-admin 默认集群角色的用户可以对任何资源执行任何操作，包括查看本地角色和绑定。
+
+** 本地绑定了 `admin` 默认集群角色的用户可以查看并管理项目中的角色和绑定。
+
+.流程
+
+. 查看当前本地角色绑定集合，这显示绑定到当前项目的不同角色的用户和组：
++
+[source,terminal]
+----
+$ oc describe rolebinding.rbac
+----
+
+. 要查其他项目的本地角色绑定，请向命令中添加 -n 标志：
++
+[source,terminal]
+----
+$ oc describe rolebinding.rbac -n joe-project
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         admin
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  ClusterRole
+  Name:  admin
+Subjects:
+  Kind  Name        Namespace
+  ----  ----        ---------
+  User  kube:admin
+
+
+Name:         system:deployers
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows deploymentconfigs in this namespace to rollout pods in
+                this namespace.  It is auto-managed by a controller; remove
+                subjects to disa...
+Role:
+  Kind:  ClusterRole
+  Name:  system:deployer
+Subjects:
+  Kind            Name      Namespace
+  ----            ----      ---------
+  ServiceAccount  deployer  joe-project
+
+
+Name:         system:image-builders
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows builds in this namespace to push images to this
+                namespace.  It is auto-managed by a controller; remove subjects
+                to disable.
+Role:
+  Kind:  ClusterRole
+  Name:  system:image-builder
+Subjects:
+  Kind            Name     Namespace
+  ----            ----     ---------
+  ServiceAccount  builder  joe-project
+
+
+Name:         system:image-pullers
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows all pods in this namespace to pull images from this
+                namespace.  It is auto-managed by a controller; remove subjects
+                to disable.
+Role:
+  Kind:  ClusterRole
+  Name:  system:image-puller
+Subjects:
+  Kind   Name                                Namespace
+  ----   ----                                ---------
+  Group  system:serviceaccounts:joe-project
+----

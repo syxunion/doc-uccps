@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * builds/managing-build-output.adoc
+
+[id="builds-output-image-environment-variables_{context}"]
+= 输出镜像环境变量
+
+ifdef::openshift-enterprise,openshift-webscale,openshift-origin[]
+docker and
+endif::[]
+source-to-image (S2I) strategy builds set the following environment variables on output images:
+
+[options="header"]
+|===
+
+|变量 |描述
+
+|`OPENSHIFT_BUILD_NAME`
+|构建的名称
+
+|`OPENSHIFT_BUILD_NAMESPACE`
+|构建的命名空间
+
+|`OPENSHIFT_BUILD_SOURCE`
+|构建的源 URL
+
+|`OPENSHIFT_BUILD_REFERENCE`
+|构建中使用的 Git 引用
+
+|`OPENSHIFT_BUILD_COMMIT`
+|构建中使用的源提交
+|===
+
+此外，任何用户定义的环境变量（例如，使用 S2I 或 docker 策略选项配置的环境变量）也将是输出镜像环境变量列表的一部分。

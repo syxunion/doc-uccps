@@ -1,0 +1,72 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-port-forwarding.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-port-forwarding-using_{context}"]
+= 使用端口转发
+
+您可以使用 CLI 将一个或多个本地端口转发到 pod。
+
+.流程
+
+使用以下命令侦听 pod 中的指定端口：
+
+[source,terminal]
+----
+$ oc port-forward <pod> [<local_port>:]<remote_port> [...[<local_port_n>:]<remote_port_n>]
+----
+
+例如：
+
+* 使用以下命令，侦听本地的 `5000` 和 `6000` 端口，并与 pod 中的 `5000` 和 `6000` 端口来回转发数据：
++
+[source,terminal]
+----
+$ oc port-forward <pod> 5000 6000
+----
++
+.输出示例
+[source,terminal]
+----
+Forwarding from 127.0.0.1:5000 -> 5000
+Forwarding from [::1]:5000 -> 5000
+Forwarding from 127.0.0.1:6000 -> 6000
+Forwarding from [::1]:6000 -> 6000
+----
+
+* 使用以下命令，侦听本地的 `8888` 端口并转发到 pod 中的 `5000`：
++
+[source,terminal]
+----
+$ oc port-forward <pod> 8888:5000
+----
++
+.输出示例
+[source,terminal]
+----
+Forwarding from 127.0.0.1:8888 -> 5000
+Forwarding from [::1]:8888 -> 5000
+----
+
+* 使用以下命令，侦听本地的一个空闲端口并转发到 pod 中的 `5000`：
++
+[source,terminal]
+----
+$ oc port-forward <pod> :5000
+----
++
+.输出示例
+[source,terminal]
+----
+Forwarding from 127.0.0.1:42390 -> 5000
+Forwarding from [::1]:42390 -> 5000
+----
++
+Or:
++
+[source,terminal]
+----
+$ oc port-forward <pod> 0:5000
+----
+

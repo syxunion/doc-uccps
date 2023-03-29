@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-overcommit-reserving-memory_{context}"]
+= 了解计算资源和容器
+计算资源的节点强制行为特定于资源类型。
+
+[id="understanding-container-CPU-requests_{context}"]
+== 了解容器 CPU 请求
+
+容器可以保证获得其请求的 CPU 量，还可额外消耗节点上提供的超额 CPU，但不会超过容器指定的限制。如果多个容器试图使用超额 CPU，则会根据每个容器请求的 CPU 数量来分配 CPU 时间。
+
+例如，如果一个容器请求了 500m CPU 时间，另一个容器请求了 250m CPU 时间，那么该节点上提供的额外 CPU 时间以 2:1 比例在这两个容器之间分配。如果容器指定了一个限制，它将被限速，无法使用超过指定限制的 CPU。使用 Linux 内核中的 CFS 共享支持强制实施 CPU 请求。默认情况下，使用 Linux 内核中的 CFS 配额支持以 100ms 测量间隔强制实施 CPU 限制，但这可以禁用。
+
+[id="understanding-memory-requests-container_{context}"]
+== 了解容器内存请求
+
+容器可以保证获得其请求的内存量。容器可以使用高于请求量的内存，但一旦超过请求量，就有可能在节点上遇到内存不足情形时被终止。如果容器使用的内存少于请求量，它不会被终止，除非系统任务或守护进程需要的内存量超过了节点资源保留考虑在内的内存量。如果容器指定了内存限制，则超过限制数量时会立即被终止。
+
+////
+Not in 4.1
+[id="containers-ephemeral_{context}"]
+== Understanding containers and ephemeral storage
+
+[NOTE]
+====
+The {product-title} cluster uses ephemeral storage to store information that does not have to persist after the cluster is destroyed.
+====
+
+A container is guaranteed the amount of ephemeral storage it requests. A
+container can use more ephemeral storage than requested, but once it exceeds its
+requested amount, it can be terminated if the available ephemeral disk space gets
+too low.
+
+If a container uses less ephemeral storage than requested, it will not be
+terminated unless system tasks or daemons need more local ephemeral storage than
+was accounted for in the node's resource reservation. If a container specifies a
+limit on ephemeral storage, it is immediately terminated if it exceeds the limit
+amount.
+////

@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="adding-compute-user-infra-general"]
+= 使用用户置备的基础架构在集群中添加计算机器
+include::_attributes/common-attributes.adoc[]
+:context: adding-compute-user-infra-general
+
+toc::[]
+
+您可以将计算机器添加到用户置备的基础架构上的集群，作为安装过程的一部分或安装后。安装后过程需要一些在安装过程中使用的相同配置文件和参数。
+
+
+[id="upi-adding-compute-bare-metal"]
+== 在裸机中添加计算机器
+
+要在裸机上的 统信容器云管理平台 集群中添加更多计算机器，请参阅在裸机中添加计算机器。

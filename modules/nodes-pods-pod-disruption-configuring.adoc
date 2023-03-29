@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-configuring.adoc
+// * nodes/nodes-cluster-pods-configuring
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-pod-disruption-configuring_{context}"]
+= 使用 pod 中断预算指定必须在线的 pod 数量
+
+您可以使用 `PodDisruptionBudget` 对象来指定某一时间必须保持在线的副本的最小数量或百分比。
+
+.流程
+
+配置 pod 中断预算：
+
+. 使用类似以下示例的对象定义来创建 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: policy/v1 <1>
+kind: PodDisruptionBudget
+metadata:
+  name: my-pdb
+spec:
+  minAvailable: 2  <2>
+  selector:  <3>
+    matchLabels:
+      foo: bar
+----
+<1> `PodDisruptionBudget` 是 `policy/v1` API 组的一部分。
+<2> 必须同时可用的最小 pod 数量。这可以是整数，也可以是指定百分比的字符串 `20%`.
+<3> 对一组资源进行的标签查询。 `matchLabels` 和 `matchExpressions` 的结果在逻辑上是联合的。将此参数留空，如 `selector {}` ，以选择项目中的所有 pod。
++
+或者：
++
+[source,yaml]
+----
+apiVersion: policy/v1 <1>
+kind: PodDisruptionBudget
+metadata:
+  name: my-pdb
+spec:
+  maxUnavailable: 25% <2>
+  selector: <3>
+    matchLabels:
+      foo: bar
+----
+<1> `PodDisruptionBudget` 是 `policy/v1` API 组的一部分。
+<2> 同时不能使用的最多的 pod 数量。这可以是整数，也可以是指定百分比的字符串 `20%`。
+<3> 对一组资源进行的标签查询。 `matchLabels` 和 `matchExpressions` 的结果在逻辑上是联合的。将此参数留空，如 `selector {}` ，以选择项目中的所有 pod。
+
+. 运行以下命令，将对象添加到项目中：
++
+[source,terminal]
+----
+$ oc create -f </path/to/file> -n <project_name>
+----

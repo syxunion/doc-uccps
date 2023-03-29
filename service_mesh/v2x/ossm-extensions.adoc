@@ -1,0 +1,28 @@
+:_content-type: ASSEMBLY
+[id="ossm-extensions"]
+= Extensions
+include::_attributes/common-attributes.adoc[]
+:context: ossm-extensions
+
+toc::[]
+
+您可以使用 WebAsembly 扩展直接将新功能添加到 {SMProductName} 代理中。这可让您从应用程序中移出更多常见的功能，并使用编译到 WebAssembly 字节代码的单一语言实现它们。
+
+
+include::modules/ossm-extensions-overview.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-wasmplugin-format.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-ref-wasmplugin.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-wasmplugin-deploy.adoc[leveloffset=+2]
+
+include::modules/ossm-extensions-smextension-format.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-ref-smextension.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-smextension-deploy.adoc[leveloffset=+2]
+
+include::modules/ossm-extensions-migration-overview.adoc[leveloffset=+1]
+
+include::modules/ossm-extensions-migrating-to-wasmplugin.adoc[leveloffset=+2]

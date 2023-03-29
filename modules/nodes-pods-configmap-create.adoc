@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmap-create_{context}"]
+= 使用 CLI 创建配置映射
+
+您可以使用以下命令从目录、特定文件或文字值创建配置映射。
+
+.流程
+
+* 创建配置映射：
++
+[source,terminal]
+----
+$ oc create configmap <configmap_name> [options]
+----

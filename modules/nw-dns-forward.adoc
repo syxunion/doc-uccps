@@ -1,0 +1,123 @@
+// Module included in the following assemblies:
+//
+// * networking/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-forward_{context}"]
+= 使用 DNS 转发
+
+您可以使用以下方法使用 DNS 转发来覆盖 `/etc/resolv.conf` 文件中的默认转发配置：
+
+* 为每个区指定名称服务器。如果转发区是 统信容器云管理平台 管理的 Ingress 域，那么上游名称服务器必须为域授权。
+* 提供上游 DNS 服务器列表。
+* 更改默认转发策略。
+
+[注意]
+=====
+默认域的 DNS 转发配置可以同时在 `/etc/resolv.conf` 文件和上游 DNS 服务器中指定默认服务器。
+=====
+
+.流程
+
+. 修改名为 `default` 的 DNS Operator 对象：
++
+[source,terminal]
+----
+$ oc edit dns.operator/default
+----
++
+这允许 Operator 使用基于 `Server` 的额外服务器配置块来创建和更新名为 `dns-default` 的 ConfigMap。如果任何服务器都没有与查询匹配的区域，则名称解析会返回上游 DNS 服务器。
++
+.DNS 示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: DNS
+metadata:
+  name: default
+spec:
+  servers:
+  - name: foo-server <1>
+    zones: <2>
+    - example.com
+    forwardPlugin:
+      policy: Random <3>
+      upstreams: <4>
+      - 1.1.1.1
+      - 2.2.2.2:5353
+  - name: bar-server
+    zones:
+    - bar.com
+    - example.com
+    forwardPlugin:
+      policy: Random
+      upstreams:
+      - 3.3.3.3
+      - 4.4.4.4:5454
+  upstreamResolvers: <5>
+    policy: Random <6>
+    upstreams: <7>
+    - type: SystemResolvConf <8>
+    - type: Network
+      address: 1.2.3.4 <9>
+      port: 53 <10>
+----
+<1> 必须符合 rfc6335 服务名称语法。
+<2> 必须符合 rfc1123 中子域的定义。集群域 `cluster.local`` 不是 `zones`` 中的一个有效的 `subdomain`。
+<3> 定义用于选择上游解析器的策略。默认值为 `Random`。您还可以使用 `RoundRobin`、和 `Sequential`。
+<4> 每个 `forwardPlugin` 最多允许 15 个 `upstreams`。
+<5> 可选。您可以使用它来覆盖默认策略，并将 DNS 解析转发到默认域的指定 DNS 解析器（上游解析器）。如果没有提供任何上游解析器，DNS 名称查询将进入 `/etc/resolv.conf` 中的服务器。
+<6> 决定选择上游服务器进行查询的顺序。您可以指定这些值之一： `Random`、`RoundRobin` 或 `Sequential`。默认值为 `Sequential`。
+<7> 可选。您可以使用它提供上游解析器。
+<8> 您可以指定上游的两种类型 - `SystemResolvConf` 和 `Network`。`SystemResolvConf` 将上游配置为使用 '/etc/resolv.conf` 和 `Network` 定义 `Networkresolver`。您可以指定其中一个或两者都指定。
+<9> 如果指定类型是 Network，则必须提供 IP 地址。address 必须是有效的 IPv4 或 IPv6 地址。
+<10> 如果指定类型是 Network，您可以选择性地提供端口。port 必须在 1 到 65535 之间。
++
+[注意]
+====
+如果 `servers` 未定义或无效，则 ConfigMap 只包括默认服务器。
+====
++
+. 查看 ConfigMap：
++
+[source,terminal]
+----
+$ oc get configmap/dns-default -n openshift-dns -o yaml
+----
++
+.基于以上 DNS 示例的 DNS ConfigMap 示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  Corefile: |
+    example.com:5353 {
+        forward . 1.1.1.1 2.2.2.2:5353
+    }
+    bar.com:5353 example.com:5353 {
+        forward . 3.3.3.3 4.4.4.4:5454 <1>
+    }
+    .:5353 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            upstream
+            fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf 1.2.3.4:53 {
+            policy Random
+        }
+        cache 30
+        reload
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    dns.operator.openshift.io/owning-dns: default
+  name: dns-default
+  namespace: openshift-dns
+----
+<1> 对 `forwardPlugin` 的更改会触发 `CoreDNS` 守护进程集的滚动更新。
+

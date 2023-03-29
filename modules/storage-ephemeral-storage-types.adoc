@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// storage/understanding-persistent-storage.adoc[leveloffset=+1]
+
+[id=storage-ephemeral-storage-types_{context}]
+= 临时存储的类型
+
+主分区中始终提供临时本地存储。创建主分区的基本方法有两种： root 和 runtime。
+
+[discrete]
+== Root
+
+默认情况下，该分区包含 kubelet 根目录、`/var/lib/kubelet/` 和 `/var/log/` 目录。此分区可以在用户 Pod、OS 和 Kubernetes 系统守护进程间共享。Pod 可以通过 `EmptyDir` 卷、容器日志、镜像层和容器可写层来消耗这个分区。kubelet 管理这个分区的共享访问和隔离。这个分区是临时的，应用程序无法预期这个分区中的任何性能 SLA（如磁盘 IOPS）。
+
+[discrete]
+== Runtime
+
+这是一个可选分区，可用于 overlay 文件系统。统信容器云管理平台会尝试识别并提供共享访问以及这个分区的隔离。容器镜像层和可写入层存储在此处。如果 runtime 分区存在，则 `root` 分区不包含任何镜像层或者其它可写入的存储。

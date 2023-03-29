@@ -1,0 +1,160 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating-infrastructure-machinesets.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="creating-infra-machines_{context}"]
+= 为基础架构机器创建机器配置池
+
+如果需要基础架构机器具有专用配置，则必须创建一个 infra 池。
+
+.流程
+
+. 向您要分配为带有特定标签的 infra 节点的节点添加标签：
++
+[source,terminal]
+----
+$ oc label node <node_name> <label>
+----
++
+[source,terminal]
+----
+$ oc label node ci-ln-n8mqwr2-f76d1-xscn2-worker-c-6fmtx node-role.kubernetes.io/infra=
+----
+
+. 创建包含 worker 角色和自定义角色作为机器配置选择器的机器配置池：
++
+[source,terminal]
+----
+$ cat infra.mcp.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  name: infra
+spec:
+  machineConfigSelector:
+    matchExpressions:
+      - {key: machineconfiguration.openshift.io/role, operator: In, values: [worker,infra]} <1>
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/infra: "" <2>
+----
+<1> 添加 worker 角色和自定义角色。
+<2> 将您添加的标签作为 `nodeSelector` 添加到节点。
++
+[注意]
+====
+自定义机器配置池从 worker 池中继承机器配置。自定义池使用任何针对 worker 池的机器配置，但增加了部署仅针对自定义池的更改的功能。由于自定义池从 worker 池中继承资源，对 worker 池的任何更改也会影响自定义池。
+====
+
+. 具有 YAML 文件后，您可以创建机器配置池：
++
+[source,terminal]
+----
+$ oc create -f infra.mcp.yaml
+----
+
+. 检查机器配置，以确保基础架构配置成功：
++
+[source,terminal]
+----
+$ oc get machineconfig
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                                        GENERATEDBYCONTROLLER                      IGNITIONVERSION   CREATED
+00-master                                                   365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+00-worker                                                   365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+01-master-container-runtime                                 365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+01-master-kubelet                                           365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+01-worker-container-runtime                                 365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+01-worker-kubelet                                           365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+99-master-1ae2a1e0-a115-11e9-8f14-005056899d54-registries   365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+99-master-ssh                                                                                          3.2.0             31d
+99-worker-1ae64748-a115-11e9-8f14-005056899d54-registries   365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             31d
+99-worker-ssh                                                                                          3.2.0             31d
+rendered-infra-4e48906dca84ee702959c71a53ee80e7             365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             23m
+rendered-master-072d4b2da7f88162636902b074e9e28e            5b6fb8349a29735e48446d435962dec4547d3090   3.2.0             31d
+rendered-master-3e88ec72aed3886dec061df60d16d1af            02c07496ba0417b3e12b78fb32baf6293d314f79   3.2.0             31d
+rendered-master-419bee7de96134963a15fdf9dd473b25            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             17d
+rendered-master-53f5c91c7661708adce18739cc0f40fb            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             13d
+rendered-master-a6a357ec18e5bce7f5ac426fc7c5ffcd            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             7d3h
+rendered-master-dc7f874ec77fc4b969674204332da037            5b6fb8349a29735e48446d435962dec4547d3090   3.2.0             31d
+rendered-worker-1a75960c52ad18ff5dfa6674eb7e533d            5b6fb8349a29735e48446d435962dec4547d3090   3.2.0             31d
+rendered-worker-2640531be11ba43c61d72e82dc634ce6            5b6fb8349a29735e48446d435962dec4547d3090   3.2.0             31d
+rendered-worker-4e48906dca84ee702959c71a53ee80e7            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             7d3h
+rendered-worker-4f110718fe88e5f349987854a1147755            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             17d
+rendered-worker-afc758e194d6188677eb837842d3b379            02c07496ba0417b3e12b78fb32baf6293d314f79   3.2.0             31d
+rendered-worker-daa08cc1e8f5fcdeba24de60cd955cc3            365c1cfd14de5b0e3b85e0fc815b0060f36ab955   3.2.0             13d
+----
++
+您应该会看到一个新的机器配置，带有 `rendered-infra-*` 前缀。
+
+. 可选：要部署对自定义池的更改，请创建一个机器配置，该配置使用自定义池名称作为标签，如本例中的 `infra`：请注意，这不是必须的，在此包括仅用于指示目的。这样，您可以只应用特定于 `infra` 节点的任何自定义配置。
++
+[注意]
+====
+创建新机器配置池后，MCO 会为该池生成一个新的呈现配置，以及该池重启的关联节点以应用新配置。
+====
+
+.. 创建机器配置：
++
+[source,terminal]
+----
+$ cat infra.mc.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: 51-infra
+  labels:
+    machineconfiguration.openshift.io/role: infra <1>
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+      - path: /etc/infratest
+        mode: 0644
+        contents:
+          source: data:,infra
+----
+<1> 将您添加的标签作为 `nodeSelector` 添加到节点。
+
+..  将机器配置应用到 infra-labeled 节点：
++
+[source,terminal]
+----
+$ oc create -f infra.mc.yaml
+----
+
+. 确认您的新机器配置池可用：
++
+[source,terminal]
+----
+$ oc get mcp
+----
++
+.输出示例
+[source,terminal]
+----
+NAME     CONFIG                                             UPDATED   UPDATING   DEGRADED   MACHINECOUNT   READYMACHINECOUNT   UPDATEDMACHINECOUNT   DEGRADEDMACHINECOUNT   AGE
+infra    rendered-infra-60e35c2e99f42d976e084fa94da4d0fc    True      False      False      1              1                   1                     0                      4m20s
+master   rendered-master-9360fdb895d4c131c7c4bebbae099c90   True      False      False      3              3                   3                     0                      91m
+worker   rendered-worker-60e35c2e99f42d976e084fa94da4d0fc   True      False      False      2              2                   2                     0                      91m
+----
++
+在本例中，worker 节点被改为一个 infra 节点。

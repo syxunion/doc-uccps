@@ -1,0 +1,12 @@
+////
+This module is included in the following assemblies:
+* service_mesh/v1x/ossm-config.adoc
+* service_mesh/v2x/ossm-observability.adoc
+////
+
+[id="ossm-overview-distr-tracing_{context}"]
+= Distributed tracing
+
+分布式追踪是通过跟踪应用中服务调用的路径来跟踪应用中各个服务的性能的过程。每次用户在应用中采取行动时，将执行请求，该请求可能需要许多服务进行交互来生成响应。此请求的路径称为分布式事务。
+
+{SMProductName} 使用 {DTProductName} 分布式追踪来允许开发人员查看微服务应用中的调用流。

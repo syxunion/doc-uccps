@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+
+:_content-type: PROCEDURE
+[id="deploying-a-sample-service_{context}"]
+= 部署示例服务
+
+要为用户定义的项目中服务测试监控，您可以部署示例服务。
+
+.流程
+
+. 为服务配置创建 YAML 文件。在本例中，该文件名为 `prometheus-example-app.yaml`.
+
+. 在该文件中添加以下部署和服务配置详情：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus-example-app
+  name: prometheus-example-app
+  namespace: ns1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-example-app
+  template:
+    metadata:
+      labels:
+        app: prometheus-example-app
+    spec:
+      containers:
+      - image: ghcr.io/rhobs/prometheus-example-app:0.4.1
+        imagePullPolicy: IfNotPresent
+        name: prometheus-example-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prometheus-example-app
+  name: prometheus-example-app
+  namespace: ns1
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    name: web
+  selector:
+    app: prometheus-example-app
+  type: ClusterIP
+----
++
+此配置会在用户定义的 `ns1` 项目中部署名为 `prometheus-example-app` 的服务。此服务会公开自定义 version 指标。
+
+. 将配置应用到集群：
++
+[source,terminal]
+----
+$ oc apply -f prometheus-example-app.yaml
+----
++
+部署该服务需要一些时间。
+
+. 您可以检查该 Pod 是否正在运行：
++
+[source,terminal]
+----
+$ oc -n ns1 get pod
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                      READY     STATUS    RESTARTS   AGE
+prometheus-example-app-7857545cb7-sbgwq   1/1       Running   0          81m
+----

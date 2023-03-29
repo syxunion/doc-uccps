@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * networking/cluster-network-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-cno-logs_{context}"]
+= 查看 Cluster Network Operator 日志
+
+您可以使用 `oc logs` 命令来查看 Cluster Network Operator 日志。
+
+.流程
+
+* 运行以下命令，以查看 Cluster Network Operator 的日志：
++
+[source,terminal]
+----
+$ oc logs --namespace=openshift-network-operator deployment/network-operator
+----

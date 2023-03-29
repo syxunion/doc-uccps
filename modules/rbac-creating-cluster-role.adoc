@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+
+[id="creating-cluster-role_{context}"]
+= 创建集群角色
+
+您可以创建集群角色。
+
+.流程
+
+. 您可以创建集群角色。
++
+[source,terminal]
+----
+$ oc create clusterrole <name> --verb=<verb> --resource=<resource>
+----
++
+在此命令中，指定：
++
+--
+* `<name>`, 本地角色的名称
+* `<verb>`, 以逗号分隔的、应用到角色的操作动词列表
+* `<resource>`, 角色应用到的资源
+--
++
+例如，要创建一个集群角色来允许用户查看 Pod，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create clusterrole podviewonly --verb=get --resource=pod
+----
+

@@ -1,0 +1,52 @@
+// Module included in the following assemblies
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="storage-class-annotations_{context}"]
+= 存储类注解
+
+要将存储类设置为集群范围的默认值，请在存储类元数据中添加以下注解：
+
+[source,yaml]
+----
+storageclass.kubernetes.io/is-default-class: "true"
+----
+
+例如：
+
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+...
+----
+
+这允许任何没有指定特定存储类的持久性卷声明（PVC）通过默认存储类自动置备。但是，您的集群可以有多个存储类，但只有其中一个是默认存储类。
+
+[注意]
+====
+beta 注解 `storageclass.beta.kubernetes.io/is-default-class` 当前仍然可用，但将在以后的版本中被删除。
+====
+
+要设置存储类描述，请在存储类元数据中添加以下注解：
+
+[source,yaml]
+----
+kubernetes.io/description: My Storage Class Description
+----
+
+例如：
+
+[source,yaml]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    kubernetes.io/description: My Storage Class Description
+...
+----

@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-oidc-identity-provider.adoc
+
+[id="identity-provider-oidc-CR_{context}"]
+= OpenID Connect CR 示例
+
+以下自定义资源 (CR) 显示 OpenID Connect 身份提供程序的参数和可接受值。
+
+如果您必须指定自定义证书捆绑包、额外范围、额外授权请求参数或 `userInfo` URL，请使用完整的 OpenID Connect CR。
+
+.标准 OpenID Connect CR
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: oidcidp <1>
+    mappingMethod: claim <2>
+    type: OpenID
+    openID:
+      clientID: ... <3>
+      clientSecret: <4>
+        name: idp-secret
+      claims: <5>
+        preferredUsername:
+        - preferred_username
+        name:
+        - name
+        email:
+        - email
+        groups:
+        - groups
+      issuer: https://www.idp-issuer.com <6>
+----
+name：此提供程序名称作为前缀放在身份声明值前，以此组成身份名称。它还可用来构建的重定向 URL。
+mappingMethod：控制如何在此提供程序的身份和 User 对象之间建立映射。
+clientID：在 OpenID 提供程序中注册的客户端的客户端 ID。该客户端必须能够重定向到 https://oauth-openshift.apps.<cluster_name>.<cluster_domain>/oauth2callback/<idp_provider_name>。
+clientSecret：对包含客户端 secret 的统信容器云管理平台Secret 对象的引用。
+claims：用作身份的声明列表。使用第一个非空声明。
+issuer：OpenID 规范中描述的颁发者标识符。必须使用 https，且不带查询或分段组件。
+
+.完整 OpenID Connect CR
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: oidcidp
+    mappingMethod: claim
+    type: OpenID
+    openID:
+      clientID: ...
+      clientSecret:
+        name: idp-secret
+      ca: <1>
+        name: ca-config-map
+      extraScopes: <2>
+      - email
+      - profile
+      extraAuthorizeParameters: <3>
+        include_granted_scopes: "true"
+      claims:
+        preferredUsername: <4>
+        - preferred_username
+        - email
+        name: <5>
+        - nickname
+        - given_name
+        - name
+        email: <6>
+        - custom_email_claim
+        - email
+        groups: <7>
+        - groups
+      issuer: https://www.idp-issuer.com
+----
+ca：可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台配置映射的引用，以用于验证所配置 URL 的服务器证书。
+extraScopes：可选：除 openid 范围外的可选请求范围列表，在授权令牌请求期间使用。
+extraAuthorizeParameters：可选：映射到授权令牌请求中的附加参数映射。
+preferredUsername:为此身份置备用户时用作首选用户名的声明的列表。使用第一个非空声明。
+name:用作显示名称的声明列表。使用第一个非空声明。
+email：用作电子邮件地址的声明列表。使用第一个非空声明。
+groups：用户登录时，用于将 OpenID Connect 供应商的组与统信容器云管理平台同步的声明列表。使用第一个非空声明。

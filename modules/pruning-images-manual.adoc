@@ -1,0 +1,328 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-images-manual_{context}"]
+= 修剪镜像
+
+修剪自定义资源可启用自动镜像修剪。管理员可以手工删除因为年龄、状态或超过限值而不再需要的镜像。手动删除镜像的方法有两种：
+
+* 在集群上以一个 `Job` 或 `CronJob` 运行镜像修剪。
+* 运行 `oc adm prune images` 命令。
+
+.先决条件
+
+* 若要修剪镜像，您必须先以具有访问令牌的用户身份登录到 CLI。用户还必须有集群角色 `system:image-pruner` 或更高级别的角色（如 `cluster-admin`）。
+* 公开镜像 registry。
+
+.流程
+
+使用以下方法之一可以手工删除因为年龄、状态或超过限值而不再需要的镜像：
+
+* 通过为 `pruner` 服务帐户创建 YAML 文件，在集群中以 `Job` 或 `CronJob` 形式运行镜像修剪，例如：
++
+[source,terminal]
+----
+$ oc create -f <filename>.yaml
+----
++
+.输出示例
++
+[source,yaml]
+----
+kind: List
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: pruner
+    namespace: openshift-image-registry
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: openshift-image-registry-pruner
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: system:image-pruner
+  subjects:
+  - kind: ServiceAccount
+    name: pruner
+    namespace: openshift-image-registry
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: image-pruner
+    namespace: openshift-image-registry
+  spec:
+    schedule: "0 0 * * *"
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 3
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            restartPolicy: OnFailure
+            containers:
+            - image: "quay.io/openshift/origin-cli:4.1"
+              resources:
+                requests:
+                  cpu: 1
+                  memory: 1Gi
+              terminationMessagePolicy: FallbackToLogsOnError
+              command:
+              - oc
+              args:
+              - adm
+              - prune
+              - images
+              - --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+              - --keep-tag-revisions=5
+              - --keep-younger-than=96h
+              - --confirm=true
+              name: image-pruner
+            serviceAccountName: pruner
+----
+
+* 运行 `oc adm prune images [<options>]` 命令：
++
+[source,terminal]
+----
+$ oc adm prune images [<options>]
+----
++
+除非使用了 `--prune-registry=false` ，否则修剪镜像会从集成 registry 中移除数据。
++
+使用 `--namespace ` 标志修剪镜像时不移除镜像，只移除镜像流。镜像是没有命名空间的资源。因此，将修剪限制到特定的命名空间会导致无法计算其当前使用量。
++
+默认情况下，集成 registry 会缓存 blob 元数据来减少对存储的请求数量，并提高处理请求的速度。修剪不会更新集成 registry 缓存。在修剪后推送的镜像如果含有修剪的层，它们会被破坏，因为不会推送在缓存中有元数据的已修剪层。因此，您必须重新部署 registry，以便在修剪后清除缓存：
++
+[source,terminal]
+----
+$ oc rollout restart deployment/image-registry -n openshift-image-registry
+----
++
+如果集成 registry 使用 Redis 缓存，您必须手动清理数据库。
++
+如果无法在修剪后重新部署 registry，那么您必须永久禁用缓存。
++
+`oc adm prune images` 操作需要 registry 的路由。默认不创建 registry 路由。
++
+*Prune images CLI configuration options* 配置选项表描述了可供 `oc adm prune images <options>` 命令使用的选项 。
++
+.修剪镜像 CLI 配置选项
+[cols="4,8",options="header"]
+|===
+
+|选项 |描述
+
+.^|`--all`
+|包括没有推送到 registry 但已通过 pullthrough 镜像的镜像。默认为开启。要将修剪限制为已被推送到集成 registry 的镜像，请传递 `--all=false`。
+
+.^|`--certificate-authority`
+|与 统信容器云平台 管理的 registry 通信时使用的证书颁发机构文件的路径。默认为来自当前用户配置文件的证书颁发机构数据。如果提供，则发起安全连接。
+
+.^|`--confirm`
+|指明应该执行修剪，而不是空运行。这需要具有指向集成容器镜像 registry 的有效路由。如果此命令在集群网络外运行，则必须使用 `--registry-url` 来提供路由。
+
+.^|`--force-insecure`
+|谨慎使用这个选项。允许与通过 HTTP 托管或具有无效 HTTPS 证书的容器 registry 进行不安全连接。
+
+.^|`--keep-tag-revisions=<N>`
+|对于每个镜像流，每个标签最多保留 `N `个镜像修订（默认值 3）。
+
+.^|`--keep-younger-than=<duration>`
+|不修剪相对于当前时间年龄不到 `<duration>` 的镜像。或者，不修剪被相对于当前时间年龄不到 `<duration>` 的其他对象引用的镜像（默认值 `60m`）。
+
+.^|`--prune-over-size-limit`
+|修剪超过同一项目中定义的最小限值的每个镜像。此标志不能与 `--keep-tag-revision`s 或 `--keep-younger-than` 结合使用。
+
+.^|`--registry-url`
+|联系 registry 时使用的地址。此命令尝试使用由受管镜像和镜像流决定的集群内部 URL。如果失败（registry 无法解析或访问），则需要使用此标志提供一个替代路由。可以在 registry 主机名中加上前缀 `https://`或 `http://` 来强制执行特定的连接协议。
+
+.^|`--prune-registry`
+|此选项与其他选项指定的条件结合，可以控制是否修剪 registry 中与 统信容器云平台 镜像 API 对象对应的数据。默认情况下，镜像修剪同时处理镜像 API 对象和 registry 中对应的数据。
+
+当您只关注移除 etcd 内容时（可能要减少镜像对象的数量，但并不关心清理 registry）或要通过硬修剪 registry 来单独进行操作（可能在 registry 的适当维护窗口期间），此选项很有用处。
+|===
+
+[id="pruning-images-conditions_{context}"]
+== 镜像修剪条件
+
+您可以对手动修剪的镜像应用条件。
+
+* 要删除任何由 统信容器云管理平台 管理的镜像，或删除带有注解 `openshift.io/image.managed` 的镜像：
+** 至少在 `--keep-younger-than` 分钟前创建 ，且当前没有被引用：
+*** 在之前 `--keep-younger-than` 分钟内创建的 Pod。
+*** 在之前 `--keep-younger-than` 分钟内创建的镜像流。
+*** 运行的 pod
+*** 待处理的 pod
+*** 复制控制器
+*** 部署
+*** 部署配置
+*** 副本集（Replica set）
+*** 构建配置
+*** Builds
+*** `stream.status.tags[].items` 中 `--keep-tag-revisions` 个最新项。
+** 超过同一项目中定义的最小限值，且当前没有被引用：
+*** 运行的 pod
+*** 待处理的 pod
+*** 复制控制器
+*** 部署
+*** 部署配置
+*** 副本集（Replica set）
+*** 构建配置
+*** Builds
+* 不支持从外部 registry 进行修剪。
+* 镜像被修剪后，会从在 status.tags 引用了该镜像的所有镜像流中移除对该镜像的所有引用。
+* 移除不再被任何镜像引用的镜像层。
+
+[注意]
+====
+T`--prune-over-size-limit` 标志无法与 `--keep-tag-revisions` 或 `--keep-younger-than` 标志结合使用。这样做会返回不允许操作的信息。
+====
+
+与使用一个命令同时进行两个操作相比，把移除 统信容器云管理平台 镜像 API 对象的操作和从 registry 中删除镜像数据的操作分开进行（使用 `--prune-registry=false` 然后再硬修剪 registry），可以缩减时间窗口且更加安全。但是，计时窗口不会完全剔除。
+
+例如，您仍然可在创建引用某一镜像的 Pod，因为修剪会将该镜像标识为需要修剪。您仍需对在修剪操作期间创建的 API 对象（它可能会引用镜像）加以注意以避免出现引用已删除内容的问题。
+
+重新进行修剪时如果没有使用 `--prune-registry` 选项，或使用 `--prune-registry=true` 选项，则不会修剪之前通过 `--prune-registry=false` 修剪的镜像的镜像 registry 中相关的存储。对于任何使用 `--prune-registry=false` 修剪的镜像，只能通过硬修剪注册表将其从 registry 存储中删除。
+
+[id="pruning-images-running-operation_{context}"]
+== 运行镜像修剪操作
+
+.流程
+
+. 查看修剪操作要删除的对象：
+
+.. 最多保留三个标签修订，并且保证资源（镜像、镜像流和 pod）不长于 `60` 分钟：
++
+[source,terminal]
+----
+$ oc adm prune images --keep-tag-revisions=3 --keep-younger-than=60m
+----
+
+.. 修剪超过定义的限值的所有镜像：
++
+[source,terminal]
+----
+$ oc adm prune images --prune-over-size-limit
+----
+
+. 使用上一步中的选项执行修剪操作：
++
+[source,terminal]
+----
+$ oc adm prune images --keep-tag-revisions=3 --keep-younger-than=60m --confirm
+----
++
+[source,terminal]
+----
+$ oc adm prune images --prune-over-size-limit --confirm
+----
+
+[id="pruning-images-secure-insecure_{context}"]
+== 使用安全或不安全连接
+
+安全连接是首选和推荐的方法。它通过 HTTPS 协议来进行，并且会强制验证证书。若有可能，prune 命令始终会尝试使用这种连接。如果不可能，某些情况下会回退到不安全连接，而这存在危险。这时，会跳过证书验证或使用普通 HTTP 协议。
+
+除非指定了 `--certificate-authority`，否则以下情形中允许回退到不安全连接：
+
+. 使用 `--force-insecure` 选项运行 `prune` 命令。
+. 提供的 `registry-url` 带有 `http://` 架构前缀。
+. 提供的 `registry-url` 是本地链路地址或 `localhost`。
+. 当前用户的配置允许不安全连接。造成的原因可能是用户使用 `--insecure-skip-tls-verify` 登录或在提示时选择不安全连接。
+
+[重要]
+====
+如果 registry 使用有别于 统信容器云管理平台 所用的证书颁发机构进行保护，则必须通过 `--certificate-authority` 标志来指定。否则，`prune` 命令会出错。
+====
+
+[id="pruning-images-problems_{context}"]
+== 镜像修剪问题
+
+[discrete]
+[id="pruning-images-not-being-pruned_{context}"]
+==== 镜像没有被修剪
+
+如果您的镜像不断积累，且 `prune` 命令只移除您的预期的少许部分，请确保清楚镜像视为修剪候选者时必须要满足的镜像修剪条件。
+
+确保您要移除的镜像在每个标签历史记录中所处的位置高于您选择的标签修订阈值。例如，有一个名为 `sha:abz` 的陈旧镜像。在标记镜像的密码空间 N 中运行以下命令，会造成在一个名为 `myapp` 的镜像流对该镜像标记三次：
+
+[source,terminal]
+----
+$ oc get is -n N -o go-template='{{range $isi, $is := .items}}{{range $ti, $tag := $is.status.tags}}'\
+  '{{range $ii, $item := $tag.items}}{{if eq $item.image "'"sha:abz"\
+  $'"}}{{$is.metadata.name}}:{{$tag.tag}} at position {{$ii}} out of {{len $tag.items}}\n'\
+  '{{end}}{{end}}{{end}}{{end}}'
+----
+
+.输出示例
+[source,terminal]
+----
+myapp:v2 at position 4 out of 5
+myapp:v2.1 at position 2 out of 2
+myapp:v2.1-may-2016 at position 0 out of 1
+----
+
+使用默认选项时，不会修剪该镜像，因为它出现在 `myapp:v2.1-may-2016` 标签历史记录中的位置 `0` 上。要将镜像视为需要修剪，管理员必须：
+
+* 在运行 `oc adm prune images` 命令时指定 `--keep-tag-revisions=0`。
++
+[警告]
+====
+此操作从所有含有基础镜像的命名空间中移除所有标签，除非它们比指定阈值年轻，或者有比指定阈值年轻的对象引用它们。
+====
+
+* 删除所有位置低于修订阈值的 `istag`，即 `myapp:v2.1` 和 `myapp:v2.1-may-2016`。
+
+* 在历史记录中进一步移动镜像，可以通过运行新构建并推送到同一 `istag`，或者标记其他镜像。对于旧版标签，这可能并不是需要的结果。
+
+应该避免在标签的名称中包含某个特定镜像的构建日期或时间，除非镜像必须保留不定的时长。这样的标签通常在历史记录中只有一个镜像，这会永久阻止它们被修剪。
+
+[discrete]
+[id="pruning-images-secure-against-insecure_{context}"]
+==== 对不安全 registry 使用安全连接
+
+如果您在 `oc adm prune images` 命令的输出中看到类似于如下的消息，这表示您的 registry 未受保护，并且 `oc adm prune images` 客户端尝试使用安全连接：
+
+[source,terminal]
+----
+error: error communicating with registry: Get https://172.30.30.30:5000/healthz: http: server gave HTTP response to HTTPS client
+----
+
+* 建议的解决方案是保护 registry 的安全。或在，您可以强制客户端使用不安全连接，方法是在命令中附加 `--force-insecure`，但并不建议这样做。
+
+[discrete]
+[id="pruning-images-insecure-against-secure_{context}"]
+==== 对受保护 registry 使用不安全连接
+
+如果您在 `oc adm prune images` 命令中看到以下错误之一，这表示您的 registry 已设有保护，但签署其证书的证书颁发机构与 `oc adm prune images` 客户端用于连接验证的不同：
+
+[source,terminal]
+----
+error: error communicating with registry: Get http://172.30.30.30:5000/healthz: malformed HTTP response "\x15\x03\x01\x00\x02\x02"
+error: error communicating with registry: [Get https://172.30.30.30:5000/healthz: x509: certificate signed by unknown authority, Get http://172.30.30.30:5000/healthz: malformed HTTP response "\x15\x03\x01\x00\x02\x02"]
+----
+
+默认情况下，使用存储在用户配置文件中的证书颁发机构数据；与主 API 通信时也是如此。
+
+使用 `--certificate-authority` 选项为容器镜像 registry 服务器提供正确的证书颁发机构。
+
+[discrete]
+[id="pruning-images-wrong-ca_{context}"]
+==== 使用错误的证书颁发机构
+
+以下错误表示，用来为受保护容器镜像 registry 的证书签名的证书颁发机构与客户端使用的不同：
+
+[source,terminal]
+----
+error: error communicating with registry: Get https://172.30.30.30:5000/: x509: certificate signed by unknown authority
+----
+
+务必通过 `--certificate-authority` 提供正确的证书颁发机构。
+
+作为一种临时解决方案，您可以添加 `--force-insecure` 标签。不过，我们不建议这样做。

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-autoscaling-developer.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-concurrency-limits-configure-hard_{context}"]
+= 配置硬并发限制
+
+硬并发限制是严格强制执行上限的上限。如果并发达到硬限制，则请求将被缓冲，必须等到有足够的可用容量来执行请求。您可以通过修改 `containerConcurrency` spec 或使用带有正确标记的 `kn service` 命令为 Knative 服务指定硬并发限制。
+
+.流程
+
+* 可选：在 `Service` 自定义资源的 spec 中为您的 Knative 服务设置 `containerConcurrency` spec：
++
+.服务规格示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+  template:
+    spec:
+      containerConcurrency: 50
+----
++
+默认值为 0，这意味着允许同时访问服务的一个副本的请求数量没有限制。
++
+大于 0 的值指定允许一次传输到服务的一个副本的请求的确切数量。这个示例将启用 50 个请求的硬并发限制。
+
+* 可选： 使用 `kn service` 命令指定 `--concurrency-limit` 标志：
++
+[source,terminal]
+----
+$ kn service create <service_name> --image <image_uri> --concurrency-limit <integer>
+----
++
+.创建服务且并发限制为 50 个请求的命令示例
+[source,terminal]
+----
+$ kn service create example-service --image quay.io/openshift-knative/knative-eventing-sources-event-display:latest --concurrency-limit 50
+----

@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="build-configuration"]
+= 构建配置资源
+include::_attributes/common-attributes.adoc[]
+:context: build-configuration
+
+toc::[]
+
+使用以下步骤来配置构建设置。
+
+include::modules/builds-configuration-parameters.adoc[leveloffset=+1]
+
+include::modules/builds-configuration-file.adoc[leveloffset=+1]

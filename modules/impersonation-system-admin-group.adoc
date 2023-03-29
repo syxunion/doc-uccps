@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * users_and_roles/impersonating-system-admin.adoc
+
+:_content-type: PROCEDURE
+[id="impersonation-system-admin-group_{context}"]
+= 模拟 system:admin 组
+
+
+当通过一个组为 `system:admin` 用户授予集群管理权限时，您必须在命令中包含 `--as=<user> --as-group=<group1> --as-group=<group2>` 参数来模拟关联的组。
+
+.流程
+
+* 要通过模拟关联的集群管理组来模拟 `system:admin` 以为用户授予权限，请运行以下命令：
++
+[source,terminal]
+----
+$ oc create clusterrolebinding <any_valid_name> --clusterrole=sudoer --as=<user> \
+--as-group=<group1> --as-group=<group2>
+----

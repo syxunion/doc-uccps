@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-internal-oauth.adoc
+
+[id="oauth-token-request-flows_{context}"]
+= OAuth 令牌请求流量和响应
+
+OAuth 服务器支持标准的授权代码授权和隐式授权 OAuth 授权流。
+
+在使用隐式授权流 (`response_type=token`) 以及配置为请求 `WWW-Authenticate` 质询（如 `openshift-challenging-client`）的 client_id 以请求 OAuth 令牌时，可能来自 `/oauth/authorize` 的服务器响应及它们的处理方式如下方所列：
+
+[cols="2a,8a,8a",options="header"]
+|===
+|状态 | 内容                                                                                                                                          | 客户端响应
+|302    | `Location` 标头包含 URL 片段中的 `access_token` 参数（RFC 6749 4.2.2 部分） | 使用 `access_token` 值作为 OAuth 令牌。
+|302    | `Location` 标头包含 error 查询参数（RFC 6749 4.1.2.1 部分）                  | 失败，或向用户显示 `error`（使用可选的 `error_description`）查询值
+|302    | 其他 `Location` 标头                                                                                                                        | 接续重定向操作，并使用这些规则处理结果
+|401    | `WWW-Authenticate` 标头存在                                                                                                              | 在识别了类型时（如 `Basic` 和`Negotiate` 等）响应质询，重新提交请求，再使用这些规则处理结果。
+|401    | 没有 `WWW-Authenticate` 标头                                                                                                            | 无法进行质询身份验证。失败，并显示响应正文（可能包含用于获取 OAuth 令牌的链接或备用方法详情）。
+|其他  | 其他                                                                                                                                            | 失败，或可向用户显示响应正文。
+|===

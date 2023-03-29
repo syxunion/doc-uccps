@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * authentication/removing-kubeadmin.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+[id="understanding-kubeadmin_{context}"]
+= kubeadmin 用户
+
+统信容器云管理平台 在安装过程完成后会创建一个集群管理员 kubeadmin。
+
+此用户自动具有 `cluster-admin` 角色，并视为集群的 root 用户。其密码是动态生成的，对统信容器云管理平台环境中是唯一的。安装完成后，安装程序的输出中会包括这个密码。例如：
+
+[source,terminal]
+----
+INFO Install complete!
+INFO Run 'export KUBECONFIG=<your working directory>/auth/kubeconfig' to manage the cluster with 'oc', the OpenShift CLI.
+INFO The cluster is ready when 'oc login -u kubeadmin -p <provided>' succeeds (wait a few minutes).
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.demo1.openshift4-beta-abcorp.com
+INFO Login to the console with user: kubeadmin, password: <provided>
+----

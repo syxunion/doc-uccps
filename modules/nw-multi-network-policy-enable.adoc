@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-multi-network-policy.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multi-network-policy-enable_{context}"]
+= 为集群启用多网络策略
+
+作为集群管理员，您可以在集群中启用多网络策略支持。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+
+.流程
+
+. 使用以下 YAML 创建 `multinetwork-enable-patch.yaml` 文件：
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  useMultiNetworkPolicy: true
+----
+
+. 使用以下 YAML 创建 `multinetwork-enable-patch.yaml` 文件：
++
+[source,terminal]
+----
+$ oc patch network.operator.openshift.io cluster --type=merge --patch-file=multinetwork-enable-patch.yaml
+----
++
+.输出示例
+[source,text]
+----
+network.operator.openshift.io/cluster patched
+----

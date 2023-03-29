@@ -1,0 +1,31 @@
+////
+This module included in the following assemblies:
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+:_content-type: CONCEPT
+[id="ossm-validating-sidecar_{context}"]
+= Validating sidecar injection
+
+Kiali 控制台提供了多种方式来验证应用程序、服务和工作负载是否有 sidecar 代理。
+
+.缺少 sidecar badge
+image::ossm-node-badge-missing-sidecar.svg[缺少 sidecar badge]
+
+*Graph* 页面显示一个节点徽标，它显示了以下图形中的 *Missing Sidecar*：
+
+* 应用程序图
+* 版本的应用程序图
+* 工作负载图
+
+.缺少 sidecar 图标
+image::ossm-icon-missing-sidecar.png[缺少 sidecar 图标]
+
+*Applications* 页面在没有 sidecar 的命名空间中任何应用程序的 *Details* 列中显示一个 *Missing Sidecar* 图标。
+
+*Workloads* 页面中为没有 sidecar 的任何应用程序的 *Details* 列中显示一个 *Missing Sidecar* 图标。
+
+*Services* 页面在没有 sidecar 的命名空间中任何应用程序的 *Details* 列中显示一个 *Missing Sidecar* 图标。当服务有多个版本时，您可以使用 *Service Details* 页面查看 *Missing Sidecar* 图标。
+
+*Workload Details*  页面有一个特殊的统一  *Logs* 选项卡，可让您查看和关联应用程序和代理日志。您可以将 Envoy 日志视为验证应用程序工作负载的 sidecar 注入的另一种方式是查看。
+
+*Workload Details* 页面还具有作为 *Envoy* 代理或被注入 Envoy 代理的任何工作负载的 Envoy 标签页。此选项卡显示内置的 Envoy 仪表板，其中包含 *Clusters*, *Listeners*, *Routes*, *Bootstrap*, *Config*, 和 *Metrics* 的子选项卡。

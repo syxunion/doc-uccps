@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/about-ipsec-ovn.adoc
+
+[id="nw-ovn-ipsec-certificates_{context}"]
+= 安全证书生成和轮转
+
+Cluster Network Operator（CNO）生成自签名 X.509 证书颁发机构（CA），该颁发机构（CA）用于加密。来自每个节点的证书签名请求（CSR）由 CNO 自动实现。
+
+CA 的有效期为 10 年。独立节点证书的有效期为 5 年，并在 4 年半后自动轮转。

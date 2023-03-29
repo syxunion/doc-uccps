@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+[id="pruning-basic-operations_{context}"]
+= 基本修剪操作
+
+CLI 将修剪操作分组到一个通用的父命令下：
+
+[source,terminal]
+----
+$ oc adm prune <object_type> <options>
+----
+
+这将指定：
+
+- 要对其执行操作的 `<object_type>`，如 `groups`、`builds`、`deployments` 或 `images`。
+- 修剪该对象类型所支持的 `<options>`。

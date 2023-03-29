@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="assigning-egress-ips-ovn"]
+= 分配出口 IP 地址
+include::_attributes/common-attributes.adoc[]
+:context: assigning-egress-ips-ovn
+
+toc::[]
+
+作为集群管理员，您可以为从一个命名空间中，或从一个命名空间内的特定 pod 中离开集群的网络流量分配一个出口 IP 地址。
+
+include::modules/nw-egress-ips-assign.adoc[leveloffset=+1]

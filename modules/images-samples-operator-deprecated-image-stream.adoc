@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/configuring-samples-operator.adoc
+
+
+:_content-type: PROCEDURE
+[id="images-samples-operator-deprecated-image-stream_{context}"]
+= 从 Cluster Samples Operator 中删除已弃用的镜像流标签
+
+Cluster Samples Operator 在镜像流中保留已弃用的镜像流标签，因为用户可能有使用已弃用的镜像流标签的部署。
+
+您可以使用 oc tag 命令编辑镜像流标签，从而删除已弃用的镜像流标签。
+
+[注意]
+====
+弃用的镜像流标签，示例供应商从镜像流中删除的标签不包括在初始安装中。
+====
+
+.先决条件
+
+* 已安装 `oc` CLI.
+
+.流程
+
+* 使用 oc tag 命令编辑镜像流标签，从而删除已弃用的镜像流标签。
++
+[source,terminal]
+----
+$ oc tag -d <image_stream_name:tag>
+----
++
+.输出示例
+[source,terminal]
+----
+Deleted tag default/<image_stream_name:tag>.
+----
+
+//Similar procedure in images-imagestreams-remove-tag.adoc

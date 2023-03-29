@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * nodes/cluster/nodes-cluster-enabling-features.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-enabling-features-cli_{context}"]
+= 使用 CLI 启用功能集
+
+您可以通过编辑 `FeatureGate` 自定义资源（CR）来使用 Uccps CLI（oc）为集群中的所有节点启用功能集。
+
+.先决条件
+
+* 已安装 Uccps CLI（oc）。
+
+.流程
+
+启用功能集：
+
+. 编辑名为 `cluster` 的 `FeatureGate` CR:
++
+[source,terminal]
+----
+$ oc edit featuregate cluster
+----
++
+.FeatureGate 自定义资源示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: FeatureGate
+metadata:
+  name: cluster <1>
+spec:
+  featureSet: TechPreviewNoUpgrade <2>
+----
++
+--
+<1> `FeatureGate` CR 的名称必须是 `cluster`。
+<2> 添加您要启用的功能集：
+* `TechPreviewNoUpgrade` 启用了特定的技术预览功能。
+--
++
+保存更改后，创建新的机器配置，机器配置池会更新，并在应用更改时在每个节点上调度。
+
+.验证
+
+include::snippets/nodes-cluster-enabling-features-verification.adoc[]

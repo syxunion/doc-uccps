@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/configuring-additional-network.adoc
+
+[id="nw-multus-bridge-object_{context}"]
+= 配置桥接额外网络
+
+以下对象描述了 bridge CNI 插件的配置参数：
+
+.Bridge CNI 插件 JSON 配置对象
+[cols=".^2,.^2,.^6",options="header"]
+|====
+|字段|类型|描述
+
+|`cniVersion`
+|`字符串`
+|CNI 规格版本。需要 `0.3.1` 值。
+
+|`name`
+|`字符串`
+|您之前为 CNO 配置提供的 `name` 参数的值。
+
+|`type`
+|`字符串`
+|
+
+|`bridge`
+|`字符串`
+|指定要使用的虚拟网桥名称。如果主机上不存在网桥接口，则进行创建。默认值为 `cni0`。
+
+|`ipam`
+|`object`
+|IPAM CNI 插件的配置对象。该插件管理网络附加定义的 IP 地址分配。
+
+|`ipMasq`
+|`布尔值`
+|设置为 `true`，从而为离开虚拟网络的流量启用 IP 伪装。所有流量的源 IP 地址都会改写为网桥 IP 地址。如果网桥没有 IP 地址，此设置无效。默认值为 `false`。
+
+|`isGateway`
+|`布尔值`
+|设置为 `true`，从而为网桥分配 IP 地址。默认值为 `false`。
+
+|`isDefaultGateway`
+|`布尔值`
+|设置为 `true`，从而将网桥配置为虚拟网络的默认网关。默认值为 `false`。如果 `isDefaultGateway` 设置为 `true`，则 `isGateway` 也会自动设置为 `true`。
+
+|`forceAddress`
+|`布尔值`
+|设置为 `true`，从而允许将之前分配的 IP 地址分配给虚拟网桥。设置为 `false` 时，如果将来自于重叠子集的 IPv4 地址或者 IPv6 地址分配给虚拟网桥，则会发生错误。默认值为 `false`。
+
+|`hairpinMode`
+|`布尔值`
+|设置为 `true`，以允许虚拟网桥通过收到它的虚拟端口将其重新发送回去。这个模式也被称为反射中继。默认值为 `false`。
+
+|`promiscMode`
+|`布尔值`
+|设置为 `true`，从而在网桥上启用混杂模式。默认值为 `false`。
+
+|`vlan`
+|`字符串`
+|以整数值形式指定虚拟 LAN (VLAN) 标签。默认情况下不分配 VLAN 标签。
+
+|`mtu`
+|`字符串`
+|将最大传输单位 (MTU) 设置为指定的值。默认值由内核自动设置。
+
+|====
+
+[id="nw-multus-bridge-config-example_{context}"]
+== 网桥配置示例
+
+以下示例配置了名为 `bridge-net` 的额外网络：
+
+[source,json]
+----
+{
+  "cniVersion": "0.3.1",
+  "name": "work-network",
+  "type": "bridge",
+  "isGateway": true,
+  "vlan": 2,
+  "ipam": {
+    "type": "dhcp"
+    }
+}
+----

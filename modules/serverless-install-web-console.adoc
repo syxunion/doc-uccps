@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * /serverless/install/install-serverless-operator.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-install-web-console_{context}"]
+= 通过 Web 控制台安装  {ServerlessOperatorName}
+
+您可以使用 {product-title} web 控制台从 OperatorHub 安装 {ServerlessOperatorName} 。安装此 Operator 可让您安装和使用 Knative 组件。
+
+.先决条件
+
+ifdef::openshift-enterprise[]
+* 您可以访问具有集群管理员权限的  {product-title} 帐户。
+endif::[]
+
+* 已登陆到 {product-title} web 控制台。
+
+.流程
+
+. 在 {product-title} 控制台中进入到  *Operators* -> *OperatorHub* 页。
+
+. 滚动页面，或在 *Filter by keyword* 框中输入关键字  *Serverless*  来查找 {ServerlessOperatorName}。
+
+. 查看 Operator 信息并单击 *安装*。
+
+. 在 *安装 Operator* 页面：
+
+.. *Installation Mode* 是 *All namespaces on the cluster (default)*。此模式将 Operator 安装至默认 `openshift-serverless` 命名空间，以便供集群中的所有命名空间监视和使用。
+
+.. *安装的命名空间* 是 `openshift-serverless`.
+
+.. 选择 *stable* 频道作为 *更新频道*。　*stable* 频道将启用 {ServerlessOperatorName} 最新稳定版本的安装。
+
+.. 选择  *Automatic* 或 *Manual* 批准策略。
+
+. 点  *安装* 使 Operator 可供 {product-title}  集群上的所选命名空间使用。
+
+. 在  *Catalog* -> *Operator 管理* 页面中，您可以监控  {ServerlessOperatorName} 订阅的安装和升级进度。
+
+.. 如果选择了 *Manual* 批准策略，订阅的升级状态将会一直保持在  *Upgrading* 直到您审阅并批准了它的安装计划。在 *Install Plan* 页面批准后，订阅的升级状态将变为  *Up to date* 。
+
+.. 如果选择了 *Automatic* 批准策略，升级状态会在不用人工参与的情况下变为 *Up to date* 。
+
+.验证
+
+当订阅的升级状态变为 *Up to date* 后，选择 *Catalog* -> *安装的 Operators* 来验证 {ServerlessOperatorName}  最终出现，它的 *Status* 在相关的命名空间中最终会变为 *InstallSucceeded*。
+
+如果没有：
+
+. 切换到  *Catalog* -> *Operator Management* 页，检查 *Operator Subscriptions* 和 *Install Plans* 页中的 *Status* 是否有错误。
+
+. 检查 *工作负载* -> *Pods* 页中提供的关于 `openshift-serverless` 项目中的 pod 的日志信息，以便进一步排除故障。

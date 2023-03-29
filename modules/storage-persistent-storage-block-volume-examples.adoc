@@ -1,0 +1,136 @@
+// Module included in the following assemblies:
+//
+// * storage/understanding-persistent-storage.adoc
+//
+// This module should only be present in openshift-enterprise and
+// openshift-origin distributions.
+
+[id="block-volume-examples_{context}"]
+= 块卷示例
+
+.PV 示例
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: block-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Block <1>
+  persistentVolumeReclaimPolicy: Retain
+  fc:
+    targetWWNs: ["50060e801049cfd1"]
+    lun: 0
+    readOnly: false
+----
+<1> `volumeMode` 需要把设置为 `Block` 来代表这个 PV 是一个原始块卷。
+
+.PVC 示例
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: block-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Block <1>
+  resources:
+    requests:
+      storage: 10Gi
+----
+<1> `volumeMode` 需要把 `volumeMode` 设置为 Block 来代表请求一个原始块 PVC。
+
+.`Pod` 规格示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-block-volume
+spec:
+  containers:
+    - name: fc-container
+      image: fedora:26
+      command: ["/bin/sh", "-c"]
+      args: [ "tail -f /dev/null" ]
+      volumeDevices:  <1>
+        - name: data
+          devicePath: /dev/xvda <2>
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: block-pvc <3>
+----
+<1> 对于块设备，使用 `VolumeDevices` 而不是 `volumeMounts`。只有 `persistentVolumeClaim` 源可以和原始块卷一起使用。
+<2> 使用 `devicePath` 而不是 `mountPath` 来代表到原始块映射到系统的物理设备的路径。
+<3> 卷源必须是 `persistentVolumeClaim` 类型，且必须与期望的 PVC 的名称匹配。
+
+.`volumeMode` 接受的值
+[cols="1,2",options="header"]
+|===
+
+|值
+|默认
+
+|Filesystem
+|是
+
+|Block
+|否
+|===
+
+.块卷的绑定方案
+[cols="1,2,3",options="header"]
+|===
+
+|PV `volumeMode`
+|PVC `volumeMode`
+|绑定结果
+
+|Filesystem
+|Filesystem
+|绑定
+
+|Unspecified
+|Unspecified
+|绑定
+
+|Filesystem
+|Unspecified
+|绑定
+
+|Unspecified
+|Filesystem
+|绑定
+
+|Block
+|Block
+|绑定
+
+|Unspecified
+|Block
+|无绑定
+
+|Block
+|Unspecified
+|无绑定
+
+|Filesystem
+|Block
+|无绑定
+
+|Block
+|Filesystem
+|无绑定
+|===
+
+[重要]
+====
+未指定值时将使用默认值 `Filesystem`。
+====

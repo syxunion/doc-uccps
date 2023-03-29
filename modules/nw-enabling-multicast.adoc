@@ -1,0 +1,159 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/enabling-multicast.adoc
+// * networking/ovn_kubernetes_network_provider/enabling-multicast.adoc
+
+ifeval::["{context}" == "openshift-sdn-enabling-multicast"]
+:namespace: netnamespace
+:annotation: netnamespace.network.openshift.io/multicast-enabled=true
+endif::[]
+ifeval::["{context}" == "ovn-kubernetes-enabling-multicast"]
+:namespace: namespace
+:annotation: k8s.ovn.org/multicast-enabled=true
+endif::[]
+
+:_content-type: PROCEDURE
+[id="nw-enabling-multicast_{context}"]
+= 启用 pod 间多播
+
+您可以为项目启用 pod 间多播。
+
+.先决条件
+* 安装 Uccp CLI (`oc`).
+* 您必须作为 `cluster-admin` 角色用户登录集群。
+
+.流程
+
+* 运行以下命令，为项目启用多播。使用您要启用多播的项目的名称替换 `<namespace>`。
++
+[source,terminal,subs="attributes+"]
+----
+$ oc annotate {namespace} <namespace> \
+    {annotation}
+----
+ifeval::["{context}" == "ovn-kubernetes-enabling-multicast"]
++
+[TIP]
+====
+You can alternatively apply the following YAML to add the annotation:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <namespace>
+  annotations:
+    k8s.ovn.org/multicast-enabled: "true"
+----
+====
+endif::[]
+
+.验证
+
+要验证项目是否启用了多播，请完成以下步骤：
+
+. 将您的当前项目更改为启用多播的项目。使用项目名替换 `<project>`。
++
+[source,terminal]
+----
+$ oc project <project>
+----
+
+. 创建 pod 以作为多播接收器：
++
+[source,terminal]
+----
+$ cat <<EOF| oc create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlistener
+  labels:
+    app: multicast-verify
+spec:
+  containers:
+    - name: mlistener
+      image: registry.access.redhat.com/ubi8
+      command: ["/bin/sh", "-c"]
+      args:
+        ["dnf -y install socat hostname && sleep inf"]
+      ports:
+        - containerPort: 30102
+          name: mlistener
+          protocol: UDP
+EOF
+----
+
+. 创建 pod 以作为多播发送器：
++
+[source,terminal]
+----
+$ cat <<EOF| oc create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: msender
+  labels:
+    app: multicast-verify
+spec:
+  containers:
+    - name: msender
+      image: registry.access.redhat.com/ubi8
+      command: ["/bin/sh", "-c"]
+      args:
+        ["dnf -y install socat && sleep inf"]
+EOF
+----
+
+. 在新的终端窗口或选项卡中，启动多播监听程序。
+
+.. 获得 Pod 的 IP 地址：
++
+[source,terminal]
+----
+$ POD_IP=$(oc get pods mlistener -o jsonpath='{.status.podIP}')
+----
+
+.. 输入以下命令启动多播监听程序：
++
+[source,terminal]
+----
+$ oc exec mlistener -i -t -- \
+    socat UDP4-RECVFROM:30102,ip-add-membership=224.1.0.1:$POD_IP,fork EXEC:hostname
+----
+
+. 启动多播传输。
+
+.. 获取 pod 网络 IP 地址范围：
++
+[source,terminal]
+----
+$ CIDR=$(oc get Network.config.openshift.io cluster \
+    -o jsonpath='{.status.clusterNetwork[0].cidr}')
+----
+
+.. 要发送多播信息，请输入以下命令：
++
+[source,terminal]
+----
+$ oc exec msender -i -t -- \
+    /bin/bash -c "echo | socat STDIO UDP4-DATAGRAM:224.1.0.1:30102,range=$CIDR,ip-multicast-ttl=64"
+----
++
+如果多播正在工作，则上一个命令会返回以下输出：
+mlistener
++
+[source,text]
+----
+mlistener
+----
+
+ifeval::["{context}" == "openshift-sdn-enabling-multicast"]
+:!annotation:
+:!namespace:
+endif::[]
+ifeval::["{context}" == "ovn-kubernetes-enabling-multicast"]
+:!annotation:
+:!namespace:
+endif::[]

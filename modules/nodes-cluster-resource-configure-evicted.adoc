@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-configure.adoc
+
+:_content-type: CONCEPT
+[id="nodes-cluster-resource-configure-evicted_{context}"]
+= 了解 pod 驱除
+
+统信容器云管理平台 可在节点内存耗尽时从节点上驱除 pod。根据内存耗尽的程度，驱除可能是安全操作，但也不一定。安全驱除表示，各个容器的主进程 (PID 1) 收到 SIGTERM 信号，稍等片刻后，如果进程还未退出，则会收到一个 SIGKILL 信号。非安全驱除暗示着各个容器的主进程会立即收到 SIGKILL 信号。
+
+被驱除的 pod 具有 *Failed* 阶段，原因为 *Evicted* 。无论 `restartPolicy` 的值是什么，该 pod 都不会重启。但是，复制控制器等控制器会看到 pod 的失败状态，并且创建一个新 pod 来取代旧 pod。
+
+[source,terminal]
+----
+$ oc get pod test
+----
+
+.输出示例
+[source,terminal]
+----
+NAME      READY     STATUS    RESTARTS   AGE
+test      0/1       Evicted   0          1m
+----
+
+[source,terminal]
+----
+$ oc get pod test -o yaml
+----
+
+.输出示例
+[source,terminal]
+----
+...
+status:
+  message: 'Pod The node was low on resource: [MemoryPressure].'
+  phase: Failed
+  reason: Evicted
+----

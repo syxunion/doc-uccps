@@ -1,0 +1,89 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-cloning.adoc
+
+:_content-type: PROCEDURE
+[id="persistent-storage-csi-cloning-provisioning_{context}"]
+= 置备 CSI 卷克隆
+
+创建一个克隆的持久性卷声明 (PVC) API 对象时，会触发一个 CSI 卷克隆的置备。克隆会预先获得另一个 PVC 的内容，遵循与任何其他持久性卷相同的规则。其中一个例外是，您必须添加一个指代到同一命名空间中现有 PVC 的 dataSource。
+
+.先决条件
+* 登陆到一个正在运行的统信容器云管理平台集群。
+* 使用支持卷克隆的 CSI 驱动程序创建的 PVC。
+* 为动态置备配置了存储后端。静态置备程序不支持克隆。
+
+.流程
+
+从现有 PVC 克隆 PVC：
+
+. 使用以下 YAML 描述的 `PersistentVolumeClaim` 对象创建并保存一个文件：
+
++
+.pvc-clone.yaml
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-1-clone
+  namespace: mynamespace
+spec:
+  storageClassName: csi-cloning <1>
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  dataSource:
+    kind: PersistentVolumeClaim
+    name: pvc-1
+----
++
+<1> 置备存储后端的存储类的名称。可以使用默认存储类，`storageClassName` 在 spec 中可以忽略 。
++
+. 运行以下命令，创建上一步中保存的对象：
++
+[source,terminal]
+----
+$ oc create -f pvc-clone.yaml
+----
++
+一个新的 PVC `pvc-1-clone` 被创建 。
+
+. 运行以下命令验证卷克隆是否已创建并就绪：
++
+[source,terminal]
+----
+$ oc get pvc pvc-1-clone
+----
++
+`pvc-1-clone` 显示的状态为 `Bound`。
++
+现在，您已准备好使用新克隆的 PVC 来配置 pod。
+
+. 使用 YAML 描述的 Pod 对象创建并保存文件。例如：
++
+
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: dockerfile/nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: pvc-1-clone <1>
+----
++
+<1> 在 CSI 卷克隆操作中创建的克隆 PVC。
++
+创建的 `Pod` 对象现在可以使用、克隆、快照或删除独立于它的原始 `dataSource` 的克隆 PVC。

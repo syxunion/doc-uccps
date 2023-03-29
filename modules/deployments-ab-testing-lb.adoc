@@ -1,0 +1,260 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/route-based-deployment-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-ab-testing-lb_{context}"]
+= A/B 测试负载均衡
+
+用户使用多个服务设置路由。每个服务负责应用程序的一个版本。
+
+每个服务分配到一个 weight，进入每个服务的请求的比例等于 `service_weight` 除以 `sum_of_weights`。每个服务的 `weight` 分布到该服务的端点，使得端点 weight 的总和等于服务 weight。
+
+路由最多可有四个服务。服务的 `weight` 可以在 `0` 到 `256` 范围内。当 `weight` 等于 `0` 时，服务不参与负载均衡，但继续为现有的持久连接服务。当服务 `weight` 不为 `0` 时，每个端点的最小 `weight` 为 `1`。因此，具有大量端点的服务会得到高于预期值的 `weight`。在本例中，减少 pod 数量以获得预期的负载均衡 `weigh`t。
+
+
+.流程
+
+设置 A/B 环境：
+
+. 创建两个应用程序并使用不同的名称。它们各自创建一个 `Deployment` 对象。应用程序是同一程序的不同版本；一个是当前生产版本，另一个是提议的新版本。
+.. 创建第一个应用程序。以下示例创建了一个名为 `ab-example-a` 的应用程序：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example --name=ab-example-a
+----
++
+.. 创建第二个应用程序：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example:v2 --name=ab-example-b
+----
++
+两个应用程序都已部署，也创建了服务。
+
+. 通过路由对外提供应用程序。此时您可以公开其中任一个。先公开当前生产版本，稍后修改路由来添加新版本，这可能比较方便。
++
+[source,terminal]
+----
+$ oc expose svc/ab-example-a
+----
++
+在 `ab-example-a.<project>.apps.<cluster_name>.<router_domain>` 查看应用程序，以确保可以看到预期的版本。
+
+. 当您部署路由时，路由器会根据为服务指定的 weight 来均衡流量。此时，存在具有默认 `weight=1` 的单一服务，因此所有请求都会进入该服务。添加其他服务作为 `alternateBackend` 并调整 weight，即可激活 A/B 设置。这可通过 `oc set route-backends` 命令或编辑路由来完成。
++
+如果将 `oc set route-backend` 设为 `0`，则服务不参与负载均衡，但继续为现有的持久连接服务。
++
+[注意]
+====
+对路由的更改只会改变流量进入各个服务的比例。您可能需要扩展部署来调整 pod 数量，以处理预期的负载。
+====
++
+若要编辑路由，请运行：
++
+[source,terminal]
+----
+$ oc edit route <route_name>
+----
++
+.输出示例
+[source,terminal]
+----
+...
+metadata:
+  name: route-alternate-service
+  annotations:
+    haproxy.router.openshift.io/balance: roundrobin
+spec:
+  host: ab-example.my-project.my-domain
+  to:
+    kind: Service
+    name: ab-example-a
+    weight: 10
+  alternateBackends:
+  - kind: Service
+    name: ab-example-b
+    weight: 15
+...
+----
+
+[id="deployments-ab-testing-lb-web_{context}"]
+== 使用 Web 控制台管理现有路由的权重
+
+.流程
+
+. 导航到 *网络* -> *路由* 页面。
+
+. 点击您要编辑的路由旁的 操作 菜单 {kebab} ，然后选择 *编辑路由*。
+
+. 编辑 YAML 文件。把 *weight* 更新为 *0* 到 *256* 之间的一个整数，用于指定目标相对于其他目标引用对象的相对权重。值 *0* 会把请求限制到这个后端。默认值为 *100*。运行 *oc explain routes.spec.alternateBackends* 以了解有关选项的更多信息。
+
+. 点 *保存*.
+
+[id="deployments-ab-testing-lb-web-new-route_{context}"]
+== 使用 Web 控制台管理新路由的权重
+
+. 进入到 *网络* -> *路由* page.
+
+. 点击 *创建路由*。
+
+. 输入路由 *名称*。
+
+. 选择 *服务*。
+
+. 点 *添加备用服务*。
+
+. 为 *权重* 和 *替换服务权重* 输入一个值。输入一个 *0* 到 *255* 之间的数字，它显示了与其他目标相比的相对权重。默认值为 *100*。
+
+. 选择 *目标端口*。
+
+. 点击 *创建*。
+
+[id="deployments-ab-testing-lb-cli_{context}"]
+== 使用 CLI 管理权重
+
+.流程
+
+. 要管理由路由均衡负载的服务以及对应的权重，请使用 `oc set route-backends` 命令：
++
+[source,terminal]
+----
+$ oc set route-backends ROUTENAME \
+    [--zero|--equal] [--adjust] SERVICE=WEIGHT[%] [...] [options]
+----
++
+例如，以下命令将 `ab-example-a` 设为主服务 ( `weight=198`) 并将 `ab-example-b` 设为第一替代服务 (`weight=2`)：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example ab-example-a=198 ab-example-b=2
+----
++
+这意味着 99% 的流量发送到服务 `ab-example-a`，1％ 发送到 `ab-example-b`。
++
+此命令不扩展部署。您可能需要进行此操作，才能有足够的 pod 来处理请求负载。
+
+. 不带标志运行命令来验证当前配置：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                    KIND     TO           WEIGHT
+routes/ab-example       Service  ab-example-a 198 (99%)
+routes/ab-example       Service  ab-example-b 2   (1%)
+----
+
+. 要改变个别服务相对于自身或主服务的权重，请使用 `--adjust` 标志。指定百分比来调整服务相对于主服务或第一替代服务（如果指定了主服务）的权重。如果还有其他后端，它们的权重会与更改后的值保持比例。
++
+以下示例会更改 `ab-example-a` 和 `ab-example-b` 服务的权重：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example --adjust ab-example-a=200 ab-example-b=10
+----
++
+或者，通过指定百分比来改变服务的权重：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example --adjust ab-example-b=5%
+----
++
+通过在百分比声明前指定 +，您可以调整相对于当前设置的权重。例如：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example --adjust ab-example-b=+15%
+----
++
+`--equal` 标志将所有服务的 `weight` 设为 `100`：
++
+[source,terminal]
+----
+$ oc set route-backends ab-example --equal
+----
++
+`--zero` 标志将所有服务的 `weight` 设为 `0`。之后，所有请求都会返回 `503` 错误。
++
+[注意]
+====
+并非所有路由器都支持多个后端或加权后端。
+====
+
+[id="deployments-ab-one-service-multi-dc_{context}"]
+== 一个服务，多个部署
+
+.流程
+
+. 创建一个新应用程序，添加对所有分片都通用的 `ab-example=true` 标签：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example --name=ab-example-a --as-deployment-config=true --labels=ab-example=true --env=SUBTITLE\=shardA
+$ oc delete svc/ab-example-a
+----
++
+应用程序完成部署，并创建了服务。这是第一个分片。
+
+. 通过路由提供应用程序，或者直接使用服务 IP:
++
+[source,terminal]
+----
+$ oc expose deployment ab-example-a --name=ab-example --selector=ab-example\=true
+$ oc expose service ab-example
+----
+
+. 通过 `ab-example-<project_name>.apps.<cluster_name>.<router_domain>` 访问应用程序，验证您能否看到 `v1` 镜像。
+
+. 创建第二个分片，它基于与第一分片相同的源镜像和标签，但使用不同的标记版本和独特的环境变量：
++
+[source,terminal]
+----
+$ oc new-app openshift/deployment-example:v2 \
+    --name=ab-example-b --labels=ab-example=true \
+    SUBTITLE="shard B" COLOR="red" --as-deployment-config=true
+$ oc delete svc/ab-example-b
+----
+
+. 在这一刻，路由下同时提供了两组 pod。但是，由于两个浏览器（通过使连接保持打开）和路由器（默认借助 Cookie）都试图保留后端服务器的连接，您可能不会看到两个分片都返回给您。
++
+使浏览器强制到其中一个分片：
+
+.. 使用 `oc scale` 命令将 `ab-example-a` 的副本数减少到 `0`。
++
+[source,terminal]
+----
+$ oc scale dc/ab-example-a --replicas=0
+----
++
+刷新浏览器以显示 `v2` 和 `shard B`（绿色）。
+
+.. 将 `ab-example-a` 扩展为 `1` 个副本，`ab-example-b` 调到 `0`：
++
+[source,terminal]
+----
+$ oc scale dc/ab-example-a --replicas=1; oc scale dc/ab-example-b --replicas=0
+----
++
+刷新浏览器以显示 `v1` 和 `shard A`（蓝色）。
+
+. 如果您对其中任一分片触发部署，那么只有该分片中的 pod 会受到影响。您可以通过在任一 `Deployment` 对象中更改 `SUBTITLE` 环境变量来触发部署：
++
+[source,terminal]
+----
+$ oc edit dc/ab-example-a
+----
++
+or
++
+[source,terminal]
+----
+$ oc edit dc/ab-example-b
+----

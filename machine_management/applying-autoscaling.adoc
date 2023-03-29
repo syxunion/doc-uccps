@@ -1,0 +1,64 @@
+:_content-type: ASSEMBLY
+[id="applying-autoscaling"]
+= 将自动扩展应用到 统信容器云管理平台 集群
+include::_attributes/common-attributes.adoc[]
+:context: applying-autoscaling
+
+toc::[]
+
+将自动扩展应用到 统信容器云管理平台 集群涉及部署集群自动扩展，然后为集群中的每种 Machine 类型部署机器自动扩展。
+
+[重要]
+====
+您只能在机器 API 正常工作的集群中配置集群自动扩展。
+====
+
+include::modules/cluster-autoscaler-about.adoc[leveloffset=+1]
+
+[id="configuring-clusterautoscaler"]
+== 配置集群自动扩展
+
+首先，部署集群自动扩展来管理 统信容器云管理平台 集群中的资源自动扩展。
+
+[注意]
+====
+由于集群自动扩展的范围仅限于整个集群，因此只能为集群创建一个集群自动扩展。
+====
+
+include::modules/cluster-autoscaler-cr.adoc[leveloffset=+2]
+
+:FeatureName: 自动扩展
+:FeatureResourceName: 自动扩展
+include::modules/deploying-resource.adoc[leveloffset=+2]
+
+== 后续步骤
+
+* 配置集群自动扩展后，必须至少配置一台机器自动扩展。
+
+include::modules/machine-autoscaler-about.adoc[leveloffset=+1]
+
+[id="configuring-machineautoscaler"]
+== 配置机器自动扩展
+
+部署集群自动扩展后，部署 `MachineAutoscaler` 资源来引用用于扩展集群的机器集。
+
+[重要]
+====
+部署 `ClusterAutoscaler` 资源后，必须至少部署一个 `MachineAutoscaler` 资源。
+====
+
+[注意]
+====
+您必须为每个机器集配置单独的资源。请记住，每个地区中的机器集都不同，因此请考虑是否要在多个地区中启用机器扩展。扩展的机器集必须至少有一台机器。
+====
+
+include::modules/machine-autoscaler-cr.adoc[leveloffset=+2]
+
+:FeatureName: 机器自动扩展
+:FeatureResourceName: MachineAutoscaler
+include::modules/deploying-resource.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+== 其他资源
+
+* 如需有关 Pod 优先级的更多信息，请参阅 xref:../nodes/pods/nodes-pods-priority.adoc#nodes-pods-priority[在 统信容器云管理平台 的 Pod 调度决策中纳入 Pod 优先级].

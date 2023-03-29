@@ -1,0 +1,82 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+// * service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-automatic-sidecar-injection_{context}"]
+= Enabling automatic sidecar injection
+
+在部署应用程序时，您必须通过将 `spec.template.metadata.annotations` 中的注解 `sidecar.istio.io/inject` 配置为 `true` 来选择注入。选择确保 sidecar 注入不会影响 {product-title} 的其他功能，如 统信容器云管理平台生态系统中的多个框架使用的 builder pod。
+
+.先决条件
+
+* 识别作为服务网格一部分的命名空间，以及需要自动 sidecar 注入的部署。
+
+.流程
+
+. 要查找部署，请使用 `oc get` 命令。
++
+[source,terminal]
+----
+$ oc get deployment -n <namespace>
+----
++
+例如，若要查看 `bookinfo` 命名空间中  'ratings-v1' 微服务的部署文件，请使用以下命令以 YAML 格式查看资源。
++
+[source,terminal]
+----
+oc get deployment -n bookinfo ratings-v1 -o yaml
+----
++
+. 在编辑器中打开应用程序的部署配置 YAML 文件。
+
+. 将 `spec.template.metadata.annotations.sidecar.istio/inject` 添加到 Deployment YAML 中，并将 `sidecar.istio.io/inject` 设置为 `true` ，如下例所示。
++
+.Example snippet from bookinfo deployment-ratings-v1.yaml
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings-v1
+  namespace: bookinfo
+  labels:
+    app: ratings
+    version: v1
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: 'true'
+----
++
+. 保存部署配置文件。
+
+. 将文件添加回包含应用程序的项目。
++
+[source,terminal]
+----
+$ oc apply -n <namespace> -f deployment.yaml
+----
++
+在本例中， `bookinfo` 是包含 `ratings-v1` 应用程序和  `deployment-ratings-v1.yaml` 的项目的名称，这是您编辑的文件。
++
+[source,terminal]
+----
+$ oc apply -n bookinfo -f deployment-ratings-v1.yaml
+----
++
+. 若要验证资源上传成功，请运行以下命令：
++
+[source,terminal]
+----
+$ oc get deployment -n <namespace> <deploymentName> -o yaml
+----
++
+例如，
++
+[source,terminal]
+----
+$ oc get deployment -n bookinfo ratings-v1 -o yaml
+----

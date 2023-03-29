@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.aodc
+
+[id="images-container-repository-about_{context}"]
+= 镜像存储库
+
+镜像存储库是相关容器镜像和标识它们的标签（tag）的集合。例如，统信容器云管理平台 Jenkins 镜像位于以下存储库中：
+
+[source,text]
+----
+docker.io/openshift/jenkins-2-centos7
+----

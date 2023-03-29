@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: REFERENCE
+[id="serverless-https-redirect-global_{context}"]
+= HTTPS 重定向全局设置
+
+HTTPS 重定向为传入的 HTTP 请求提供重定向。这些重定向的 HTTP 请求会被加密。您可以通过为 `KnativeServing`  自定义资源 (CR) 配置 `httpProtocol` ，为集群中的所有服务启用 HTTPS 重定向。
+
+.启用 HTTPS 重定向的 `KnativeServing` CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+spec:
+  config:
+    network:
+      httpProtocol: "redirected"
+...
+----

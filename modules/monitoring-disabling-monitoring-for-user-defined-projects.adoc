@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * monitoring/enabling-monitoring-for-user-defined-projects.adoc
+
+:_content-type: PROCEDURE
+[id="disabling-monitoring-for-user-defined-projects_{context}"]
+= 为用户定义的项目禁用监控
+
+为用户定义的项目启用监控后，您可以通过在集群监控 `ConfigMap` 对象中设置 `enableUserWorkload: false` 来再次禁用它。
+
+[注意]
+====
+另外，您也可以通过删除 `enableUserWorkload: true` 来为用户定义的项目禁用监控。
+====
+
+.流程
+
+. 编辑 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
++
+.. 在 `data/config.yaml` 下将 `enableUserWorkload:` 设置为 `false` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: false
+----
+
+. 保存文件以使改变生效。然后会自动禁用对用户定义的项目的监控。
+
+. 检查 `prometheus-operator`, `prometheus-user-workload` 和 `thanos-ruler-user-workload` Pod 是否已在  `openshift-user-workload-monitoring` 项目中终止。这可能需要片刻时间：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get pod
+----
++
+.输出示例
+[source,terminal]
+----
+No resources found in openshift-user-workload-monitoring project.
+----
+
+[注意]
+====
+在禁用了对用户定义的项目的监控时 `openshift-user-workload-monitoring` 项目中的 `user-workload-monitoring-config` `ConfigMap` 对象不会被自动删除。这是为了保留您可能已在 ConfigMap 中创建的任何自定义配置。
+====

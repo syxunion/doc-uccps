@@ -1,0 +1,24 @@
+:_content-type: ASSEMBLY
+[id="creating-machineset-osp"]
+= 在 OpenStack 上创建机器集
+include::_attributes/common-attributes.adoc[]
+:context: creating-machineset-osp
+
+toc::[]
+
+您可以在 UnionTech OpenStack Platform（RHOSP）上的 统信容器云管理平台 集群中创建不同的机器集来满足特定目的。例如，您可以创建基础架构机器集和相关的机器，以便将支持型工作负载转移到新机器上。
+
+include::modules/machine-user-provisioned-limitations.adoc[leveloffset=+1]
+
+include::modules/machine-api-overview.adoc[leveloffset=+1]
+
+include::modules/machineset-yaml-osp.adoc[leveloffset=+1]
+
+include::modules/machineset-yaml-osp-sr-iov.adoc[leveloffset=+1]
+
+include::modules/machineset-yaml-osp-sr-iov-port-security.adoc[leveloffset=+1]
+
+include::modules/machineset-creating.adoc[leveloffset=+1]
+
+// Mothballed - re-add when available
+// include::modules/machineset-osp-adding-bare-metal.adoc[leveloffset=+1]

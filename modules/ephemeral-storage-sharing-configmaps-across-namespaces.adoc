@@ -1,0 +1,36 @@
+:_content-type: PROCEDURE
+
+[id="ephemeral-storage-sharing-configmaps-across-namespaces_{context}"]
+= 在命名空间间共享配置映射
+
+[role="_abstract"]
+要在集群中的命名空间间共享配置映射，您可以为该配置映射创建 `SharedConfigMap` 自定义资源(CR)实例。
+
+.先决条件
+
+您必须具有执行以下操作的权限：
+
+* 在集群范围的级别上创建 `sharedconfigmaps.sharedresource.openshift.io` 自定义资源定义(CRD)的实例。
+* 管理集群中命名空间中的角色和角色绑定，以控制哪些用户可以获取、列出和监视这些实例。
+* 管理集群中命名空间中的角色和角色绑定，以控制挂载 Container Storage Interface(CSI)卷的 pod 中的哪些服务帐户可以使用这些实例。
+* 访问包含您要共享 Secret 的命名空间。 
+
+.流程
+
+. 为您要在集群中的命名空间之间共享的配置映射创建 `SharedConfigMap` CR 实例：
++
+[source,terminal]
+----
+$ oc apply -f - <<EOF
+apiVersion: sharedresource.openshift.io/v1alpha1
+kind: SharedConfigMap
+metadata:
+  name: my-share
+spec:
+  secretRef:
+    name: <name of configmap>
+    namespace: <namespace of configmap>
+EOF
+----
+
+.后续步骤

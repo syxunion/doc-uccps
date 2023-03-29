@@ -1,0 +1,33 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-managing-max-pods"]
+= Managing the maximum number of pods per node
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-managing-max-pods
+
+toc::[]
+
+在 统信容器云管理平台 中，您可以根据节点上的处理器内核数和/或硬限制，来配置可在节点上运行的 pod 数量。如果您同时使用这两个选项，则取两者中较小的限制来限制节点上的 pod 数。
+
+超过这些值可能会导致：
+
+* 统信容器云管理平台 CPU 使用率提高。
+* pod 调度缓慢。
+* 潜在的内存不足情形，具体取决于节点中的内存量。
+* IP 地址池耗尽。
+* 资源过量使用，导致用户应用程序性能变差。
+
+[注意]
+====
+包含单个容器的一个 pod 实际上会使用两个容器。第二个容器在容器实际启动前先设置了网络。因此，运行 10 个 pod 的节点实际上运行有 20 个容器。
+====
+
+podsPerCore 参数根据节点的处理器内核数限制节点上可运行的 pod 数量。例如，如果将一个有 4 个处理器内核的节点上的 podsPerCore 设置为 10，则该节点上允许的 pod 数量上限为 40。
+
+maxPods 参数将节点上可运行的 pod 数量限制为一个固定值，不考虑节点的属性。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-managing-max-pods-proc.adoc[leveloffset=+1]

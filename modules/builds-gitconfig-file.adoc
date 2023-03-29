@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+:_content-type: PROCEDURE
+[id="builds-gitconfig-file_{context}"]
+= 从 .gitconfig 文件创建 secret
+
+如果克隆应用程序要依赖于 `.gitconfig` 文件，您可以创建包含它的 secret。将它添加到 builder 服务帐户中，再添加到您的 `BuildConfig` 。
+
+.流程
+
+* 从 `.gitconfig` 文件创建 secret：
+
+[source,terminal]
+----
+$ oc create secret generic <secret_name> --from-file=<path/to/.gitconfig>
+----
+
+[注意]
+====
+如果 `.gitconfig` 文件的 `http` 部分设置了 `sslVerify=false`，则可以关闭 iVSSL 验证：
+
+[source,text]
+----
+[http]
+        sslVerify=false
+----
+====

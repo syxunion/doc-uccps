@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * scaling_and_performance/using-topology-manager.adoc
+
+[id="pod-interactions-with-topology-manager_{context}"]
+= Pod 与拓扑管理器策略的交互
+
+以下的 `Pod` specs 示例演示了 Pod 与 Topology Manager 的交互。
+因为没有指定资源请求或限制，以下 pod 以 `BestEffort` QoS 类运行。
+
+[source,yaml]
+----
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+----
+
+因为请求小于限制，下一个 pod 以 `Burstable` QoS 类运行。
+
+[source,yaml]
+----
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        memory: "200Mi"
+      requests:
+        memory: "100Mi"
+----
+
+如果所选策略不是 `none`，则拓扑管理器将不考虑其中任何一个 `Pod` 规格。因为请求等于限制，最后一个 pod 以 Guaranteed QoS 类运行。
+
+[source,yaml]
+----
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        memory: "200Mi"
+        cpu: "2"
+        example.com/device: "1"
+      requests:
+        memory: "200Mi"
+        cpu: "2"
+        example.com/device: "1"
+----
+
+拓扑管理器将考虑这个 pod。拓扑管理器会参考 CPU Manager 的静态策略，该策略可返回可用 CPU 的拓扑结构。拓扑管理器还参考设备管理器来发现可用设备的拓扑结构，如 example.com/device。
+
+拓扑管理器将使用此信息存储该容器的最佳拓扑。在本 pod 中，CPU Manager 和设备管理器将在资源分配阶段使用此存储的信息。

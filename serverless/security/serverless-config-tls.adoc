@@ -1,0 +1,14 @@
+:_content-type: ASSEMBLY
+[id="serverless-config-tls"]
+= 配置 TLS 身份验证
+include::_attributes/common-attributes.adoc[]
+:context: serverless-config-tls
+
+toc::[]
+
+您可以使用 _传输层安全 (TLS)加密_ Knative 流量并进行身份验证。
+
+TLS 是 Knative Kafka 唯一支持的流量加密方法。建议将 SASL 和 TLS 同时用于 Knative Kafka 资源。
+
+include::modules/serverless-enabling-tls-internal-traffic.adoc[leveloffset=+1]
+include::modules/serverless-enabling-tls-local-services.adoc[leveloffset=+1]

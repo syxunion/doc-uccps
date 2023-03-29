@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="accessing-alerting-rules-for-your-project_{context}"]
+= 访问用户定义的项目的警报规则
+
+要列出用户定义的项目的警报规则，您必须已被分配该项目的  `monitoring-rules-view` 角色。
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 您已作为已被分配了项目的 `monitoring-rules-view` 角色的用户登录。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 您可以列出 `<project>`  中的警报规则：
++
+[source,terminal]
+----
+$ oc -n <project> get prometheusrule
+----
+
+. 要列出警报规则的配置，请运行以下命令：
++
+[source,terminal]
+----
+$ oc -n <project> get prometheusrule <rule> -o yaml
+----

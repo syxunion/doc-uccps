@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * web_console/dynamic-plug-ins.adoc
+
+:_content-type: PROCEDURE
+[id="getting-started-with-dynamic-plugins_{context}"]
+= 动态插件入门
+
+要开始使用动态插件，您必须设置您的环境来编写新的 Uccps 控制台动态插件。
+
+.先决条件
+* 确保安装了 Node.js。
+* 确定安装了 yarn。
+
+.流程
+
+. 访问含有用于创建插件的模板的该存储库。
+
+. 从 *<> Code* 选项卡中选择 `Use this Template` 以创建 GitHub 存储库。
+
+. 使用插件的名称替换模板。
+
+. 从您复制的仓库中，克隆它的本地机器，以便编辑代码。
+
+. 编辑 `consolePlugin` 声明中的插件元数据： `package.json`。
++
+[source,json]
+
+----
+"consolePlugin": {
+  "name": "my-plugin", <1>
+  "version": "0.0.1", <2>
+  "displayName": "My Plugin", <3>
+  "description": "Enjoy this shiny, new console plugin!", <4>
+  "exposedModules": {
+    "ExamplePage": "./components/ExamplePage"
+  },
+  "dependencies": {
+    "@console/pluginAPI": "*"
+  }
+}
+----
+<1> 更新插件的名称。
+<2> 更新版本。
+<3> 更新插件的显示名称。
+<4> 使用有关插件的概要更新描述。

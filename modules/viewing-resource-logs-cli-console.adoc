@@ -1,0 +1,78 @@
+// Module included in the following assemblies:
+//
+// * logging/viewing-resource-logs.adoc
+// * nodes/pods/nodes-pods-viewing.adoc
+
+:_content-type: PROCEDURE
+[id="viewing-resource-logs-cli-console_{context}"]
+= 查看资源日志
+
+您可以在 Uccps CLI（oc）和 Web 控制台中查看各种资源的日志。日志从日志的尾部或末尾读取。
+
+.先决条件
+
+* 访问 Uccps CLI (oc).
+
+.流程 (UI)
+
+. 在 统信容器云管理平台 控制台中，导航到  *工作负载* -> *Pods* ，或通过您要调查的资源导航到 pod。
++
+[注意]
+====
+有些资源（如构建）没有直接查询的 pod。在这种情况下，您可以在资源的 *Details*  页面中找到 *Logs* 链接。
+====
+
+. 从下拉菜单中选择一个项目。
+
+. 点您要调查的 pod 的名称。
+
+. 点 *Logs*. 
+
+.流程 (CLI)
+
+** 查看特定 pod 的日志：
++
+[source,terminal]
+----
+$ oc logs -f <pod_name> -c <container_name>
+----
++
+--
+其中：
+
+`-f`:: 可选：指定输出是否遵循要写到日志中的内容。
+`<pod_name>`:: 指定 pod 的名称。
+`<container_name>`:: 可选：指定容器的名称。当 pod 具有多个容器时，您必须指定容器名称。
+--
++
+例如：
++
+[source,terminal]
+----
+$ oc logs ruby-58cd97df55-mww7r
+----
++
+[source,terminal]
+----
+$ oc logs -f ruby-57f7f4855b-znl92 -c ruby
+----
++
+输出的日志文件内容。
+
+** 查看特定资源的日志：
++
+[source,terminal]
+----
+$ oc logs <object_type>/<resource_name> <1>
+----
+<1> 指定资源类型和名称。
++
+例如：
++
+[source,terminal]
+----
+$ oc logs deployment/ruby
+----
++
+输出的日志文件内容。
+

@@ -1,0 +1,80 @@
+// Module included in the following assemblies:
+//
+// * serverless/knative_serving/serverless-custom-domains.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-domain-mapping-odc-admin_{context}"]
+= 使用 管理员 视角将自定义域映射到服务
+
+include::snippets/serverless-domain-mapping.adoc[]
+
+如果您有集群管理员权限，您可以使用 {product-title} 控制台中的 *管理员* 视角创建 DomainMapping 自定义资源 (CR) 。 
+
+.先决条件
+
+* 已登陆到 web 控制台。
+* 您处于 *管理员* 视角。
+* 已安装 Uccps Serverless Operator。
+* 已安装 Knative Serving。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 您已创建了 Knative 服务，并控制要映射到该服务的自定义域。
++
+
+.流程
+
+. 导航到 *CustomResourceDefinitions* ，并使用搜索框查找 *DomainMapping* 自定义资源定义 (CRD) 。
+
+. 点 *DomainMapping* CRD，然后导航到 *Instances* 选项卡。
+
+. 单击 *Create DomainMapping*.
+
+. 修改`DomainMapping` CR 的 YAML，使其为您的实例包含以下信息：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+ name: <domain_name> <1>
+ namespace: <namespace> <2>
+spec:
+ ref:
+   name: <target_name> <3>
+   kind: <target_type> <4>
+   apiVersion: serving.knative.dev/v1
+----
+<1> 要映射到目标 CR 的自定义域名
+<2> `DomainMapping` CR 和目标 CR 的命名空间
+<3> 映射到自定义域的目标 CR 名称。
+<4> 映射到自定义域的 CR 类型。
++
+.到 Knative 服务的域映射示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: DomainMapping
+metadata:
+ name: custom-ksvc-domain.example.com
+ namespace: default
+spec:
+ ref:
+   name: example-service
+   kind: Service
+   apiVersion: serving.knative.dev/v1
+----
+
+.验证
+
+* 使用 `curl` 请求访问自定义域。例如：
++
+.示例命令
+[source,terminal]
+----
+$ curl custom-ksvc-domain.example.com
+----
++
+.输出示例
+[source,terminal]
+----
+Hello OpenShift!
+----

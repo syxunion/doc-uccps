@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+//* builds/creating-build-inputs.adoc
+
+[id="builds-define-build-inputs_{context}"]
+= 构建输入
+
+构建输入提供构建操作的源内容。您可以使用以下构建输入在 统信容器云管理平台 中提供源，它们按优先顺序列出：
+
+
+* 内联 Dockerfile 定义
+* 从现有镜像中提取内容
+* Git 存储库
+* 二进制（本地）输入
+* 输入 secret
+* 外部工件 (artifact)
+
+
+您可以在单个构建中组合多个输入。但是，由于内联 Dockerfile 具有优先权，它可能会覆盖任何由其他输入提供的名为 Dockerfile 的文件。二进制（本地）和 Git 存储库是互斥的输入。
+
+如果不希望在构建生成的最终应用程序镜像中提供构建期间使用的某些资源或凭证，或者想要消耗在 secret 资源中定义的值，您可以使用输入 secret。外部工件可用于拉取不以其他任一构建输入类型提供的额外文件。
+
+在运行构建时：
+
+. 构造工作目录，并将所有输入内容放进工作目录中。例如，把输入 Git 存储库克隆到工作目录中，并且把由输入镜像指定的文件通过目标目录复制到工作目录中。
+
+. 构建过程将目录更改到 `contextDir`（若已指定）。
+
+. 内联 Dockerfile（若有）写入当前目录中。
+
+. 当前目录中的内容提供给构建过程，供 Dockerfile、自定义构建器逻辑或 `assemble` 脚本引用。这意味着，构建会忽略所有驻留在 `contextDir` 之外的输入内容。
+
+以下源定义示例包括多种输入类型，以及它们如何组合的说明。如需有关如何定义各种输入类型的更多详细信息，请参阅每种输入类型的具体小节。
+
+[source,yaml]
+----
+source:
+  git:
+    uri: https://github.com/openshift/ruby-hello-world.git <1>
+    ref: "master"
+  images:
+  - from:
+      kind: ImageStreamTag
+      name: myinputimage:latest
+      namespace: mynamespace
+    paths:
+    - destinationDir: app/dir/injected/dir <2>
+      sourcePath: /usr/lib/somefile.jar
+  contextDir: "app/dir" <3>
+ifndef::openshift-online[]
+  dockerfile: "FROM centos:7\nRUN yum install -y httpd" <4>
+endif::[]
+----
+<1> 要克隆到构建的工作目录中的存储库。
+<2> 来自 `myinputimage` 的 `/usr/lib/somefile.jar` 存储在 `<workingdir> /app/dir/injected/dir` 中。
+<3> 构建的工作目录将变为 `<original_workingdir>/app/dir`。
+<4> `<original_workingdir>/app/dir` 中创建了含有此内容的 Dockerfile，并覆盖具有该名称的任何现有文件。

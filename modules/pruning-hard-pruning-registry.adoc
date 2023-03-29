@@ -1,0 +1,136 @@
+// Module included in the following assemblies:
+//
+// * applications/pruning-objects.adoc
+
+:_content-type: PROCEDURE
+[id="pruning-hard-pruning-registry_{context}"]
+= 硬修剪 registry
+
+Uccp Container Registry 可能会积累未被 统信容器云管理平台 集群的 etcd 引用的 Blob。因此，基本镜像修剪过程对它们无用。它们称为孤立的 Blob。
+
+以下情形中可能会出现孤立的 Blob：
+
+- 使用 `oc delete image <sha256:image-id>` 命令手动删除镜像，该命令仅从 etcd 中移除镜像，而不从 registry 存储中移除。
+
+- 守护进程失败引发的推送到 registry 的行为，会造成只上传一些 blob，但不上传其镜像清单（这作为最后一个组件上传）。所有唯一镜像 Blob 变成孤立的 Blob。
+
+- 统信容器云管理平台 因为配额限制而拒绝某一镜像。
+
+- 标准镜像修剪器删除镜像清单，但在删除相关 Blob 前中断。
+
+- registry 修剪器中有一个程序错误，无法移除预定的 Blob，从而导致引用它们的镜像对象被移除，并且 Blob 变成孤立的 Blob。
+// Find this BZ
+
+硬修剪registry 是独立于基本镜像修剪的流程，能够让集群管理员移除孤立的 Blob。如果 Uccp Container registry 的存储空间不足，并且您认为有孤立的 Blob，则应该执行硬修剪。
+
+这应该是罕见的操作，只有在有证据表明创建了大量新的孤立项时才需要。否则，您可以定期执行标准镜像修剪，例如一天一次（取决于要创建的镜像数量）。
+
+.流程
+
+从 registry 中硬修剪孤立的 Blob：
+
+. *登录*
++
+使用 CLI，以 `kubeadmin` 或可访问 `openshift-image-registry` 命名空间的其他特权用户身份登录集群 。
+
+. *运行基本镜像修剪*.
++
+基本镜像修剪会移除了不再需要的额外镜像。硬修剪不移除自己的镜像，只移除保存在 registry 存储中的 Blob。因此，您应该在硬修剪之前运行此操作。
+
+. *将 registry 切换成只读模式*
++
+如果 registry 不以只读模式运行，任何在修剪的同时发生的推送将会：
++
+--
+- 失败，并导致出现新的孤立项；或者
+- 成功，但镜像无法拉取（因为删除了一些引用的 Blob）。
+--
++
+只有 registry 切回到读写模式后，推送才会成功。因此，必须仔细地调度硬修剪。
++
+将 registry 切换成只读模式：
+
+.. 在 `configs.imageregistry.operator.openshift.io/cluster` 中，把 `spec.readOnly` 设置为 `true`：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster -p '{"spec":{"readOnly":true}}' --type=merge
+----
+
+. *添加 `system:image-pruner` 角色。*
++
+用来运行 registry 实例的服务帐户需要额外的权限才能列出某些资源。
+
+.. 获取服务帐户名称：
++
+[source,terminal]
+----
+$ service_account=$(oc get -n openshift-image-registry \
+    -o jsonpath='{.spec.template.spec.serviceAccountName}' deploy/image-registry)
+----
+
+.. 将 `system:image-pruner` 集群角色添加到服务帐户：
++
+[source,terminal]
+----
+$ oc adm policy add-cluster-role-to-user \
+    system:image-pruner -z \
+    ${service_account} -n openshift-image-registry
+----
+
+. *可选：在空运行模式下运行修剪器。*
++
+若要查看会移除多少 Blob，请以空运行模式运行硬修剪器。不会实际进行任何更改。以下示例引用了名为 `image-registry-3-vhndw` 的镜像 registry pod：
++
+[source,terminal]
+----
+$ oc -n openshift-image-registry exec pod/image-registry-3-vhndw -- /bin/sh -c '/usr/bin/dockerregistry -prune=check'
+----
++
+另外，若要获得修剪候选者的准确路径，可提高日志级别：
++
+[source,terminal]
+----
+$ oc -n openshift-image-registry exec pod/image-registry-3-vhndw -- /bin/sh -c 'REGISTRY_LOG_LEVEL=info /usr/bin/dockerregistry -prune=check'
+----
++
+.输出示例
+[source,terminal]
+----
+time="2017-06-22T11:50:25.066156047Z" level=info msg="start prune (dry-run mode)" distribution_version="v2.4.1+unknown" kubernetes_version=v1.6.1+$Format:%h$ openshift_version=unknown
+time="2017-06-22T11:50:25.092257421Z" level=info msg="Would delete blob: sha256:00043a2a5e384f6b59ab17e2c3d3a3d0a7de01b2cabeb606243e468acc663fa5" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+time="2017-06-22T11:50:25.092395621Z" level=info msg="Would delete blob: sha256:0022d49612807cb348cabc562c072ef34d756adfe0100a61952cbcb87ee6578a" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+time="2017-06-22T11:50:25.092492183Z" level=info msg="Would delete blob: sha256:0029dd4228961086707e53b881e25eba0564fa80033fbbb2e27847a28d16a37c" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+time="2017-06-22T11:50:26.673946639Z" level=info msg="Would delete blob: sha256:ff7664dfc213d6cc60fd5c5f5bb00a7bf4a687e18e1df12d349a1d07b2cf7663" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+time="2017-06-22T11:50:26.674024531Z" level=info msg="Would delete blob: sha256:ff7a933178ccd931f4b5f40f9f19a65be5eeeec207e4fad2a5bafd28afbef57e" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+time="2017-06-22T11:50:26.674675469Z" level=info msg="Would delete blob: sha256:ff9b8956794b426cc80bb49a604a0b24a1553aae96b930c6919a6675db3d5e06" go.version=go1.7.5 instance.id=b097121c-a864-4e0c-ad6c-cc25f8fdf5a6
+...
+Would delete 13374 blobs
+Would free up 2.835 GiB of disk space
+Use -prune=delete to actually delete the data
+----
+
+. *运行硬修剪*
++
+在 docker-registry pod 的一个正在运行的实例中执行以下命令进行硬修剪：以下示例引用了名为 `image-registry-3-vhndw` 的镜像 registry pod：
++
+[source,terminal]
+----
+$ oc -n openshift-image-registry exec pod/image-registry-3-vhndw -- /bin/sh -c '/usr/bin/dockerregistry -prune=delete'
+----
++
+.输出
+[source,terminal]
+----
+Deleted 13374 blobs
+Freed up 2.835 GiB of disk space
+----
+
+. *将 registry 切回到读写模式。*
++
+在修剪完成后，registry 可以被切换到读写模式：在 `configs.imageregistry.operator.openshift.io/cluster` 中，把 `spec.readOnly` 设置为 `false`：
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster -p '{"spec":{"readOnly":false}}' --type=merge
+----

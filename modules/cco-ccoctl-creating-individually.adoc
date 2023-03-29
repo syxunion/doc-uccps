@@ -1,0 +1,135 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+
+:_content-type: PROCEDURE
+[id="cco-ccoctl-creating-individually_{context}"]
+= 单独创建 AWS 资源
+
+如果您需要在修改 AWS 资源前查看 ccoctl 工具创建的 JSON 文件，或者 `ccoctl` 工具用于创建 AWS 资源的过程无法自动满足组织的要求，您可以单独创建 AWS 资源。例如，此选项对于在不同用户或部门之间共享创建这些资源的组织可能有用。
+
+否则，您可以使用 `ccoctl aws create-all` 命令自动创建 AWS 资源。
+
+//to-do if possible: xref to modules/cco-ccoctl-creating-at-once.adoc for `create the AWS resources automatically`
+
+[注意]
+====
+默认情况下，ccoctl 在运行命令的目录中创建对象。要指定目录，使用 `--output-dir` 标志。此流程使用 `<path_to_ccoctl_output_dir>` 来引用这个位置。
+
+有些 `ccoctl` 命令会发出 AWS API 调用来创建或修改 AWS 资源。要将 JSON 文件放在本地文件系统中，请使用 --dry-run 标志。这些 JSON 文件可以检查或修改，然后使用 `--cli-input-json` 参数通过 AWS CLI 工具应用。
+====
+
+.先决条件
+
+* 提取并准备 `ccoctl` 二进制文件。
+
+.流程
+
+. 生成用于为集群设置 OpenID Connect 供应商的公共和私有 RSA 密钥文件：
++
+[source,terminal]
+----
+$ ccoctl aws create-key-pair
+----
++
+.输出示例:
++
+[source,terminal]
+----
+2021/04/13 11:01:02 Generating RSA keypair
+2021/04/13 11:01:03 Writing private key to /<path_to_ccoctl_output_dir>/serviceaccount-signer.private
+2021/04/13 11:01:03 Writing public key to /<path_to_ccoctl_output_dir>/serviceaccount-signer.public
+2021/04/13 11:01:03 Copying signing key for use by installer
+----
++
+其中 `serviceaccount-signer.private` 和 `serviceaccount-signer.public `是生成的密钥文件。
++
+此命令还会在 `/<path_to_ccoctl_output_dir>/tls/bound-service-account-signing-key.key` 中创建集群在安装过程中所需的私钥。
+
+. 在 AWS 上创建 OpenID Connect 身份提供程序和 S3 存储桶：
++
+[source,terminal]
+----
+$ ccoctl aws create-identity-provider \
+--name=<name> \
+--region=<aws_region> \
+--public-key-file=<path_to_ccoctl_output_dir>/serviceaccount-signer.public
+----
++
+其中：
++
+--
+** `<name>` 是用于标记创建用于跟踪的任何云资源的名称。
+** `<aws-region>` 是将要在其中创建云资源的 AWS 区域。
+** `<path_to_ccoctl_output_dir>` 是 `ccoctl aws create-key-pair` 命令生成的公钥文件的路径。
+--
++
+.输出示例：:
++
+[source,terminal]
+----
+2021/04/13 11:16:09 Bucket <name>-oidc created
+2021/04/13 11:16:10 OpenID Connect discovery document in the S3 bucket <name>-oidc at .well-known/openid-configuration updated
+2021/04/13 11:16:10 Reading public key
+2021/04/13 11:16:10 JSON web key set (JWKS) in the S3 bucket <name>-oidc at keys.json updated
+2021/04/13 11:16:18 Identity Provider created with ARN: arn:aws:iam::<aws_account_id>:oidc-provider/<name>-oidc.s3.<aws_region>.amazonaws.com
+----
++
+其中 `02-openid-configuration` 是发现文档,，`03-keys.json` 是 JSON Web 密钥集文件。
++
+此命令还会在 `/<path_to_ccoctl_output_dir>/manifests/cluster-authentication-02-config.yaml` 中创建 YAML 配置文件。此文件为集群生成的服务帐户令牌设置签发者 URL 字段，以便 AWS IAM 身份提供程序信任令牌。
+
+. 为集群中的每个组件创建 IAM 角色。
+
+.. 从统信容器云管理平台发行镜像中提取 `CredentialsRequest` 对象列表：
++
+[source,terminal]
+----
+$ oc adm release extract --credentials-requests \
+--cloud=aws \
+--to=<path_to_directory_with_list_of_credentials_requests>/credrequests 
+--from=quay.io/<path_to>/ocp-release:<version>
+----
++
+
+.. 使用 ccoctl 工具处理 `credrequests` 目录中的所有 `CredentialsRequest` 对象：
++
+[source,terminal]
+----
+$ ccoctl aws create-iam-roles \
+--name=<name> \
+--region=<aws_region> \
+--credentials-requests-dir=<path_to_directory_with_list_of_credentials_requests>/credrequests \
+--identity-provider-arn=arn:aws:iam::<aws_account_id>:oidc-provider/<name>-oidc.s3.<aws_region>.amazonaws.com
+----
++
+[注意]
+====
+对于使用其他 IAM API 端点的 AWS 环境（如 GovCloud），还必须使用 `--region` 参数指定您的区域。
+====
++
+对于每个 `CredentialsRequest` 对象，`ccoctl` 创建一个带有信任策略的 IAM 角色，该角色与指定的 `OIDC` 身份提供程序相关联，以及来自统信容器云管理平台发行镜像的每个 `CredentialsRequest` 对象中定义的权限策略。
+
+.验证
+
+* 要验证统信容器云管理平台secret 是否已创建，列出 `<path_to_ccoctl_output_dir>/manifests` 目录中的文件：
++
+[source,terminal]
+----
+$ ll <path_to_ccoctl_output_dir>/manifests
+----
++
+.输出示例：
++
+[source,terminal]
+----
+total 24
+-rw-------. 1 <user> <user> 161 Apr 13 11:42 cluster-authentication-02-config.yaml
+-rw-------. 1 <user> <user> 379 Apr 13 11:59 openshift-cloud-credential-operator-cloud-credential-operator-iam-ro-creds-credentials.yaml
+-rw-------. 1 <user> <user> 353 Apr 13 11:59 openshift-cluster-csi-drivers-ebs-cloud-credentials-credentials.yaml
+-rw-------. 1 <user> <user> 355 Apr 13 11:59 openshift-image-registry-installer-cloud-credentials-credentials.yaml
+-rw-------. 1 <user> <user> 339 Apr 13 11:59 openshift-ingress-operator-cloud-credentials-credentials.yaml
+-rw-------. 1 <user> <user> 337 Apr 13 11:59 openshift-machine-api-aws-cloud-credentials-credentials.yaml
+----
+
+您可以通过查询 AWS 来验证是否已创建 IAM 角色。如需更多信息，请参阅有关列出 IAM 角色的 AWS 文档。

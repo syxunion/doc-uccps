@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="using-imagestreams-with-kube-resources"]
+= Kubernetes 资源使用镜像流
+include::_attributes/common-attributes.adoc[]
+:context: using-imagestreams-with-kube-resources
+
+toc::[]
+
+作为 统信容器云管理平台 的原生资源，镜像流可以直接与 统信容器云管理平台 中的所有其他原生资源一起来工作（如构建或部署）。它也可能可以和其与原生 Kubernetes 资源一起工作，如作业、复制控制器、副本设置或 Kubernetes 部署。
+
+include::modules/images-managing-images-enabling-imagestreams-kube.adoc[leveloffset=+1]

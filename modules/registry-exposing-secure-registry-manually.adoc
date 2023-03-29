@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * registry/securing-exposing-registry.adoc
+
+:_content-type: PROCEDURE
+[id="registry-exposing-secure-registry-manually_{context}"]
+= 手动公开受保护的registry
+
+通过使用路由可以开放从外部访问统信容器云管理平台 registry的通道，用户不再需要从集群内部登录到统信容器云管理平台 registry。这样，您可以使用路由地址从集群外部登录 registry，并使用路由主机标记并推送到现有项目。
+
+.先决条件：
+
+* 以下的先决条件会被自动执行：
+** 部署 Registry Operator。
+** 部署 Ingress Operator。
+
+.流程
+
+您可以使用`configs.imageregistry.operator.openshift.io` 资源中的`DefaultRoute` 参数或使用自定义路由来公开路由。
+
+使用 `DefaultRoute` 公开registry：
+
+. 将 `DefaultRoute` 设置为 `True`:
++
+[source,terminal]
+----
+$ oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+----
++
+. 使用 `podman` 登录：
++
+[source,terminal]
+----
+$ HOST=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+----
++
+[source,terminal]
+----
+$ podman login -u kubeadmin -p $(oc whoami -t) --tls-verify=false $HOST <1>
+----
+<1> 如果集群的默认路由证书不受信任，则需要 `--tls-verify=false` 。您可以将一个自定义的可信证书设置为 Ingress Operator 的默认证书。
+
+
+使用自定义路由公开registry：
+
+. 使用路由的 TLS 密钥创建一个 secret：
++
+[source,terminal]
+----
+$ oc create secret tls public-route-tls \
+    -n openshift-image-registry \
+    --cert=</path/to/tls.crt> \
+    --key=</path/to/tls.key>
+----
++
+此步骤是可选的。如果不创建一个secret，则路由将使用Ingress Operator的默认TLS配置。
++
+. 在 Registry Operator 中：
++
+[source,yaml]
+----
+spec:
+  routes:
+    - name: public-routes
+      hostname: myregistry.mycorp.organization
+      secretName: public-route-tls
+...
+----
++
+[注意]
+====
+如果为registry的路由提供了一个自定义的 TLS 配置，则仅需设置secretName 。
+====

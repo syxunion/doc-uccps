@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+[id="serverless-custom-event-sources"]
+= 自定义事件源
+include::_attributes/common-attributes.adoc[]
+:context: serverless-custom-event-sources
+
+toc::[]
+
+如果您需要从 Knative 中没有包含在 Knative 的事件制作者或发出没有 CloudEvent 格式的事件的制作者中入站事件，您可以通过创建自定义事件源来实现此目标。您可以使用以下方法之一创建自定义事件源：
+
+* 通过创建接收器绑定，将 `PodSpecable` 对象用作事件源。
+* 通过创建容器源，将容器用作事件源。
+
+// sinkbinding intro
+include::modules/serverless-sinkbinding-intro.adoc[leveloffset=+1]
+// YAML
+include::modules/serverless-sinkbinding-yaml.adoc[leveloffset=+2]
+// kn commands
+include::modules/serverless-sinkbinding-kn.adoc[leveloffset=+2]
+include::modules/specifying-sink-flag-kn.adoc[leveloffset=+3]
+// ODC
+include::modules/serverless-sinkbinding-odc.adoc[leveloffset=+2]
+// Reference
+include::modules/serverless-sinkbinding-reference.adoc[leveloffset=+2]
+
+[id="serverless-custom-event-sources-containersource"]
+== 容器源
+
+容器源创建容器镜像来生成事件并将事件发送到 sink。您可以通过创建容器镜像和使用您的镜像 URI 的 `ContainerSource` 对象，使用容器源创建自定义事件源。
+
+// intro
+include::modules/serverless-containersource-guidelines.adoc[leveloffset=+2]
+// kn
+include::modules/serverless-kn-containersource.adoc[leveloffset=+2]
+// ODC
+include::modules/serverless-odc-create-containersource.adoc[leveloffset=+2]
+// Reference
+include::modules/serverless-containersource-reference.adoc[leveloffset=+2]

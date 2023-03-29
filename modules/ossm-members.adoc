@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/installing-ossm.adoc
+// * service_mesh/v2x/installing-ossm.adoc
+
+[id="ossm-members_{context}"]
+= Creating the {SMProductName} members
+
+`ServiceMeshMember` 资源为 {SMProductName} 管理员提供了一种将项目添加到服务网格（即使对应用户没有服务网格项目或 member roll）的权限。虽然项目管理员被自动授予在其项目中创建 `ServiceMeshMember` 资源的权限，但它们不能将其指向任何 `ServiceMeshControlPlane` 直到服务网格管理员显式授予服务网格访问权限。管理员可以通过授予 `mesh-user` 用户角色来授予用户访问网格的权限。在本例中， `istio-system` 是 {SMProductShortName} 项目的名称。
+
+[source,terminal]
+----
+$ oc policy add-role-to-user -n istio-system --role-namespace istio-system mesh-user <user_name>
+----
+
+管理员可以修改 Service Mesh control plane 项目中的 `mesh-user` 角色绑定，以指定授予访问权限的用户和组。`ServiceMeshMember` 会将项目添加到它引用的 {SMProductShortName} control plane 项目中的   `ServiceMeshMemberRoll` 
+
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMember
+metadata:
+  name: default
+spec:
+  controlPlaneRef:
+    namespace: istio-system
+    name: basic
+----
+
+`mesh-users` 角色绑定在管理员创建e `ServiceMeshControlPlane` 资源后自动创建。管理员可使用以下命令为用户添加角色。
+
+[source,terminal]
+----
+$ oc policy add-role-to-user
+----
+
+管理员也可以在创建 `ServiceMeshControlPlane` 资源前创建 `mesh-user` 角色绑定。例如，管理员可以在与 `ServiceMeshControlPlane` 资源相同的 `oc apply` 操作中创建它。
+
+本例为 `alice` 添加一个角色绑定：
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: istio-system
+  name: mesh-users
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mesh-user
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: alice
+----

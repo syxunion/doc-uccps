@@ -1,0 +1,24 @@
+////
+This CONCEPT module included in the following assemblies:
+-service_mesh/v1x/ossm-architecture.adoc
+-service_mesh/v2x/ossm-architecture.adoc
+////
+
+[id="ossm-kiali-features_{context}"]
+= Kiali features
+//In the title include nouns or noun phrases that are used in the body text.
+//Do not start the title of concept modules with a verb..
+
+Kiali 控制台与 Red Hat Service Mesh 集成，提供以下功能：
+
+* *健康* – 快速识别应用程序、服务或者工作负载的问题。
+
+* *拓扑* – 以图形的形式显示应用程序、服务或工作负载如何通过 Kiali 进行通信。
+
+* *指标* – 预定义的 metrics dashboard 可为您生成 Go、Node.js、Quarkus 、Spring Boot 、Thonttail 和 Vert.x 的服务网格和应用程序性能图表。。您还可以创建您自己的自定义仪表板。
+
+* *追踪* – 通过与 Jaeger 集成，可以在组成一个应用程序的多个微服务间追踪请求的路径。
+
+* *验证* – 对最常见 Istio 对象（Destination Rules 、Service Entries 、Virtual Services 等等）进行高级验证。
+
+* *配置* – 使用向导创建、更新和删除 Istio 路由配置的可选功能，或者直接在 Kiali Console 的 YAML 编辑器中创建、更新和删除 Istio 路由配置。

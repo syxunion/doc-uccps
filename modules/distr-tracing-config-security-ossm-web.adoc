@@ -1,0 +1,74 @@
+////
+This module included in the following assemblies:
+service_mesh/v2x/ossm-reference-jaeger.adoc
+////
+:_content-type: PROCEDURE
+[id="distr-tracing-config-security-ossm-web_{context}"]
+= Configuring distributed tracing security for service mesh from the OpenShift console
+
+您可以修改 Jaeger 资源来配置分布式追踪平台安全性，以便在 Uccps 控制台中用于 Service Mesh。
+
+.Prerequisites
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 必须安装 {SMProductName} Operator 。
+* 部署到集群的 `ServiceMeshControlPlane`。
+* 访问 统信容器云管理平台 Web控制台 。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到 {product-title} web 控制台。
+
+. 导航到 Operators → 安装的 Operators.
+
+. 点 *Project* 菜单，从列表中选择部署  `ServiceMeshControlPlane`资源的项目，如 `istio-system`.
+
+. 点 *{JaegerName} Operator*.
+
+. 在 *Operator 详情* 页面中， 点 *Jaeger* 标签页。
+
+. 点 Jaeger 实例的名称。
+
+. 在 Jaeger 详情页面上，点击 `YAML` 选项卡来修改您的配置。
+
+. 编辑 `Jaeger` 自定义资源文件，以添加 `htpasswd` 配置，如下例所示。
+
+* `spec.ingress.openshift.htpasswdFile`
+* `spec.volumes`
+* `spec.volumeMounts`
++
+.显示 `htpasswd` 配置的 Jaeger 资源示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+spec:
+  ingress:
+    enabled: true
+    openshift:
+      htpasswdFile: /etc/proxy/htpasswd/auth
+      sar: '{"namespace": "istio-system", "resource": "pods", "verb": "get"}'
+    options: {}
+    resources: {}
+    security: oauth-proxy
+  volumes:
+    - name: secret-htpasswd
+      secret:
+        secretName: htpasswd
+    - configMap:
+        defaultMode: 420
+        items:
+          - key: ca-bundle.crt
+            path: tls-ca-bundle.pem
+        name: trusted-ca-bundle
+        optional: true
+      name: trusted-ca-bundle
+  volumeMounts:
+    - mountPath: /etc/proxy/htpasswd
+      name: secret-htpasswd
+    - mountPath: /etc/pki/ca-trust/extracted/pem/
+      name: trusted-ca-bundle
+      readOnly: true
+----
++
+. 点 *保存*.

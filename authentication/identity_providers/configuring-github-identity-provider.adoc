@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="configuring-github-identity-provider"]
+= 配置 GitHub 或 GitHub Enterprise 身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-github-identity-provider
+
+toc::[]
+
+配置 github 身份提供程序，针对 GitHub 或 GitHub Enterprise 的 OAuth 身份验证服务器验证用户名和密码。OAuth 可以协助统信容器云管理平台和 GitHub 或 GitHub Enterprise 之间的令牌交换流。
+
+您可以使用 GitHub 集成来连接 GitHub 或 GitHub Enterprise。对于 GitHub Enterprise 集成，您必须提供实例的 hostname，并可选择提供要在服务器请求中使用的 ca 证书捆绑包。
+
+[注意]
+====
+除非有所注明，否则以下步骤同时适用于 GitHub 和 GitHub Enterprise。
+====
+
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-registering-github.adoc[leveloffset=+1]
+
+include::modules/identity-provider-secret.adoc[leveloffset=+1]
+
+include::modules/identity-provider-config-map.adoc[leveloffset=+1]
+
+include::modules/identity-provider-github-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]
+

@@ -1,0 +1,135 @@
+// Module included in the following assemblies:
+// * openshift_images/create-images.adoc
+
+:_content-type: CONCEPT
+[id="images-test-s2i_{context}"]
+= 关于测试 source-to-image 镜像
+
+作为 Source-to-Image (S2I) 构建程序镜像创建者，您可在本地测试 S2I 镜像，并使用 统信容器云管理平台 构建系统进行自动化测试和连续集成。
+
+为了成功运行 S2I 构建，S2I 需要存在 `assemble` 和 `run` 脚本。提供 `save-artifacts` 脚本可重复利用构建工件，而提供 usage 脚本则可确保有人在 S2I 以外运行容器镜像时，使用情况信息能够打印到控制台上。
+
+测试 S2I 镜像的目的在于确保所有这些描述命令均能正常工作，即使基本容器镜像已改变或命令所用工具已更新也不受影响。 
+
+[id="images-test-s2i-testing-requirements_{context}"]
+== 了解测试要求
+
+test 脚本的标准位置为 `test/run`。该脚本由 统信容器云管理平台 S2I 镜像构建程序调用，可以是简单的 Bash 脚本，也可以是静态的 Go 二进制文件。
+
+`test/run` 脚本会执行 S2I 构建，因此您的 $PATH 中必须有 S2I 二进制文件。必要情况下，请遵循 S2I README 中的安装说明。
+
+S2I 结合了应用程序源代码与构建程序镜像，因此为了对其进行测试，您需要一个示例应用程序源来验证该源是否成功转换成了可运行的容器镜像。示例应用程序应简单，但也应执行 assemble 和 run 脚本的关键步骤。
+
+[id="images-test-s2i-generating-scripts-and-tools_{context}"]
+== 生成脚本和工具
+
+S2I 工具随附功能强大的生成工具，可加快新 S2I 镜像的创建过程。`s2i create` 命令生成所有必要的 S2I 脚本和测试工具以及 Makefile：
+
+[source,termnal]
+----
+$ s2i create _<image name>_ _<destination directory>_
+----
+
+所生成的 `test/run` 脚本必须经过调整才可使用，但它为开始开发提供了一个良好起点。
+
+[注意]
+====
+由 `s2i create` 命令生成的 `test/run` 脚本要求示例应用程序源位于 `test/test-app` 目录中。
+====
+ifndef::openshift-online[]
+[id="images-test-s21-testing-locally_{context}"]
+== 本地测试
+本地运行 S2I 镜像测试的最简单方法是使用所生成的 `Makefile`。
+
+如果未使用 `s2i create` 命令，则可复制以下 `Makefile` 模板，并将 `IMAGE_NAME` 参数替换为您的镜像名称。
+
+.`Makefile` 示例
+----
+IMAGE_NAME = openshift/ruby-20-centos7
+CONTAINER_ENGINE := $(shell command -v podman 2> /dev/null | echo docker)
+
+build:
+	${CONTAINER_ENGINE} build -t $(IMAGE_NAME) .
+
+.PHONY: test
+test:
+	${CONTAINER_ENGINE} build -t $(IMAGE_NAME)-candidate .
+	IMAGE_NAME=$(IMAGE_NAME)-candidate test/run
+----
+
+[id="images-test-s21-basic-testing-workflow_{context}"]
+== 基本测试工作流
+
+`test` 脚本会假定您已构建要测试的镜像。如果需要，请先构建 S2I 镜像。运行以下任一命令：
+
+* 如果使用 Podman，请运行以下命令：
++
+[source,terminal]
+----
+$ podman build -t <builder_image_name>
+----
+
+* 如果使用 Docker，请运行以下命令：
++
+[source,terminal]
+----
+$ docker build -t <builder_image_name>
+----
+
+以下步骤描述测试 S2I 镜像构建程序的默认工作流：
+
+. 验证 `usage`` 脚本是否正在工作：
++
+* 如果使用 Podman，请运行以下命令：
++
+[source,terminal]
+----
+$ podman run <builder_image_name> .
+----
+
+* 如果使用 Docker，请运行以下命令：
++
+[source,terminal]
+----
+$ docker run <builder_image_name> .
+----
+
+. 构建镜像：
++
+[source,terminal]
+[options="nowrap"]
+----
+$ s2i build file:///path-to-sample-app _<BUILDER_IMAGE_NAME>_ _<OUTPUT_APPLICATION_IMAGE_NAME>_
+----
+
+. 可选：如果支持 `save-artifacts`，请再次运行第 2 步，验证保存和恢复工件是否正常工作。
+
+. 运行容器：:
++
+* 如果使用 Podman，请运行以下命令：
++
+[source,terminal]
+----
+$ podman run <output_application_image_name>
+----
+
+* 如果使用 Docker，请运行以下命令：
++
+[source,terminal]
+----
+$ docker run <output_application_image_name>
+----
+
+. 验证容器是否正在运行，应用程序是否有所反应。
+
+通常，运行这些步骤便足以说明构建程序镜像是否按预期工作。
+
+
+[id="images-test-s21-using-openshift-for-building-the-image_{context}"]
+== 使用 统信容器云管理平台 构建镜像
+
+有了 `Dockerfile` 和组成新 S2I 构建程序镜像的其他工件后，您可以将它们放入 git 存储库中，并使用 统信容器云管理平台 来构建和推送（push）镜像。定义指向您的存储库的 Docker 构建。
+
+如果 统信容器云管理平台 实例托管在一个公共 IP 地址上，则每次推送（push）到您的 S2I 构建程序镜像 GitHub 存储库时，均可触发构建。
+
+您还可使用 `ImageChangeTrigger` 来基于您所更新的 S2I 构建程序镜像来触发应用程序的重新构建。

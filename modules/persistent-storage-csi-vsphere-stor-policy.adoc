@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// persistent-storage-csi-vsphere.adoc
+//
+
+[id="persistent-storage-csi-vsphere-stor-policy_{context}"]
+= vSphere 存储策略
+
+vSphere CSI Operator Driver 存储类使用 vSphere 的存储策略。统信容器云管理平台会自动创建一个存储策略，该策略以云配置中配置的数据存储为目标。
+[output, yaml]
+----
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: thin-csi
+provisioner: csi.vsphere.vmware.com
+parameters:
+  StoragePolicyName: "$openshift-storage-policy-xxxx"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: false
+reclaimPolicy: Delete
+----

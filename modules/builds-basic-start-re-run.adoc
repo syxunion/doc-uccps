@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-start-re-run_{context}"]
+= 重新运行构建
+
+您可以使用 `--from-build` 标志，手动重新运行构建。
+
+.流程
+
+* 要手动重新运行构建，请输入以下命令：
++
+[source,terminal]
+----
+$ oc start-build --from-build=<build_name>
+----

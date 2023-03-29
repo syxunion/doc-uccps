@@ -1,0 +1,16 @@
+:_content-type: ASSEMBLY
+[id="deploying-egress-router-layer3-redirection"]
+= 以重定向模式部署出口路由器 pod
+include::_attributes/common-attributes.adoc[]
+:context: deploying-egress-router-layer3-redirection
+
+toc::[]
+
+作为集群管理员，您可以部署一个出口路由器 pod，该 pod 被配置为将流量重新定向到指定的目的地 IP 地址。
+
+include::modules/nw-egress-router-pod.adoc[leveloffset=+1]
+
+include::modules/nw-egress-router-dest-var.adoc[leveloffset=+1]
+
+include::modules/nw-egress-router-redirect-mode.adoc[leveloffset=+1]
+

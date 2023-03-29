@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/preparing-ossm-install.adoc
+// * service_mesh/v2x/servicemesh-release-notes.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: REFERENCE
+[id="ossm-supported-configurations_{context}"]
+= 支持的配置
+
+{SMProductName} 当前发行版本支持以下配置。
+
+
+[id="ossm-supported-configurations-kiali_{context}"]
+== Kiali 支持的配置
+
+* Kiali 控制台只支持 Chrome 、Edge 、Firefox 或 SDomain 浏览器的最新的两个版本。
+
+[id="ossm-supported-configurations-jaeger_{context}"]
+== 分布式追踪支持的配置
+
+* Jaeger 代理是 Jaeger 唯一支持的配置。多租户安装或 OpenShift Dedicated 不支持 Jaeger 作为 daemonset。
+
+[id="ossm-supported-configurations-webassembly_{context}"]
+== 支持的 WebAssembly 模块
+
+* 3scale WebAssembly 是唯一提供 WebAssembly 模块。您可以创建自定义 WebAssembly 模块。

@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * builds/securing-builds-by-strategy.adoc
+
+
+:_content-type: PROCEDURE
+[id="builds-restricting-build-strategy-to-user_{context}"]
+= 在项目范围内限制用户使用构建策略
+
+与在全局范围内向用户授予构建策略角色类似，您只能允许项目中的某一组特定用户使用特定策略来创建构建。
+
+.先决条件
+
+* 禁用构建策略的全局访问。
+
+.流程
+
+* 将与构建策略对应的角色分配给项目中的特定用户。例如，将 `devproject` 项目中的 `system:build-strategy-docker` 角色添加到用户 `devuser`：
++
+[source,terminal]
+----
+$ oc adm policy add-role-to-user system:build-strategy-docker devuser -n devproject
+----

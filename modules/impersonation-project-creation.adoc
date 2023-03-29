@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * applications/projects/creating-project-other-user.adoc
+
+:_content-type: PROCEDURE
+[id="impersonation-project-creation_{context}"]
+= 在创建项目时模拟用户
+
+您可在创建项目请求时模拟其他用户。由于 `system:authenticated:oauth` 是唯一能够创建项目请求的 bootstrap 组，因此您必须模拟这个组。
+
+.流程
+
+* 代表其他用户创建项目请求：
++
+[source,terminal]
+----
+$ oc new-project <project> --as=<user> \
+    --as-group=system:authenticated --as-group=system:authenticated:oauth
+----

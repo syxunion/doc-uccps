@@ -1,0 +1,107 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/installing-ossm.adoc
+// * service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-member-roll-create_{context}"]
+= Creating the {SMProductName} member roll
+
+`ServiceMeshMemberRoll` 列出属于 {SMProductShortName} 的项目。只有 `ServiceMeshMemberRoll` 中列出的项目会受到 control plane 的影响。在将项目添加到特定 control plane 部署的 member roll 之前，项目不属于服务网格。
+
+您必须在 `ServiceMeshMemberRoll` 所在的同一个项目中创建一个名为 `default` 的`ServiceMeshControlPlane`资源，如 `istio-system`.
+
+[id="ossm-member-roll-create-console_{context}"]
+== Creating the member roll from the web console
+
+您可从 web 控制台在 {SMProductShortName} member roll 中添加一个或多个项目。在本例中， `istio-system`  是 {SMProductShortName} control plane 项目的名称。
+
+.先决条件
+* 已安装并验证的 {SMProductName} Operator。
+* 要添加到服务网格的现存项目列表。
+
+.流程
+
+. 登陆到 {product-title} Web 控制台。
+
+. 如果您还没有网格服务，或者您从头开始，请为您的应用程序创建一个项目。它必须与安装 {SMProductShortName} 的项目不同。
+
+.. 浏览至 *主页* -> *项目*.
+
+.. 在 *名称* 字段中输入一个名称。
+
+.. 点 *创建*。
+
+. 导航到 *Operators* -> *I安装的 Operators*.
+
+. 点 *项目* 菜单，从列表中选择部署 `ServiceMeshControlPlane` 资源的项目，如 `istio-system`。
+
+. 点  {SMProductName} Operator。
+
+. 点 *Istio Service Mesh Member Roll* 选项卡。
+
+. 点 *Create ServiceMeshMemberRoll*
+
+. 单击 *Members*，然后在 *Value* 字段中输入项目名称。您可以添加多个项目，但每个项目只能属于一个 *一个* `ServiceMeshMemberRoll` 资源。
+
+. 点 *创建*。
+
+[id="ossm-member-roll-create-cli_{context}"]
+== Creating the member roll from the CLI
+
+您可以使用命令行将项目添加到 `ServiceMeshMemberRoll` 中。
+
+.先决条件
+
+* 已安装并验证的  {SMProductName} Operator。
+* 要添加到服务网格的项目列表。
+* 访问 Uccps CLI (`oc`)。
+
+.流程
+
+. 登录 {product-title} CLI.
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:6443
+----
+
+. 果您还没有网格服务，或者您从头开始，请为您的应用程序创建一个项目。它必须与安装 {SMProductShortName} 的项目不同。
++
+[source,terminal]
+----
+$ oc new-project <your-project>
+----
+
+. 要添加项目作为成员，请修改以下示例 YAML:您可以添加多个项目，但每个项目只能属于 *一个* `ServiceMeshMemberRoll` 资源。在本例中， `istio-system` 是 {SMProductShortName} 项目的名称。
++
+.servicemeshmemberroll-default.yaml 示例
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  members:
+    # a list of projects joined into the service mesh
+    - your-project-name
+    - another-project-name
+----
+
+. 运行以下命令，在 `istio-system` 命名空间中上传并创建 `ServiceMeshMemberRoll` 资源。
++
+[source,terminal]
+----
+$ oc create -n istio-system -f servicemeshmemberroll-default.yaml
+----
+
+. 运行以下命令，以验证 `ServiceMeshMemberRoll` 是否已成功创建。
++
+[source,terminal]
+----
+$ oc get smmr -n istio-system default
+----
++
+当  `STATUS` 列为 `Configured` 时，安装成功完成。

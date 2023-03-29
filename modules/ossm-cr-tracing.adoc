@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-reference-smcp.adoc
+
+[id="ossm-cr-tracing_{context}"]
+= tracing parameters
+
+以下示例演示了 `ServiceMeshControlPlane` 对象的`spec.tracing` 参数，以及可用参数和值的信息。
+
+.追踪参数示例
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  tracing:
+    sampling: 100
+    type: Jaeger
+----
+
+.Istio  追踪参数
+[options="header"]
+[cols="l, a, a, a"]
+|===
+|参数 |描述 |值 |默认值
+
+|tracing:
+ sampling:
+
+|抽样率决定了 Envoy 代理生成 trace 的频率。您可以使用抽样率来控制向追踪系统报告的请求百分比。
+|0 到 10000 之间的整数值，代表 0.01% 的增长（0 到 100%）。例如，将值设置为 10 会抽样 0.1% 的请求，将值设为 100 会抽样 1% 的请求，设置为 500 会抽样 5% 的请求，设置 10000 会抽样 100% 的请求。
+|`10000` (100% traces)
+
+|tracing:
+ type:
+|目前 `Jaeger` 是唯一支持的追踪类型。默认启用 Jaeger。要禁用追踪，请将 `type` 参数设置为 `None`.
+|`None`, `Jaeger`
+|`Jaeger`
+|===

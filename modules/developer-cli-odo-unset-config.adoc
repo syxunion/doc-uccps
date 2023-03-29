@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/configuring-the-odo-cli.adoc
+
+:_content-type: REFERENCE
+[id="developer-cli-odo-unset-config_{context}"]
+= 取消设置值
+
+您可以使用以下命令为首选键取消设置值：
+
+[source,terminal]
+----
+$ odo preference unset <key>
+----
+
+[注意]
+====
+您可以使用 `-f` 标志跳过确认。
+====
+
+.示例命令
+[source,terminal]
+----
+$ odo preference unset updatenotification
+? Do you want to unset updatenotification in the preference (y/N) y
+----
+
+.输出示例
+[source,terminal]
+----
+Global preference was successfully updated
+----

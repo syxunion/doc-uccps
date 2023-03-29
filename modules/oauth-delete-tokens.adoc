@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing-oauth-access-tokens.adoc
+
+:_content-type: PROCEDURE
+[id="oauth-delete-tokens_{context}"]
+= 删除用户拥有的 OAuth 访问令牌
+
+`oc logout` 命令只使活跃会话的 OAuth 令牌无效。您可以使用以下步骤删除不再需要的用户拥有的 OAuth 令牌。
+
+从使用该令牌的所有会话中删除 OAuth 访问令牌日志。
+
+.流程
+
+* 删除用户拥有的 OAuth 访问令牌：
++
+[source,terminal]
+----
+$ oc delete useroauthaccesstokens <token_name>
+----
++
+.输出示例
+[source,terminal]
+----
+useroauthaccesstoken.oauth.openshift.io "<token_name>" deleted
+----

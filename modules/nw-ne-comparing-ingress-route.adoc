@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * networking/understanding-networking.adoc
+
+[id="nw-ne-comparing-ingress-route_{context}"]
+= 路由和 Ingress 的比较
+统信容器云管理平台 中的 Kubernetes Ingress 资源通过作为集群内 pod 运行的共享路由器服务来实现 Ingress Controller。管理 Ingress 流量的最常见方法是使用 Ingress Controller。您可以像任何其他常规 pod 一样扩展和复制此 pod。此路由器服务基于 HAProxy，后者是一个开源负载均衡器解决方案。
+
+统信容器云管理平台 路由为集群中的服务提供入口流量。路由提供了标准 Kubernetes Ingress Controller 可能不支持的高级功能，如 TLS 重新加密、TLS 直通和为蓝绿部署分割流量。
+
+入口流量通过路由访问集群中的服务。路由和入口是处理入口流量的主要资源。Ingress 提供类似于路由的功能，如接受外部请求并根据路由委派它们。但是，对于 Ingress，您只能允许某些类型的连接：HTTP/2、HTTPS 和服务器名称识别(SNI)，以及 TLS（证书）。在 统信容器云管理平台 中，生成路由以满足 Ingress 资源指定的条件。

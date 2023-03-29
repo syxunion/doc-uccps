@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+[id="deployments-triggers_{context}"]
+= 部署触发器
+
+`部署配置` 可以包含触发器，推动创建新部署过程以响应集群中的事件。
+
+[警告]
+====
+如果 `部署配置` 上没有定义任何触发器，则默认添加配置更改触发器。如果触发器定义为空白字段，则必须手动启动部署。
+====
+
+[discrete]
+[id="deployments-configchange-trigger_{context}"]
+=== 配置更改部署触发器
+
+当在 `部署配置` 的 pod 模板中发现配置改变时，配置更改触发器会生成一个新的复制控制器。
+
+[注意]
+====
+如果在 `部署配置` 上定义了配置更改触发器，则在 `部署配置` 本身创建后会自动创建第一个复制控制器,且不会暂停。
+====
+
+.配置更改部署触发器
+[source,yaml]
+----
+triggers:
+  - type: "ConfigChange"
+----
+
+[discrete]
+[id="deployments-imagechange-trigger_{context}"]
+=== 镜像更改部署触发器
+
+镜像更改触发器会在镜像流标签内容更改时（推送镜像的新版本时）产生新的复制控制器。
+
+.镜像更改部署触发器
+[source,yaml]
+----
+triggers:
+  - type: "ImageChange"
+    imageChangeParams:
+      automatic: true <1>
+      from:
+        kind: "ImageStreamTag"
+        name: "origin-ruby-sample:latest"
+        namespace: "myproject"
+      containerNames:
+        - "helloworld"
+----
+<1> 如果 `imageChangeParams.automatic` 字段设置为 `false`，则触发器被禁用。
+
+在上例中，当 `origin-ruby-sample` 镜像流的 `latest` 标签值更改并且新镜像值与 `部署配置` 的 `helloworld` 容器中指定的当前镜像不同时，会使用 `helloworld` 容器的新镜像创建新的复制控制器 。
+
+[注意]
+====
+如果在 `部署配置` 上定义了镜像更改触发器（带有配置更改触发器和 `automatic=false`，或 `automatic=true`）并且镜像更改触发器指向的镜像流标签尚不存在，则初始部署过程将在镜像导入时或由构建推送到镜像流标签时立即自动开始。
+====

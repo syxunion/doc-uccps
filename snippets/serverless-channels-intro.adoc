@@ -1,0 +1,10 @@
+// Text snippet included in the following files
+//
+// * /serverless/develop/serverless-creating-channels.adoc
+// * /serverless/discover/serverless-channels.adoc
+
+频道是定义单一事件转发和持久层的自定义资源。事件源或生成程序在将事件发送到频道后，可使用订阅将这些事件发送到多个 Knative 服务或其他 sink。
+
+image::serverless-event-channel-workflow.png[Channel workflow overview]
+
+您可以通过实例化受支持的 `Channel` 对象来创建频道，并通过修改 `Subscription` 对象中的 `delivery` 规格来配置重新发送尝试。

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-edit-buildconfig_{context}"]
+= 编辑 BuildConfig
+
+要编辑构建配置，您可以使用 *Developer* 视角的 *Builds* 视图中的 *Edit BuildConfig* 选项。
+
+您可以使用以下任一视图编辑 `BuildConfig` ：
+
+* *Form 视图* 允许您使用标准表单字段和复选框编辑 `BuildConfig`。
+* *YAML 视图* 允许您编辑 `BuildConfig`，完全控制操作。
+
+您可以在 *Form view* 和 *YAML 视图* 间切换，而不丢失任何数据。*Form 视图* 中的数据传输到 *YAML 视图*，反之亦然。
+
+.流程
+
+. 在 *Developer* 视角 的 *Builds* 视图中，点击菜单 kebab 来查看 *Edit BuildConfig* 选项。
+. 点击 *Edit BuildConfig* 以查看 *Form view* 选项。
+. 在 *Git* 部分中，输入您要用来创建应用程序的代码库的 Git 存储库 URL。这个 URL 随后会被验证。
+* 可选：点击 *Show Advanced Git Options* 来添加详情，例如：
+** *Git Reference*，用于指定包含您要用来构建应用程序的代码的分支、标签或提交。
+** *Context Dir*，用于指定包含您要用来构建应用程序的代码的子目录。
+** *Source Secret*，创建一个具有用来从私有存储库拉取源代码的凭证的 *Secret Name*。
+. 在 *Build from* 部分中，选择您要从中构建的选项。您可以使用以下选项：
+** *镜像流标签* 引用给定镜像流和标签的镜像。输入您要从构建并推送到的位置的项目、镜像流和标签。
+** *镜像流镜像* 引用给定镜像流和镜像名称的镜像。输入您要从中构建的镜像流镜像。另外，进入要推送到的项目、镜像流和标签。
+** *Docker* 镜像 ：通过 *Docker* 镜像存储库引用 Docker 镜像。您还需要进入项目、镜像流和标签，以引用您要推送到的位置。
+. 可选：在 *Environment Variables* 部分中，使用 *Name* 和 *Value* 字段添加与项目关联的环境变量。要添加更多环境变量，请使用 *Add Value* 或 *Add from ConfigMap* 和 *Secret*。
+. 可选： 要进一步自定义应用程序，请使用以下高级选项：
+Trigger::
+构建器镜像更改时触发新镜像构建。点 *Add Trigger* 并选择 *Type* 和 *Secret* 来添加更多触发器。
+
+Secrets::
+为应用添加 *secret*。点 *Add secret* 并选择 *Secret* 和 *Mountpoint* 来添加更多 *secret*。
+
+Policy::
+单击 *Run policy* 以选择构建运行策略。所选策略决定从构建配置创建的构建必须运行的顺序。
+
+Hooks::
+选择择 *Run build hooks after image is built*，以在构建结束时运行命令并验证镜像。添加 *Hook 类型*、*命令* 和 *参数*，以附加到 命令。
+
+. 单击 *Save* 以保存 `BuildConfig`。

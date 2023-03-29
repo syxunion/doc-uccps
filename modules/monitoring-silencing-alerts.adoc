@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="silencing-alerts_{context}"]
+= 静默警报
+
+您可以静默特定的警报，或者静默符合您定义的指定条件的警报。
+
+.先决条件
+
+* 对于您要查看指标的项目，您可以作为开发者或具有 edit 权限的用户访问集群。
+
+.流程
+
+静默特定的警报：
+
+* 在 *开发者* 视角中：
+
+. 浏览到 统信容器云管理平台 Web 控制台的  *Observe* -> *Alerting* -> *Alerts* 页面。
+
+. 对于您要置于静默状态的警报，请选择右列中的 {kebab} 并选择 *Silence Alert*。这时会显示 *Silence Alert* 表单，其中预先填充了所选警报的规格。
+
+. 可选：修改静默。
+
+. 在创建静默前您必须添加注释。
+
+. 若要创建静默，请选择 *Silence*.
+
+* 在 *Developer* 视角中：
+
+. 导航到 统信容器云管理平台 web 控制台中的  *Observe* -> *<project_name>* -> *Alerts* 页面。
+
+. 选择警报名称左侧的 *>* 来展开警报的详情。选择展开视图中的警报名称以打开警报的 *Alert Details* 页面。
+
+. 选择 *Silence Alert*。这时会显示 *Silence Alert* 表单，其中预先填充了所选警报的规格。
+
+. 可选：修改静默。
+
+. 在创建静默前您必须添加注释。
+
+. 若要创建静默，请选择 *Silence*。
+
+要在 *开发者* 视角中通过创建警报规格来将一组警报置于静默状态：
+
+. 导航到 统信容器云管理平台 Web 控制台中的 *Observe* -> *Alerting* -> *Silences* 页面。
+
+. 选择 *Create Silence*.
+
+. 在 *Create Silence* 表单中设置警报的时间表、持续时间和标签详情。您还必须为静默添加注释。
+
+. 要为与您在上一步中输入的标签选择器匹配的警报创建静默，请选择 *Silence*。

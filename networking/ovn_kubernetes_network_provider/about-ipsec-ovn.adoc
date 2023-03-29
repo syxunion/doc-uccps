@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="about-ipsec-ovn"]
+= IPsec 加密配置
+include::_attributes/common-attributes.adoc[]
+:context: about-ipsec-ovn
+
+toc::[]
+
+启用 IPsec，则 OVN-Kubernetes Container Network Interface（CNI）集群网络中的所有节点之间的网络流量都可以通过加密的隧道进行。
+
+默认禁用 IPsec。
+
+[注意]
+====
+IPsec 加密只能在集群安装过程中启用，且在启用后无法禁用。有关安装文档，请参阅选择集群安装方法并为用户准备它。
+====
+
+include::modules/nw-ovn-ipsec-traffic.adoc[leveloffset=+1]
+include::modules/nw-ovn-ipsec-encryption.adoc[leveloffset=+1]
+include::modules/nw-ovn-ipsec-certificates.adoc[leveloffset=+1]

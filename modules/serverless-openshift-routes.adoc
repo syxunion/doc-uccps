@@ -1,0 +1,122 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-configuring-routes.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-openshift-routes_{context}"]
+= 为 Knative 服务配置 {product-title} 路由
+
+如果要将 Knative 服务配置为在 {product-title} 上使用 TLS 证书，则必须禁用 Uccps Serverless Operator 为服务自动创建路由，而是手动为服务创建路由。
+[NOTE]
+====
+完成以下步骤时，不会创建 knative-serving-ingress 命名空间中的默认 {product-title} 路由。但是，应用程序的 Knative 路由仍然在此命名空间中创建。
+====
+
+.先决条件
+
+* {ServerlessOperatorName}和 Knative Serving 组件必须安装在  {product-title} 集群中。
+* 安装了 Uccps CLI (`oc`).
+
+.流程
+
+. 创建包含 `serving.knative.openshift.io/disableRoute=true` 注解的 Knative 服务：
++
+.. 创建 Knative `Service` 资源：
++
+.资源示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: <service_name>
+  annotations:
+    serving.knative.openshift.io/disableRoute: "true"
+spec:
+  template:
+    spec:
+      containers:
+      - image: <image>
+...
+----
+.. 应用 `Service` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+.. 可选。使用 `kn service create` 命令创建 Knative 服务：
++
+.`kn`  命令示例
+[source,terminal]
+----
+$ kn service create <service_name> \
+  --image=gcr.io/knative-samples/helloworld-go \
+  --annotation serving.knative.openshift.io/disableRoute=true
+----
+
+. 验证没有为服务创建 {product-title} 路由：
++
+.示例命令
+[source,terminal]
+----
+$ $ oc get routes.route.openshift.io \
+  -l serving.knative.openshift.io/ingressName=$KSERVICE_NAME \
+  -l serving.knative.openshift.io/ingressNamespace=$KSERVICE_NAMESPACE \
+  -n knative-serving-ingress
+----
++
+您将看到以下输出：
++
+[source,terminal]
+----
+No resources found in knative-serving-ingress namespace.
+----
+
+. 在 `knative-serving-ingress` 命名空间中创建 路由 资源：
++
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 600s <1>
+  name: <route_name> <2>
+  namespace: knative-serving-ingress <3>
+spec:
+  host: <service_host> <4>
+  port:
+    targetPort: http2
+  to:
+    kind: Service
+    name: kourier
+    weight: 100
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge <5>
+    key: |-
+      -----BEGIN PRIVATE KEY-----
+      [...]
+      -----END PRIVATE KEY-----
+    certificate: |-
+      -----BEGIN CERTIFICATE-----
+      [...]
+      -----END CERTIFICATE-----
+    caCertificate: |-
+      -----BEGIN CERTIFICATE-----
+      [...]
+      -----END CERTIFICATE----
+  wildcardPolicy: None
+----
+<1> 路由的超时值。您必须设置与 max-revision-timeout-seconds 设置相同的值（默认为 600s ）。
+<2> {product-title} 路由的名称。
+<3> 路由的命名空间。这必须是 knative-serving-ingress。
+<4> 用于外部访问的主机名。您可以将其设置为 `<service_name>-<service_namespace>.<domain>` 。
+<5> 您要使用的证书。目前，只支持 边缘（edge） 终止。
+. 应用 路由 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

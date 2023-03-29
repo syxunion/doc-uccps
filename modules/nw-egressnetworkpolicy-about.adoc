@@ -1,0 +1,132 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "configuring-egress-firewall-ovn"]
+:ovn:
+:kind: EgressFirewall
+:api: k8s.ovn.org/v1
+endif::[]
+ifeval::["{context}" == "openshift-sdn-egress-firewall"]
+:openshift-sdn:
+:kind: EgressNetworkPolicy
+:api: network.openshift.io/v1
+endif::[]
+
+[id="nw-egressnetworkpolicy-about_{context}"]
+= 出口防火墙在一个项目中的工作原理
+
+作为集群管理员，您可以使用一个 _出口防火墙_ 来限制集群内的一些 pod 或所有 pod 可以访问的外部主机。出口防火墙适用于以下情况：
+
+- pod 只能连接到内部主机，且无法启动到公共互联网的连接。
+- pod 只能连接到公共互联网，且无法启动到 统信容器云管理平台 集群以外的内部主机的连接。
+- pod 无法访问 统信容器云管理平台 集群外的特定内部子网或主机。
+- pod 只能连接到特定的外部主机。
+
+例如，您可以允许某一个项目访问指定的 IP 范围，但拒绝其他项目对同一 IP 范围的访问。或者您可以限制应用程序开发人员从 Python pip 的镜像点进行更新，并强制要求更新只能来自于批准的源。
+
+您可以通过创建一个 EgressNetworkPolicy 自定义资源（CR）对象来配置出口防火墙策略。出口防火墙与满足以下任一条件的网络流量匹配：
+
+- CIDR 格式的 IP 地址范围
+- 解析为 IP 地址的 DNS 名称
+
+[重要]
+====
+如果您的出口防火墙包含 `0.0.0.0/0` 的拒绝规则，则阻止访问 统信容器云管理平台 API 服务器。为确保 pod 能够继续访问 统信容器云管理平台 API 服务器，您必须在出口防火墙规则中包含 API 服务器侦听的 IP 地址范围，如下例所示：
+
+[source,yaml,subs="attributes+"]
+----
+apiVersion: network.openshift.io/v1
+kind: EgressNetworkPolicy
+metadata:
+  name: default
+  namespace: <namespace>
+spec:
+  egress:
+  - to:
+      cidrSelector: <api_server_address_range>
+    type: Allow
+# ...
+  - to:
+      cidrSelector: 0.0.0.0/0
+    type: Deny
+----
+<namespace>：出口防火墙的命名空间。
+<api_server_address_range>：包含 统信容器云管理平台 API 服务器的 IP 地址范围。
+cidrSelector：一个全局拒绝规则会阻止访问 统信容器云管理平台 API 服务器。
+
+要查找 API 服务器的 IP 地址，请运行 `oc get ep kubernetes -n default`。
+
+====
+
+[重要]
+====
+您必须将 OpenShift SDN 配置为使用网络策略或多租户模式来配置出口防火墙。
+
+如果您使用网络策略模式，则出口防火墙只与每个命名空间的一个策略兼容，且无法用于共享网络的项目，如全局项目。
+====
+
+[警告]
+====
+出口防火墙规则不适用于通过路由器的网络流量。任何有权创建 Route CR 对象的用户，都可以通过创建指向禁止的目的地的路由来绕过出口防火墙策略规则。
+====
+
+[id="limitations-of-an-egress-firewall_{context}"]
+== 出口防火墙的限制
+
+出口防火墙有以下限制：
+
+* 项目不能有多个 EgressNetworkPolicy 对象。
+
+
+* 每个项目最多可定义一个最多具有 1000 个规则的 EgressNetworkPolicy 对象。
+
+* `default`` 项目无法使用出口防火墙。
+
+* 当在多租户模式下使用 OpenShift SDN 默认 Container Network Interface (CNI) 网络供应商时，会有以下限制：
+
+  - 全局项目无法使用出口防火墙。您可以使用 `oc adm pod-network make-projects-global` 把一个项目设置为全局项目。
+
+  - 通过 `oc adm pod-network join-projects` 命令合并的项目，无法在任何合并的项目中使用出口防火墙。
+
+违反这些限制会导致项目的出口防火墙出现问题，并可能导致所有外部网络流量被丢弃。
+
+[id="policy-rule-order_{context}"]
+== 出口防火墙策略规则的匹配顺序
+
+出口防火墙策略规则按照它们定义的顺序来评估，从第一个到最后一个的顺序。第一个与 pod 的出口连接匹配的规则会被应用。该连接会忽略后续的所有规则。
+
+[id="domain-name-server-resolution_{context}"]
+== 域名服务器 (DNS) 解析如何工作
+
+如果您在 egress 防火墙策略规则中使用 DNS 名称，则正确解析域名会受到以下限制：
+
+
+* 域名更新会根据生存时间（TTL）持续时间进行轮询。默认情况下，持续时间为 30 秒。当出口防火墙控制器查询本地名称服务器以获取域名时，如果响应中包含的 TTL 小于 30 秒，控制器会将持续时间设置为返回的值。如果响应中的 TTL 大于 30 分钟，控制器会将持续时间设置为 30 分钟。如果 TTL 介于 30 秒到 30 分钟之间，控制器会忽略该值，并将持续时间设置为 30 秒。
+
+* 在需要时，pod 必须通过相同的本地名称服务器解析域名。否则，egress 防火墙控制器和 pod 已知的域的 IP 地址可能会有所不同。如果主机名的 IP 地址不同，则出口防火墙的强制实施可能不一致。
+
+
+* 因为出口防火墙控制器和 pod 异步轮询相同的本地名称服务器，所以 pod 可能会在出口控制器执行前获取更新的 IP 地址，从而导致竞争条件。由于这个限制，仅建议在 EgressNetworkPolicy 对象中使用域名来更改 IP 地址的域。
+
+
+[注意]
+====
+出口防火墙始终允许 pod 访问 pod 所在的用于 DNS 解析的节点的外部接口。
+
+如果您在出口防火墙策略中使用域名，且您的 DNS 解析不是由本地节点上的 DNS 服务器处理，那么您必须添加出口防火墙规则，允许访问您的 DNS 服务器的 IP 地址。如果您在 pod 中使用域名。
+====
+
+ifdef::ovn[]
+:!ovn:
+endif::[]
+ifdef::openshift-sdn[]
+:!openshift-sdn:
+endif::[]
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::api[]
+:!api:
+endif::[]

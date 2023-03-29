@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-github-identity-provider.adoc
+
+[id="identity-provider-github-CR_{context}"]
+= GitHub CR 示例
+
+以下自定义资源 (CR) 显示 GitHub 身份提供程序的参数和可接受值。
+
+.GitHub CR
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: githubidp 
+    mappingMethod: claim 
+    type: GitHub
+    github:
+      ca: 
+        name: ca-config-map
+      clientID: {...} 
+      clientSecret: 
+        name: github-secret
+      hostname: ... <6>
+      organizations: 
+      - myorganization1
+      - myorganization2
+      teams: 
+      - myorganization1/team-a
+      - myorganization2/team-b
+----
+name:此提供程序名称作为前缀放在 GitHub 数字用户 ID 前，以此组成身份名称。它还可用来构建回调 URL。
+mappingMethod:控制如何在此提供程序的身份和 User 对象之间建立映射。
+ca：可选：对包含 PEM 编码证书颁发机构捆绑包的统信容器云管理平台ConfigMap 的引用，以用于验证所配置 URL 的服务器证书。仅用于带有非公开信任的根证书的 GitHub Enterprise。
+clientID：注册的 GitHub OAuth 应用程序的客户端 ID。应用程序必须配置有回调 URL https://oauth-openshift.apps.<cluster-name>.<cluster-domain>/oauth2callback/<idp-provider-name>。
+clientSecret：对包含 GitHub 发布的客户端 Secret 的统信容器云管理平台Secret 的引用。
+hostname：对于 GitHub Enterprise，您必须提供实例的主机名，如 example.com。这个值必须与 /setup/settings 文件中的 GitHub Enterprise hostname 值匹配，且不可包括端口号。如果未设定这个值，则必须定义 teams 或 organizations。对于 GitHub，请省略此参数。
+organizations：组织列表。必须设置 organizations 或 teams 字段，除非设置 hostname 字段，或者将 mappingMethod 设为 lookup。不可与 teams 字段结合使用。
+teams：团队列表。必须设置 teams 或 organizations 字段，除非设置 hostname 字段，或者将 mappingMethod 设为 lookup。不可与 organizations 字段结合使用。
+
+[注意]
+====
+如果指定了 `organizations` 或 `teams`，只有至少是一个所列组织成员的 GitHub 用户才能登录。如果在 `clientID` 中配置的 GitHub OAuth 应用程序不归该组织所有，则组织所有者必须授予第三方访问权限才能使用此选项。这可以在组织管理员第一次登录 GitHub 时完成，也可以在 GitHub 组织设置中完成。
+====

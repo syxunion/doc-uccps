@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="oadp-features-plugins"]
+= OADP 功能和插件
+include::_attributes/common-attributes.adoc[]
+:context: oadp-features-plugins
+:velero-domain: velero.io
+
+toc::[]
+
+Uccp API 用于数据保护(OADP)功能，提供用于备份和恢复应用的选项。
+
+默认插件使 Velero 能够与某些云供应商集成，并备份和恢复统信容器云管理平台资源。
+
+include::modules/oadp-features.adoc[leveloffset=+1]
+include::modules/oadp-plugins.adoc[leveloffset=+1]
+
+有关安装、使用及备份恢复介绍请参考《统信容器云管理平台解决方案用户手册-附加组件-OADP》

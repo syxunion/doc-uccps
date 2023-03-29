@@ -1,0 +1,7 @@
+:_content-type: PROCEDURE
+[id="odc-uninstalling-helm-release_{context}"]
+= 卸载 Helm 发行版本
+
+.流程
+. 在 *拓扑* 视图中，右键点击 Helm 发行版本并选择 *卸载 Helm 发行版本*。
+. 在确认提示中，输入 chart 的名称并点击 *卸载*。

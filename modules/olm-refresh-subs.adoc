@@ -1,0 +1,109 @@
+// Module included in the following assemblies:
+//
+// * support/troubleshooting/troubleshooting-operator-issues.adoc
+// * serverless/install/removing-openshift-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="olm-refresh-subs_{context}"]
+= 刷新失败的订阅
+
+在  Operator Lifecycle Manager (OLM)中，如果您订阅的是引用网络中无法访问的镜像的 Operator，您可以在`openshift-marketplace` 命名空间中找到带有以下错误的作业：
+
+.输出示例
+[source,terminal]
+----
+ImagePullBackOff for
+Back-off pulling image "example.com/openshift4/ose-elasticsearch-operator-bundle@sha256:6d2587129c846ec28d384540322b40b05833e7e00b25cca584e004af9a1d292e"
+----
+
+.输出示例
+[source,terminal]
+----
+rpc error: code = Unknown desc = error pinging docker registry example.com: Get "https://example.com/v2/": dial tcp: lookup example.com on 10.0.0.1:53: no such host
+----
+
+因此，订阅会处于这个失败状态，Operator 无法安装或升级。
+
+您可以通过删除订阅、集群服务版本（CSV）及其他相关对象来刷新失败的订阅。重新创建订阅后，OLM 会重新安装 Operator 的正确版本。
+
+.先决条件
+
+* 您有一个失败的订阅，无法拉取不能访问的捆绑包镜像。
+* 已确认可以访问正确的捆绑包镜像。
+
+.流程
+
+. 从安装 Operator 的命名空间中获取 `Subscription` 和 `ClusterServiceVersion` 对象的名称：
++
+[source,terminal]
+----
+$ oc get sub,csv -n <namespace>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                                       PACKAGE                  SOURCE             CHANNEL
+subscription.operators.coreos.com/elasticsearch-operator   elasticsearch-operator   redhat-operators   5.0
+
+NAME                                                                         DISPLAY                            VERSION    REPLACES   PHASE
+clusterserviceversion.operators.coreos.com/elasticsearch-operator.5.0.0-65   OpenShift Elasticsearch Operator   5.0.0-65              Succeeded
+----
+
+. 删除订阅：
++
+[source,terminal]
+----
+$ oc delete subscription <subscription_name> -n <namespace>
+----
+
+. 删除集群服务版本：
++
+[source,terminal]
+----
+$ oc delete csv <csv_name> -n <namespace>
+----
+
+. 在 `openshift-marketplace` 命名空间中获取所有失败的作业的名称和相关配置映射：
++
+[source,terminal]
+----
+$ oc get job,configmap -n openshift-marketplace
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                                                        COMPLETIONS   DURATION   AGE
+job.batch/1de9443b6324e629ddf31fed0a853a121275806170e34c926d69e53a7fcbccb   1/1           26s        9m30s
+
+NAME                                                                        DATA   AGE
+configmap/1de9443b6324e629ddf31fed0a853a121275806170e34c926d69e53a7fcbccb   3      9m30s
+----
+
+. 删除作业：
++
+[source,terminal]
+----
+$ oc delete job <job_name> -n openshift-marketplace
+----
++
+这样可确保尝试拉取无法访问的镜像的 Pod 不会被重新创建。
+
+. 删除配置映射：
++
+[source,terminal]
+----
+$ oc delete configmap <configmap_name> -n openshift-marketplace
+----
+
+. 在 Web 控制台中使用 OperatorHub 重新安装 Operator。
+
+.验证
+
+* 检查是否已成功重新安装 Operator:
++
+[source,terminal]
+----
+$ oc get sub,csv,installplan -n <namespace>
+----

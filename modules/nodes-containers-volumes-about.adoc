@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-volumes-about_{context}"]
+= 了解卷
+
+卷是挂载的文件系统，供 pod 及其容器使用，可以通过多个主机上本地或网络附加存储端点来支持。默认情况下，容器不具持久性；重启之后，其中的内容会被清除。
+
+为确保卷上的文件系统不包含任何错误，并在出现错误时尽可能进行修复，统信容器云管理平台 在调用 mount 实用程序之前会先调用 fsck。在添加卷或更新现有卷时会出现这种情况。
+
+最简单的卷类型是 emptyDir，这是单一机器上的一个临时目录。管理员也可以允许您请求自动附加到 pod 的持久性卷。
+
+[注意]
+====
+如果集群管理员启用了 FSGroup 参数，则 emptyDir 卷存储可能会受到基于 pod FSGroup 的配额的限制。
+====
+

@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+[id="configmaps"]
+= 创建和使用配置映射
+include::_attributes/common-attributes.adoc[]
+:context: configmaps
+
+toc::[]
+
+以下部分定义配置映射以及如何创建和使用它们。
+
+include::modules/nodes-pods-configmap-overview.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-configmap-create-from-console.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-configmap-create.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-configmap-creating-from-directories.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmap-creating-from-files.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmap-creating-from-literal-values.adoc[leveloffset=+2]
+
+[id="nodes-pods-configmaps-consuming-configmap-in-pods"]
+== 用例: 在 pod 中使用配置映射
+
+以下小节描述了在 pod 中消耗 ConfigMap 对象时的一些用例。
+
+include::modules/nodes-pods-configmaps-use-case-consuming-in-env-vars.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmaps-use-case-setting-command-line-arguments.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-configmaps-use-case-consuming-in-volumes.adoc[leveloffset=+2]

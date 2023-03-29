@@ -1,0 +1,39 @@
+// Module included in the following assemblies
+
+// * /serverless/cli_tools/kn-func-ref.adoc
+
+:_content-type: PROCEDURE
+[id="functions-list-kn_{context}"]
+= Listing existing functions
+
+您可以使用 `kn func list` 列出现有功能。如果要列出部署为 Knative 服务的功能，也可以使用 `kn service list` 。
+
+.流程
+
+* 列出现有功能：
++
+[source,terminal]
+----
+$ kn func list [-n <namespace> -p <path>]
+----
++
+.输出示例
+[source,terminal]
+----
+NAME           NAMESPACE  RUNTIME  URL                                                                                      READY
+example-function  default    node     http://example-function.default.apps.ci-ln-g9f36hb-d5d6b.origin-ci-int-aws.dev.rhcloud.com  True
+----
+
+* 列出部署为 Knative 服务的功能：
++
+[source,terminal]
+----
+$ kn service list -n <namespace>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME            URL                                                                                       LATEST                AGE   CONDITIONS   READY   REASON
+example-function   http://example-function.default.apps.ci-ln-g9f36hb-d5d6b.origin-ci-int-aws.dev.rhcloud.com   example-function-gzl4c   16m   3 OK / 3     True
+----

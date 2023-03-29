@@ -1,0 +1,9 @@
+:_content-type: ASSEMBLY
+[id="installing-kn"]
+= 安装 Knative CLI 
+include::_attributes/common-attributes.adoc[]
+:context: installing-kn
+
+toc::[]
+
+include::modules/serverless-installing-cli-web-console.adoc[leveloffset=+1]

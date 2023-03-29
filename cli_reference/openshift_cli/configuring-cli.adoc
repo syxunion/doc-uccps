@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="cli-configuring-cli"]
+= 配置 Uccps CLI
+include::_attributes/common-attributes.adoc[]
+:context: cli-configuring-cli
+
+toc::[]
+
+[id="cli-enabling-tab-completion"]
+== 启用 tab 自动完成功能
+
+You can enable tab completion for the Bash or Zsh shells.
+
+// Enabling tab completion for Bash
+include::modules/cli-configuring-completion.adoc[leveloffset=+2]

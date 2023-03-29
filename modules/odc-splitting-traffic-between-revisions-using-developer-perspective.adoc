@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-traffic-management.adoc
+
+:_content-type: PROCEDURE
+[id="odc-splitting-traffic-between-revisions-using-developer-perspective_{context}"]
+= 使用 {product-title} 控制台管理修订版本之间的流量
+
+创建无服务器应用程序后，应用程序会在 OpenShift Container Platform Web 控制台中的 *开发者视角* 的 *拓扑* 中显示。应用程序修订版本由节点表示，Knative 服务由节点的四边形表示。
+
+代码或服务配置中的任何新更改都会创建一个新修订版本，也就是给定时间点上代码的快照。对于服务，您可以根据需要通过分割服务修订版本并将其路由到不同的修订版本来管理服务间的流量。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 已登陆到  {product-title} Web 控制台。
+
+.流程
+
+要在  *拓扑* 视图中的多个应用程序修订版本间分割流量：
+
+. 点 Knative 服务在侧面面板中查看其概述信息。
+. 点 *资源* 选项卡，查看服务的 *资源* 和 *路由* 列表。
++
+.无服务器应用程序
+image::odc-serverless-app.png[]
+
+. 点侧边面板顶部的由 *S* 图标代表的服务，查看服务详情概述。
+. 点 *YAML* 选项卡，在 YAML 编辑器中修改服务配置，然后点  *保存*。例如，将 `timeoutseconds` 从 300 改为 301。这个配置更改会触发新修订版本。在 *拓扑* 视图中会显示最新的修订，服务 *资源* 选项卡现在会显示两个修订版本。
+. 在 *Resources* 选项卡中，点 btn:[Set Traffic Distribution] 查看流量分布对话框：
+.. 在 *Splits* 字段中为两个修订版本添加流量百分比。
+.. 添加标签以便为这两个修订版本创建自定义 URL。
+.. 点 *Save* 查看两个节点，分别代表 Topology 视图中的两个修订版本。
++
+.无服务器应用程序修订
+image::odc-serverless-revisions.png[]

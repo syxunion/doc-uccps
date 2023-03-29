@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="configuring-basic-authentication-identity-provider"]
+= 配置基本身份验证身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-basic-authentication-identity-provider
+
+toc::[]
+
+配置 `basic-authentication` 身份提供程序，以便用户使用针对远程身份提供程序验证的凭证来登录 统信容器云管理平台。基本身份验证是一种通用后端集成机制。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-about-basic-authentication.adoc[leveloffset=+1]
+
+include::modules/identity-provider-secret-tls.adoc[leveloffset=+1]
+
+include::modules/identity-provider-config-map.adoc[leveloffset=+1]
+
+include::modules/identity-provider-basic-authentication-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]
+
+include::modules/example-apache-httpd-configuration.adoc[leveloffset=+1]
+
+include::modules/identity-provider-basic-authentication-troubleshooting.adoc[leveloffset=+1]

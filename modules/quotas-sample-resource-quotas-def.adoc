@@ -1,0 +1,154 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+[id="quotas-sample-resource-quota-definitions_{context}"]
+= 资源配额定义示例
+
+.`core-object-counts.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: core-object-counts
+spec:
+  hard:
+    configmaps: "10" <1>
+    persistentvolumeclaims: "4" <2>
+    replicationcontrollers: "20" <3>
+    secrets: "10" <4>
+    services: "10" <5>
+    services.loadbalancers: "2" <6>
+----
+<1> 项目中可以存在的 `ConfigMap` 对象的总数。
+<2> 项目中可以存在的持久性卷声明 (PVC) 的总数。
+<3> 项目中可以存在的复制控制器的总数。
+<4> 项目中可以存在的 secret 的总数。
+<5> 项目中可以存在的服务总数。
+<6> 项目中可以存在的 `LoadBalancer` 类型的服务总数。
+
+.`openshift-object-counts.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: openshift-object-counts
+spec:
+  hard:
+    openshift.io/imagestreams: "10" <1>
+----
+<1> 项目中可以存在的镜像流的总数。
+
+.`compute-resources.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+  hard:
+    pods: "4" <1>
+    requests.cpu: "1" <2> 
+    requests.memory: 1Gi <3>
+    requests.ephemeral-storage: 2Gi <4>
+    limits.cpu: "2"  <5>
+    limits.memory: 2Gi <6>
+    limits.ephemeral-storage: 4Gi <7>
+    
+----
+<1> 项目中可以存在的处于非终端状态的 Pod 总数。
+<2> 在非终端状态的所有 Pod 中，CPU 请求总和不能超过 1 个内核。
+<3> 在非终端状态的所有 Pod 中，内存请求总和不能超过 1Gi。
+<4> 在非终端状态的所有 Pod 中，临时存储请求总和不能超过 2Gi。
+<5> limits.cpu：在非终端状态的所有 Pod 中，CPU 限值总和不能超过 2 个内核。
+<6> limits.memory：在非终端状态的所有 Pod 中，内存限值总和不能超过 2Gi。
+<7> 在非终端状态的所有 Pod 中，临时存储限值总和不能超过 4Gi。
+
+
+.`besteffort.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: besteffort
+spec:
+  hard:
+    pods: "1" <1>
+  scopes:
+  - BestEffort <2>
+----
+<1> 项目中可以存在的具有 BestEffort 服务质量的非终端状态 Pod 的总数。
+<2> 将配额仅限为在内存或 CPU 方面具有 BestEffort 服务质量的匹配 Pod。
+
+.`compute-resources-long-running.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources-long-running
+spec:
+  hard:
+    pods: "4" <1>
+    limits.cpu: "4" <2>
+    limits.memory: "2Gi" <3>
+    limits.ephemeral-storage: "4Gi" <4>
+  scopes:
+  - NotTerminating <5>
+----
+<1> 处于非终端状态的 Pod 总数。
+<2> 在非终端状态的所有 Pod 中，CPU 限值总和不能超过这个值。
+<3> 在非终端状态的所有 Pod 中，内存限值总和不能超过这个值。
+<4> 在非终端状态的所有 Pod 中，临时存储限值总和不能超过这个值。`RestartNever` policy is applied.
+<5> 将配额仅限为 `spec.activeDeadlineSeconds` 设为 nil 的匹配 Pod。构建 Pod 会归入 `NotTerminating` 下，除非应用了 `RestartNever` 策略。
+
+.`compute-resources-time-bound.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources-time-bound
+spec:
+  hard:
+    pods: "2" <1>
+    limits.cpu: "1" <2> 
+    limits.memory: "1Gi" <3>
+    limits.ephemeral-storage: "1Gi" <4>
+  scopes:
+  - Terminating <5>
+----
+<1> 处于终止状态的 pod 总数。
+<2> 在处于终止状态的所有 Pod 中，CPU 限值总和不能超过这个值。
+<3> 在处于终止状态的所有 Pod 中，内存限值总和不能超过这个值。
+<4> 在处于终止状态的所有 Pod 中，临时存储限值总和不能超过这个值。
+<5> 将配额仅限为 `spec.activeDeadlineSeconds >=0` 的匹配 `Pod`。例如，此配额适用于构建或部署器 `Pod`，而非 Web 服务器或数据库等长时间运行的 `Pod`。
+
+.`storage-consumption.yaml`
+[source,yaml]
+----
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: storage-consumption
+spec:
+  hard:
+    persistentvolumeclaims: "10" <1>
+    requests.storage: "50Gi" <2>
+    gold.storageclass.storage.k8s.io/requests.storage: "10Gi" <3>
+    silver.storageclass.storage.k8s.io/requests.storage: "20Gi" <4>
+    silver.storageclass.storage.k8s.io/persistentvolumeclaims: "5" <5>
+    bronze.storageclass.storage.k8s.io/requests.storage: "0" <6>
+    bronze.storageclass.storage.k8s.io/persistentvolumeclaims: "0" <7>
+----
+<1> 项目中的持久性卷声明总数
+<2> 在一个项目中的所有持久性卷声明中，请求的存储总和不能超过这个值。
+<3> 在一个项目中的所有持久性卷声明中，金级存储类中请求的存储总和不能超过这个值。
+<4> 在一个项目中的所有持久性卷声明中，银级存储类中请求的存储总和不能超过这个值。
+<5> 在一个项目中的所有持久性卷声明中，银级存储类中声明总数不能超过这个值。
+<6> 在一个项目中的所有持久性卷声明中，铜级存储类中请求的存储总和不能超过这个值。如果此值设为 0，则表示铜级存储类无法请求存储。
+<7> 在一个项目中的所有持久性卷声明中，铜级存储类中请求的存储总和不能超过这个值。如果此值设为 0，则表示铜级存储类无法创建声明。

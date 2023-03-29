@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+// * openshift_images/images-understand.aodc
+
+[id="images-id_{context}"]
+= 镜像 ID
+
+镜像 ID 是 SHA（安全哈希算法）代码，可用于拉取（pull）镜像。SHA 镜像 ID 不能更改。特定 SHA 标识符会始终引用完全相同的容器镜像内容。例如：
+
+[source,text]
+----
+docker.io/openshift/jenkins-2-centos7@sha256:ab312bda324
+----

@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+[id="persistent-storage-csi-snapshots-provision_{context}"]
+= 置备卷快照
+
+置备快照的方法有两种：动态和手动。
+
+[id="snapshots-dynamic-provisioning_{context}"]
+== 动态置备
+
+您可以请求从持久性卷声明中动态获取快照，而不使用已存在的快照。参数可以通过 `VolumeSnapshotClass` CRD 指定。
+
+[id="snapshots-manual-provisioning_{context}"]
+== 手动调配
+
+作为集群管理员，您可以手动置备大量 `VolumeSnapshotContent` 对象。它们包括了集群用户可以获得的实际卷的快照详情。

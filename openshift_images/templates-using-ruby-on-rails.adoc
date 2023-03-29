@@ -1,0 +1,40 @@
+:_content-type: ASSEMBLY
+[id="templates-using-ruby-on-rails"]
+= 使用 Ruby on Rails
+include::_attributes/common-attributes.adoc[]
+:context: templates-ruby-on-rails
+
+toc::[]
+
+Ruby on Rails 是采用 Ruby 编写的 web 框架。本指南介绍在 统信容器云管理平台 上使用 Rails 4。
+
+[警告]
+====
+浏览整个教程，了解在 统信容器云管理平台 上运行应用程序的所有步骤。如果遇到问题，请尝试通读整个教程，然后再回看问题。该教程还可用于审查您之前的步骤，以确保正确运行所有步骤。
+====
+
+== 先决条件
+
+* 具备 Ruby 和 Rails 基础知识。
+* 本地已安装 Ruby 2.0.0+ 版、RubyGems、Bundler。
+* 具备 Git 基础知识。
+* 统信容器云管理平台 4 的运行实例。
+* 确保 统信容器云管理平台 实例正在运行且可用。另外还需确保已安装 oc CLI 客户端，且可从命令 shell 访问命令，以便您可以使用您的电子邮件地址和密码通过客户端登录。
+
+include::modules/templates-rails-setting-up-database.adoc[leveloffset=+1]
+
+include::modules/templates-rails-writing-application.adoc[leveloffset=+1]
+
+include::modules/templates-rails-creating-welcome-page.adoc[leveloffset=+2]
+
+include::modules/templates-rails-configuring-application.adoc[leveloffset=+2]
+
+include::modules/templates-rails-storing-application-in-git.adoc[leveloffset=+2]
+
+include::modules/templates-rails-deploying-application.adoc[leveloffset=+1]
+
+include::modules/templates-rails-creating-database-service.adoc[leveloffset=+2]
+
+include::modules/templates-rails-creating-frontend-service.adoc[leveloffset=+2]
+
+include::modules/templates-rails-creating-route-for-application.adoc[leveloffset=+2]

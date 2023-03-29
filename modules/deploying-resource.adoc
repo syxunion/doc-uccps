@@ -1,0 +1,31 @@
+// Be sure to set the :FeatureName: and :FeatureResourceName: values in each assembly on the lines before
+// the include statement for this module. For example, add the following lines to the assembly:
+// :FeatureName: cluster autoscaler
+// :FeatureResourceName: ClusterAutoscaler
+//
+// Module included in the following assemblies:
+//
+// * machine_management/applying-autoscaling.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="{FeatureResourceName}-deploying_{context}"]
+= 部署集群 {FeatureName}
+
+要部署集群 {FeatureName}，请创建一个 `{FeatureResourceName}`  资源实例。
+
+.流程
+
+. 为 `{FeatureResourceName}`  资源创建一个 YAML 文件，其中包含自定义的资源定义。
+
+. 在集群中创建资源：
++
+[source,terminal]
+----
+$ oc create -f <filename>.yaml <1>
+----
+<1> `<filename>` 是您自定义的资源文件的名称。
+
+// Undefine attributes, so that any mistakes are easily spotted
+:!FeatureName:
+:!FeatureResourceName:

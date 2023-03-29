@@ -1,0 +1,175 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-pingsource.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-pingsource-yaml_{context}"]
+= 使用 YAML 创建 ping 源
+
+使用 YAML 文件创建 Knative 资源使用声明性 API，它允许您以可重复的方式描述事件源。要使用 YAML 创建无服务器 ping 源，您必须创建一个 YAML 文件来定义 `PingSource` 对象，然后使用 `oc apply` 来应用它。
+
+.`PingSource`  对象示例
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: test-ping-source
+spec:
+  schedule: "*/2 * * * *" <1>
+  data: '{"message": "Hello world!"}' <2>
+  sink: <3>
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+----
+
+<1> 事件指定的调度使用 CRON 格式。
+<2> 事件消息正文以 JSON 编码的数据字符串表示。
+<3> 这些是事件消费者的详情。在这个示例中，我们使用名为 `event-display` 的 Knative 服务。
+
+.先决条件
+
+* {ServerlessOperatorName}、Knative Serving 和 Knative Eventing。
+* 安装 Uccps CLI (`oc`).
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+. 要验证 ping 源是否可以工作，请创建一个简单的 Knative 服务，在服务日志中转储传入的信息。
+
+.. 创建服务 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+----
+.. 创建服务：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 对于您要请求的每一组 ping 事件，请在与事件消费者相同的命名空间中创建一个 ping 源。
+
+.. 为 ping 源创建 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: test-ping-source
+spec:
+  schedule: "*/2 * * * *"
+  data: '{"message": "Hello world!"}'
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+----
+.. 创建 ping 源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 输入以下命令检查是否正确映射了控制器：
++
+[source,terminal]
+----
+$ oc get pingsource.sources.knative.dev <ping_source_name> -oyaml
+----
++
+.输出示例
+[source,terminal]
+----
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  annotations:
+    sources.knative.dev/creator: developer
+    sources.knative.dev/lastModifier: developer
+  creationTimestamp: "2020-04-07T16:11:14Z"
+  generation: 1
+  name: test-ping-source
+  namespace: default
+  resourceVersion: "55257"
+  selfLink: /apis/sources.knative.dev/v1/namespaces/default/pingsources/test-ping-source
+  uid: 3d80d50b-f8c7-4c1b-99f7-3ec00e0a8164
+spec:
+  data: '{ value: "hello" }'
+  schedule: '*/2 * * * *'
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display
+      namespace: default
+----
+
+.验证
+
+您可以通过查看 sink pod 的日志来验证 Kubernetes 事件是否已发送到 Knative 事件。
+
+默认情况下，如果在 60 秒内都没有流量，Knative 服务会终止其 Pod。本指南中演示的示例创建了一个 PingSource，每 2 分钟发送一条消息，因此每个消息都应该在新创建的 pod 中观察到。
+
+. 查看新创建的 pod：
++
+[source,terminal]
+----
+$ watch oc get pods
+----
+
+. 使用 Ctrl+C 取消查看 pod，然后查看所创建 pod 的日志：
++
+[source,terminal]
+----
+$ oc logs $(oc get pod -o name | grep event-display) -c user-container
+----
++
+.输出示例
+[source,terminal]
+----
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 1.0
+  type: dev.knative.sources.ping
+  source: /apis/v1/namespaces/default/pingsources/test-ping-source
+  id: 042ff529-240e-45ee-b40c-3a908129853e
+  time: 2020-04-07T16:22:00.000791674Z
+  datacontenttype: application/json
+Data,
+  {
+    "message": "Hello world!"
+  }
+----
+
+.删除 ping 源
+// move to separate procedure; out of scope for this PR
+
+* 删除 ping 源：
++
+[source,terminal]
+----
+$ oc delete -f <filename>
+----
++
+.示例命令
+[source,terminal]
+----
+$ oc delete -f ping-source.yaml
+----

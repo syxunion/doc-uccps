@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-observability.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-access-prometheus_{context}"]
+= Accessing the Prometheus console
+
+Prometheus 是一个监控和警报工具，可用于收集微服务相关的多维数据。在本例中， `istio-system` 是 {SMProductShortName} 命名空间。
+
+.流程
+
+. 登陆到  {product-title} web 控制台。
+
+. 点  *项目* 菜单，选择安装 {SMProductShortName} 的项目，如 *istio-system*.
+
+. 单击 *路由*.
+
+. 点击 *Prometheus* 行的 *位置*  列中的链接。
+
+. 使用 {product-title} 凭证登录到 Grafana 控制台。

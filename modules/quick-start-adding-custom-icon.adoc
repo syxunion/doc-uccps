@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+:_content-type: PROCEDURE
+[id="adding-custom-icon-to-quick-start_{context}"]
+= 为快速启动添加自定义图标
+
+为所有快速启动提供了默认图标。您可以提供自己的自定义图标。
+
+.流程
+
+. 查找您要用作自定义图标的 `.svg` 文件。
+. 使用在线工具将文本转换为 base64。
+. 在 YAML 文件中，添加 `icon: >-`，然后在下一行中包含 `data:image/svg+xml;base64`，后面接的是 base64 转换的输出。例如：
++
+[source,yaml]
+----
+icon: >-
+   data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHJvbGU9ImltZyIgdmlld.
+----

@@ -1,0 +1,30 @@
+// Text snippet included in the following modules and assemblies:
+//
+// * /serverless/develop/serverless-applications.adoc
+// * /modules/creating-serverless-apps-admin-console.adoc
+
+:_content-type: SNIPPET
+
+无服务器应用程序已创建并部署为 Kubernetes 服务，由路由和配置定义，并包含在 YAML 文件中。要使用 Uccps Serverless 部署无服务器应用程序，您必须创建一个 Knative `Service` object.
+
+.Knative `Service` 对象 YAML 文件示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: hello <1>
+  namespace: default <2>
+spec:
+  template:
+    spec:
+      containers:
+        - image: docker.io/openshift/hello-openshift <3>
+          env:
+            - name: RESPONSE <4>
+              value: "Hello Serverless!"
+----
+<1> 应用程序的名称。
+<2> 应用程序使用的命名空间。
+<3> 应用程序的镜像。
+<4> 示例应用程序输出的环境变量。

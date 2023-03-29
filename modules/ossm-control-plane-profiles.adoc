@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-control-plane-profiles_{context}"]
+= Creating {SMProductShortName} control plane profiles
+
+您可以使用 `ServiceMeshControlPlane` 配置集创建可重复使用的配置。个人用户可以根据自己的配置扩展他们创建的配置集。配置集也可以从其他配置集继承配置信息。例如，您可以为财务团队创建一个财务 control plane，为市场团队创建一个市场 control plane。如果您创建了一个开发模板和一个产品模板，则市场团队成员和财务团队成员就可以根据自己团队的情况对开发模板和生成环境配置集进行扩展。
+
+当您配置 {SMProductShortName} 配置集时，它遵循与 `ServiceMeshControlPlane`, 相同的语法，用户以分级方式继承设置。Operator 附带一个 `默认` 配置集，带有 {SMProductName} 的默认设置。
+
+[id="ossm-create-configmap_{context}"]
+== Creating the ConfigMap
+
+要添加自定义配置集，您必须在 `openshift-operators` 项目中创建一个名为 `smcp-templates` 的  `ConfigMap` 。Operator 容器会自动挂载 `ConfigMap`。
+
+.先决条件
+
+* 已安装并验证的 {SMProductShortName} Operator。
+* 具有 `cluster-admin` 角色的帐户 。
+* Operator 部署的位置。
+* 访问 Uccps  CLI(`oc`)。
+
+.流程
+
+. 以`cluster-admin` 用户身份登录 {product-title} CLI。
+
+. 在 CLI 中运行这个命令，在 `openshift-operators`  项目中创建名为 `smcp-templates` 的 ConfigMap，并将 `<profiles-directory>` 替换成本地磁盘上的 `ServiceMeshControlPlane` 文件的位置：
++
+[source,terminal]
+----
+$ oc create configmap --from-file=<profiles-directory> smcp-templates -n openshift-operators
+----
+
+. 您可以使用 `ServiceMeshControlPlane` 中的 `profiles` 参数指定一个或多个模板。
++
+[source,yaml]
+----
+  apiVersion: maistra.io/v2
+  kind: ServiceMeshControlPlane
+  metadata:
+    name: basic
+  spec:
+    profiles:
+    - default
+----

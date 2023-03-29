@@ -1,0 +1,70 @@
+:_content-type: 流程
+[id="nodes-nodes-swap-memory_{context}"]
+
+= 在节点上启用交换内存使用
+
+:FeatureName: 在节点上启用交换内存
+include::snippets/technology-preview.adoc[]
+
+您可以根据节点为 统信容器云管理平台 工作负载启用交换内存使用。
+
+[警告]
+====
+启用交换内存可能会对工作负载性能和资源不足处理造成负面影响。不要在 master 节点上启用交换内存。
+====
+
+要启用交换内存，请创建一个 `kubeletconfig` 自定义资源(CR)来设置  `swapbehavior` 参数。您可以设置有限或无限的交换内存：
+
+* 有限: 使用 `LimitedSwap` 值来限制可以使用的交换内存工作负载量。任何不是由 统信容器云管理平台 管理的节点上的工作负载都可以使用交换内存。LimitedSwap 的行为取决于节点是否使用 Linux 控制组 版本 1(cgroups v1) 或 版本 2(cgroups v2) 运行：
+** cgroups v1: 统信容器云管理平台 工作负载可以使用内存和交换的任意组合（如果设置）到 pod 的内存限值。
+** cgroups v2: 统信容器云管理平台 工作负载无法使用交换内存。
+
+* 无限: 使用 `UnlimitedSwap` 值来允许工作负载在请求时尽可能多地使用 swap 内存，最多使用系统限制。
+
+由于 kubelet 在没有此配置的情况下不会启动交换内存，因此您必须在 统信容器云管理平台 中启用交换内存前在节点上启用交换内存。如果节点上没有交换内存，则在 统信容器云管理平台 中启用交换内存不会起作用。
+
+.先决条件
+
+* 您有一个正在运行的 统信容器云管理平台 集群。
+
+* 以具有管理特权的用户身份登录集群。
+
+* 您已在集群中启用了 `TechPreviewNoUpgrade` 功能集 (请参阅 _Nodes -> Working with clusters -> Enabling features using feature gates_).
++
+[注意]
+====
+启用 `TechPreviewNoUpgrade` 功能集无法撤消并阻止次版本更新。不建议在生产环境集群中使用这些功能集。
+====
+
+* 如果节点上启用了 cgroup v2，则必须通过设置 `swapaccount=1` 内核参数来启用节点上的交换核算。
+
+.流程
+
+. 对要允许交换内存的机器配置池应用自定义标签。
++
+[source,terminal]
+----
+$ oc label machineconfigpool worker kubelet-swap=enabled
+----
+
+. 创建自定义资源(CR)来启用和配置 swap 设置。
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: swap-config
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      kubelet-swap: enabled
+  kubeletConfig:
+    failSwapOn: false <1>
+    memorySwap:
+      swapBehavior: LimitedSwap <2>
+----
+<1> 设置为 `false` ，以在关联的节点上启用交换内存使用。设置为 `true` 可禁用交换内存使用。
+<2> 指定交换内存行为。如果未指定，则默认值为 `LimitedSwap`。
+
+. 在机器上启用交换内存。

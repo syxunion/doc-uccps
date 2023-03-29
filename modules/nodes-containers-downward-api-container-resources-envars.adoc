@@ -1,0 +1,59 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-downward-api-container-resources-envars_{context}"]
+= 使用环境变量消耗容器资源
+
+在创建 pod 时，您可以利用环境变量来使用 Downward API 注入有关计算资源请求和限制的信息。
+
+.流程
+
+使用环境变量：
+
+. 在创建 pod 配置时，在 spec.container 字段中指定与 resources 字段的内容对应的环境变量：
++
+[source,yaml]
+----
+....
+spec:
+  containers:
+    - name: test-container
+      image: gcr.io/google_containers/busybox:1.24
+      command: [ "/bin/sh", "-c", "env" ]
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      env:
+        - name: MY_CPU_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.cpu
+        - name: MY_CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.cpu
+        - name: MY_MEM_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+        - name: MY_MEM_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+....
+----
++
+如果容器配置中没有包含资源限制，Downward API 会默认使用节点的 CPU 和内存可分配量。
+
+. 从 pod.yaml 文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f pod.yaml
+----

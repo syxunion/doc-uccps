@@ -1,0 +1,63 @@
+// Module included in the following assemblies:
+//
+// * applications/projects/configuring-project-creation.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="modifying-template-for-new-projects_{context}"]
+= 为新项目修改模板
+
+作为集群管理员，您可以修改默认项目模板，以便使用自定义要求创建新项目。
+
+创建自己的自定义项目模板：
+
+.流程
+
+. 以具有 `luster-admin` 特权的用户身份登录。
+
+. 生成默认项目模板：
++
+[source,terminal]
+----
+$ oc adm create-bootstrap-project-template -o yaml > template.yaml
+----
+
+. 使用文本编辑器，通过添加对象或修改现有对象来修改生成的 `template.yaml` 文件。
+
+. 项目模板必须创建在 `openshift-config` 命名空间中。加载修改后的模板：
++
+[source,terminal]
+----
+$ oc create -f template.yaml -n openshift-config
+----
+
+. 使用 Web 控制台或 CLI 编辑项目配置资源。
+
+** 使用 Web 控制台：
+... 导航到 *管理员* -> *集群设置* 页面。
+... 单击 *配置* 以查看所有配置资源。
+... 找到 *项目* and click *编辑 YAML*.
+
+** 使用 CLI:
+... 编辑 `project.config.openshift.io/cluster` 资源:
++
+[source,terminal]
+----
+$ oc edit project.config.openshift.io/cluster
+----
+
+. 更新 `spec` 部分，使其包含 `projectRequestTemplate` 和 `name` 参数，再设置您上传的项目模板的名称。默认名称为 `project-request`。
++
+.带有自定义项目模板的项目配置资源
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Project
+metadata:
+  ...
+spec:
+  projectRequestTemplate:
+    name: <template_name>
+----
+
+. 保存更改后，创建一个新项目来验证是否成功应用了您的更改。

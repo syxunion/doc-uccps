@@ -1,0 +1,24 @@
+:_content-type: REFERENCE
+[id="odo-build-images_{context}"]
+= odo build-images
+
+`odo` 可根据 Dockerfile 构建容器镜像，并将这些镜像推送到 registry。
+
+在运行 `odo build-images` 命令时，`odo` 会使用 镜像 类型搜索 `devfile.yaml` 中的所有组件，例如：
+
+[source,yaml]
+----
+components:
+- image:
+    imageName: quay.io/myusername/myimage
+    dockerfile:
+      uri: ./Dockerfile <1>
+      buildContext: ${PROJECTS_ROOT} <2>
+  name: component-built-from-dockerfile
+----
+<1>`uri` 字段指示要使用的 Dockerfile 的相对路径，相对于包含 `devfile.yaml` 的目录。devfile 规格表示 `uri` 也可以是 HTTP URL，但 odo 尚不支持此 URL。
+<2> `buildContext` 指示用作构建上下文的目录。默认值为 `${PROJECTS_ROOT}`。
+
+对于每个镜像组件，`odo` 执行 `podman` 或 `docker` （按此顺序找到的第一个），以使用指定的 Dockerfile、构建上下文和参数构建镜像。
+
+如果将 `--push` 标志传递给命令，则镜像会在构建后推送到其 registry。

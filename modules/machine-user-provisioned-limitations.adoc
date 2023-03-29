@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating-infrastructure-machinesets.adoc
+// * machine_management/creating_machinesets/creating-machineset-aws.adoc
+// * machine_management/creating_machinesets/creating-machineset-azure.adoc
+// * machine_management/creating_machinesets/creating-machineset-azure-stack-hub.adoc
+// * machine_management/creating_machinesets/creating-machineset-gcp.adoc
+// * machine_management/creating_machinesets/creating-machineset-osp.adoc
+// * machine_management/creating_machinesets/creating-machineset-rhv.adoc
+// * machine_management/creating_machinesets/creating-machineset-vsphere.adoc
+// * machine_management/deploying-machine-health-checks.adoc
+// * machine_management/manually-scaling-machinesets.adoc
+// * post_installation_configuration/node-tasks.adoc
+// * nodes-nodes-creating-infrastructure-nodes.adoc
+
+[重要]
+====
+此过程不适用于使用手动置备的机器的集群。您只能在 Machine API 操作的集群中使用高级机器管理和扩展功能。
+====

@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/configuring-egress-ips-ovn.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-ips-node_{context}"]
+= 标记节点以托管出口 IP 地址
+
+您可以将 `k8s.ovn.org/egress-assignable=""` 标签应用到集群中的节点，以便 统信容器云管理平台 可以为该节点分配一个或多个出口 IP 地址。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以集群管理员身份登录集群。
+
+.流程
+
+* 要标记节点，使其可以托管一个或多个出口 IP 地址，请输入以下命令：
++
+[source,terminal]
+----
+$ oc label nodes <node_name> k8s.ovn.org/egress-assignable="" <1>
+----
++
+<1> 要标记的节点的名称。
++
+[提示]
+====
+您还可以应用以下 YAML 将标签添加到节点：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Node
+metadata:
+  labels:
+    k8s.ovn.org/egress-assignable: ""
+  name: <node_name>
+----
+====

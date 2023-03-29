@@ -1,0 +1,94 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-event-delivery.adoc
+
+:_content-type: REFERENCE
+[id="serverless-configuring-event-delivery-examples_{context}"]
+= 配置事件交付参数示例
+
+您可以为 `Broker`, `Trigger`, `Channel`, 和 `Subscription` 对象配置事件交付参数。如果您为代理或频道配置事件交付参数，这些参数会传播到为这些对象创建的触发器或订阅。您还可以为触发器或订阅设置事件交付参数，以覆盖代理或频道的设置。
+
+.`Broker` 对象示例
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+...
+spec:
+  delivery:
+    deadLetterSink:
+      ref:
+        apiVersion: eventing.knative.dev/v1alpha1
+        kind: KafkaSink
+        name: <sink_name>
+    backoffDelay: <duration>
+    backoffPolicy: <policy_type>
+    retry: <integer>
+...
+----
+
+.`Trigger` 对象示例
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+...
+spec:
+  broker: <broker_name>
+  delivery:
+    deadLetterSink:
+      ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: <sink_name>
+    backoffDelay: <duration>
+    backoffPolicy: <policy_type>
+    retry: <integer>
+...
+----
+
+.`Channel` 对象示例
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1
+kind: Channel
+metadata:
+...
+spec:
+  delivery:
+    deadLetterSink:
+      ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: <sink_name>
+    backoffDelay: <duration>
+    backoffPolicy: <policy_type>
+    retry: <integer>
+...
+----
+
+.`Subscription` 对象示例
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1
+kind: Subscription
+metadata:
+...
+spec:
+  channel:
+    apiVersion: messaging.knative.dev/v1
+    kind: Channel
+    name: <channel_name>
+  delivery:
+    deadLetterSink:
+      ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: <sink_name>
+    backoffDelay: <duration>
+    backoffPolicy: <policy_type>
+    retry: <integer>
+...
+----

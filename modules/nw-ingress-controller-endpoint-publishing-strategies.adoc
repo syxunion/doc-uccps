@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+[id="nw-ingress-controller-endpoint-publishing-strategies_{context}"]
+= Ingress Controller 端点发布策略
+
+*`NodePortService` 端点发布策略*
+
+`NodePortService` 端点发布策略使用 Kubernetes NodePort 服务发布 Ingress Controller。
+
+在这个配置中，Ingress Controller 部署使用容器网络。创建了一个 `NodePortService` 来发布部署。特定的节点端口由 统信容器云管理平台 动态分配; 但是，为了支持静态端口分配，您会保留对受管 `NodePortService` 的节点端口字段的更改 。
+
+.NodePortService 图表
+image::202_OpenShift_Ingress_0222_node_port.png[]
+
+上图显示了与 统信容器云管理平台 Ingress NodePort 端点发布策略相关的以下概念：
+
+* 集群中的所有可用节点均有自己的外部可访问 IP 地址。集群中运行的服务绑定到所有节点的唯一 NodePort。
+* 客户端连接到已停机的节点时，例如，通过图中 `193.10.0.10` IP 地址的方式，节点端口将客户端直接连接到运行该服务的可用节点。在这种情况下，不需要负载平衡。如镜像所示，193.10.0.10 已不可用，必须使用另一个 IP 地址。
+
+[注意]
+====
+Ingress Operator 忽略对服务的 `.spec.ports[].nodePort` 字段的任何更新。
+
+默认情况下，端口会自动分配，您可以访问集成的端口分配。但是，有时需要静态分配端口来与现有基础架构集成，这些基础架构可能无法根据动态端口进行重新配置。要实现与静态节点端口的集成，您可以直接更新受管服务资源。
+====
+
+*`HostNetwork` 端点发布策略*
+
+`HostNetwork` 端点发布策略会在部署 Ingress Controller 的节点端口上发布 Ingress Controller。
+
+带有 `HostNetwork` 端点发布策略的 Ingress 控制器每个节点只能有一个 pod 副本。如果您想要 n 个副本，则必须至少使用可调度这些副本的 n 个节点。因为每个 Pod 副本都会通过调度的节点主机上的端口 80 和 443 进行请求，所以如果同一节点上的其他 pod 使用这些端口，则无法将副本调度到该节点。

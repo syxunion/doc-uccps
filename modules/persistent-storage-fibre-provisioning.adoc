@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-fibre.adoc
+
+[id="provisioning-fibre_{context}"]
+= 置备
+要使用 `PersistentVolume` API 置备 Fibre Channel 卷，必须提供以下内容：
+
+* `targetWWNs` (Fibre Channel 阵列目标的 World Wide Names）。
+* 一个有效的 LUN 号码。
+* 文件系统类型。
+
+持久性卷和 LUN 之间有一个一对一的映射。
+
+.先决条件
+
+* Fibre Channel LUN 必须存在于底层系统中。
+
+.`PersistentVolume` 对象定义
+
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  fc:
+    wwids: [scsi-3600508b400105e210000900000490000] <1>
+    targetWWNs: ['500a0981891b8dc5', '500a0981991b8dc5'] <2>
+    lun: 2 <2>
+    fsType: ext4
+----
+<1>全局广泛的标识符(WWID)。FC `*wwids*` 或 FC 目标 WWN 和 lun 的组合必须设置，但不能同时设置。建议在 WWN 目标中使用 FC WWID 标识符，因为它可以保证每个存储设备独有，并且独立于用于访问该设备的路径。通过发出 SCSI Indentification Vital Product Data（page 0x83 ）或单元 Serial Number（`*page 0x80*`）来获得 WWID 标识符。FC WWID 被标识为 `*/dev/disk/by-id/*` 来引用磁盘上的数据，即使设备的路径发生了变化，即使从不同系统访问该设备也是如此。
+<2> Fibre Channel WWN 由 `/dev/disk/by-path/pci-<IDENTIFIER>-fc-0x<WWN>-lun-<LUN#>` 代表，但您不需要提供 `WWN` 之前（包括`0x`）和以后（包括 `-`）的部分。
+
+[重要]
+====
+在卷被格式化并置备后，修改 `fstype` 参数的值会导致数据丢失和 pod 失败。
+====

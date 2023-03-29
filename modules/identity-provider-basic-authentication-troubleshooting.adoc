@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+
+[id="identity-provider-basic-authentication-troubleshooting_{context}"]
+= 基本身份验证故障排除
+
+最常见的问题与后端服务器网络连接相关。要进行简单调试，请在 master 上运行 `curl` 命令。要测试成功的登录，请将以下示例命令中的 `<user>` 和 `<password>` 替换为有效的凭证。要测试无效的登录，请将它们替换为错误的凭证。
+
+[source,terminal]
+----
+$ curl --cacert /path/to/ca.crt --cert /path/to/client.crt --key /path/to/client.key -u <user>:<password> -v https://www.example.com/remote-idp
+----
+
+*成功响应*
+
+200 状态并带有 sub（subject）键则表示成功：
+
+[source,terminal]
+----
+{"sub":"userid"}
+----
+subject 必须是经过身份验证的用户所特有的，而且必须不可修改。
+
+成功响应可以有选择地提供附加数据，例如：
+
+* 使用 `name` 键的显示名称：
++
+[source,terminal]
+----
+{"sub":"userid", "name": "User Name", ...}
+----
+* 使用 `name` 键的显示名称：
++
+[source,terminal]
+----
+{"sub":"userid", "email":"user@example.com", ...}
+----
+* 使用 `preferred_username` 键的首选用户名：
++
+[source,terminal]
+----
+{"sub":"014fbff9a07c", "preferred_username":"bob", ...}
+----
++
+`preferred_username` 键可用在唯一不可改主体是数据库密钥或 UID 且存在更易读名称的情形中。为经过身份验证的身份置备统信容器云管理平台用户时，这可用作提示。
+
+*失败的响应*
+
+- 失败的响应
+- 非 200 状态或带有非空“error”键表示错误：{"error":"Error message"}

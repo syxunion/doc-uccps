@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+[id="builds-strategy-pipeline-mapping-buildconfig-jenkins_{context}"]
+= BuildConfig 环境变量和 Jenkins 任务参数之间的映射
+
+根据对 Pipeline 策略构建配置的更改创建或更新 Jenkins 任务时，构建配置中的任何环境变量都会映射到 Jenkins 任务参数定义，其中 Jenkins 任务参数定义的默认值是关联环境变量的当前值。
+
+在 Jenkins 任务初始创建之后，您仍然可以从 Jenkins 控制台向任务添加其他参数。参数名称与构建配置中的环境变量名称不同。为这些 Jenkins 任务启动构建时，将遵循这些参数。
+
+为 Jenkins 任务启动构建的方式决定了如何设置参数。
+
+* 如果使用 `oc start-build` 启动，则构建配置中的环境变量值是为对应作业实例设置的参数。您在 Jenkins 控制台中对参数默认值所做的更改都将被忽略。构建配置值具有优先权。
+
+* 如果使用 `oc start-build -e` 启动，则 `-e` 选项中指定的环境变量值具有优先权。
+** 如果指定没有列在构建配置中列出的环境变量，它们将添加为 Jenkins 任务参数定义。
+** 您在 Jenkins 控制台中对与环境变量对应的参数所做的更改都将被忽略。构建配置以及您通过 `oc start-build -e` 指定的值具有优先权。
+
+* 如果使用 Jenkins 控制台启动 Jenkins 任务，您可以使用 Jenkins 控制台控制参数的设置，作为启动任务构建的一部分。
+
+[注意]
+====
+建议您在构建配置中指定与作业参数关联的所有可能环境变量。这样做可以减少磁盘 I/O 并提高 Jenkins 处理期间的性能。
+====

@@ -1,0 +1,74 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="creating-an-infra-node_{context}"]
+= 创建基础架构节点
+
+[重要]
+====
+请参阅为安装程序置备的基础架构环境创建基础架构机器集，或为其 control plane 节点由机器 API 管理的任何集群创建基础架构机器集。
+====
+
+集群的基础架构系统（也称为 `infra` 节点）的要求已被置备。安装程序只为 control plane 和 worker 节点提供置备。Worker 节点可以通过标记来指定为基础架构节点或应用程序（也称为 `app` ）。
+
+.流程
+
+. 向您要充当应用程序节点的 worker 节点添加标签：
++
+[source,terminal]
+----
+$ oc label node <node-name> node-role.kubernetes.io/app=""
+----
+
+. 向您要充当基础架构节点的 worker 节点添加标签：
++
+[source,terminal]
+----
+$ oc label node <node-name> node-role.kubernetes.io/infra=""
+----
+
+. 检查相关节点现在是否具有 `infra` 角色或 `app` 角色：
++
+[source,terminal]
+----
+$ oc get nodes
+----
+
+. 创建默认的集群范围节点选择器。默认节点选择器应用到在所有命名空间中创建的 pod。这会创建一个与 pod 上任何现有节点选择器交集的交集，这会额外限制 pod 的选择器。
++
+[重要]
+====
+如果默认节点选择器键与 pod 标签的键冲突，则不会应用默认节点选择器。
+
+但是，不要设置可能会导致 pod 变得不可调度的默认节点选择器。例如，当 pod 的标签被设置为不同的节点角色（如 `node-role.kubernetes.io/infra=""`）时，将默认节点选择器设置为特定的节点角色（如 `node-role.kubernetes.io/master=""`）可能会导致 pod 无法调度。因此，将默认节点选择器设置为特定节点角色时要小心。
+
+您还可以使用项目节点选择器来避免集群范围节点选择器键冲突。
+====
+
+.. 编辑 `Scheduler` 对象：
++
+[source,terminal]
+----
+$ oc edit scheduler cluster
+----
+
+.. 使用适当的节点选择器添加 `defaultNodeSelector` 字段：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  name: cluster
+...
+spec:
+  defaultNodeSelector: topology.kubernetes.io/region=us-east-1 <1>
+...
+----
+<1> 默认情况下，此节点选择器示例将容器集部署到 `us-east-1` 区域的节点。
+
+.. 保存文件以使改变生效。
+
+现在，您可以将基础架构资源移到新标记的 `infra` 节点。

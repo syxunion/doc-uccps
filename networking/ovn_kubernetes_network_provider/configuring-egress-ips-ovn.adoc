@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="configuring-egress-ips-ovn"]
+= 配置出口 IP 地址
+include::_attributes/common-attributes.adoc[]
+:context: configuring-egress-ips-ovn
+
+toc::[]
+
+作为集群管理员，您可以配置 OVN-Kubernetes Container Network Interface(CNI)集群网络供应商，为命名空间分配一个或多个出口 IP 地址，或分配给命名空间中的特定 pod。
+
+include::modules/nw-egress-ips-about.adoc[leveloffset=+1]
+
+include::modules/nw-egress-ips-object.adoc[leveloffset=+1]
+
+include::modules/nw-egress-ips-node.adoc[leveloffset=+1]

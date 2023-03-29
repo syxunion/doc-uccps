@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * monitoring/monitoring-overview.adoc
+
+:_content-type: REFERENCE
+[id="components-for-monitoring-user-defined-projects_{context}"]
+= 用于监控用户定义的项目的组件
+
+统信容器云管理平台 1.2 包括对监控堆栈的可选增强，供您用于监控用户定义的项目中的服务和 Pod。此功能包括以下组件：
+
+.用于监控用户定义的项目的组件
+[options="header"]
+|===
+
+|组件|描述
+
+|Prometheus Operator
+|openshift-user-workload-monitoring 项目中的 Prometheus Operator (PO) 在同一项目中创建、配置和管理 Prometheus 和 Thanos Ruler 实例。
+
+|Prometheus
+|Prometheus 是为用户定义的项目提供监控的监控系统。Prometheus 将警报发送到 Alertmanager 进行处理。
+
+|Thanos Ruler
+|Thanos Ruler 是 Prometheus 的一个规则评估引擎，作为一个独立的进程来部署。在 统信容器云管理平台 1.2 中，Thanos Ruler 为监控用户定义的项目提供规则和警报评估。
+
+|===
+
+[注意]
+====
+在为用户定义的项目启用监控后，会部署上表中的组件。
+====
+
+监控堆栈中的所有组件都由堆栈监控，并在 统信容器云管理平台 更新时自动更新。

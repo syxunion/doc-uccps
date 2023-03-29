@@ -1,0 +1,218 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-node-selector.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-node-selectors-project_{context}"]
+= 创建项目范围节点选择器
+
+您可以组合使用项目中的节点选择器和节点上的标签，将该项目中创建的所有 pod 限制到标记的节点。
+
+当您在这个项目中创建 pod 时，统信容器云管理平台 会将节点选择器添加到项目中 pod，并将 pod 调度到项目中具有匹配标签的节点。如果存在集群范围默认节点选择器，则以项目节点选择器为准。
+
+您可以通过编辑  `Namespace` 对象来向项目添加节点选择器，以添加  `openshift.io/node-selector` 参数。您可为节点、机器集或机器配置添加标签。将标签添加到机器集可确保节点或机器停机时，新节点具有标签。如果节点或机器停机，添加到节点或机器配置的标签不会保留。
+
+如果 Pod 对象包含节点选择器，则不会调度 pod，但没有项目具有匹配的节点选择器。从该 spec 创建 pod 时，您收到类似以下消息的错误：
+
+.错误信息示例
+[source,terminal]
+----
+Error from server (Forbidden): error when creating "pod.yaml": pods "pod-4" is forbidden: pod node label selector conflicts with its project node label selector
+----
+
+[注意]
+====
+您可以向 pod 添加额外的键/值对。但是，您无法为一个项目键添加其他值。
+====
+
+.流程
+
+添加默认项目节点选择器：
+
+. 创建项目或编辑现有项目以添加 `openshift.io/node-selector` 参数：
++
+[source,terminal]
+----
+$ oc edit namespace <name>
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/node-selector: "type=user-node,region=east" <1>
+    openshift.io/description: ""
+    openshift.io/display-name: ""
+    openshift.io/requester: kube:admin
+    openshift.io/sa.scc.mcs: s0:c30,c5
+    openshift.io/sa.scc.supplemental-groups: 1000880000/10000
+    openshift.io/sa.scc.uid-range: 1000880000/10000
+  creationTimestamp: "2021-05-10T12:35:04Z"
+  labels:
+    kubernetes.io/metadata.name: demo
+  name: demo
+  resourceVersion: "145537"
+  uid: 3f8786e3-1fcb-42e3-a0e3-e2ac54d15001
+spec:
+  finalizers:
+  - kubernetes
+----
+<1> 使用适当的 `<key>:<value>` 对添加 `openshift.io/node-selector` 。
+
+. 通过使用机器集或直接编辑节点，为节点添加标签：
+
+* 在创建节点时，使用 `MachineSet` 对象向由机器集管理的节点添加标签：
+
+.. 运行以下命令，将标签添加到 `MachineSet` 对象中：
++
+[source,terminal]
+----
+$ oc patch MachineSet <name> --type='json' -p='[{"op":"add","path":"/spec/template/spec/metadata/labels", "value":{"<key>"="<value>","<key>"="<value>"}}]'  -n openshift-machine-api
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc patch MachineSet ci-ln-l8nry52-f76d1-hl7m7-worker-c --type='json' -p='[{"op":"add","path":"/spec/template/spec/metadata/labels", "value":{"type":"user-node","region":"east"}}]'  -n openshift-machine-api
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来向机器集中添加标签：
+
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: <machineset>
+  namespace: openshift-machine-api
+spec:
+  template:
+    spec:
+      metadata:
+        labels:
+          region: "east"
+          type: "user-node"
+----
+====
+
+.. 使用 `oc edit` 命令验证标签是否已添加到 `MachineSet` 对象中：
++
+例如：
++
+[source,terminal]
+----
+$ oc edit MachineSet ci-ln-l8nry52-f76d1-hl7m7-worker-c -n openshift-machine-api
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+...
+spec:
+...
+  template:
+    metadata:
+...
+    spec:
+      metadata:
+        labels:
+          region: east
+          type: user-node
+----
+
+.. 重新部署与该机器集关联的节点：
++
+例如：
++
+[source,terminal]
+----
+$ oc scale --replicas=0 MachineSet ci-ln-l8nry52-f76d1-hl7m7-worker-c -n openshift-machine-api
+----
++
+[source,terminal]
+----
+$ oc scale --replicas=1 MachineSet ci-ln-l8nry52-f76d1-hl7m7-worker-c -n openshift-machine-api
+----
+
+.. 当节点就绪并可用时，使用 oc get 命令验证该标签是否已添加到节点：
++
+[source,terminal]
+----
+$ oc get nodes -l <key>=<value>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get nodes -l type=user-node,region=east 
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                       STATUS   ROLES    AGE   VERSION
+ci-ln-l8nry52-f76d1-hl7m7-worker-c-vmqzp   Ready    worker   61s   v1.23.0
+----
+
+* 直接向节点添加标签：
+
+.. 编辑 `Node` 对象以添加标签：
++
+[source,terminal]
+----
+$ oc label <resource> <name> <key>=<value>
+----
++
+例如，若要为以下节点添加标签：
++
+[source,terminal]
+----
+$ oc label nodes ci-ln-l8nry52-f76d1-hl7m7-worker-c-tgq49 type=user-node region=east
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来向节点添加标签：
+
+[source,yaml]
+----
+kind: Node
+apiVersion: v1
+metadata:
+  name: <node_name>
+  labels:
+    type: "user-node"
+    region: "east"
+----
+====
+
+.. 使用 `oc get`命令验证标签是否已添加到 Node 对象中：
++
+[source,terminal]
+----
+$ oc get nodes -l <key>=<value>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc get nodes -l type=user-node,region=east
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                       STATUS   ROLES    AGE   VERSION
+ci-ln-l8nry52-f76d1-hl7m7-worker-b-tgq49   Ready    worker   17m   v1.23.0
+----

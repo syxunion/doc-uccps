@@ -1,0 +1,16 @@
+// Text snippet included in the following modules:
+//
+// * modules/odc-importing-codebase-from-git-to-create-application.adoc
+
+:_content-type: SNIPPET
+
+路由:: 点击 显示高级路由选项 链接，您可以执行以下操作：
+* 自定义路由的主机名。
+* 指定路由器监控的路径。
+* 从下拉列表中选择流量的目标端口。
+* 选中 *安全路由* 复选框来保护您的路由。从相应的下拉列表中，选择所需的 TLS 终止类型，并设置非安全流量的策略。
++
+[注意]
+====
+对于无服务器应用程序，Knative 服务管理上述所有路由选项。但在需要时，您可以自定义流量的目标端口。如果不指定目标端口，则使用默认端口 `8080`。
+====

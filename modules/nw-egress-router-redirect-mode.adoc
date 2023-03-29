@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/deploying-egress-router-layer3-redirection.adoc
+
+:_content-type: PROCEDURE
+[id="nw-egress-router-redirect-mode_{context}"]
+= 以重定向模式部署出口路由器 pod
+
+在 _重定向_ 模式中，出口路由器 pod 会设置 iptables 规则将流量从其自身 IP 地址重定向到一个或多个目标 IP 地址。需要使用保留源 IP 地址的客户端 pod 必须修改来连接到出口路由器，而不是直接连接到目标 IP。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+. 创建出口路由器 pod。
+
+. 为确保其他 pod 可以查找出口路由器 pod 的 IP 地址，请创建一个服务指向出口路由器 pod，如下例所示：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-1
+spec:
+  ports:
+  - name: http
+    port: 80
+  - name: https
+    port: 443
+  type: ClusterIP
+  selector:
+    name: egress-1
+----
++
+您的 pod 现在可以连接到此服务。使用保留的出口 IP 地址将其连接重新指向外部服务器的对应端口。

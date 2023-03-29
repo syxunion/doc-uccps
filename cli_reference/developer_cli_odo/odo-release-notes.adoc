@@ -1,0 +1,74 @@
+:_content-type: ASSEMBLY
+[id='odo-release-notes']
+= `{odo-title}` 发行注记
+include::_attributes/common-attributes.adoc[]
+:context: odo-release-notes
+
+toc::[]
+
+[id="odo-notable-improvements_{context}"]
+== odo 版本 2.5.0 中的显著变化和改进
+
+// #5238
+* 使用 `adler32` 哈希来为每个组件创建唯一路由
+// #5252
+* 支持 devfile 中的其他字段来分配资源：
+** cpuRequest
+** cpuLimit
+** memoryRequest
+** memoryLimit
+// #5276
+* 在 `odo delete` 命令中添加 `--deploy` 标志，删除使用 `odo deploy` 命令部署的组件：
++
+[source,terminal]
+----
+$ odo delete --deploy
+----
+// #5237
+* 在 `odo link` 命令中添加映射支持
+// #5279
+* 支持临时卷，使用 `volume` 组件中的 `ephemeral` 字段。
+// #5270
+* 在请求遥测选择时，将默认回答设置为 `yes`
+// #5260
+* 通过将额外的遥测数据发送到 devfile registry 来提高指标
+// #5287
+* 将 bootstrap 镜像更新至 `registry.access.redhat.com/ocp-tools-4/odo-init-container-rhel8:1.1.11`
+// #5308
+* 上游存储库位于 link:https://github.com/redhat-developer/odo[]
+
+
+
+[id="odo-fixed-issues_{context}"]
+== 程序错误修复
+// #5294
+* 在以前的版本中，如果 `.odo/env` 文件不存在，`odo deploy` 将失败。现在，如果需要，请创建 `.odo/env` 文件。
+// #5286
+* 在以前的版本中，如果断开与集群的连接，使用 `odo create` 命令创建交互式组件会失败。此问题已在最新的发行版本中解决。
+
+
+[id="odo-getting-support_{context}"]
+== 获取支持
+
+.对于产品
+
+如果您发现了错误，遇到问题或者有改进 odo 功能的建议，请在 Bugzilla 中提交问题。选择 *Uccps Developer Tools and Services* 作为产品类型，*odo* 作为组件。
+
+请在问题描述中提供尽可能多的细节。
+
+.对于文档
+
+如果您在文档中发现错误或者有改进文档的建议，请在 Bugzilla 中提交问题。选择 统信容器云管理平台 产品类型和 Documentation 组件类型。
+
+
+
+
+
+////
+[id="odo-known-issues_{context}"]
+== Known issues
+
+////
+
+//[id="odo-technology-preview_{context}"]
+//== Technology Preview features `{odo-title}`

@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="setting-a-scrape-sample-limit-for-user-defined-projects_{context}"]
+= 为用户定义的项目设置提取示例限制
+
+您可以限制用户定义的项目中每个目标提取可接受的示例数量。
+
+[警告]
+====
+如果您设置了示例限制，则在达到限制后，不会为该目标摄取更多样本数据。
+====
+
+.先决条件
+
+* 您可以使用具有  `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有 `user-workload-monitoring-config-edit` 角色的用户访问集群。
+* 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 在 `openshift-user-workload-monitoring` 项目中编辑  `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
+
+. 在 `data/config.yaml` 中添加 `enforcedSampleLimit` 配置，以限制用户定义的项目中每个目标提取可接受的示例数量：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      enforcedSampleLimit: 50000 <1>
+----
+<1> 如果指定此参数，则需要一个值。这个 `enforcedSampleLimit` 示例将用户定义的项目中每个目标提取的示例数量限制为 50,000。
+
+. 保存文件以使改变生效。该限制会自动应用。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+将更改保存到  `user-workload-monitoring-config` `ConfigMap` 对象时，可能会重新部署 `openshift-user-workload-monitoring` 项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====

@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="serverless-tracing"]
+= 跟踪请求
+:context: serverless-tracing
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+分布式追踪记录了一个请求在组成一个应用程序的多个微服务间的路径。它被用来将不同工作单元的信息串联在一起，理解分布式事务中整个事件链。工作单元可能会在不同进程或主机中执行。
+
+include::modules/distr-tracing-product-overview.adoc[leveloffset=+1]
+// we can only use this module for OCP until OSD docs have distributed tracing install docs available, since this is part of the prereqs
+include::modules/serverless-open-telemetry.adoc[leveloffset=+1]
+
+// standalone Jaeger only integration
+include::modules/serverless-jaeger-config.adoc[leveloffset=+1]
+

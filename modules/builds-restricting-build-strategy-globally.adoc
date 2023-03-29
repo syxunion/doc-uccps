@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * builds/securing-builds-by-strategy.adoc
+
+
+:_content-type: PROCEDURE
+[id="builds-restricting-build-strategy-globally_{context}"]
+= 在全局范围内限制用户使用构建策略
+
+您可以允许某一组用户使用特定策略来创建构建。
+
+.先决条件
+
+* 禁用构建策略的全局访问。
+
+.流程
+
+* 将与构建策略对应的角色分配给特定用户。例如，将 `system:build-strategy-docker` 集群角色添加到用户 `devuser`：
++
+[source,terminal]
+----
+$ oc adm policy add-cluster-role-to-user system:build-strategy-docker devuser
+----
++
+[警告]
+====
+如果在集群级别授予用户对 `builds/docker` 子资源的访问权限，那么该用户将能够在他们可以创建构建的任何项目中使用 docker 策略来创建构建。
+====

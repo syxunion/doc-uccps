@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-reference-smcp.adoc
+
+:_content-type: REFERENCE
+[id="ossm-cr-status_{context}"]
+= 状态参数
+
+`status` 参数描述了服务网格的当前状态。这些信息由 Operator 生成，且为只读。
+
+.Istio 状态参数
+|===
+|Name |描述 |类型
+
+|`observedGeneration`
+|控制器在最新协调期间观察到的生成。状态中的信息与对象的特定生成有关。如果 `status.observedGeneration` 项与 `metadata.generation` 不匹配，则代表 `status.conditions` 没有处于最新状态。
+|整数
+
+|`annotations`
+|The `annotations` 参数存储额外的、通常多余的状态信息，如由 `ServiceMeshControlPlane` 对象部署的组件数量。命令行工具 oc 使用这些状态，它还不允许在 JSONPath 表达式中计数对象。
+|无法配置
+
+|`readiness`
+|组件和拥有资源的就绪状态。
+|字符串
+
+|`operatorVersion`
+|最后处理此资源的 Operator 版本。
+|字符串
+
+|`components`
+|显示每个部署的 Service Mesh control plane 组件的状态。
+|字符串
+
+|`appliedSpec`
+|应用所有配置集后生成的配置选项规格。
+|`ControlPlaneSpec`
+
+|`conditions`
+|代表对象当前状态的最新可用影响。 `Reconciled` 表示 Operator 已完成与 `ServiceMeshControlPlane`资源中的配置协调已部署组件的实际状态。 `Installed` 表示安装了 Service Mesh control plane。 `Ready` 表示所有 Service Mesh control plane 组件都已就绪。
+|字符串
+
+|`chartVersion`
+|最后一次为此资源处理的图表版本。
+|字符串
+
+|`appliedValues`
+|生成的 `values.yaml` 文件，用于生成 chart。
+|`ControlPlaneSpec`
+|===

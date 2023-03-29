@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * builds/advanced-build-operations.adoc
+
+[id="builds-build-run-policy_{context}"]
+= 构建运行策略
+
+构建运行策略描述从构建配置创建的构建应运行的顺序。这可以通过更改 `Build` 规格的 `spec` 部分中的 `runPolicy` 字段的值来完成。
+
+还可以通过以下方法更改现有构建配置的 `runPolicy` 值：
+
+* 如果将 `Parallel` 改为 `Serial` 或 `SerialLatestOnly`，并从此配置触发新构建，这会导致新构建需要等待所有并行构建完成，因为串行构建只能单独运行。
+* 如果将 `Serial` 更改为 `SerialLatestOnly` 并触发新构建，这会导致取消队列中的所有现有构建，但当前正在运行的构建和最近创建的构建除外。最新的构建接下来运行。

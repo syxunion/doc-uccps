@@ -1,0 +1,75 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+:_content-type: REFERENCE
+[id="distr-tracing-config-ingester_{context}"]
+= Ingester configuration options
+
+Ingester 是一个从 Kafka 主题读取并写入 Elasticsearch 存储后端的服务。如果您使用 `allInOne` 或 `production` 部署策略，则不需要配置 Ingester 服务
+
+.传递给 Ingester 的 Jaeger 参数
+[options="header"]
+[cols="l, a, a"]
+|===
+|参数 |描述 |值
+|spec:
+  ingester:
+    options: {}
+|定义 Ingester 服务的配置选项。
+|
+
+|options:
+  deadlockInterval:
+|指定 Ingester 在终止前必须等待消息的时间间隔（以秒为单位）。默认情况下，死锁时间间隔被禁用（设置为 0），以避免在系统初始化过程中没有信息到达 Ingester。
+|分钟和秒，例如 1m0s。默认值为 0。
+
+|options:
+  kafka:
+    consumer:
+      topic:
+|The `topic` parameter identifies the Kafka configuration used by the collector to produce the messages, and the Ingester to consume the messages.
+|consumer 的标签例如，`jaeger-spans`.
+
+|options:
+  kafka:
+    consumer:
+      brokers:
+|Ingester 用来使用消息的 Kafka 配置的标识。
+|代理的标签，如 `my-cluster-kafka-brokers.kafka:9092`.
+
+|options:
+  log-level:
+|Ingester 的日志记录级别。
+|可能的值有： `debug`, `info`, `warn`, `error`, `fatal`, `dpanic`, `panic`.
+|===
+
+.流传输 Collector 和 Ingester 示例
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple-streaming
+spec:
+  strategy: streaming
+  collector:
+    options:
+      kafka:
+        producer:
+          topic: jaeger-spans
+          brokers: my-cluster-kafka-brokers.kafka:9092
+  ingester:
+    options:
+      kafka:
+        consumer:
+          topic: jaeger-spans
+          brokers: my-cluster-kafka-brokers.kafka:9092
+      ingester:
+        deadlockInterval: 5
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: http://elasticsearch:9200
+----

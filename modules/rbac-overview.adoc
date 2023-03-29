@@ -1,0 +1,149 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: CONCEPT
+[id="authorization-overview_{context}"]
+= RBAC 概述
+
+基于角色的访问控制 (RBAC) 对象决定是否允许用户在项目内执行给定的操作。
+
+
+集群管理员可以使用集群角色和绑定来控制谁对统信容器云管理平台平台本身和所有项目具有各种访问权限等级。
+
+开发人员可以使用本地角色和绑定来控制谁有权访问他们的项目。请注意，授权是与身份验证分开的一个步骤，身份验证更在于确定执行操作的人的身份。
+
+授权通过使用以下几项来管理：
+
+[cols="1,4",options="header"]
+|===
+
+|授权对象 |描述
+
+|规则 |一组对象上允许的操作集合。例如，用户或服务帐户能否创建（create） Pod。
+
+|角色 |规则的集合。可以将用户和组关联或绑定到多个角色。
+
+|绑定 |用户和/组与角色之间的关联。
+|===
+
+控制授权的 RBAC 角色和绑定有两个级别：
+
+[cols="1,4",options="header"]
+|===
+
+|RBAC 级别 |描述
+
+|集群 RBAC |对所有项目均适用的角色和绑定。集群角色存在于集群范围，集群角色绑定只能引用集群角色。
+
+|本地 RBAC |作用于特定项目的角色和绑定。虽然本地角色只存在于单个项目中，但本地角色绑定可以同时引用集群和本地角色。
+
+|===
+
+集群角色绑定是存在于集群级别的绑定。角色绑定存在于项目级别。集群角色 view 必须使用本地角色绑定来绑定到用户，以便该用户能够查看项目。只有集群角色不提供特定情形所需的权限集合时才应创建本地角色。
+
+这种双级分级结构允许通过集群角色在多个项目间重复使用，同时允许通过本地角色在个别项目中自定义。
+
+在评估过程中，同时使用集群角色绑定和本地角色绑定。例如：
+
+. 选中集群范围的“allow”规则。
+. 选中本地绑定的“allow”规则。
+. 默认为拒绝。
+
+
+[id="default-roles_{context}"]
+== 默认集群角色
+
+统信容器云管理平台 包括了一组默认的集群角色，您可以在集群范围或本地将它们绑定到用户和组。
+
+[重要]
+====
+不建议手动修改默认集群角色。对这些系统角色的修改可能会阻止集群正常工作。
+====
+
+[cols="1,4",options="header"]
+|===
+
+|默认集群角色 |描述
+
+|`admin` |项目管理者。如果在本地绑定中使用，则 admin 有权查看项目中的任何资源，并且修改项目中除配额外的任何资源。
+
+|`basic-user` |此用户可以获取有关项目和用户的基本信息。
+
+|`cluster-admin` |此超级用户可以在任意项目中执行任何操作。当使用本地绑定来绑定一个用户时，这些用户可以完全控制项目中每一资源的配额和所有操作。
+
+|`cluster-status` |此用户可以获取基本的集群状态信息。
+
+|`cluster-reader` | 用户可以获取或查看大多数对象，但不能修改它们。
+|`edit` |此用户可以修改项目中大多数对象，但无权查看或修改角色或绑定。
+
+|`self-provisioner` |此用户可以创建自己的项目。
+
+|`view` |此用户无法进行任何修改，但可以查看项目中的大多数对象。不能查看或修改角色或绑定。
+
+|===
+
+请注意本地和集群绑定之间的区别。例如，如果使用本地角色绑定将 cluster-admin 角色绑定到一个用户，这可能看似该用户具有了集群管理员的特权。事实并非如此。将 cluster-admin 绑定到项目里的某一用户，仅会将该项目的超级管理员特权授予这一用户。该用户具有集群角色 admin 的权限，以及该项目的一些额外权限，例如能够编辑项目的速率限制。通过 web 控制台 UI 操作时此绑定可能会令人混淆，因为它不会列出绑定到真正集群管理员的集群角色绑定。然而，它会列出可用来本地绑定 cluster-admin 的本地角色绑定。
+
+////
+If you do, when you upgrade
+your cluster, the default roles are updated and
+automatically reconciled when the server is started. During reconciliation, any
+permissions that are missing from
+the default roles are added. If you added more permissions to the role, they are
+not removed.
+
+If you customized the default roles and configured them to prevent automatic
+role reconciliation, you must manually update policy definitions
+when you upgrade {product-title}.
+////
+
+
+下方展示了集群角色、本地角色、集群角色绑定、本地角色绑定、用户、组和服务帐户之间的关系。
+
+image::rbac.png[{product-title} RBAC]
+
+
+[id="evaluating-authorization_{context}"]
+== 评估授权
+
+统信容器云管理平台 使用以下几项来评估授权：
+
+身份:: 用户名以及用户所属组的列表。
+
+操作:: 您执行的操作。在大多数情况下，这由以下几项组成：
+* *项目*: 您访问的项目。项目是一种附带额外注解的 Kubernetes 命名空间，使一个社区的用户可以在与其他社区隔离的前提下组织和管理其内容。
+* *操作动词* : 操作本身：get、list、create、update、delete、deletecollection 或 watch。
+* *资源名称*: 您访问的 API 端点。
+绑定:: 绑定的完整列表，用户或组与角色之间的关联。
+
+统信容器云管理平台 通过以下几个步骤评估授权：
+
+. 使用身份和项目范围操作来查找应用到用户或所属组的所有绑定。
+. 使用绑定来查找应用的所有角色。
+. 使用角色来查找应用的所有规则。
+. 针对每一规则检查操作，以查找匹配项。
+. 如果未找到匹配的规则，则默认拒绝该操作。
+
+
+[提示]
+====
+请记住，用户和组可以同时关联或绑定到多个角色。
+====
+
+项目管理员可以使用 CLI 查看本地角色和绑定信息，包括与每个角色关联的操作动词和资源的一览表。
+
+[重要]
+====
+通过本地绑定来绑定到项目管理员的集群角色会限制在一个项目内。不会像授权给 *cluster-admin* 或 *system:admin* 的集群角色那样在集群范围绑定。
+
+集群角色是在集群级别定义的角色，但可在集群级别或项目级别进行绑定。
+====
+
+[id="cluster-role-aggregations_{context}"]
+=== 集群角色聚合
+默认的 admin、edit、view 和 cluster-reader 集群角色支持集群角色聚合，其中每个角色的集群规则可在创建了新规则时动态更新。只有通过创建自定义资源扩展 Kubernetes API 时，此功能才有意义。
+
+// NEED NEW LINK TO ASSEMBLY ABOUT making custom resources
+

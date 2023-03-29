@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+:context: nodes-nodes-tls
+[id="nodes-nodes-tls"]
+= 为 kubelet 启用 TLS 安全配置集
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+您可以使用 TLS（端口层安全）安全配置集定义 kubelet 在充当 HTTP 服务器时需要哪些 TLS 密码。kubelet 使用其 HTTP/GRPC 服务器与 Kubernetes API 服务器通信，后者向 pod 发送命令，收集日志，并通过 kubelet 对 pod 运行 exec 命令。
+
+TLS 安全配置集定义了 Kubernetes API 服务器连接 kubelet 时必须使用的 TLS 密码，以保护 kubelet 和 Kubernetes API 服务器之间的通信。
+
+[注意]
+====
+默认情况下，当 kubelet 充当 Kubernetes API 服务器的客户端时，它会自动与 API 服务器协商 TLS 参数。
+====
+
+include::modules/tls-profiles-understanding.adoc[leveloffset=+1]
+
+include::modules/tls-profiles-kubelet-configuring.adoc[leveloffset=+1]
+
+

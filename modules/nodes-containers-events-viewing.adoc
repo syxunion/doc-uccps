@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-events.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-events-viewing-cli_{context}"]
+= 使用 CLI 查看事件
+
+您可以使用 CLI，获取给定项目中的事件列表。
+
+.流程
+
+* 要查看某一项目中的事件，请使用以下命令：
++
+[source,terminal]
+----
+$ oc get events [-n <project>] <1>
+----
+<1> 项目的名称。
++
+例如：
++
+[source,terminal]
+----
+$ oc get events -n openshift-config
+----
++
+.输出示例
+[source,terminal]
+----
+LAST SEEN   TYPE      REASON                   OBJECT                      MESSAGE
+97m         Normal    Scheduled                pod/dapi-env-test-pod       Successfully assigned openshift-config/dapi-env-test-pod to ip-10-0-171-202.ec2.internal
+97m         Normal    Pulling                  pod/dapi-env-test-pod       pulling image "gcr.io/google_containers/busybox"
+97m         Normal    Pulled                   pod/dapi-env-test-pod       Successfully pulled image "gcr.io/google_containers/busybox"
+97m         Normal    Created                  pod/dapi-env-test-pod       Created container
+9m5s        Warning   FailedCreatePodSandBox   pod/dapi-volume-test-pod    Failed create pod sandbox: rpc error: code = Unknown desc = failed to create pod network sandbox k8s_dapi-volume-test-pod_openshift-config_6bc60c1f-452e-11e9-9140-0eec59c23068_0(748c7a40db3d08c07fb4f9eba774bd5effe5f0d5090a242432a73eee66ba9e22): Multus: Err adding pod to network "openshift-sdn": cannot set "openshift-sdn" ifname to "eth0": no netns: failed to Statfs "/proc/33366/ns/net": no such file or directory
+8m31s       Normal    Scheduled                pod/dapi-volume-test-pod    Successfully assigned openshift-config/dapi-volume-test-pod to ip-10-0-171-202.ec2.internal
+----
+
+
+* 从 统信容器云管理平台 控制台查看项目中的事件。
++
+. 启动 统信容器云管理平台 控制台。
++
+. 点 *Home* -> *Events* ，再选择您的项目。
+
+. 移到您想要查看事件的资源。例如 *Home* -> *Projects* -> <project-name> -> <resource-name>.
++
+pod 和部署等许多对象也具有自己的 *Events* 选项卡，其中显示与该对象相关的事件。

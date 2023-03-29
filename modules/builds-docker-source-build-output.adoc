@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * builds/managing-build-output.adoc
+
+[id="builds-docker-source-build-output_{context}"]
+= 构建输出
+
+使用 docker 或 source-to-image（S2I）策略的构建会导致创建新的容器镜像。镜像而后被推送到由 Build 规格的 output 部分中指定的容器镜像 registry 中。
+
+如果输出类型是 `ImageStreamTag`，则镜像将推送到集成的 统信容器云管理平台 registry 并在指定的镜像流中标记。如果输出类型为 `DockerImage`，则输出引用的名称将用作 `docker push` 规格。规格中可以包含 registry；如果没有指定 registry，则默认为 `DockerHub`。如果 Build 规格的 output 部分为空，则构建结束时不推送镜像。
+
+.输出到 ImageStreamTag
+[source,yaml]
+----
+spec:
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "sample-image:latest"
+----
+
+.输出到 docker Push 规格
+[source,yaml]
+----
+spec:
+  output:
+    to:
+      kind: "DockerImage"
+      name: "my-registry.mycompany.com:5000/myimages/myimage:tag"
+----

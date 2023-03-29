@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-overcommit-project-disable_{context}"]
+= 禁用项目过量使用
+
+启用之后，可以按项目禁用过量使用。例如，您可以允许独立于过量使用配置基础架构组件。
+
+.流程
+
+在某个项目中禁用过量使用：
+
+. 编辑项目对象文件
+
+. 添加以下注解：
++
+[source,yaml]
+----
+quota.openshift.io/cluster-resource-override-enabled: "false"
+----
+
+. 创建项目对象：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----

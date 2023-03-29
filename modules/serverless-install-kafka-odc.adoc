@@ -1,0 +1,98 @@
+// Module is included in the following assemblies:
+//
+// serverless/admin_guide/serverless-kafka-admin.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-install-kafka-odc_{context}"]
+= 安装 Knative Kafka
+
+Knative Kafka 提供集成选项，供您在 OpenShift Serverless 中使用支持的 Apache Kafka 消息流平台。如果您已安装 KnativeKafka 自定义资源，则 Uccps Serverless 安装中提供了 `KnativeKafka` 功能。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} ，Knative Eventing 和 knativekafka 自定义资源。
+
+* 如果要使用验证步骤，请安装 Uccps CLI (`oc`) 
+
+* 在 {product-title} 上具有集群管理员权限。
+
+* 已登陆到 {product-title} web 控制台。
+
+.流程
+
+. 在 *管理员* 视角中，进入  *Operators* -> *安装的 Operators*.
+
+. 检查页面顶部的 *项目* 下拉菜单是否已设置为 *项目: knative-eventing*.
+
+. 在 OpenShift Serverless Operator 的 *提供的 APIs* 列表中，找到 *Knative Kafka* 复选框并点 *创建 Instance*.
+
+. 在 *KnativeKafka* 页面中配置 *创建 Knative Kafka*  对象。
++
+.`KnativeKafka` 自定义资源示例
+[source,yaml]
+----
+apiVersion: operator.serverless.openshift.io/v1alpha1
+kind: KnativeKafka
+metadata:
+    name: knative-kafka
+    namespace: knative-eventing
+spec:
+    channel:
+        enabled: true <1>
+        bootstrapServers: <bootstrap_servers> <2>
+    source:
+        enabled: true <3>
+    broker:
+        enabled: true <4>
+        defaultConfig:
+            bootstrapServers: <bootstrap_servers> <5>
+            numPartitions: <num_partitions> <6>
+            replicationFactor: <replication_factor> <7>
+    sink:
+        enabled: true <8>
+----
+<1> 让开发人员在集群中使用 `KafkaChannel` 频道类型。
+<2> 以逗号分隔的 AMQ Streams 集群中的 bootstrap 服务器列表。
+<3> 让开发人员在集群中使用 KafkaSource 事件源类型。
+<4> 让开发人员在集群中使用 Knative Kafka 代理实现。
+<5> 来自 Red Hat AMQ Streams 集群的 bootstrap 服务器的逗号分隔列表。
+<6> 定义 Kafka 主题分区的数量，由 Broker 对象支持。默认值为 10。
+<7> 定义 Kafka 主题的复制因素，由 Broker 对象支持。默认值为 3。
+<8> 让开发人员在集群中使用 Kafka sink。
++
+
+.. 建议您在不需要完全控制 *KnativeKafka* 对象创建的简单配置中使用该表单。
+
+..对于更复杂的配置，建议编辑 YAML，这可以完全控制 *KnativeKafka* 对象的创建。您可以通过点 *创建 Knative Kafka* 页面右上角的 *Edit YAML* 链接来访问 YAML。
+
+. 完成 Kafka 的任何可选配置后，点 *创建*。您会自动定向到 *Knative Kafka* 标签页，其中 *knative-kafka* 在资源列表中。
+
+.验证
+
+. 点 *Knative Kafka* 选项卡中的 *knative-kafka* 资源。您会自动定向到 *Knative Kafka 详情* 页面。
+
+. 查看资源的 *Conditions* 列表，并确认其状态为 *真*。
++
+image::knative-kafka-overview.png[Kafka Knative Overview page showing Conditions]
++
+如果条件的状态为 *Unknown* 或 *False*，请等待几分钟刷新页面。
+
+. 检查是否已创建 Knative Kafka 资源：
++
+[source,terminal]
+----
+$ oc get pods -n knative-eventing
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                        READY   STATUS    RESTARTS   AGE
+kafka-broker-dispatcher-7769fbbcbb-xgffn    2/2     Running   0          44s
+kafka-broker-receiver-5fb56f7656-fhq8d      2/2     Running   0          44s
+kafka-channel-dispatcher-84fd6cb7f9-k2tjv   2/2     Running   0          44s
+kafka-channel-receiver-9b7f795d5-c76xr      2/2     Running   0          44s
+kafka-controller-6f95659bf6-trd6r           2/2     Running   0          44s
+kafka-source-dispatcher-6bf98bdfff-8bcsn    2/2     Running   0          44s
+kafka-webhook-eventing-68dc95d54b-825xs     2/2     Running   0          44s
+----

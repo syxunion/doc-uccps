@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/tkn_cli/op-tkn-references.adoc
+
+[id="op-tkn-pipeline-run_{context}"]
+= Pipeline run 命令
+
+
+== pipelinerun
+管理管道运行。
+
+.示例： 显示帮助信息
+[source,terminal]
+----
+$ tkn pipelinerun -h
+----
+
+== pipelinerun cancel
+取消管道运行。
+
+.示例：取消从命名空间中运行的 `mypipelinerun` 管道
+[source,terminal]
+----
+$ tkn pipelinerun cancel mypipelinerun -n myspace
+----
+
+== pipelinerun delete
+删除管道运行。
+
+.示例：删除管道从命名空间中运行
+[source,terminal]
+----
+$ tkn pipelinerun delete mypipelinerun1 mypipelinerun2 -n myspace
+----
+
+.示例：删除所有管道从命名空间中运行，但最近执行的管道运行除外
+[source,terminal]
+----
+$ tkn pipelinerun delete -n myspace --keep 5 <1>
+----
+<1> 使用您要保留的最新执行的管道运行数量替换 `5`。
+
+.示例：删除所有管道
+[source,terminal]
+----
+$ tkn pipelinerun delete --all
+----
+
+[注意]
+====
+从 UnionTech Uccps Pipelines 1.6 开始，`tkn pipelinerun delete --all` 命令不会删除处于 running 状态的任何资源。
+====
+
+== pipelinerun describe
+描述管道运行。
+
+.示例：描述在命名空间中运行的 `mypipelinerun` 管道
+[source,terminal]
+----
+$ tkn pipelinerun describe mypipelinerun -n myspace
+----
+
+== pipelinerun list
+列出管道运行。
+
+.示例： 显示在命名空间中运行的管道列表
+[source,terminal]
+----
+$ tkn pipelinerun list -n myspace
+----
+
+== pipelinerun logs
+显示管道运行的日志。
+
+.示例：显示 `mypipelinerun` 管道运行的日志，其中包含命名空间中的所有任务和步骤
+[source,terminal]
+----
+$ tkn pipelinerun logs mypipelinerun -a -n myspace
+----

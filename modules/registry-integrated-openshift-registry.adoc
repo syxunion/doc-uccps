@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+//* registry/registry-options
+//* registry/index.adoc
+
+[id="registry-integrated-openshift-registry_{context}"]
+= 集成的统信容器云管理平台 registry
+ifdef::openshift-enterprise,openshift-webscale,openshift-origin[]
+统信容器云管理平台 提供了一个内建的镜像 registry，它作为一个标准的工作负载在集群中运行。这个 registry 由一个 infrastructure Operator 配置并管理。它为用户提供了一种现成的解决方案，供用户管理在已有集群基础架构上运行的，用于处理实际工作负载的镜像。这个registry可以象集群中的其他负载一样进行扩展，且不需要置备特殊的基础架构。此外，它已被集成到集群用户身份验证和授权系统中。这意味着，通过定义镜像资源上的用户权限就可以控制对镜像的创建和访问权限。
+
+该 registry 通常作为集群中构建的镜像的发布目标，以及在集群中运行的工作负载的镜像源。当一个新镜像被推送到registry时，集群会收到新镜像的通知，其他组件就可以对更新的镜像做出反应。
+
+镜像数据会存储在两个位置。实际镜像数据存储在可配置的存储位置，例如云存储或一个文件系统卷中。镜像的元数据被保存为标准的API资源（镜像(image)及镜像流(imagestream)），它们可以通过标准的集群 API 进行访问。
+endif::[]

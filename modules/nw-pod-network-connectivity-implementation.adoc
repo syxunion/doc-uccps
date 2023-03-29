@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * networking/verifying-connectivity-endpoint.adoc
+
+[id="nw-pod-network-connectivity-implementation_{context}"]
+= 连接健康检查实现
+
+在集群中，连接检查控制器或编配连接验证检查。连接测试的结果存储在 `openshift-network-diagnostics` 命名空间中的 `PodNetworkConnectivity` 对象中。连接测试会每分钟以并行方式执行。
+
+Cluster Network Operator（CNO）将几个资源部署到集群，以发送和接收连接性健康检查：
+
+健康检查源:: 此程序部署在一个由 `Deployment` 对象管理的单个 pod 副本集中。程序会消耗 `PodNetworkConnectivity` 对象，并连接到每个对象中指定的 `spec.targetEndpoint`。
+
+健康检查目标:: pod 作为集群中每个节点上的守护进程集的一部分部署。pod 侦听入站健康检查。在每个节点上存在这个 pod 可以测试到每个节点的连接。

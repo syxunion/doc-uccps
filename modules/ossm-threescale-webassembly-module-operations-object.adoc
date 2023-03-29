@@ -1,0 +1,27 @@
+// Module included in the following assembly:
+//
+// service_mesh/v2x/ossm-threescale-webassembly-module.adoc
+
+[id="ossm-threescale-webassembly-module-operations-object_{context}"]
+= The 3scale WebAssembly module operations object
+
+属于特定 `source type` 的 `ops` 数组中的每个元素都是 `operation` 对象，可以应用转换到值或执行测试。用于此类对象的字段名称是 `operation` 本身的名称，任何值都是`operation` 的参数，可以是结构对象，例如，带有字段和值、列表或字符串的映射。
+
+大多数 `operations` 都参与一个或多个输入，产生一个或多个输出。当它们消耗输入或生成输出时，它们与一个堆栈相关：操作消耗的每个值都从堆栈中弹出，最初填充任何 `source` 匹配。它们输出的值将推送到堆栈。其他 `operations` 没有使用或生成的输出不是声明的特定属性，但您检查值的堆栈。
+
+[NOTE]
+====
+完成解析后，下一步获取的值，例如将值分配给 app_id、app_key 或 user_key，取自堆栈的底部值.
+====
+
+有几个不同的  `operations` 类别：
+
+* `decode`： 通过解码来转换输入值，使其获得不同的格式。
+* `string`： 这取字符串值作为输入，并对字符串执行转换和检查。
+* `stack`： 它们取输入中的一组值，执行多个堆栈转换，以及堆栈中特定位置的选择。
+* `check`： 这声明了以没有副作用的方式处理一组操作的属性。
+* `control`： 它们执行允许修改评估流的操作。
+* `format`： 它解析输入值的格式特定结构，并在其中查找值。
+
+所有操作都由名称标识符以字符串形式指定。
+

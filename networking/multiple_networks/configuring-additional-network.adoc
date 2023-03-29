@@ -1,0 +1,124 @@
+:_content-type: ASSEMBLY
+[id="configuring-additional-network"]
+= 配置额外网络
+include::_attributes/common-attributes.adoc[]
+:context: configuring-additional-network
+
+toc::[]
+
+作为集群管理员，您可以为集群配置额外网络。支持以下网络类型：
+
+* xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-bridge-object_configuring-additional-network[Bridge]
+* xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-host-device-object_configuring-additional-network[主机设备]
+* xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-ipvlan-object_configuring-additional-network[IPVLAN]
+* xref:../../networking/multiple_networks/configuring-additional-network.adoc#nw-multus-macvlan-object_configuring-additional-network[MACVLAN]
+
+[id="{context}_approaches-managing-additional-network"]
+== 管理额外网络的方法
+
+您可以通过两种方法来管理额外网络的生命周期。每种方法都是相互排斥的，您一次只能使用一种方法来管理额外网络。对于任一方法，额外网络由您配置的 Container Network Interface(CNI)插件管理。
+
+对于额外网络，IP 地址通过您配置为额外网络一部分的 IP 地址管理(IPAM) CNI 插件来置备。IPAM 插件支持多种 IP 地址分配方法，包括 DHCP 和静态分配。
+
+* 修改 Cluster Network Operator(CNO)配置：CNO 会自动创建和管理 `NetworkAttachmentDefinition` 对象。除了管理对象生命周期外，CNO 可以确保 DHCP 可用于使用 DHCP 分配的 IP 地址的额外网络。
+
+* 应用 YAML 清单：您可以通过创建 `NetworkAttachmentDefinition` 对象直接管理额外网络。这个方法可以串联 CNI 插件。
+
+[id="{context}_configuration-additional-network-attachment"]
+== 配置额外网络附加
+
+额外网络通过 `k8s.cni.cncf.io` API 组中的 `NetworkAttachmentDefinition`API 来配置。
+[重要]
+====
+请勿将任何敏感信息或机密存储在 `NetworkAttachmentDefinition` 对象中，因为此类信息可由项目管理用户访问。
+====
+
+下表中描述了 API 的配置：
+
+.`NetworkAttachmentDefinition` API 字段
+[cols=".^3,.^2,.^5",options="header"]
+|====
+|字段|类型|描述
+
+|`metadata.name`
+|`string`
+|额外网络的名称。
+
+|`metadata.namespace`
+|`string`
+|与对象关联的命名空间。
+
+|`spec.config`
+|`string`
+|JSON 格式的 CNI 插件配置。
+
+|====
+
+[id="{context}_configuration-additional-network-cno"]
+=== 通过 Cluster Network Operator 配置额外网络
+
+额外网络附加的配置作为 Cluster Network Operator(CNO)配置的一部分被指定。
+
+以下 YAML 描述了使用 CNO 管理额外网络的配置参数：
+
+.Cluster Network Operator 配置
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  # ...
+  additionalNetworks: <1>
+  - name: <name> <2>
+    namespace: <namespace> <3>
+    rawCNIConfig: |- <4>
+      {
+        ...
+      }
+    type: Raw
+----
+<1> 由一个或多个附加网络配置组成的数组。
+
+<2> 您要创建的额外网络附加的名称。该名称在指定的 `namespace` 中需要是唯一的。
+
+<3> 在其中创建网络附加的命名空间。如果您未指定值，则使用 default 命名空间。
+
+<4> JSON 格式的 CNI 插件配置。
+
+[id="{context}_configuration-additional-network-yaml"]
+=== 从 YAML 清单配置额外网络
+
+从 YAML 配置文件指定额外网络的配置，如下例所示：
+
+[source,yaml]
+----
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: <name> <1>
+spec:
+  config: |- <2>
+    {
+      ...
+    }
+----
+<1> 您要创建的额外网络附加的名称。
+<2> JSON 格式的 CNI 插件配置。
+
+[id="{context}_configuration-additional-network-types"]
+== 额外网络类型的配置
+
+以下部分介绍了额外网络的具体配置字段。
+
+include::modules/nw-multus-bridge-object.adoc[leveloffset=+2]
+include::modules/nw-multus-host-device-object.adoc[leveloffset=+2]
+include::modules/nw-multus-ipvlan-object.adoc[leveloffset=+2]
+include::modules/nw-multus-macvlan-object.adoc[leveloffset=+2]
+
+include::modules/nw-multus-ipam-object.adoc[leveloffset=+1]
+
+include::modules/nw-multus-create-network.adoc[leveloffset=+1]
+
+include::modules/nw-multus-create-network-apply.adoc[leveloffset=+1]

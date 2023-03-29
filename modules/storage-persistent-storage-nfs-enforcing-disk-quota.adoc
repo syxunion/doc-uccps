@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-nfs.adoc
+
+[id="nfs-enforcing-disk-quota_{context}"]
+= 强制磁盘配额
+
+使用磁盘分区强制磁盘配额和大小限制。每个分区都可以有自己的导出。每个导出都是一个 PV。统信容器云管理平台会保证每个 PV 都使用不同的名称，但 NFS 卷服务器和路径的唯一性是由管理员实现的。
+
+采用这种方法强制配额可让软件开发人员以特定数量（如 10Gi）请求持久性存储，并可与相等或更大容量的卷进行匹配。

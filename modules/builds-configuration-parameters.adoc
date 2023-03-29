@@ -1,0 +1,51 @@
+// Module included in the following assemblies:
+//
+// * builds/build-configuration.adoc
+
+[id="builds-configuration-parameters_{context}"]
+= 构建控制器配置参数
+
+`build.config.openshift.io/cluster` 资源提供以下配置参数。
+
+[cols="3a,8a",options="header"]
+|===
+|参数 |描述
+
+|`Build`
+|包含有关如何处理构建的集群范围内信息。规范且唯一有效的名称是 `cluster`。
+
+`spec`: 包含构建控制器配置的用户可设置值。
+
+|`buildDefaults`
+|控制构建的默认信息。
+
+`defaultProxy`: 包含所有构建操作的默认代理设置，包括镜像拉取或推送以及源代码下载。
+
+您可以通过设置 `BuildConfig` 策略中的 `HTTP_PROXY`、`HTTPS_PROXY` 和 `NO_PROXY` 环境变量来覆盖值。
+
+`gitProxy`: 仅包含 Git 操作的代理设置。如果设置，这将覆盖所有 Git 命令的任何代理设置，例如 `git clone`。
+
+此处未设置的值将从 DefaultProxy 继承。
+
+`env`: 一组应用到构建的默认环境变量，条件是构建中不存在指定的变量。
+
+`imageLabels`: 应用到生成的镜像的标签列表。您可以通过在 `BuildConfig` 中提供具有相同名称的标签来覆盖默认标签。
+
+`resources`: 定义执行构建的资源要求。
+
+|`ImageLabel`
+|`name`: 定义标签的名称。它必须具有非零长度。
+
+|`buildOverrides`
+|控制构建的覆盖设置。
+
+`imageLabels`: 应用到生成的镜像的标签列表。如果您在 `BuildConfig` 中提供了与此表中名称相同的标签，您的标签将会被覆盖。
+
+`nodeSelector`: 一个选择器，必须为 true 才能使构建 Pod 适合节点。
+
+`tolerations`: 一个容忍度列表，覆盖构建 Pod 上设置的现有容忍度。
+
+|`BuildList`
+|`items`: 标准对象的元数据。
+
+|===

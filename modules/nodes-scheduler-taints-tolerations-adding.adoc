@@ -1,0 +1,86 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-taints-tolerations.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-taints-tolerations-adding_{context}"]
+= 添加污点和容限
+
+您可以为 pod 和污点添加容限，以便节点能够控制哪些 pod 应该或不应该调度到节点上。对于现有的 pod 和节点，您应首先将容限添加到 pod，然后将污点添加到节点，以避免在添加容限前从节点上移除 pod。
+
+.流程
+
+. 通过编辑 `Pod` 使其包含 `tolerations`  小节来向 pod 添加容限：
++
+.使用 Equal 运算符的 pod 配置文件示例
+[source,yaml]
+----
+spec:
+  tolerations:
+  - key: "key1" <1>
+    value: "value1"
+    operator: "Equal"
+    effect: "NoExecute"
+    tolerationSeconds: 3600 <2>
+----
+<1> 容限参数，如 *Taint 和 toleration 组件* 表中所述。
+<2> `tolerationSeconds` 参数指定 pod 在被驱除前可以保持与节点绑定的时长。
++
+例如：
++
+.使用 Exists 运算符的 pod 配置文件示例
+[source,yaml]
+----
+spec: 
+   tolerations:
+    - key: "key1"
+      operator: "Exists" <1>
+      effect: "NoExecute"
+      tolerationSeconds: 3600
+----
+<1> `Exists` 运算符不会接受一个 value。
++
+本例在 `node1` 上放置一个键为 `key1` 且值为 `value1` 的污点，污点效果是 `NoExecute`.
+
+. 通过以下命令，使用 *Taint 和 toleration 组件* 表中描述的参数为节点添加污点：
++
+[source,terminal]
+----
+$ oc adm taint nodes <node_name> <key>=<value>:<effect>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc adm taint nodes node1 key1=value1:NoExecute
+----
++
+本例在 `node1` 上放置一个键为 `key1` 且值为 `value1` 的污点，污点效果是 `NoExecute`.
++
+[注意]
+====
+如果向 control plane 节点添加了一个 `NoSchedule` 污点，节点必须具有  `node-role.kubernetes.io/master=:NoSchedule` 污点，这默认会添加。
+
+例如：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    machine.openshift.io/machine: openshift-machine-api/ci-ln-62s7gtb-f76d1-v8jxv-master-0
+    machineconfiguration.openshift.io/currentConfig: rendered-master-cdc1ab7da414629332cc4c3926e6e59c
+...
+spec:
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+...
+----
+====
++
+pod 上的容限与节点上的污点匹配。具有任一容限的 pod 可以调度到 `node1` 上。
+

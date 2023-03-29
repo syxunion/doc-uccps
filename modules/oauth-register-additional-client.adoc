@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-oauth-clients.adoc
+
+:_content-type: PROCEDURE
+[id="oauth-register-additional-client_{context}"]
+= 注册其他 OAuth 客户端
+
+如果需要其他 OAuth 客户端来管理统信容器云管理平台集群的身份验证，则可以注册一个。
+
+.流程
+
+* 注册其他 OAuth 客户端：
++
+[source,terminal]
+----
+$ oc create -f <(echo '
+kind: OAuthClient
+apiVersion: oauth.openshift.io/v1
+metadata:
+ name: demo 
+secret: "..." 
+redirectURIs:
+ - "http://www.example.com/" 
+grantMethod: prompt
+')
+----

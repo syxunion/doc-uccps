@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="installing-knative-serving"]
+= 安装 Knative Serving
+include::_attributes/common-attributes.adoc[]
+:context: installing-knative-serving
+
+toc::[]
+
+安装 Knative Serving 可让您在集群中创建 Knative 服务和功能。它还允许您为应用程序使用自动扩展和网络选项等其他功能。
+
+安装 {ServerlessOperatorName} 后，您可以使用默认设置安装 Knative Serving，或者在 `KnativeServing` 自定义资源 (CR) 中配置更高级的设置。
+
+
+include::modules/serverless-install-serving-web-console.adoc[leveloffset=+1]
+include::modules/serverless-install-serving-yaml.adoc[leveloffset=+1]

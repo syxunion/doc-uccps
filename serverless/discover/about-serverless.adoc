@@ -1,0 +1,36 @@
+:_content-type: ASSEMBLY
+[id="about-serverless"]
+= 关于 {ServerlessProductName}
+:context: about-serverless
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+{ServerlessProductName} 提供 Kubernetes 原生构建块，供开发人员在  {product-title} 中创建和部署无服务器、事件驱动的应用程序。 {ServerlessProductName} 基于开源 link:https://knative.dev/docs/[Knative 项目]，通过启用企业级无服务器平台为混合和多云环境提供可移植性和一致性。
+
+
+// Knative Serving
+include::modules/about-knative-serving.adoc[leveloffset=+1]
+
+// Knative Eventing
+include::modules/about-knative-eventing.adoc[leveloffset=+1]
+
+您可以使用以下方法将事件从 xref:../../serverless/discover/knative-event-sources.adoc#knative-event-sources[事件源] 传播到多个事件接收器：
+
+* xref:../../serverless/discover/serverless-channels.adoc#serverless-channels[频道和订阅], 或者
+* xref:../../serverless/develop/serverless-using-brokers.adoc#serverless-using-brokers[代理] 和 xref:../../serverless/develop/serverless-triggers.adoc#serverless-triggers[触发器].
+
+// add something about CLI tools?
+
+
+ifdef::openshift-enterprise[]
+[id="about-serverless-scalability-performance"]
+== 可伸缩性和性能
+
+{ServerlessProductName} 已使用配置为 3 个主要节点和 3 个 worker 节点进行测试，每个节点都有 64 个 CPU、457 GB 内存和 394 GB 存储。
+
+使用此配置创建的最大 Knative 服务数为 3,000。这与 统信容器云管理平台 Kubernetes 服务限制 10,000 对应，因为 1 个 Knative 服务创建 3 个 Kubernetes 服务。
+
+零响应时间的平均缩放约为 3.4 秒，最大响应时间为 8 秒，而一个简单 Quarkus 应用程序使用 99.9thile 的 4.5 秒。这些时间可能因应用程序和应用程序的运行时的不同而有所不同。
+endif::[]
+

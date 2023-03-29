@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-across-multiple-projects.adoc
+
+:_content-type: PROCEDURE
+[id="quotas-viewing-clusterresourcequotas_{context}"]
+= 查看适用的集群资源配额
+
+项目管理员无法创建或修改多项目配额来限制自己的项目，但管理员可以查看应用到自己项目的多项目配额文档。项目管理员可以使用 `AppliedClusterResourceQuota` 资源进行此操作。
+
+.流程
+
+. 要查看应用到某一项目的配额，请运行：
++
+[source,terminal]
+----
+$ oc describe AppliedClusterResourceQuota
+----
++
+.输出示例
+[source,terminal]
+----
+Name:   for-user
+Namespace:  <none>
+Created:  19 hours ago
+Labels:   <none>
+Annotations:  <none>
+Label Selector: <null>
+AnnotationSelector: map[openshift.io/requester:<user-name>]
+Resource  Used  Hard
+--------  ----  ----
+pods        1     10
+secrets     9     20
+----

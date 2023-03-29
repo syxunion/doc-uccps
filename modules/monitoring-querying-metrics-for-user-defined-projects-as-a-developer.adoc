@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics.adoc
+// * virt/logging_events_monitoring/virt-prometheus-queries.adoc
+
+:_content-type: PROCEDURE
+[id="querying-metrics-for-user-defined-projects-as-a-developer_{context}"]
+= 以开发者身份查询用户定义的项目的指标
+
+您可以以开发者或具有项目查看权限的用户身份访问用户定义项目的指标。
+
+在  *开发者* 视角中， Metrics UI 包括所选项目的一些预定义 CPU、内存、带宽和网络数据包查询。您还可以对项目的 CPU、内存、带宽、网络数据包和应用程序指标运行自定义 Prometheus Query Language (PromQL) 查询。
+
+[注意]
+====
+开发者只能使用 *开发者* 视角，而不能使用 *管理员* 视角。作为开发者，您一次只能查询一个项目的指标。开发人员无法访问 统信容器云管理平台 监控提供的用于核心平台组件的第三方 UI。取而代之，为您的用户定义的项目使用 Metrics UI。
+====
+
+.先决条件
+
+* 对于您要查看指标的项目，您可以作为开发者或具有查看权限的用户访问集群。
+* 您已为用户定义的项目启用了监控。
+* 您已在用户定义的项目中部署了服务。
+* 您已为该服务创建了 `ServiceMonitor` 自定义资源定义（CRD），以定义如何监控该服务。
+
+.流程
+
+. 在 统信容器云管理平台 web 控制台中的  *开发者* 视角中，选择 *Observe* -> *Metrics*.
+
+. 在 Project: 列表中选择您要查看指标的项目。
+
+. 3.从 *Select Query* 列表中选择查询，或者通过选择 *Show PromQL* 运行自定义 PromQL 查询。
++
+[注意]
+====
+在 *开发者* 视角中，您一次只能运行一个查询。
+====

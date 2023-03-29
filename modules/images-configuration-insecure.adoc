@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-insecure_{context}"]
+= 允许不安全的 registry
+
+您可以通过编辑 `image.config.openshift.io/cluster` 自定义资源（CR）来添加不安全的 registry 及 registry 中的特定存储库（可选）。统信容器云管理平台 会将对此 CR 的更改应用到集群中的所有节点。
+
+没有使用有效 SSL 证书或不需要 HTTPS 连接的 registry 被视为是不安全的 registry。
+
+[警告]
+====
+应避免使用不安全的外部 registry，以减少可能的安全性风险。
+====
+
+.流程
+
+. 编辑 `image.config.openshift.io/cluster` CR:
++
+[source,terminal]
+----
+$ oc edit image.config.openshift.io/cluster
+----
++
+以下是一个带有不安全 registry 列表的 `image.config.openshift.io/cluster` CR 示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Image
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2019-05-17T13:44:26Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "8302"
+  selfLink: /apis/config.openshift.io/v1/images/cluster
+  uid: e34555da-78a9-11e9-b92b-06d6c7da38dc
+spec:
+  registrySources: <1>
+    insecureRegistries: <2>
+    - insecure.com
+    - reg4.io/myrepo/myapp:latest
+    allowedRegistries:
+    - example.com
+    - quay.io
+    - registry.redhat.io
+    - insecure.com <3>
+    - reg4.io/myrepo/myapp:latest
+    - image-registry.openshift-image-registry.svc:5000
+status:
+  internalRegistryHostname: image-registry.openshift-image-registry.svc:5000
+----
+<1> 包含用于决定容器运行时在访问构建和 pod 的镜像时应如何处理个别 registry 的配置。它不包含内部集群 registry 的配置。
+<2> 指定不安全的 registry。您可以在该 registry 中指定存储库。
+<3> 确保将任何不安全的 registry 包含在 `allowedRegistries` 列表中。
++
+[注意]
+====
+当定义 `allowedRegistries` 参数时，除非明确列出，否则所有 registry（包括 `registry.redhat.io` 和 `quay.io registry` 和默认的内部镜像 registry）都会被阻断。如果使用参数，为了避免 pod 失败，将所有 registry（包括 `registry.redhat.io` 和 `quay.io registry`）和 `internalRegistryHostname` 添加到 `allowedRegistries` 列表中，因为环境中有效负载镜像需要它们。对于断开连接的集群，还应添加镜像的 registry。
+====
++
+Machine Config Operator（MCO）会监控 `image.config.openshift.io/cluster` CR 是否有对 registry 的更改，然后在检测到更改时排空并取消记录节点。节点返回 Ready 状态后，改为在每个节点的 `/etc/containers/registries.conf` 文件中列出的不安全和受阻 registry。
+
+. 要检查 registry 是否已添加到策略文件中，请在节点上使用以下命令：
++
+[source,terminal]
+----
+$ cat /host/etc/containers/registries.conf
+----
++
+以下示例表示来自 insecure.com registry 的镜像是不安全的，并允许进行镜像拉取和推送。
++
+.输出示例
+[source,terminal]
+----
+unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+
+[[registry]]
+  prefix = ""
+  location = "insecure.com"
+  insecure = true
+----

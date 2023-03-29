@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/installing-ossm.adoc
+// * service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-control-plane-remove_{context}"]
+= 删除 {SMProductName} control plane
+
+要从现有的 {product-title} 实例卸载 Service Mesh，首先删除 Service Mesh control plane 和 Operator。然后，您将运行命令来删除剩余的资源。
+
+[id="ossm-control-plane-remove-operatorhub_{context}"]
+==  使用 Web 控制台删除 Service Mesh control plane
+
+您可以使用 Web 控制台删除 {SMProductName} control plane
+
+.流程
+
+. 登陆到  {product-title} web 控制台。
+
+. 点 *项目* 菜单，选择安装 {SMProductShortName} control plane 的项目，如  *istio-system*.
+
+. 导航到  *Operators* -> *安装的 Operators*.
+
+. 点 *提供的 APIs* 下的 *Service Mesh Control Plane* 
+
+. 点 `ServiceMeshControlPlane` 菜单 {kebab}.
+
+. 点 *Delete Service Mesh Control Plane*.
+
+. 在确认窗口中点 *删除* 删除 `ServiceMeshControlPlane`.
+
+[id="ossm-control-plane-remove-cli_{context}"]
+== 使用 CLI 删除 Service Mesh control plane
+
+您可以使用 CLI 删除 {SMProductName} control plane 。在本例中， `istio-system` 是 control plane 项目的名称。
+
+.流程
+
+. 登录 {product-title} CLI.
+
+. 运行以下命令以删除 `ServiceMeshMemberRoll` 资源。
++
+[source,terminal]
+----
+$ oc delete smmr -n istio-system default
+----
+
+. 运行这个命令来获得安装的 `ServiceMeshControlPlane`的名称：
++
+[source,terminal]
+----
+$ oc get smcp -n istio-system
+----
+
+. 使用以上命令中的输出替换  `<name_of_custom_resource>` ，运行这个命令来删除自定义资源：
++
+[source,terminal]
+----
+$ oc delete smcp -n istio-system <name_of_custom_resource>
+----

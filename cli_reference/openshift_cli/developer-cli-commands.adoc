@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="cli-developer-commands"]
+= Uccps CLI 开发人员命令参考
+include::_attributes/common-attributes.adoc[]
+:context: cli-developer-commands
+
+toc::[]
+
+本参考提供了 Uccps CLI（oc）开发人员命令的描述和示例命令。如需管理员命令，请参阅 Uccps CLI 管理员命令参考。
+
+运行 `oc help` 来列出所有命令或运行 `oc <command> --help` 获取特定命令的附加详情。
+
+// The following file is auto-generated from the openshift/oc repository
+// OpenShift CLI (oc) developer commands
+include::modules/oc-by-example-content.adoc[leveloffset=+1]

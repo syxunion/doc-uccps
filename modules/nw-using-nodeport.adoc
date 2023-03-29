@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.adoc
+
+[id="nw-using-nodeport_{context}"]
+= 使用 NodePort 使流量进入集群
+
+使用 `NodePort` 类型的 `Service` 资源，在集群中所有节点的特定端口上公开服务。端口在 Service 资源的 `.spec.ports[*].nodePort` 字段中指定。
+
+[重要]
+====
+使用节点端口需要额外的端口资源。
+====
+
+NodePort` 在节点 IP 地址的静态端口上公开服务。默认情况下，`NodePort` 在 `30000` 到 `32767` 的范围内，这意味着，`NodePort` 不可能与服务的预期端口匹配。例如：端口 8080 可能会在节点的端口 31020 中公开。
+
+管理员必须确保外部 IP 地址路由到节点。
+
+`NodePort` 和外部 IP 地址互相独立，可以同时使用它们。

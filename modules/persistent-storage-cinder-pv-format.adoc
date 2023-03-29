@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent_storage-cinder.adoc
+
+[id="persistent-storage-cinder-pv-format_{context}"]
+= 持久性卷格式化
+
+因为统信容器云管理平台在首次使用卷前会进行格式化，所以可以使用未格式化的 Cinder 卷作为 PV。
+
+在统信容器云管理平台挂载卷并将其传递给容器之前，它会检查在 PV 定义中是否包含由 fsType 参数指定的文件系统。如果没有使用文件系统格式化该设备，该设备中的所有数据都会被删除，并使用指定的文件系统自动格式化该设备。

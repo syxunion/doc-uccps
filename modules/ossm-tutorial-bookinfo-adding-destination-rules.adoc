@@ -1,0 +1,40 @@
+////
+This PROCEDURE module included in the following assemblies:
+* service_mesh/v1x/prepare-to-deploy-applications-ossm.adoc
+* service_mesh/v2x/prepare-to-deploy-applications-ossm.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-tutorial-bookinfo-adding-destination-rules_{context}"]
+= Adding default destination rules
+
+在使用 Bookinfo 应用程序前，您必须首先添加默认目的地规则。根据您是否启用了 mutual TLS 验证，预先配置两个 YAML 文件。
+
+.流程
+
+. 要添加目的地规则，请运行以下命令之一：
+** 如果没有启用 mutual TLS：
++
+
+[source,bash,subs="attributes"]
+----
+$ oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/networking/destination-rule-all.yaml
+----
++
+** 如果启用了 nutual TLS：
++
+
+[source,bash,subs="attributes"]
+----
+$ oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/networking/destination-rule-all-mtls.yaml
+----
++
+您应该看到类似如下的输出：
++
+[source,terminal]
+----
+destinationrule.networking.istio.io/productpage created
+destinationrule.networking.istio.io/reviews created
+destinationrule.networking.istio.io/ratings created
+destinationrule.networking.istio.io/details created
+----

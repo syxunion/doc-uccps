@@ -1,0 +1,16 @@
+:_content-type: PROCEDURE
+[id="odc-setting-user-preferences_{context}"]
+= 设置用户首选项
+
+您可以为集群设置默认用户首选项。
+
+.流程
+
+. 使用您的登录凭证登录到 统信容器云管理平台 web 控制台。
+. 使用 masthead 访问用户配置文件下的用户首选项。
+. 在 *General* 部分中：
+.. 在 *Perspective* 字段中，您可以设置要登录到的默认视角。您可以根据需要选择 *Administrator* 或 *Developer* 视角。如果未选择透视图，您会登录到您最近看到的视角。
+.. 在 *Project* 字段中，选择一个您要处理的项目。每次登录时，控制台都将默认为项目。
+.. 在 *Topology* 字段中，您可以将拓扑视图设置为 default 到 graph 或 list 视图。如果未选中，控制台将默认为您使用的最后一个视图。
+.. 在 *Create/Edit resource method* 字段中，您可以设置创建或编辑资源的首选。如果表单和 YAML 选项都可用，控制台默认为您的选择。
+. 在 Language 部分中，选择 *Default 浏览器语言* 以使用默认的浏览器语言设置。否则，请选择您要用于控制台的语言。

@@ -1,0 +1,120 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-init.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-init-creating_{context}"]
+= 创建初始容器
+
+以下示例概述了一个包含两个初始容器的简单 pod。一个用于等待 myservice，另一个用于等待 mydb。两个容器完成后，pod 都会启动。
+
+.流程
+
+. 为初始容器创建 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    command: ['sh', '-c', 'until getent hosts myservice; do echo waiting for myservice; sleep 2; done;']
+  - name: init-mydb
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    command: ['sh', '-c', 'until getent hosts mydb; do echo waiting for mydb; sleep 2; done;']
+----
+
+. 为 myservice 服务创建 YAML 文件。
++
+[source,yaml]
+----
+kind: Service
+apiVersion: v1
+metadata:
+  name: myservice
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376
+----
+
+. 为 mydb 服务创建 YAML 文件
++
+[source,yaml]
+----
+kind: Service
+apiVersion: v1
+metadata:
+  name: mydb
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9377
+----
+
+. 运行以下命令来创建  `myapp-pod`:
++
+[source,terminal]
+----
+$ oc create -f myapp.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+pod/myapp-pod created
+----
+
+. 查看 pod 的状态：
++
+[source,terminal]
+----
+$ oc get pods
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                          READY     STATUS              RESTARTS   AGE
+myapp-pod                     0/1       Init:0/2            0          5s
+----
++
+注意 pod 状态指出它正在等待
+
+. 运行以下命令来创建上述服务：
++
+[source,terminal]
+----
+$ oc create -f mydb.yaml
+----
++
+[source,terminal]
+----
+$ oc create -f myservice.yaml
+----
+
+. View the status of the pod:
++
+[source,terminal]
+----
+$ oc get pods
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                          READY     STATUS              RESTARTS   AGE
+myapp-pod                     1/1       Running             0          2m
+----

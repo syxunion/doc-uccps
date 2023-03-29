@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+// * scalability_and_performance/routing-optimization.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+[id="router-performance-optimizations_{context}"]
+= Ingress Controller（路由器）性能优化
+
+统信容器云管理平台 不再支持通过设置以下环境变量来修改 Ingress Controller 的部署： `ROUTER_THREADS`、`ROUTER_DEFAULT_TUNNEL_TIMEOUT`、`ROUTER_DEFAULT_CLIENT_TIMEOUT`、`ROUTER_DEFAULT_SERVER_TIMEOUT` 和 `RELOAD_INTERVAL`。
+
+您可以修改 Ingress Controller 的部署，但当 Ingress Operator 被启用时，其配置会被覆盖。

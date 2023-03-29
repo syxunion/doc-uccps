@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+// * understanding-networking.adoc
+
+
+[id="nw-ne-openshift-ingress_{context}"]
+= 统信容器云管理平台 Ingress Operator
+在创建 统信容器云管理平台 集群时，在集群中运行的 Pod 和服务会各自分配自己的 IP 地址。IP 地址可供附近运行的其他容器集和服务访问，但外部客户端无法访问这些 IP 地址。Ingress Operator 实现 IngressController API，是负责启用对 统信容器云管理平台 集群服务的外部访问的组件。
+
+Ingress Operator 通过部署和管理一个或多个基于 HAProxy 的 Ingress Controller 来处理路由，使外部客户端可以访问您的服务。您可以通过指定 统信容器云管理平台 `Route` 和 Kubernetes `Ingress` 资源，来使用 Ingress Operator 路由流量。Ingress Controller 中的配置（如定义 `endpointPublishingStrategy` 类型和内部负载平衡）提供了发布 Ingress Controller 端点的方法。

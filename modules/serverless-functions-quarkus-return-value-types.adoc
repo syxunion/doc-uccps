@@ -1,0 +1,23 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-quarkus-functions.adoc
+
+:_content-type: REFERENCE
+[id="serverless-functions-quarkus-return-value-types_{context}"]
+= 允许的类型
+
+功能的输入和输出可以是 `void`, `String`, 或 `byte[]` 类型。此外，它们也可以是原语类型及其打包程序，例如 `int` 和 `Integer`。它们也可以是以下复杂的对象：Javabeans、映射、列表、数组和特殊的 `CloudEvents<T>` 类型。
+
+映射、列出、数组、`CloudEvents<T>` 类型的 `<T>` 类型参数以及 Javabeans 的属性只能是此处列出的类型。
+
+.示例
+[source,java]
+----
+public class Functions {
+    public List<Integer> getIds();
+    public Purchase[] getPurchasesByName(String name);
+    public String getNameById(int id);
+    public Map<String,Integer> getNameIdMapping();
+    public void processImage(byte[] img);
+}
+----

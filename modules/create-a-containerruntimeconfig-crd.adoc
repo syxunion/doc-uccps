@@ -1,0 +1,217 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="create-a-containerruntimeconfig_{context}"]
+= 创建 ContainerRuntimeConfig CR 以编辑 CRI-O 参数
+
+您可以为与特定机器配置池（MCP）关联的节点更改与 统信容器云管理平台 CRI-O 运行时关联的一些设置。通过使用 `ContainerRuntimeConfig` 自定义资源（CR），您可以设置配置值并添加一个标签以匹配 MCP。然后，MCO 会使用更新的值重建关联节点上的 crio.conf 和 storage.conf 配置文件。
+
+[注意]
+====
+要使用 `ContainerRuntimeConfig` CR 恢复实现的更改，您必须删除 CR。从机器配置池中删除标签不会恢复更改。
+====
+
+您可以使用 `ContainerRuntimeConfig` CR 修改以下设置：
+
+* **PIDs limit**: `pidsLimit` 参数设置 CRI-O `pids_limit` 参数，这是容器中允许的最大进程数。默认为 1024（`pids_limit = 1024`）。
+* **Log level**: 日志级别: `logLevel` 参数设置 CRI-O `log_level` 参数，即日志消息的详细程度。默认为 info (`log_level = info`)。其他选项包括 `fatal`、`panic`、`error`、`warn`、`debug` 和 `trace`。
+* **Overlay size**: Overlay 大小：`overlaySize` 参数设置 CRI-O Overlay 存储驱动程序 `size` 参数，这是容器镜像的最大大小。默认值为 10 GB（`size = "10G"`）。
+* **Maximum log size**: `logSizeMax` 参数设置 CRI-O `log_size_max` 参数，这是容器日志文件允许的最大值。默认为没有限制（`log_size_max = -1`）。如果设置为正数，则必须至少小于 ConMon 读取缓冲的 8192。conMon 是一个监控单个容器管理器（如 Podman 或 CRI-O）与 OCI 运行时（如 runc 或 crun）之间的通信的程序。
+
+您应该为每个机器配置池有一个 `ContainerRuntimeConfig` CR，并为该池分配所有配置更改。如果要将相同的内容应用到所有池，则所有池只需要 oneContainerRuntimeConfig CR。
+
+您应该编辑现有的 `ContainerRuntimeConfig` CR，以修改现有设置或添加新设置，而不是为每个更改创建新 CR。建议您只创建一个新的 `ContainerRuntimeConfig` CR 来修改不同的机器配置池，或者用于临时的更改，以便您可以恢复更改。
+
+您可以根据需要创建多个 `ContainerRuntimeConfig ` CR，每个集群的限制为 10。对于第一个 `ContainerRuntimeConfig` CR，MCO 会创建一个机器配置并附加 containerruntime。对于每个后续 CR，控制器会创建一个带有数字后缀的新 containerruntime 机器配置。例如，如果您有一个带有 `-2` 后缀的 containerruntime 机器配置，则下一个 containerruntime 机器配置会附加 `-3`。
+
+如果要删除机器配置，应该以相反的顺序删除它们，以避免超过限制。例如，您应该在删除 `containerruntime-2` 机器配置前删除 `containerruntime-3` 机器配置。
+
+[注意]
+====
+如果您的机器配置带有 `containerruntime-9` 后缀，并且创建了 anotherContainerRuntimeConfig CR，则不会创建新的机器配置，即使少于 10 个 `containerruntime` 机器配置。
+====
+
+.显示多个 ContainerRuntimeConfig CR 示例
+[source,terminal]
+----
+$ oc get ctrcfg
+----
+
+.输出示例
+[source, terminal]
+----
+NAME         AGE
+ctr-pid      24m
+ctr-overlay  15m
+ctr-level    5m45s
+----
+
+.显示多个 containerruntime 机器配置示例
+[source,terminal]
+----
+$ oc get mc | grep container
+----
+
+.输出示例
+[source, terminal]
+----
+...
+01-master-container-runtime                        b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             57m
+...
+01-worker-container-runtime                        b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             57m
+...
+99-worker-generated-containerruntime               b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             26m
+99-worker-generated-containerruntime-1             b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             17m
+99-worker-generated-containerruntime-2             b5c5119de007945b6fe6fb215db3b8e2ceb12511   3.2.0             7m26s
+...
+----
+
+以下示例将 `pids_limit` 增加到 2048，将 `log_level` 设置为 debug，将覆盖大小设置为 8 GB，并将 `log_size_max` 设置为无限：
+
+.ContainerRuntimeConfig CR 示例
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: ContainerRuntimeConfig
+metadata:
+ name: overlay-size
+spec:
+ machineConfigPoolSelector:
+   matchLabels:
+     pools.operator.machineconfiguration.openshift.io/worker: '' <1>
+ containerRuntimeConfig:
+   pidsLimit: 2048 <2>
+   logLevel: debug <3>
+   overlaySize: 8G <4>
+   logSizeMax: "-1" <5>
+----
+<1> 指定机器配置池标签。
+<2> 可选：指定容器中允许的最大进程数。
+<3> 可选：指定日志消息的详细程度。
+<4> 可选：指定容器镜像的最大大小。
+<5> 可选：指定容器日志文件允许的最大大小。如果设置为正数，则必须至少为 8192。
+
+.流程
+
+使用 `ContainerRuntimeConfig` CR 更改 CRI-O 设置：
+
+. 为 `ContainerRuntimeConfig` CR 创建 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: ContainerRuntimeConfig
+metadata:
+ name: overlay-size
+spec:
+ machineConfigPoolSelector:
+   matchLabels:
+     pools.operator.machineconfiguration.openshift.io/worker: '' <1>
+ containerRuntimeConfig: <2>
+   pidsLimit: 2048
+   logLevel: debug
+   overlaySize: 8G
+   logSizeMax: "-1"
+----
+<1> 为您要修改的机器配置池指定一个标签。
+<2> 根据需要设置参数。
+
+. 创建 `ContainerRuntimeConfig` CR：
++
+[source,terminal]
+----
+$ oc create -f <file_name>.yaml
+----
+
+. 验证是否已创建 CR：
++
+[source,terminal]
+----
+$ oc get ContainerRuntimeConfig
+----
++
+.输出示例
+[source,terminal]
+----
+NAME           AGE
+overlay-size   3m19s
+----
+
+. 检查是否创建了新的 `containerruntime` 机器配置：
++
+[source,terminal]
+----
+$ oc get machineconfigs | grep containerrun
+----
++
+.输出示例
+[source,terminal]
+----
+99-worker-generated-containerruntime   2c9371fbb673b97a6fe8b1c52691999ed3a1bfc2  3.2.0  31s
+----
+
+. 监控机器配置池，直到所有系统都显示为 ready 状态：
++
+[source,terminal]
+----
+$ oc get mcp worker
+----
++
+.输出示例
++
+[source,terminal]
+----
+NAME    CONFIG               UPDATED  UPDATING  DEGRADED  MACHINECOUNT  READYMACHINECOUNT  UPDATEDMACHINECOUNT  DEGRADEDMACHINECOUNT  AGE
+worker  rendered-worker-169  False    True      False     3             1                  1                    0                     9h
+----
+
+. 验证设置是否在 CRI-O 中应用：
+
+.. 打开到机器配置池中节点的 `oc debug` 会话，并运行 `chroot /host`。
++
+[source, terminal]
+----
+$ oc debug node/<node_name>
+----
++
+[source, terminal]
+----
+sh-4.4# chroot /host
+----
+
+.. 验证 `crio.conf` 文件中的更改：
++
+[source,terminal]
+----
+sh-4.4# crio config | egrep 'log_level|pids_limit|log_size_max'
+----
++
+.输出示例
++
+[source,terminal]
+----
+pids_limit = 2048
+log_size_max = -1
+log_level = "debug"
+----
+
+.. 验证 'storage.conf' 文件中的更改：
++
+[source,terminal]
+----
+sh-4.4# head -n 7 /etc/containers/storage.conf
+----
++
+.输出示例
++
+----
+[storage]
+  driver = "overlay"
+  runroot = "/var/run/containers/storage"
+  graphroot = "/var/lib/containers/storage"
+  [storage.options]
+    additionalimagestores = []
+    size = "8G"
+----

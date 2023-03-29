@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * logging/nodes-edge-remote-workers.adoc
+
+[id="nodes-edge-remote-workers-network_{context}"]
+= 使用远程 worker 节点进行网络隔离
+
+所有节点每 10 秒向 统信容器云管理平台 集群中的 Kubernetes Controller Manager Operator（kube 控制器）发送 heartbeat。如果集群没有从节点获得 heartbeat,统信容器云管理平台 会使用几个默认机制进行响应。
+ 
+统信容器云管理平台 旨在可以正确处理网络分区和其他中断问题的出现。您可以缓解一些常见中断的影响，如软件升级中断、网络分割和路由问题。缓解策略包括确保远程 worker 节点上的 pod 请求正确的 CPU 和内存资源量、配置适当的复制策略、使用跨区冗余以及在工作负载中使用 Pod Disruption Tables。
+
+如果 kube 控制器在经过了配置的时间后无法访问节点，则 control plane 上的节点控制器会将节点健康状况更新为 Unhealthy，并将节点 Ready 条件标记为 Unknown。因此，调度程序会停止将 pod 调度到该节点。内部节点控制器添加了 node.kubernetes.io/unreachable 污点，对节点具有 NoExecute 效果，默认情况下，在五分钟后调度节点上的 pod 进行驱除。
+
+如果工作负载控制器（如 Deployment 对象或 StatefulSet 对象）将流量定向到不健康节点上的 pod，而其他节点也可以访问集群，统信容器云管理平台 会从节点上的 pod 路由流量。无法访问集群的节点不会使用新的流量路由进行更新。因此，这些节点上的工作负载可能会继续尝试访问不健康的节点。
+
+您可以通过以下方法降低连接丢失的影响：
+
+* 使用守护进程集创建容许污点的 pod
+* 使用在节点停机时自动重启的静态 pod
+* 使用 Kubernetes 区域来控制 pod 驱除
+* 配置 pod 容限来延迟或避免 pod 驱除
+* 配置 kubelet 以控制它在将节点标记为不健康的时间。

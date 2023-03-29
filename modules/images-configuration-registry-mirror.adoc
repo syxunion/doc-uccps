@@ -1,0 +1,184 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+// * updating/updating-restricted-network-cluster/restricted-network-update.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-registry-mirror_{context}"]
+= 配置镜像 registry 存储库镜像
+
+通过设置容器 registry 存储库镜像，您可以进行以下操作：
+
+* 配置 统信容器云管理平台 集群，以便重定向从源镜像 registry 上的存储库拉取（pull）镜像的请求，并通过已镜像 (mirror) 的镜像 registry 上的存储库来解决该请求。
+* 为每个目标存储库识别多个已镜像 (mirror)的存储库，以确保如果一个镜像停止运作，仍可使用其他镜像。
+
+统信容器云管理平台 中存储库镜像的属性包括：
+
+* 镜像拉取（pull）可应对 registry 停机的问题
+* 受限网络中的集群可以从关键位置（如 quay.io）拉取镜像，并让位于公司防火墙后的 registry 提供请求的镜像。
+* 发出镜像拉取（pull）请求时尝试特定 registry 顺序，通常最后才会尝试持久性 registry。
+* 您所输入的镜像信息会添加到 统信容器云管理平台 集群中每个节点上的 /etc/containers/registries.conf 文件中。
+* 当节点从源存储库中请求镜像时，它会依次尝试每个已镜像的存储库，直到找到所请求的内容。如果所有镜像均失败，集群则会尝试源存储库。如果成功，则镜像拉取至节点中。
+
+可通过以下方式设置存储库镜像：
+
+* 在 统信容器云管理平台 安装中：
++
+通过拉取（pull） 统信容器云管理平台 所需的容器镜像，然后将这些镜像放至公司防火墙后，即可将 统信容器云管理平台 安装到受限网络中的数据中心。
+
+* 安装 统信容器云管理平台 后：
++
+即使没有在 统信容器云管理平台 安装期间配置镜像 (mirror)，之后您仍可使用 `ImageContentSourcePolicy` 对象进行配置。
+
+以下流程提供安装后镜像配置，您可在此处创建 `ImageContentSourcePolicy` 对象来识别：
+--
+* 您希望镜像 (mirror) 的容器镜像存储库的源
+* 您希望为其提供从源存储库请求的内容的每个镜像存储库的单独条目。
+--
+
+[注意]
+====
+您只能为具有 `ImageContentSourcePolicy` 对象的集群配置全局 pull secret。您不能在项目中添加 pull secret。
+====
+
+.先决条件
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 通过以下方法配置已镜像的存储库：
++
+* 按照 UnionTech Quay 存储库镜像中所述，使用 UnionTech Quay 来设置已镜像的存储库。使用 UnionTech Quay 有助于您将镜像从一个存储库复制到另一存储库，并可随着时间的推移重复自动同步这些存储库。
+* 使用 skopeo 等工具手动将镜像从源目录复制到已镜像的存储库。
++
+例如：在 UnionTech Enterprise Linux（RHEL 7 或 RHEL 8）系统上安装 skopeo RPM 软件包后，使用 skopeo 命令，如下例所示：
++
+[source,terminal]
+----
+$ skopeo copy \
+docker://registry.access.redhat.com/ubi8/ubi-minimal@sha256:5cfbaf45ca96806917830c183e9f37df2e913b187adb32e89fd83fa455ebaa6 \
+docker://example.io/example/ubi-minimal
+----
++
+在本例中，您有一个名为 `example.io` 的容器镜像 registry，其中包含一个名为 example 的镜像存储库，您希望将 `ubi8/ubi-minimal` 镜像从 `registry.access.redhat.com` 复制到此镜像存储库。创建该 registry 后，您可将 统信容器云管理平台 集群配置为将源存储库的请求重定向到已镜像的存储库。
+
+. 登录您的 统信容器云管理平台 集群。
+
+. 创建 `ImageContentSourcePolicy` 文件（如：`registryrepomirror.yaml`），将源和镜像 (mirror) 替换为您自己的 registry、存储库对和镜像中的源和镜像：
++
+[source,yaml]
+----
+apiVersion: operator.Uccps.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: ubi8repo
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - example.io/example/ubi-minimal 
+    source: registry.access.redhat.com/ubi8/ubi-minimal 
+  - mirrors:
+    - example.com/example/ubi-minimal
+    source: registry.access.redhat.com/ubi8/ubi-minimal
+  - mirrors:
+    - mirror.example.com/redhat
+    source: registry.redhat.io/Uccps4 
+----
+指明镜像 registry 和存储库的名称。
+指明包含所镜像内容的 registry 和存储库。
+您可以在 registry 中配置命名空间以使用该命名空间中的任何镜像。如果您使用 registry 域作为源，ImageContentSourcePolicy 资源将应用到 registry 中的所有存储库。
+
+. 创建新的 `ImageContentSourcePolicy` 对象：
++
+[source,terminal]
+----
+$ oc create -f registryrepomirror.yaml
+----
++
+创建 `ImageContentSourcePolicy` 对象后，新的设置将部署到每个节点，集群开始使用已镜像的存储库来响应源存储库请求。
+
+. 要检查是否应用了已镜像的配置设置，在其中一个节点上执行以下内容。
+
+.. 列出您的节点：
++
+[source,terminal]
+----
+$ oc get node
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                           STATUS                     ROLES    AGE  VERSION
+ip-10-0-137-44.ec2.internal    Ready                      worker   7m   v1.24.0
+ip-10-0-138-148.ec2.internal   Ready                      master   11m  v1.24.0
+ip-10-0-139-122.ec2.internal   Ready                      master   11m  v1.24.0
+ip-10-0-147-35.ec2.internal    Ready,SchedulingDisabled                      worker   7m   v1.24.0
+ip-10-0-153-12.ec2.internal    Ready                      worker   7m   v1.24.0
+ip-10-0-154-10.ec2.internal    Ready                      master   11m  v1.24.0
+----
++
+您可以发现，在应用更改时每个 worker 节点上的调度都会被禁用。
+
+.. 启动调试过程以访问节点：
++
+[source,terminal]
+----
+$ oc debug node/ip-10-0-147-35.ec2.internal
+----
++
+.输出示例
+[source,terminal]
+----
+Starting pod/ip-10-0-147-35ec2internal-debug ...
+To use host binaries, run `chroot /host`
+----
+
+.. 访问节点的文件：
++
+[source,terminal]
+----
+sh-4.2# chroot /host
+----
+
+.. 检查 /etc/containers/registries.conf 文件，确保已完成更改：
++
+[source,terminal]
+----
+sh-4.2# cat /etc/containers/registries.conf
+----
++
+.输出示例
+[source,terminal]
+----
+unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
+[[registry]]
+  location = "registry.access.redhat.com/ubi8/"
+  insecure = false
+  blocked = false
+  mirror-by-digest-only = true
+  prefix = ""
+  [[registry.mirror]]
+    location = "example.io/example/ubi8-minimal"
+    insecure = false
+  [[registry.mirror]]
+    location = "example.com/example/ubi8-minimal"
+    insecure = false
+----
+
+.. 将镜像摘要从源拉取到节点，并检查是否通过镜像解析。`ImageContentSourcePolicy` 对象仅支持镜像摘要，不支持镜像标签。
++
+[source,terminal]
+----
+sh-4.2# podman pull --log-level=debug registry.access.redhat.com/ubi8/ubi-minimal@sha256:5cfbaf45ca96806917830c183e9f37df2e913b187adb32e89fd83fa455ebaa6
+----
+
+.存储库镜像故障排除
+
+如果存储库镜像流程未按规定工作，请使用以下有关存储库镜像如何工作的信息协助排查问题。
+
+* 首个工作镜像用于提供拉取（pull）的镜像。
+* 只有在无其他镜像工作时，才会使用主 registry。
+* 从系统上下文，`Insecure` 标志用作回退。
+* 最近更改了 `/etc/containers/registries.conf` 文件的格式。现在它是第 2 版，采用 TOML 格式。

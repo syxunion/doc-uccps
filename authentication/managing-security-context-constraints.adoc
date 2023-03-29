@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="managing-pod-security-policies"]
+= 管理安全性上下文约束
+include::_attributes/common-attributes.adoc[]
+:context: configuring-internal-oauth
+
+toc::[]
+
+include::modules/security-context-constraints-about.adoc[leveloffset=+1]
+include::modules/security-context-constraints-pre-allocated-values.adoc[leveloffset=+1]
+include::modules/security-context-constraints-example.adoc[leveloffset=+1]
+
+// This section shouldn't show on OSD
+include::modules/security-context-constraints-creating.adoc[leveloffset=+1]
+// End Exclusion
+
+include::modules/security-context-constraints-rbac.adoc[leveloffset=+1]
+include::modules/security-context-constraints-command-reference.adoc[leveloffset=+1]

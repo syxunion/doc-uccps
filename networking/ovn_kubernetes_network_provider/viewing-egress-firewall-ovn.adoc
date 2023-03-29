@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="viewing-egress-firewall-ovn"]
+= 查看项目的出口防火墙
+include::_attributes/common-attributes.adoc[]
+:context: viewing-egress-firewall-ovn
+
+toc::[]
+
+作为集群管理员，您可以列出任何现有出口防火墙的名称，并查看特定出口防火墙的流量规则。
+
+include::modules/nw-egressnetworkpolicy-view.adoc[leveloffset=+1]

@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+// * builds/basic-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-basic-cancel-multiple_{context}"]
+= 取消多个构建
+
+您可以使用以下 CLI 命令取消多个构建。
+
+.流程
+
+* 要手动取消多个构建，请输入以下命令：
++
+[source,terminal]
+----
+$ oc cancel-build <build1_name> <build2_name> <build3_name>
+----

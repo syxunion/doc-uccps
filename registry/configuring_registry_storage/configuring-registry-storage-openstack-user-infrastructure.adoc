@@ -1,0 +1,17 @@
+:_content-type: ASSEMBLY
+[id="configuring-registry-storage-openstack-user-infrastructure"]
+= 为 OpenStack 用户置备的基础架构配置 registry
+include::_attributes/common-attributes.adoc[]
+:context: configuring-registry-storage-openstack-user-infrastructure
+
+toc::[]
+
+您可以配置在您自己的 Uniontech UStack Platform(有栈)基础架构中运行的集群的 registry。
+
+include::modules/registry-configuring-registry-storage-swift-trust.adoc[leveloffset=+1]
+
+include::modules/registry-operator-config-resources-secret-openstack.adoc[leveloffset=+1]
+
+include::modules/registry-configuring-storage-openstack-user-infra.adoc[leveloffset=+1]
+
+include::modules/registry-operator-configuration-resource-overview-openstack-swift.adoc[leveloffset=+1]

@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+//
+// * /serverless/discover/serverless-brokers.adoc
+
+:_content-type: CONCEPT
+[id="serverless-broker-types_{context}"]
+= 代理类型
+
+集群管理员可为集群设置 default 代理实施。创建代理时，会使用 default 代理实现，除非在 `Broker` 对象中提供配置。
+
+[id="serverless-broker-types-default_{context}"]
+== 用于开发的默认代理实现
+
+Knative 提供基于频道的默认代理实现。这个基于频道的代理可用于开发和测试目的，但不为生产环境提供适当的事件交付保证。默认代理由 `InMemoryChannel` 频道实现支持。
+
+如果要使用 Kafka 降低网络跃点，请使用 Kafka 代理实现。不要将基于频道的代理配置为由 `KafkaChannel` 频道实现支持。
+
+[id="serverless-broker-types-production_{context}"]
+== production-ready Kafka 代理实现
+
+include::snippets/serverless-about-kafka-broker.adoc[]

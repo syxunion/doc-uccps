@@ -1,0 +1,197 @@
+[id="applications-create-using-cli-modify_{context}"]
+= 修改应用程序创建
+
+`new-app` 命令生成用于构建、部署和运行所创建应用程序的 统信容器云管理平台 对象。通常情况下，这些对象是在当前项目中创建的，并分配有从输入源存储库或输入镜像中获得的名称。但是，您可以使用 `new-app` 修改这种行为。
+
+.`new-app` 输出对象
+[cols="2,8",options="header"]
+|===
+
+|对象 |描述
+
+|`BuildConfig`
+|为命令行中指定的每个源存储库创建一个 `BuildConfig` 对象。`BuildConfig` 对象指定要使用的策略、源位置和构建输出位置。
+
+|`ImageStreams`
+|对于 `BuildConfig` 对象，通常会创建两个镜像流。其一代表输入镜像。进行源构建时，这是构建器镜像。进行 Docker 构建时，这是 FROM 镜像。其二代表输出镜像。如果容器镜像指定为 `new-app` 的输入，那么也会为该镜像创建镜像流。
+
+|`DeploymentConfig`
+|创建一个 `部署配置` 来部署构建的输出或指定的镜像。`new-app` 命令为生成的 部署配置中包含的容器中指定的所有 Docker 卷创建 `emptyDir` 卷。
+
+|`Service`
+|`new-app` 命令会尝试检测输入镜像中公开的端口。它使用编号最小的已公开端口来生成公开该端口的服务。要公开一个不同的端口，只需在 `new-app` 完成后使用 `oc expose` 命令生成额外服务。
+
+|其他
+|根据模板，可在实例化模板时生成其他对象。
+
+|===
+
+== 指定环境变量
+
+从模板、源或镜像生成应用程序时，您可以在运行时使用 `-e|--env` 参数将环境变量传递给应用程序容器：
+
+[source,terminal]
+----
+$ oc new-app openshift/postgresql-92-centos7 \
+    -e POSTGRESQL_USER=user \
+    -e POSTGRESQL_DATABASE=db \
+    -e POSTGRESQL_PASSWORD=password
+----
+
+这些变量可使用 `--env-file` 参数从文件中读取。以下是一个名为 `postgresql.env` 的示例文件：
+
+[source,terminal]
+----
+POSTGRESQL_USER=user
+POSTGRESQL_DATABASE=db
+POSTGRESQL_PASSWORD=password
+----
+
+从文件中读取变量：
+
+[source,terminal]
+----
+$ oc new-app openshift/postgresql-92-centos7 --env-file=postgresql.env
+----
+
+另外，也可使用 `--env-file=-` 在标准输入上给定环境变量：
+
+[source,terminal]
+----
+$ cat postgresql.env | oc new-app openshift/postgresql-92-centos7 --env-file=-
+----
+
+[注意]
+====
+在 `new-app` 处理过程中创建的任何 `BuildConfig` 对象，都不能使用通过 `-e|--env` 或 `--env-file` 参数传递的环境变量进行更新。
+====
+
+== 指定构建环境变量
+
+从模板、源或镜像生成应用程序时，您可以在运行时使用 `--build-env` 参数将环境变量传递给构建容器：
+
+[source,terminal]
+----
+$ oc new-app openshift/ruby-23-centos7 \
+    --build-env HTTP_PROXY=http://myproxy.net:1337/ \
+    --build-env GEM_HOME=~/.gem
+----
+
+这些变量可使用 `--build-env-file` 参数从文件中读取。以下是一个名为 `ruby.env` 的示例文件：
+
+[source,terminal]
+----
+HTTP_PROXY=http://myproxy.net:1337/
+GEM_HOME=~/.gem
+----
+
+从文件中读取变量：
+
+[source,terminal]
+----
+$ oc new-app openshift/ruby-23-centos7 --build-env-file=ruby.env
+----
+
+另外，也可使用 `--build-env-file=-` 在标准输入上给定环境变量：
+
+[source,terminal]
+----
+$ cat ruby.env | oc new-app openshift/ruby-23-centos7 --build-env-file=-
+----
+
+== 指定标签
+
+从源、镜像或模板生成应用程序时，您可以使用 `-l|--label` 参数为创建的对象添加标签。借助标签，您可以轻松地集中选择、配置和删除与应用程序关联的对象。
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world -l name=hello-world
+----
+
+== 查看输出但不创建
+
+要查看运行 `new-app` 命令的空运行，您可以使用 `-o|--output` 参数及 `yaml` 或 `json` 值。然后，您可以使用输出结果预览创建的对象，或将其重定向到可以编辑的文件。满意之后，您可以使用 `oc create` 创建 统信容器云管理平台 对象。
+
+要将 `new-app` 工件输出到一个文件，请运行以下命令：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world \
+    -o yaml > myapp.yaml
+----
+
+编辑该文件：
+
+[source,terminal]
+----
+$ vi myapp.yaml
+----
+
+通过引用该文件来创建新应用程序：
+
+[source,terminal]
+----
+$ oc create -f myapp.yaml
+----
+
+== 使用其他名称创建对象
+
+`new-app` 创建的对象通常命名自用于生成它们的源存储库或镜像。您可以通过在命令中添加 `--name` 标志来设置生成的对象名称：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world --name=myapp
+----
+
+== 在另一项目中创建对象
+
+通常，`new-app` 会在当前项目中创建对象。不过，您可以使用 `-n|--namespace` 参数在另一项目中创建对象：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world -n myproject
+----
+
+== 创建多个对象
+
+`new-app` 命令允许创建多个应用程序，为 `new-app` 指定多个参数便可实现。命令行中指定的标签将应用到单一命令创建的所有对象。环境变量应用到从源或镜像创建的所有组件。
+
+从源存储库和 Docker Hub 镜像创建应用程序：
+
+[source,terminal]
+----
+$ oc new-app https://github.com/openshift/ruby-hello-world mysql
+----
+
+[注意]
+====
+如果以独立参数形式指定源代码存储库和构建器镜像，`new-app` 会将构建器镜像用作源代码存储库的构建器。如果这不是您的用意，请使用 `~` 分隔符为源指定所需的构建器镜像。
+====
+
+== 在单个 POD 中对镜像和源进行分组
+
+`new-app` 命令允许在一个 pod 中一起部署多个镜像。要指定要将哪些镜像分组在一起，使用 `+` 分隔符。也可使用 `--group` 命令行参数来指定应分组在一起的镜像。要将源存储库中构建的镜像与其他镜像一起分组，请在组中指定其构建器镜像：
+
+[source,terminal]
+----
+$ oc new-app ruby+mysql
+----
+
+将通过源构建的镜像和外部镜像一起部署：
+
+[source,terminal]
+----
+$ oc new-app \
+    ruby~https://github.com/openshift/ruby-hello-world \
+    mysql \
+    --group=ruby+mysql
+----
+
+== 搜索镜像、模板和其他输入
+
+要搜索镜像、模板和 `oc new-app` 命令的其他输入，使用 `--search` 和 `--list`。例如，查找包含 PHP 的所有镜像或模板：
+
+[source,terminal]
+----
+$ oc new-app --search php
+----

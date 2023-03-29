@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-event-sinks.adoc
+
+:_content-type: REFERENCE
+[id="serverless-connect-trigger-sink_{context}"]
+= 将触发器连接到 sink
+
+您可以将触发器连接到 sink，以便在将代理的事件发送到 sink 前过滤代理的事件。在 `Trigger` 对象的资源规格中，连接到触发器的 sink 会配置为`subscriber` 。
+
+.连接到 Kafka sink 的 `Trigger` 对象示例
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: <trigger_name> <1>
+spec:
+...
+  subscriber:
+    ref:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: KafkaSink
+      name: <kafka_sink_name> <2>
+----
+<1> 连接到 sink 的触发器的名称。
+<2> `KafkaSink` 对象的名称。

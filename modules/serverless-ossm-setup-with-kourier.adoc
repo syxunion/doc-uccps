@@ -1,0 +1,89 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-ossm-setup.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-ossm-setup-with-kourier_{context}"]
+= 在启用了 Kourier 时将 Service Mesh 与  Serverless 集成
+
+即使已经启用了 Kourier，您也可以在 Uccps Serverless 中使用 Service Mesh。如果您已在启用了 Kourier 的情况下安装了 Knative Serving，但决定在以后添加 Service Mesh 集成，这个过程可能会很有用。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+* 安装 Uccps CLI (`oc`).
+* 在集群上安装 统信容器云管理平台无服务扩展组件 和 Knative Serving。
+* 安装 Uccps 统信容器云管理平台服务网格。带有 统信容器云管理平台服务网格 和 Kourier 的统信容器云管理平台无服务器 支持与 Uccps 统信容器云管理平台服务网格 2.x 版本搭配使用。
+
+.流程
+
+. 将您要与 统信容器云管理平台服务网格 集成的命名空间作为成员添加到 `ServiceMeshMemberRoll` 对象中：
++
+[source,yaml]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  members:
+    - <namespace> <1>
+...
+----
+<1> 添加您要与 统信容器云管理平台服务网格 集成的命名空间。
+. 应用 `ServiceMeshMemberRoll` 资源：
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----
+
+. 创建允许 Knative 系统 Pod 到 Knative 服务流量的网络策略：
+.. 对于您要与 Service Mesh 集成的每个命名空间，创建一个 `NetworkPolicy` 资源：
++
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-serving-system-namespace
+  namespace: <namespace> <1>
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          knative.openshift.io/part-of: "openshift-serverless"
+  podSelector: {}
+  policyTypes:
+  - Ingress
+...
+----
+<1> 添加您要与 Service Mesh 集成的命名空间。
++
+[NOTE]
+====
+`knative.openshift.io/part-of: "openshift-serverless"` 标签添加到 Uccps  Serverless 1.22.0 中。如果使用统信容器云管理平台无服务器 1.21.1 或更早版本，请将 `knative.openshift.io/part-of` 标签添加到  `knative-serving` 和 `knative-serving-ingress` 命名空间
+
+将标签添加到 `knative-serving` 命名空间：
+
+[source,terminal]
+----
+$ oc label namespace knative-serving knative.openshift.io/part-of=openshift-serverless
+----
+
+将标签添加到 `knative-serving-ingress` 命名空间：
+
+[source,terminal]
+----
+$ oc label namespace knative-serving-ingress knative.openshift.io/part-of=openshift-serverless
+----
+====
+.. 应用 `NetworkPolicy` 资源。
++
+[source,terminal]
+----
+$ oc apply -f <filename>
+----

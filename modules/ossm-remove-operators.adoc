@@ -1,0 +1,28 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/installing-ossm.adoc
+// * service_mesh/v2x/installing-ossm.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-operatorhub-remove-operators_{context}"]
+= 删除安装的 Operator
+
+您必须删除 Operator 才可以成功删除  {SMProductName}。删除 {SMProductName} Operator后，您必须删除 Kiali Operator、{JaegerName} Operator 和 Uccps Elasticsearch Operator。Operator.
+
+[id="ossm-remove-operator-servicemesh_{context}"]
+== 删除 Operator
+
+按照以下步骤删除组成 {SMProductName} 的 Operator。对以下每个 Operator 重复上述步骤。
+
+* {SMProductName}
+* Kiali
+* {JaegerName}
+* Uccps Elasticsearch
+
+.Procedure
+
+. 登陆到  {product-title} web 控制台。
+
+. 在 *Operators* → *安装的 Operators*  页面中，滚动页面或在 *按名称搜索* 输入关键字以查找每个 Operator。然后点击 Operator 名称。
+
+. 在 *Operator 详情* 页面中，从 *Actions* 菜单中选择 *卸载 Operator* 按照提示卸载每个 Operator。

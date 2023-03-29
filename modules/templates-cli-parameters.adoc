@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-cli-parameters_{context}"]
+= 列出参数
+
+模板的 `parameter` 部分列出了可覆盖的参数列表。
+
+.流程
+
+. 您可使用以下命令并指定要用的文件通过 CLI 列出参数：
++
+[source,terminal]
+----
+$ oc process --parameters -f <filename>
+----
++
+或者，如果模板已上传：
++
+[source,terminal]
+----
+$ oc process --parameters -n <project> <template_name>
+----
++
+例如，下面显示了在默认 Uccps 项目中列出其中一个快速启动模板的参数时的输出：
++
+[source,terminal]
+----
+$ oc process --parameters -n openshift rails-postgresql-example
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                         DESCRIPTION                                                                                              GENERATOR           VALUE
+SOURCE_REPOSITORY_URL        The URL of the repository with your application source code                                                                  https://github.com/sclorg/rails-ex.git
+SOURCE_REPOSITORY_REF        Set this to a branch name, tag or other ref of your repository if you are not using the default branch
+CONTEXT_DIR                  Set this to the relative path to your project if it is not in the root of your repository
+APPLICATION_DOMAIN           The exposed hostname that will route to the Rails service                                                                    rails-postgresql-example.openshiftapps.com
+GITHUB_WEBHOOK_SECRET        A secret string used to configure the GitHub webhook                                                     expression          [a-zA-Z0-9]{40}
+SECRET_KEY_BASE              Your secret key for verifying the integrity of signed cookies                                            expression          [a-z0-9]{127}
+APPLICATION_USER             The application user that is used within the sample application to authorize access on pages                                 openshift
+APPLICATION_PASSWORD         The application password that is used within the sample application to authorize access on pages                             secret
+DATABASE_SERVICE_NAME        Database service name                                                                                                        postgresql
+POSTGRESQL_USER              database username                                                                                        expression          user[A-Z0-9]{3}
+POSTGRESQL_PASSWORD          database password                                                                                        expression          [a-zA-Z0-9]{8}
+POSTGRESQL_DATABASE          database name                                                                                                                root
+POSTGRESQL_MAX_CONNECTIONS   database max connections                                                                                                     10
+POSTGRESQL_SHARED_BUFFERS    database shared buffers                                                                                                      12MB
+----
++
+该输出标识了在处理模板时使用类似正则表达式的生成器生成的几个参数。

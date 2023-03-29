@@ -1,0 +1,63 @@
+// Module filename: nw-annotating-a-route-with-a-cookie-name.adoc
+// Use module with the following module:
+// nw-using-cookies-keep-route-statefulness.adoc
+//
+// Module included in the following assemblies:
+//
+// * networking/configuring-routing.adoc
+
+:_content-type: PROCEDURE
+[id="nw-annotating-a-route-with-a-cookie-name_{context}"]
+= 使用 Cookie 标注路由
+
+您可以设置 Cookie 名称来覆盖为路由自动生成的默认名称。这样，接收路由流量的应用程序就能知道 Cookie 名称。通过删除 Cookie，它可以强制下一请求重新选择端点。因此，如果服务器过载，它会尝试从客户端中删除请求并重新分发它们。
+
+.流程
+
+. 使用指定的 Cookie 名称标注路由：
++
+[source,terminal]
+----
+$ oc annotate route <route_name> router.openshift.io/cookie_name="<cookie_name>"
+----
++
+--
+其中：
+
+`<route_name>`:: 指定路由的名称。
+`<cookie_name>`:: 指定 Cookie 的名称。
+--
++
+例如，使用 cookie 名称 `my_cookie` 标注路由 `my_route`：
++
+[source,terminal]
+----
+$ oc annotate route my_route router.openshift.io/cookie_name="my_cookie"
+----
+
+. 在变量中捕获路由主机名：
++
+[source,terminal]
+----
+$ ROUTE_NAME=$(oc get route <route_name> -o jsonpath='{.spec.host}')
+----
++
+--
+其中：
+
+`<route_name>`:: 指定路由的名称。
+--
+
+. 保存 cookie，然后访问路由：
++
+[source,terminal]
+----
+$ curl $ROUTE_NAME -k -c /tmp/cookie_jar
+----
++
+使用上一个命令在连接到路由时保存的 cookie：
++
+[source,terminal]
+----
+$ curl $ROUTE_NAME -k -b /tmp/cookie_jar
+----

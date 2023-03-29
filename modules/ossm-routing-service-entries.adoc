@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: CONCEPT
+[id="ossm-routing-service-entries_{context}"]
+= Understanding service entries
+
+服务条目在由  {SMProductName} 内部维护的服务 registry 中添加一个条目。添加服务条目后，Envoy 代理将流量发送到该服务，就像是网格中的服务一样。服务条目允许您进行以下操作：
+
+* 管理服务网格外运行的服务的流量。
+* 重定向和转发外部目的地的流量，如来自 web 的 API 调用，或转发到旧基础架构中服务的流量。
+* 为外部目的地定义重新尝试、超时和错误注入策略。
+* 在虚拟机 (VM) 中运行网格服务，方法是在网格中添加虚拟机。
+
+[注意]
+====
+将服务从不同集群添加到网格，以便在 Kubernetes 上配置多集群 Red Hat OpenShift Service Mesh 网格.
+====
+
+.服务条目示例
+以下示例是一个 mesh-external 服务条目，它将 `ext-resource` 外部依赖项添加到 {SMProductName} 服务 registry 中：
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: svc-entry
+spec:
+  hosts:
+  - ext-svc.example.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+----
+
+使用 `hosts` 字段指定外部资源。您可以完全限定名，也可以使用通配符前缀域名。
+
+您可以配置虚拟服务和目的地规则，以控制到服务条目的流量，其方式与您为网格中的任何其他服务配置流量相同。例如，以下目的地规则将流量路由配置为使用 mutual TLS 来保护到 `ext-svc.example.com` 外部服务的连接。它被配置为使用服务项：
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: ext-res-dr
+spec:
+  host: ext-svc.example.com
+  trafficPolicy:
+    tls:
+      mode: MUTUAL
+      clientCertificate: /etc/certs/myclientcert.pem
+      privateKey: /etc/certs/client_private_key.pem
+      caCertificates: /etc/certs/rootcacerts.pem
+----

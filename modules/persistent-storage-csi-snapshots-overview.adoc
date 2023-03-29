@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent-storage-csi-snapshots.adoc
+
+:_content-type: CONCEPT
+[id="persistent-storage-csi-snapshots-overview_{context}"]
+= CSI 卷快照概述
+
+_快照（snapshot）_ 代表了集群中特定时间点的存储卷的状态 。卷快照可以用来置备新卷。
+
+统信容器云管理平台默认支持 Container Storage Interface(CSI)卷快照。但是，需要一个特定的 CSI 驱动程序。
+
+通过 CSI 卷快照，集群管理员能够：
+
+* 部署支持快照功能的第三方 CSI 驱动。
+* 从一个现有的卷快照创建一个新的 PVC。
+* 对现有的 PVC 进行快照。
+* 将快照恢复为一个不同的 PVC。
+* 删除现有的卷快照。
+
+通过 CSI 卷快照，应用程序开发人员可以：
+
+* 使用卷快照作为构建块来开发应用程序或集群级别的存储备份解决方案。
+* 快速回滚到以前的开发版本。
+* 不需要每次都进行完全备份，从而可以更有效地使用存储。
+
+在使用卷快照时请注意以下几点：
+
+* 仅支持 CSI 驱动程序。不支持 in-tree 和 FlexVolumes。
+* 统信容器云管理平台仅附带所选 CSI 驱动程序。对于不是由统信容器云管理平台Driver Operator 提供的 CSI 驱动程序，建议使用由社区或存储供应商提供的 CSI 驱动程序。按照 CSI 驱动程序供应商的安装说明进行操作。
+* CSI 驱动程序可能会也可能不会带有卷快照功能。提供卷快照支持的 CSI 驱动程序可能会使用 `csi-external-snapshotter` sidecar。详情请查看 CSI 驱动程序提供的文档。

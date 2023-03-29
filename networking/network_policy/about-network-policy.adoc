@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="about-network-policy"]
+= 关于网络策略
+include::_attributes/common-attributes.adoc[]
+:context: about-network-policy
+
+toc::[]
+
+作为集群管理员，您可以定义网络策略以限制到集群中的 pod 的网络通讯。
+
+include::modules/nw-networkpolicy-about.adoc[leveloffset=+1]
+
+include::modules/nw-networkpolicy-optimize.adoc[leveloffset=+1]

@@ -1,0 +1,276 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/customizing-installation-ossm.adoc
+
+:_content-type: REFERENCE
+[id="ossm-cr-example_{context}"]
+= {SMProductShortName} Control plane 参数
+
+下表列出了 `ServiceMeshControlPlane` 资源的顶级参数。
+
+.`ServiceMeshControlPlane` resource 资源参数
+|===
+|名称 |描述 |类型
+
+|`apiVersion`
+|APIVersion 定义对象的这个表示法的版本化的 schema。服务器将识别的模式转换为最新的内部值，并可拒绝未识别的值。ServiceMeshControlPlane 版本 2.0 的值为 maistra.io/v2。
+|ServiceMeshControlPlane 版本 2.0 的值为 maistra.io/v2。
+
+|`kind`
+|kind 是一个字符串值，代表此对象所代表的 REST 资源。
+|`ServiceMeshControlPlane` 是 ServiceMeshControlPlane 的唯一有效值。
+
+|`metadata`
+|关于这个 `ServiceMeshControlPlane` 实例的元数据。您可以为 Service Mesh control plane 安装提供一个名称来跟踪您的工作，例如 `basic`.
+|字符串
+
+|`spec`
+|此 `ServiceMeshControlPlane`所需状态的规格。这包括组成 Service Mesh control plane 的所有组件的配置选项。
+|如需更多信息，请参阅表 2。
+
+|`status`
+|此 `ServiceMeshControlPlane` 的当前状态以及组成 Service Mesh control plane 的组件。
+|如需更多信息，请参阅表 3。
+|===
+
+下表列出了 `ServiceMeshControlPlane` 资源规格。更改这些参数配置 {SMProductName} 组件。 
+
+.`ServiceMeshControlPlane` 资源规格
+|===
+|名称 |描述 |可配置参数
+
+|`附加组件`
+|`addons` 参数配置除 Service Mesh control plane 组件之外的额外功能，如视觉化或指标存储。 
+|`3scale`, `grafana`, `jaeger`, `kiali`, 和 `prometheus`.
+
+|`cluster`
+|`cluster` 参数设置集群的常规配置（集群名称、网络名称、多集群、网格扩展等等）
+|`meshExpansion`, `multiCluster`, `name`, 和 `network`
+
+|`gateways`
+| 您可以使用 `gateways` 参数为网格配置入口和出口网关。
+|`enabled`, `additionalEgress`, `additionalIngress`, `egress`, `ingress`, 和  `openshiftRoute`
+
+|`general`
+|`general` 参数代表在其它任何位置都不适用的常规 Service Mesh control plane 配置。
+|`logging` 和`validationMessages`
+
+|`policy`
+|您可以使用 `policy` 参数为 Service Mesh control plane 配置策略检查。通过将 `spec.policy.enabled` 设置为 `true` 来启用策略检查。
+|`mixer` `remote`, 或 `type`. `type` 可以被设置为 `Istiod`, `Mixer` 或  `None`.
+
+|`profiles`
+|您可以使用 `profiles` 参数设置用于默认值的 `ServiceMeshControlPlane` 配置集。
+|`default`
+
+|`proxy`
+| 您可以使用 `proxy` 参数来配置 sidecar 的默认行为。
+|`accessLogging`, `adminPort`, `concurrency`, 和 `envoyMetricsService`
+
+|`runtime`
+| 您可以使用 `runtime` 参数配置 Service Mesh control plane 组件。
+|`components`, 和 `defaults`
+
+|`security`
+| `security`  参数允许您为 Service Mesh control plane 配置安全性方面。
+|`certificateAuthority`, `controlPlane`, `identity`, `dataPlane` 和 `trust`
+
+|`techPreview`
+|`techPreview` 参数允许早期访问技术预览中的功能。
+|N/A
+
+|`telemetry`
+|如果 `spec.mixer.telemetry.enabled` 被设置为 `true`，则遥测会被启用。
+|`mixer`, `remote`, 和 `type`. `type` 可以被设置为 `Istiod`, `Mixer` 或 `None`.
+
+|`tracing`
+|您可以使用 `tracing` 参数为网格启用分布式追踪。
+|`sampling`, `type`. `type` 可以被设置为 `Jaeger` 或 `None`.
+
+|`version`
+|您可以使用 `version` 参数指定要安装的 Service Mesh control plane 的 Maistra 版本。当使用空版本创建 `ServiceMeshControlPlane` 时，准入 Webhook 会将版本设置为当前版本。带有空版本的新的 `ServiceMeshControlPlanes` 设置为 `v2.0` 。现有带有空版本的 `ServiceMeshControlPlanes` 会保留其设置。
+|字符串
+|===
+
+`ControlPlaneStatus` 代表服务网格的当前状态。
+
+.`ServiceMeshControlPlane` 资源 `ControlPlaneStatus`
+|===
+|名称 |描述 |类型
+
+|`annotations`
+|`annotations` 参数存储额外的、通常多余的状态信息，如 `ServiceMeshControlPlane` 部署的组件数量。命令行工具 `oc`,使用这些状态，它还不允许在 JSONPath 表达式中计数对象。
+|无法配置
+
+|`conditions`
+|代表对象当前状态的最新可用影响。`Reconciled` 表示 Operator 是否已完成与 `ServiceMeshControlPlane`资源中的配置协调已部署组件的实际状态。 `Installed` 显示是否安装了 Service Mesh control plane。 `Ready` 表示所有 Service Mesh control plane 组件是否已就绪。
+|字符串
+
+|`components`
+|显示每个部署的 Service Mesh control plane 组件的状态。
+|字符串
+
+|`appliedSpec`
+|应用所有配置集后生成的配置选项规格。
+|`ControlPlaneSpec`
+
+|`appliedValues`
+|用于生成 chart 的 values.yaml。
+|`ControlPlaneSpec`
+
+|`chartVersion`
+|最后一次为此资源处理的图表版本。
+|字符串
+
+|`observedGeneration`
+|控制器在最新协调期间观察到的生成。状态中的信息与对象的特定生成有关。如果 `status.observedGeneration` 项与 `metadata.generation` 不匹配，则代表 `status.conditions`  没有处于最新状态。
+|整数
+
+|`operatorVersion`
+|最后处理此资源的 operator 版本。
+|字符串
+
+|`readiness`
+|组件和拥有资源的就绪状态
+|字符串
+|===
+
+
+这个示例 `ServiceMeshControlPlane` 定义包含所有支持的参数。
+
+.Example `ServiceMeshControlPlane` 资源示例
+[source,yaml, subs="attributes,verbatim"]
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  version: v{MaistraVersion}
+  proxy:
+    runtime:
+      container:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+  tracing:
+    type: Jaeger
+  gateways:
+    ingress: # istio-ingressgateway
+      service:
+        type: ClusterIP
+        ports:
+        - name: status-port
+          port: 15020
+        - name: http2
+          port: 80
+          targetPort: 8080
+        - name: https
+          port: 443
+          targetPort: 8443
+      meshExpansionPorts: []
+    egress: # istio-egressgateway
+      service:
+        type: ClusterIP
+        ports:
+        - name: status-port
+          port: 15020
+        - name: http2
+          port: 80
+          targetPort: 8080
+        - name: https
+          port: 443
+          targetPort: 8443
+    additionalIngress:
+      some-other-ingress-gateway: {}
+    additionalEgress:
+      some-other-egress-gateway: {}
+
+  policy:
+    type: Mixer
+    mixer: # only applies if policy.type: Mixer
+      enableChecks: true
+      failOpen: false
+
+  telemetry:
+    type: Istiod # or Mixer
+    mixer: # only applies if telemetry.type: Mixer, for v1 telemetry
+      sessionAffinity: false
+      batching:
+        maxEntries: 100
+        maxTime: 1s
+      adapters:
+        kubernetesenv: true
+        stdio:
+          enabled: true
+          outputAsJSON: true
+  addons:
+    grafana:
+      enabled: true
+      install:
+        config:
+          env: {}
+          envSecrets: {}
+        persistence:
+          enabled: true
+          storageClassName: ""
+          accessMode: ReadWriteOnce
+          capacity:
+            requests:
+              storage: 5Gi
+        service:
+          ingress:
+            contextPath: /grafana
+            tls:
+              termination: reencrypt
+    kiali:
+      name: kiali
+      enabled: true
+      install: # install kiali CR if not present
+        dashboard:
+          viewOnly: false
+          enableGrafana: true
+          enableTracing: true
+          enablePrometheus: true
+      service:
+        ingress:
+          contextPath: /kiali
+    jaeger:
+      name: jaeger
+      install:
+        storage:
+          type: Elasticsearch # or Memory
+          memory:
+            maxTraces: 100000
+          elasticsearch:
+            nodeCount: 3
+            storage: {}
+            redundancyPolicy: SingleRedundancy
+            indexCleaner: {}
+        ingress: {} # jaeger ingress configuration
+  runtime:
+    components:
+      pilot:
+        deployment:
+          replicas: 2
+        pod:
+          affinity: {}
+        container:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+      grafana:
+        deployment: {}
+        pod: {}
+      kiali:
+        deployment: {}
+        pod: {}
+----

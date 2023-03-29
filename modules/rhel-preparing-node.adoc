@@ -1,0 +1,92 @@
+// Module included in the following assemblies:
+//
+// * machine_management/adding-rhel-compute.adoc
+// * machine_management/more-rhel-compute.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="rhel-preparing-node_{context}"]
+= 准备 UOS 计算节点
+
+在将 UnionTech OS Server 20(UOS20) 机器添加到 统信容器云管理平台 集群之前，您必须将每台主机注册到 UnionTech Subscription Manager (RHSM)，为其附加有效的 统信容器云管理平台 订阅，并且启用所需的存储库。
+
+. 在每一主机上进行 RHSM 注册：
++
+[source,terminal]
+----
+# subscription-manager register --username=<user_name> --password=<password>
+----
+
+. 从 RHSM 获取最新的订阅数据：
++
+[source,terminal]
+----
+# subscription-manager refresh
+----
+
+. 列出可用的订阅：
++
+[source,terminal]
+----
+# subscription-manager list --available --matches '*OpenShift*'
+----
+
+. 在上一命令的输出中，找到 统信容器云管理平台 订阅的池 ID 并附加该池：
++
+[source,terminal]
+----
+# subscription-manager attach --pool=<pool_id>
+----
+
+. 禁用所有 yum 存储库：
+.. 禁用所有已启用的 RHSM 存储库：
++
+[source,terminal]
+----
+# subscription-manager repos --disable="*"
+----
+
+.. 列出剩余的 yum 存储库，并记录它们在 `repo id` 下的名称（若有）：
++
+[source,terminal]
+----
+# yum repolist
+----
+
+.. 使用 `yum-config-manager` 禁用剩余的 yum 存储库：
++
+[source,terminal]
+----
+# yum-config-manager --disable <repo_id>
+----
++
+或者，禁用所有存储库：
++
+[source,terminal]
+----
+# yum-config-manager --disable \*
+----
++
+请注意，有大量可用存储库时可能需要花费几分钟
+
+. 仅启用 统信容器云管理平台 1.2 需要的存储库：
++
+[source,terminal]
+----
+# subscription-manager repos \
+    --enable="rhel-8-for-x86_64-baseos-rpms" \
+    --enable="rhel-8-for-x86_64-appstream-rpms" \
+    --enable="rhocp-4.10-for-rhel-8-x86_64-rpms" \
+    --enable="fast-datapath-for-rhel-8-x86_64-rpms"
+----
+
+. 停止并禁用主机上的防火墙：
++
+[source,terminal]
+----
+# systemctl disable --now firewalld.service
+----
++
+[注意]
+====
+请不要在以后启用防火墙。如果这样做，则无法访问 worker 上的 统信容器云管理平台 日志。
+====

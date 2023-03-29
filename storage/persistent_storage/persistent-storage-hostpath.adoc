@@ -1,0 +1,18 @@
+:_content-type: ASSEMBLY
+[id="persistent-storage-using-hostpath"]
+= 使用 hostPath 的持久性存储
+include::_attributes/common-attributes.adoc[]
+:context: persistent-storage-hostpath
+
+toc::[]
+
+统信容器云管理平台集群中的 hostPath 卷将主机节点的文件系统中的文件或目录挂载到 pod 中。大多数 pod 都不需要 hostPath 卷，但是如果应用程序需要它，它会提供一个快速的测试选项。
+
+[重要]
+====
+集群管理员必须将 pod 配置为以特权方式运行。这样可访问同一节点上的 pod。
+====
+
+include::modules/persistent-storage-hostpath-about.adoc[leveloffset=+1]
+include::modules/persistent-storage-hostpath-static-provisioning.adoc[leveloffset=+1]
+include::modules/persistent-storage-hostpath-pod.adoc[leveloffset=+1]

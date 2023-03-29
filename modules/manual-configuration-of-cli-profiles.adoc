@@ -1,0 +1,130 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/openshift_cli/managing-cli-profiles.adoc
+
+:_content-type: CONCEPT
+[id="manual-configuration-of-cli-profiles_{context}"]
+= 手动配置 CLI 配置集
+
+[注意]
+====
+本节介绍 CLI 配置的更多高级用法。在大多数情况下，您可以使用 `oc login` 和 `oc project` 命令登录并在上下文和项目间切换。
+====
+
+如果要手动配置 CLI 配置文件，您可以使用 `oc config` 命令，而不是直接修改这些文件。`oc config` 命令包括很多有用的子命令来实现这一目的：
+
+.CLI 配置子命令
+[cols="1,8",options="header"]
+|===
+
+|指明了 |使用方法
+
+a|`set-cluster`
+a|在 CLI 配置文件中设置集群条目。如果引用的 cluster nickname 已存在，则指定的信息将合并到其中。
+[source,terminal,options="nowrap"]
+----
+$ oc config set-cluster <cluster_nickname> [--server=<master_ip_or_fqdn>]
+[--certificate-authority=<path/to/certificate/authority>]
+[--api-version=<apiversion>] [--insecure-skip-tls-verify=true]
+----
+
+a|`set-context`
+a|在 CLI 配置文件中设置上下文条目。如果引用的上下文 nickname 已存在，则指定的信息将合并在.
+[source,terminal,options="nowrap"]
+----
+$ oc config set-context <context_nickname> [--cluster=<cluster_nickname>]
+[--user=<user_nickname>] [--namespace=<namespace>]
+----
+
+a|`use-context`
+a|使用指定上下文 nickname 设置当前上下文。
+[source,terminal,options="nowrap"]
+----
+$ oc config use-context <context_nickname>
+----
+
+a|`set`
+a|在 CLI 配置文件中设置单个值。
+[source,terminal,options="nowrap"]
+----
+$ oc config set <property_name> <property_value>
+----
+`<property_name>`  是一个以点分隔的名称，每个令牌代表属性名称或映射键。`<property_value>`  是要设置的新值。
+
+a|`unset`
+a|在 CLI 配置文件中取消设置单个值。
+[source,terminal,options="nowrap"]
+----
+$ oc config unset <property_name>
+----
+`<property_name>`  是一个以点分隔的名称，每个令牌代表属性名称或映射键。
+
+a|`view`
+a|显示当前正在使用的合并 CLI 配置。
+[source,terminal,options="nowrap"]
+----
+$ oc config view
+----
+
+显示指定 CLI 配置文件的结果。
+[source,terminal,options="nowrap"]
+----
+$ oc config view --config=<specific_filename>
+----
+|===
+
+.用法示例
+
+* 以使用访问令牌的用户身份登录。`alice` 用户使用此令牌：
+
+[source,terminal,options="nowrap"]
+----
+$ oc login https://openshift1.example.com --token=ns7yVhuRNpDM9cgzfhhxQ7bM5s7N2ZVrkZepSRf4LC0
+----
+
+* 查看自动创建的集群条目：
+
+[source,terminal,options="nowrap"]
+----
+$ oc config view
+----
+
+.输出示例
+[source,terminal]
+----
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://openshift1.example.com
+  name: openshift1-example-com
+contexts:
+- context:
+    cluster: openshift1-example-com
+    namespace: default
+    user: alice/openshift1-example-com
+  name: default/openshift1-example-com/alice
+current-context: default/openshift1-example-com/alice
+kind: Config
+preferences: {}
+users:
+- name: alice/openshift1.example.com
+  user:
+    token: ns7yVhuRNpDM9cgzfhhxQ7bM5s7N2ZVrkZepSRf4LC0
+----
+
+* 更新当前上下文以便用户登录到所需的命名空间：
+
+[source,terminal]
+----
+$ oc config set-context `oc config current-context` --namespace=<project_name>
+----
+
+* 检查当前上下文，确认是否实施了更改：
+
+[source,terminal]
+----
+$ oc whoami -c
+----
+
+所有后续 CLI 操作都使用新的上下文，除非通过覆盖 CLI 选项或直至上下文切换为止。

@@ -1,0 +1,10 @@
+// Module included in the following assemblies:
+//
+// * applications/quotas/quotas-setting-per-project.adoc
+
+[id="quotas-requests-vs-limits_{context}"]
+= 请求与限值
+
+在分配计算资源时，每个容器可能会为 CPU、内存和临时存储各自指定请求和限制值。配额可以限制任何这些值。
+
+如果配额具有为 `requests.cpu` 或 `requests.memory` 指定的值，那么它要求每个传入的容器都明确请求那些资源。如果配额具有为 `limits.cpu` 或 `limits.memory` 指定的值，那么它要求每个传入的容器为那些资源指定一个显性限值。

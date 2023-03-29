@@ -1,0 +1,57 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-http2-haproxy_{context}"]
+= 启用 HTTP/2 入口连接
+
+您可以在 HAProxy 中启用透明端到端的 HTTP/2 连接。此功能使应用程序所有者利用 HTTP/2 协议功能，包括单一连接、标头压缩、二 进制流等等。
+
+您可以为单独的 Ingress Controller 或整个集群启用 HTTP/2 连接。
+
+要在从客户端到 HAProxy 的连接中启用 HTTP/2，路由必须指定一个自定义证书。使用默认证书的路由无法使用 HTTP/2。这一限制是避免连接并发问题（如客户端为使用相同证书的不同路由重新使用连接）所必需的。
+
+从 HAProxy 到应用程序 pod 的连接只能将 HTTP/2 用于 re-encrypt 路由，而不适用于 edge-terminated 或 insecure 路由。存在这个限制的原因是，在与后端协商使用 HTTP/2 时，HAProxy 要使用 ALPN（Application-Level Protocol Negotiation），它是一个 TLS 的扩展。这意味着，端到端的 HTTP/2 适用于 passthrough 和 re-encrypt 路由，而不适用于 nsecure 或 edge-terminated 路由。
+
+
+[重要]
+====
+对于非 passthrough 路由，Ingress Controller 会独立于客户端的连接来协商它与应用程序的连接。这意味着，客户端可以连接到 Ingress Controller 并协商 HTTP/1.1，Ingress Controller 可连接到应用程序，协商 HTTP/2 并使用 HTTP/2 连接将客户端 HTTP/1.1 连接转发请求。如果客户端随后试图将其连接从 HTTP/1.1 升级到 WebSocket 协议，这会导致问题。因为 Ingress Controller 无法将 WebSocket 转发到 HTTP/2，也无法将其 HTTP/2 的连接升级到 WebSocket。因此，如果您有一个应用程序旨在接受 WebSocket 连接，则必须允许使用 HTTP/2 协议，或者其它客户端将无法升级到 WebSocket 协议。
+====
+
+.流程
+
+在单一 Ingress Controller 上启用 HTTP/2。
+
+* 要在 Ingress Controller 上启用 HTTP/2，请输入 `oc annotate` 命令：
++
+[source,terminal]
+----
+$ oc -n openshift-ingress-operator annotate ingresscontrollers/<ingresscontroller_name> ingress.operator.openshift.io/default-enable-http2=true
+----
++
+将 `<ingresscontroller_name>` 替换为要注解的 `Ingress Controller` 的名称。
+
+在整个集群中启用 HTTP/2。
+
+* 要为整个集群启用 HTTP/2，请输入 `oc annotate` 命令：
++
+[source,terminal]
+----
+$ oc annotate ingresses.config/cluster ingress.operator.openshift.io/default-enable-http2=true
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加注解：
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+  annotations:
+    ingress.operator.openshift.io/default-enable-http2: "true"
+----
+====

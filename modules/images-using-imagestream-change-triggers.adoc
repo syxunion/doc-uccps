@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+[id="images-using-imagestream-change-triggers_{context}"]
+= 镜像流更改触发器
+
+当有新版本上游镜像时，镜像流触发器支持自动调用构建和部署。
+
+//from FAQ
+
+例如，修改镜像流标签时，构建和部署可以自动启动。实现方法是通过监控特定镜像流标签并在检测到变化时通知构建或部署。

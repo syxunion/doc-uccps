@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * registry/configuring_registry_storage-openstack-user-infrastructure.adoc
+
+[id="registry-configuring-storage-openstack-user-infra_{context}"]
+= 使用用户置备的基础架构 有栈 的 registry 存储
+
+您必须手动设置存储介质，并在 registry CR 中配置设置。
+
+.先决条件
+
+* 在具有用户置备的 Uniontech UStack Platform(有栈)上的集群。
+* 要为 有栈 配置 registry 存储，您需要提供 Registry Operator 云凭证。
+* 对于 有栈 存储上的 Swift，secret 应该包含以下以下两个键：
+
+** `REGISTRY_STORAGE_SWIFT_USER`
+** `REGISTRY_STORAGE_SWIFT_PASSWORD`

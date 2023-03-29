@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+// * openshift_images/using-image-pull-secrets
+
+:_content-type: PROCEDURE
+[id="images-allow-pods-to-reference-images-across-projects_{context}"]
+= 允许 pod 在项目间引用镜像
+
+使用内部容器镜像仓库（registry）时，为允许 `project-a` 中的 pod 引用 `project-b` 中的镜像，`project-a` 中的服务帐户必须绑定到 `project-b` 中的 `system:image-puller` 角色。
+
+[注意]
+====
+在创建 pod 服务帐户或命名空间时，请等待服务帐户置备了 docker pull secret；如果在其服务帐户被完全置备前创建 pod，则 pod 无法访问 统信容器云管理平台 内部 registry。
+====
+
+.流程
+
+. 要允许 `project-a` 中的 pod 引用 `project-b` 中的镜像，请将 `project-a` 中的服务帐户绑定到 `project-b` 中的 `system:image-puller` 角色。
++
+[source,terminal]
+----
+$ oc policy add-role-to-user \
+    system:image-puller system:serviceaccount:project-a:default \
+    --namespace=project-b
+----
++
+添加该角色后，`project-a` 中引用默认服务帐户的 pod 能够从 `project-b` 拉取（pull）镜像。
+
+. 要允许访问 `project-a` 中的任意服务帐户，请使用组：
++
+[source,terminal]
+----
+$ oc policy add-role-to-group \
+    system:image-puller system:serviceaccounts:project-a \
+    --namespace=project-b
+----

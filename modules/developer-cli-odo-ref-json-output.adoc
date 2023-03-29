@@ -1,0 +1,144 @@
+:_content-type: REFERENCE
+[id="odo-json-output_{context}"]
+= JSON 输出
+
+输出内容的 `odo` 命令通常会接受 `-o json` 标志以 JSON 格式输出此内容，适用于其他程序来更轻松地解析此输出。
+
+输出结构与 Kubernetes 资源类似，带有 `kind`, `apiVersion`, `metadata`, `spec`, 和 `status` 字段。
+
+_List_ 命令会返回 `List` 资源，其中包含一个项列表的 `items`（或类似）字段，每个项目也与 Kubernetes 资源类似。
+
+_Delete_ 命令会返回一个 `Status` 资源；请参阅 Status Kubernetes 资源。
+
+其他命令会返回与命令关联的资源，如 `Application`, `Storage`, `URL` 等。
+
+当前接受 `-o json` 标记的命令的完整列表是：
+
+|===
+| 命令 | Kind (版本) | 列表项目的 kind（版本） | 完整内容？
+
+| odo application describe
+| Application (odo.dev/v1alpha1)
+| 不适用
+| 否
+
+| odo application list
+| List (odo.dev/v1alpha1)
+| Application (odo.dev/v1alpha1)
+| ?
+
+| odo catalog list components
+| List (odo.dev/v1alpha1)
+| _missing_
+| 是
+
+| odo catalog list services
+| List (odo.dev/v1alpha1)
+| ClusterServiceVersion (operators.coreos.com/v1alpha1)
+| ?
+
+| odo catalog describe component
+| _missing_
+| 不适用
+| 是
+
+| odo catalog describe service
+| CRDDescription (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo component create
+| Component (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo component describe
+| Component (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo component list
+| List (odo.dev/v1alpha1)
+| Component (odo.dev/v1alpha1)
+| 是
+
+| odo config view
+| DevfileConfiguration (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo debug info
+| OdoDebugInfo (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo env view
+| EnvInfo (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo preference view
+| PreferenceList (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo project create
+| Project (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo project delete
+| Status (v1)
+| 不适用
+| 是
+
+| odo project get
+| Project (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo project list
+| List (odo.dev/v1alpha1)
+| Project (odo.dev/v1alpha1)
+| 是
+
+| odo registry list
+| List (odo.dev/v1alpha1)
+| _missing_
+| 是
+
+| odo service create
+| Service
+| 不适用
+| 是
+
+| odo service describe
+| Service
+| 不适用
+| 是
+
+| odo service list
+| List (odo.dev/v1alpha1)
+| Service
+| 是
+
+| odo storage create
+| Storage (odo.dev/v1alpha1)
+| 不适用
+| 是
+
+| odo storage delete
+| Status (v1)
+| 不适用
+| 是
+
+| odo storage list
+| List (odo.dev/v1alpha1)
+| Storage (odo.dev/v1alpha1)
+| 是
+
+| odo url list
+| List (odo.dev/v1alpha1)
+| URL (odo.dev/v1alpha1)
+| 是
+|===

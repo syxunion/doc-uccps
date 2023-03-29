@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="reducing-latency-for-alerting-rules-that-do-not-query-platform-metrics_{context}"]
+= 减少不查询平台指标的警报规则的延迟
+
+如果用户定义的项目的警报规则不查询默认集群指标，您可以在 `openshift-user-workload-monitoring` 项目中的 Prometheus 实例上直接部署该规则。这可绕过不需要的 Thanos Ruler，从而减少警报规则的延迟。这也有助于尽可能降低监控组件的总负载。
+
+[警告]
+====
+用户定义的项目的默认 统信容器云管理平台 指标提供有关 CPU 和内存用量、带宽统计和数据包速率的信息。如果您将规则直接部署到 `openshift-user-workload-monitoring` 项目中的 Prometheus 实例，则无法将这些指标包含在警报规则中。只有在您阅读了文档并对监控架构有了全面的了解后，才应使用本节中所述的流程。
+====
+
+.先决条件
+
+* 您已为用户定义的项目启用了监控。
+* 对于您要创建警报规则的项目，您已作为具有 `monitoring-rules-edit` 角色的用户登录。
+* 已安装 Uccps CLI (`oc`).
+
+.流程
+
+. 为警报规则创建 YAML 文件。在本例中，该文件名为 `example-app-alerting-rule.yaml`.
+
+. 向 YAML 文件添加警报规则配置，该文件中包含键为 `openshift.io/prometheus-rule-evaluation-scope` 且值为 `leaf-prometheus` 的标签。例如：
++
+[source,yaml]
+----
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: example-alert
+  namespace: ns1
+  labels:
+    openshift.io/prometheus-rule-evaluation-scope: leaf-prometheus
+spec:
+  groups:
+  - name: example
+    rules:
+    - alert: VersionAlert
+      expr: version{job="prometheus-example-app"} == 0
+----
+
+如果存在该标签，则会在 `openshift-user-workload-monitoring` 项目中的 Prometheus 实例上部署警报规则。如果不存在该标签，则会将警报规则部署到 Thanos Ruler。
+
+. 将配置文件应用到集群：
++
+[source,terminal]
+----
+$ oc apply -f example-app-alerting-rule.yaml
+----
++
+创建警报规则需要一些时间。

@@ -1,0 +1,29 @@
+// Module included in the following assemblies:
+// * openshift_images/image-pull-policy
+
+:_content-type: CONCEPT
+[id="images-image-pull-policy-overview_{context}"]
+= 镜像拉取（pull）策略概述
+
+统信容器云管理平台 在创建容器时，会使用容器的 `imagePullPolicy` 来决定是否应在启动容器前拉取（pull）镜像。
+
+.`imagePullPolicy` 有三个可能的值：
+[width="50%",options="header"]
+|===
+|值 |描述
+
+|`Always`
+|始终拉取（pull）镜像。
+
+|`IfNotPresent`
+|仅拉取（pull）节点上不存在的镜像。
+
+|`Never`
+|永不拉取（pull）镜像。
+|===
+
+
+如果没有指定容器的 `imagePullPolicy` 参数，统信容器云管理平台 会根据镜像标签来设置。
+
+. 如果标签为 `latest`，统信容器云管理平台 会将 `imagePullPolicy` 默认设置为 `Always`。
+. 否则，统信容器云管理平台 会将 `imagePullPolicy` 默认设置为 `IfNotPresent`。

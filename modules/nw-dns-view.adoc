@@ -1,0 +1,49 @@
+// Module included in the following assemblies:
+//
+// * dns/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-view_{context}"]
+= 查看默认 DNS
+
+每个 统信容器云管理平台 新安装都有一个名为 `default` 的 `dns.operator`。
+
+.流程
+
+. 使用 `oc describe` 命令来查看默认 dns：
++
+[source,terminal]
+----
+$ oc describe dns.operator/default
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         default
+Namespace:
+Labels:       <none>
+Annotations:  <none>
+API Version:  operator.openshift.io/v1
+Kind:         DNS
+...
+Status:
+  Cluster Domain:  cluster.local <1>
+  Cluster IP:      172.30.0.10 <2>
+...
+----
+<1> Cluster Domain 字段是用来构造完全限定的 pod 和服务域名的基本 DNS 域。
+<2> Cluster IP 是 Pod 为名称解析查询的地址。IP 由服务 CIDR 范围中的第 10 个地址定义。
+
+. 要查找集群的服务 CIDR，使用 oc get 命令：
++
+[source,terminal]
+----
+$ oc get networks.config/cluster -o jsonpath='{$.status.serviceNetwork}'
+----
+
+.输出示例
+[source,terminal]
+----
+[172.30.0.0/16]
+----

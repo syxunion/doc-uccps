@@ -1,0 +1,27 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: REFERENCE
+[id="kn-trigger-filtering_{context}"]
+= 使用 Knative CLI 使用触发器过滤事件
+// should be a procedure module but out of scope for this PR
+
+使用 Knative (kn) CLI 使用 kn CLI 通过触发器过滤事件，可提供精简且直观的用户界面。您可以使用 `kn trigger create` 命令和适当的标记来通过使用触发器过滤事件。
+
+在以下触发器示例中，只有带有属性 `type: dev.knative.samples.helloworld` 的事件才会发送到事件 sink:
+
+[source,terminal]
+----
+$ kn trigger create <trigger_name> --broker <broker_name> --filter type=dev.knative.samples.helloworld --sink ksvc:<service_name>
+----
+
+您还可以使用多个属性过滤事件。以下示例演示了如何使用类型、源和扩展属性过滤事件：
+
+[source,terminal]
+----
+$ kn trigger create <trigger_name> --broker <broker_name> --sink ksvc:<service_name> \
+--filter type=dev.knative.samples.helloworld \
+--filter source=dev.knative.samples/helloworldsource \
+--filter myextension=my-extension-value
+----

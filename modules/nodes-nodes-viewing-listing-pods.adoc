@@ -1,0 +1,56 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-viewing.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-viewing-listing-pods_{context}"]
+= 列出集群中某一节点上的 pod
+
+您可以列出特定节点上的所有 pod。
+
+.流程
+
+* 列出一个或多个节点上的所有或选定 pod：
++
+[source,terminal]
+----
+$ oc describe node <node1> <node2>
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc describe node ip-10-0-128-218.ec2.internal
+----
+
+* 列出选定节点上的所有或选定 pod：
++
+[source,terminal]
+----
+$ oc describe --selector=<node_selector>
+----
++
+[source,terminal]
+----
+$ oc describe node  --selector=kubernetes.io/os
+----
++
+或：
++
+[source,terminal]
+----
+$ oc describe -l=<pod_selector>
+----
++
+[source,terminal]
+----
+$ oc describe node -l node-role.kubernetes.io/worker
+----
+
+* 列出特定节点上的所有 pod，包括终止的 pod：
++
+[source,terminal]
+----
+$ oc get pod --all-namespaces --field-selector=spec.nodeName=<nodename>
+----

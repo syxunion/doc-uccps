@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+//
+// * web_console/dynamic-plug-ins.adoc
+
+:_content-type: PROCEDURE
+[id="deploy-on-cluster_{context}"]
+= 在集群中部署插件
+
+在将镜像推送到 registry 后，您可以将插件部署到集群中。
+
+.流程
+
+. 要将插件部署到集群中，请运行以下命令对模板进行实例化：
++
+[source,terminal]
+----
+$ oc process -f template.yaml \
+  -p PLUGIN_NAME=my-plugin \ <1>
+  -p NAMESPACE=my-plugin-namespace \ <2>
+  -p IMAGE=quay.io/my-repository/my-plugin:latest \ <3>
+  | oc create -f -
+----
+<1> 使用插件的名称更新。
+<2> 使用命名空间更新。
+<3> 使用您创建的镜像的名称进行更新。
++
+此命令运行轻量级 NGINX HTTP 服务器来为插件提供资产。
+
+重要: `PLUGIN_NAME` 必须与您在 `package.json` 中的 `consolePlugin` 声明中使用的插件名称匹配。
+
+[start=2]
+. 运行以下命令来修补 *Console Operator* 配置来启用插件：
++
+[source,terminal]
+
+----
+$ oc patch consoles.operator.openshift.io cluster --patch '{ "spec": { "plugins": ["my-plugin"] } }' --type=merge
+----

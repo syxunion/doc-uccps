@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="customizing-web-console"]
+= 在 统信容器云管理平台 中定制 Web 控制台
+include::_attributes/common-attributes.adoc[]
+:context: customizing-web-console
+
+toc::[]
+
+您可以对 统信容器云管理平台 web 控制台进行定制，如设置自定义徽标、产品名、链接、通知标语和命令行下载。这在您需要定制 Web 控制台以满足具体公司或政府要求时特别有用。
+
+include::modules/adding-a-custom-logo.adoc[leveloffset=+1]
+
+include::modules/creating-custom-links.adoc[leveloffset=+1]
+
+include::modules/customizing-the-web-console-URL.adoc[leveloffset=+1]
+
+include::modules/customizing-the-login-page.adoc[leveloffset=+1]
+
+include::modules/defining-template-for-external-log-link.adoc[leveloffset=+1]
+
+include::modules/adding-custom-notification-banners.adoc[leveloffset=+1]
+
+include::modules/customizing-cli-downloads.adoc[leveloffset=+1]
+
+include::modules/adding-yaml-examples-to-kube-resources.adoc[leveloffset=+1]

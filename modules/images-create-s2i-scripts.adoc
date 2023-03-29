@@ -1,0 +1,123 @@
+// Module included in the following assemblies:
+//
+//* builds/build-strategies.adoc
+// * openshift_images/create-images.adoc
+
+[id="images-create-s2i-scripts_{context}"]
+= 如何编写 Source-to-image 脚本
+
+Y您可以使用任何编程语言编写 S2I 脚本，只要脚本可在构建器镜像中执行。S2I 支持多种提供 assemble/run/save-artifacts 脚本的选项。每次构建时按以下顺序检查所有这些位置：
+
+. 构建配置中指定的脚本。
+. 在应用程序源 `.s2i/bin` 目录中找到的脚本。
+. 在默认镜像 URL 中找到的带有 `io.openshift.s2i.scripts-url` 标签的脚本。
+
+镜像中指定的 `io.openshift.s2i.scripts-url` 标签和构建配置中指定的脚本都可以采用以下形式之一：
+
+* `image:///path_to_scripts_dir`: 镜像中 S2I 脚本所处目录的绝对路径
+* `$$file:///path_to_scripts_dir$$`: 主机上 S2I 脚本所处目录的相对或绝对路径
+* `http(s)://path_to_scripts_dir`: S2I 脚本所处目录的 URL
+
+.S2I 脚本
+[cols="3a,8a",options="header"]
+|===
+
+|脚本 |描述
+
+|`assemble`
+|`assemble` 用来从源代码构建应用程序工件，并将其放置在镜像内部的适当目录中的脚本。这个脚本是必需的。此脚本的工作流为：
+
+. 可选：恢复构建工件。如果要支持增量构建，确保同时定义了 `save-artifacts`。
+. 将应用程序源放在所需的位置。
+. 构建应用程序工件。
+. 将工件安装到适合它们运行的位置。
+
+|`run`
+|`run` 脚本将执行您的应用程序。这个脚本是必需的。
+
+|`save-artifacts`
+|`save-artifacts` 脚本将收集所有可加快后续构建过程的依赖项。这个脚本是可选的。例如：
+
+* 对于 Ruby, 由 Bundler 安装的 `gem`。
+* 对于 Java, `.m2` 内容。
+
+这些依赖项会收集到一个 `tar` 文件中，并传输到标准输出。
+
+|`usage`
+|借助 `usage` 脚本，可以告知用户如何正确使用您的镜像。这个脚本是可选的。
+
+|`test/run`
+|借助 `test/run` 脚本，可以创建一个进程来检查镜像是否正常工作。这个脚本是可选的。该流程的建议工作流是：
+
+. 构建镜像。
+. 运行镜像以验证 `usage` 脚本。
+. 运行 `s2i build` 以验证 `assemble` 脚本。
+. 可选：再次运行`s2i build`，以验证 `save-artifacts` 和 `assemble` 脚本的保存和恢复工件功能。
+. 运行镜像，以验证测试应用程序是否正常工作。
+
+[注意]
+====
+建议将 `test/run` 脚本构建的测试应用程序放置到镜像存储库中的 `test/test-app` 目录。
+====
+|===
+
+*S2I 脚本示例*
+
+以下示例 S2I 脚本采用 Bash 编写。每个示例都假定其 `tar` 内容解包到 `/tmp/s2i` 目录中。
+
+.`assemble` 脚本:
+[source,bash]
+----
+#!/bin/bash
+
+# restore build artifacts
+if [ "$(ls /tmp/s2i/artifacts/ 2>/dev/null)" ]; then
+    mv /tmp/s2i/artifacts/* $HOME/.
+fi
+
+# move the application source
+mv /tmp/s2i/src $HOME/src
+
+# build application artifacts
+pushd ${HOME}
+make all
+
+# install the artifacts
+make install
+popd
+----
+
+.`run` 脚本:
+[source,bash]
+----
+#!/bin/bash
+
+# run the application
+/opt/application/run.sh
+----
+
+
+.`save-artifacts` 脚本:
+[source,bash]
+----
+#!/bin/bash
+
+pushd ${HOME}
+if [ -d deps ]; then
+    # all deps contents to tar stream
+    tar cf - deps
+fi
+popd
+----
+
+.`usage` 脚本:
+[source,bash]
+----
+#!/bin/bash
+
+# inform the user how to use the image
+cat <<EOF
+This is a S2I sample builder image, to use it, install
+https://github.com/openshift/source-to-image
+EOF
+----

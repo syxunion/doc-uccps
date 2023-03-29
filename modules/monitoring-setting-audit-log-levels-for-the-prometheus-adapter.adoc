@@ -1,0 +1,117 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+:_content-type: PROCEDURE
+[id="setting-audit-log-levels-for-the-prometheus-adapter_{context}"]
+= 为 Prometheus Adapter 设置审计日志级别
+
+[role=_abstract]
+在默认平台监控中，您可以为 Prometheus Adapter 配置审计日志级别。
+
+.先决条件
+
+* 已安装 Uccps CLI (`oc`).
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+
+.流程
+
+您可以在默认 `openshift-monitoring` 项目中为 Prometheus Adapter 设置审计日志级别：
+
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
+
+. 在 `data/config.yaml` 下的 `k8sPrometheusAdapter/audit` 部分中添加 `profile:`：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    k8sPrometheusAdapter:
+      audit:
+        profile: <audit_log_level> <1>
+----
+<1> 应用到 Prometheus Adapter 的审计日志级别。
+
+. 使用 profile: 参数的以下值之一设置审计日志级别：
++
+* `None`: 不要记录事件。
+* `Metadata`: 仅记录请求的元数据，如用户、时间戳等。不要记录请求文本和响应文本。metadata 是默认的审计日志级别。
+* `Request`: 仅记录元数据和请求文本，而不记录响应文本。这个选项不适用于非资源请求。
+* `RequestResponse`: 日志事件元数据、请求文本和响应文本。这个选项不适用于非资源请求。
+
+. 保存文件以使改变生效。在应用更改时，Prometheus Adapter 的 Pod 会自动重启。
++
+[警告]
+====
+一旦将更改保存到监控配置映射，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====
+
+.验证
+
+. 在配置映射的  `k8sPrometheusAdapter/audit/profile`, 下，将日志级别设置为 Request 并保存文件。
+
+. 确认 Prometheus Adapter 的 pod 正在运行。以下示例列出了 `openshift-monitoring` 项目中的 pod 状态：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get pods
+----
+
+. 确认正确配置了审计日志级别和审计日志文件路径：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get deploy prometheus-adapter -o yaml
+----
++
+.输出示例
+[source,terminal]
+----
+...
+  - --audit-policy-file=/etc/audit/request-profile.yaml
+  - --audit-log-path=/var/log/adapter/audit.log
+----
+
+. 确认 `openshift-monitoring` 项目中的 `prometheus-adapter` 部署中应用了正确的日志级别：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring exec deploy/prometheus-adapter -c prometheus-adapter -- cat /etc/audit/request-profile.yaml
+----
++
+.输出示例
+[source,terminal]
+----
+"apiVersion": "audit.k8s.io/v1"
+"kind": "Policy"
+"metadata":
+  "name": "Request"
+"omitStages":
+- "RequestReceived"
+"rules":
+- "level": "Request"
+----
++
+[注意]
+====
+如果您为 `ConfigMap` 对象中的  Prometheus Adapter 输入了一个未识别的 配置集 值，则不会对 Prometheus Adapter 进行任何更改，Cluster Monitoring Operator 会记录错误。
+====
+
+. 查看 Prometheus Adapter 的审计日志：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring exec -c <prometheus_adapter_pod_name> -- cat /var/log/adapter/audit.log
+----
+

@@ -1,0 +1,90 @@
+// Module included in the following assemblies:
+//
+// * security/encrypting-etcd.adoc
+// * post_installation_configuration/cluster-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="disabling-etcd-encryption_{context}"]
+= 禁用 etcd 加密
+
+您可以在集群中禁用 etcd 数据的加密。
+
+.先决条件
+
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 修改 `APIServer` 对象：
++
+[source,terminal]
+----
+$ oc edit apiserver
+----
+
+. 将 `encryption` 字段类型设置为 `identity`：
++
+[source,yaml]
+----
+spec:
+  encryption:
+    type: identity <1>
+----
+<1> `identity` 类型是默认值，意味着没有执行任何加密。
+
+. 保存文件以使改变生效。
++
+解密过程开始。根据集群的大小，这个过程可能需要 20 分钟或更长的时间才能完成。
+
+. 验证 etcd 解密是否成功。
+
+.. 查看 Uccps API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功解密：
++
+[source,terminal]
+----
+$ oc get openshiftapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功解密后输出显示 `DecryptionCompleted`：
++
+[source,terminal]
+----
+DecryptionCompleted
+Encryption mode set to identity and everything is decrypted
+----
++
+如果输出显示 `DecryptionInProgress`，解密仍在进行中。等待几分钟后重试。
+
+.. 查看 Kubernetes API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功解密：
++
+[source,terminal]
+----
+$ oc get kubeapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功解密后输出显示 `DecryptionCompleted`：
++
+[source,terminal]
+----
+DecryptionCompleted
+Encryption mode set to identity and everything is decrypted
+----
++
+如果输出显示 `DecryptionInProgress`，解密仍在进行中。等待几分钟后重试。
+
+.. 查看 Uccps OAuth API 服务器的 `Encrypted` 状态条件，以验证其资源是否已成功解密：
++
+[source,terminal]
+----
+$ oc get authentication.operator.openshift.io -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
++
+在成功解密后输出显示 `DecryptionCompleted`：
++
+[source,terminal]
+----
+DecryptionCompleted
+Encryption mode set to identity and everything is decrypted
+----
++
+如果输出显示 `DecryptionInProgress`，解密仍在进行中。等待几分钟后重试。

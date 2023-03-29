@@ -1,0 +1,236 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-volumes.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-volumes-adding_{context}"]
+= 将卷添加到 pod
+
+您可以将卷和卷挂载添加到 pod。
+
+.流程
+
+将卷和/或卷挂载添加到 pod 模板中：
+
+[source,terminal]
+----
+$ oc set volume <object_type>/<name> --add [options]
+----
+
+.添加卷时支持的选项
+[cols="3a*",options="header"]
+|===
+
+|选项 |描述 |默认
+
+|`--name`
+|卷的名称。
+|若未指定，则自动生成。
+
+|`-t, --type`
+|卷源的名称。支持的值有： `emptyDir`, `hostPath`, `secret`,
+`configmap`, `persistentVolumeClaim` 或 `projected`.
+|`emptyDir`
+
+|`-c, --containers`
+|按名称选择容器。它还可以使用通配符 '*’ 来匹配任意字符。
+|`'*'`
+
+|`-m, --mount-path`
+|所选容器内的挂载路径。不要挂载到容器 root、/ 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统（如主机的 /dev/pts 文件）。使用 /host 挂载主机是安全的。
+|
+
+|`--path`
+|主机路径。`--type=hostPath` 的必要参数。不要挂载到容器 root、/ 或主机和容器中相同的任何路径。如果容器有足够权限，可能会损坏您的主机系统（如主机的 /dev/pts 文件）。使用 /host 挂载主机是安全的。
+|
+
+|`--secret-name`
+|secret 的名称。`--type=secret` 的必要参数。
+|
+
+|`--configmap-name`
+|configmap 的名称。`--type=configmap` 的必要参数。
+|
+
+|`--claim-name`
+|持久性卷声明的名称。`--type=persistentVolumeClaim` 的必要参数。
+`--type=persistentVolumeClaim`.
+|
+
+|`--source`
+|以 JSON 字符串表示的卷源详情。如果 `--type` 不支持所需的卷源，则建议使用此参数。
+|
+
+|`-o, --output`
+|显示修改后的对象，而不在服务器上更新它们。支持的值有 `json` 和 `yaml`。
+|
+
+|`--output-version`
+|输出给定版本的修改后对象。
+|`api-version`
+|===
+
+
+例如：
+
+* 将新卷源 *emptyDir* 添加到 *registry* `DeploymentConfig` 对象中：
++
+[source,terminal]
+----
+$ oc set volume dc/registry --add
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加卷：
+
+.带有添加卷的部署配置示例
+[%collapsible]
+=====
+[source,yaml]
+----
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: registry
+  namespace: registry
+spec:
+  replicas: 3
+  selector:
+    app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      volumes: <1>
+        - name: volume-pppsw
+          emptyDir: {}
+      containers:
+        - name: httpd
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+----
+<1> 添加卷源 *emptyDir*.
+=====
+====
+
+* 为复制控制器 *r1* 添加含有 secret *secret1* 的卷 *v1* 并挂载到容器中的 */data*：
++
+[source,terminal]
+----
+$ oc set volume rc/r1 --add --name=v1 --type=secret --secret-name='secret1' --mount-path=/data
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加卷：
+
+.带有添加的卷和 secret 的复制控制器示例
+[%collapsible]
+=====
+[source,yaml]
+----
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: example-1
+  namespace: example
+spec:
+  replicas: 0
+  selector:
+    app: httpd
+    deployment: example-1
+    deploymentconfig: example
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: httpd
+        deployment: example-1
+        deploymentconfig: example
+    spec:
+      volumes: <1>
+        - name: v1
+          secret:
+            secretName: secret1
+            defaultMode: 420
+      containers:
+        - name: httpd
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          volumeMounts: <2>
+            - name: v1
+              mountPath: /data
+----
+<1> 添加卷和 secret。
+<2> 添加容器挂载路径。
+=====
+====
+
+* 使用声明名称 *pvc1* 将现有持久性卷 *v1* 添加到磁盘上的部署配置 *dc.json*，将该卷挂载到容器 *c1* 中的 */data* 并更新服务器上的 `DeploymentConfig`：
++
+[source,terminal]
+----
+$ oc set volume -f dc.json --add --name=v1 --type=persistentVolumeClaim \
+  --claim-name=pvc1 --mount-path=/data --containers=c1
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来添加卷：
+
+.添加了持久性卷的部署配置示例
+[%collapsible]
+=====
+[source,yaml]
+----
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: example
+  namespace: example
+spec:
+  replicas: 3
+  selector:
+    app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      volumes:
+        - name: volume-pppsw
+          emptyDir: {}
+        - name: v1 <1>
+          persistentVolumeClaim:
+            claimName: pvc1
+      containers:
+        - name: httpd
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts: <2>
+            - name: v1
+              mountPath: /data
+----
+<1> 添加名为 "pvc1" 的持久卷声明。
+<2> 添加容器挂载路径。
+=====
+====
+
+* 为所有复制控制器添加基于 Git 存储库 *$$https://github.com/namespace1/project1$$* 且具有修订 *5125c45f9f563* 的卷 v1：
++
+[source,terminal]
+----
+$ oc set volume rc --all --add --name=v1 \
+  --source='{"gitRepo": {
+                "repository": "https://github.com/namespace1/project1",
+                "revision": "5125c45f9f563"
+            }}'
+----

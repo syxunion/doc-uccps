@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-authentication.adoc
+
+[id="authentication-prometheus-system-metrics_{context}"]
+= Prometheus 身份验证指标
+
+统信容器云管理平台 在身份验证尝试过程中捕获以下 Prometheus 系统指标：
+
+* `openshift_auth_basic_password_count` 统计 `oc login` 用户名和密码的尝试次数。
+* `openshift_auth_basic_password_count_result` 按照结果（`success` 或 `error`）统计 `oc login` 用户名和密码的尝试次数。
+* `openshift_auth_form_password_count` 统计 web 控制台登录尝试次数。
+* `openshift_auth_form_password_count_result` 按照结果（`success` 或 `error`）统计 web 控制台登录尝试次数。
+* `openshift_auth_password_total` 统计 `oc login` 和 web 控制台登录尝试总次数。

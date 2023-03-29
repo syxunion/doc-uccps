@@ -1,0 +1,76 @@
+// Module included in the following assemblies:
+//
+// * networking/routes/route-configuration.adoc
+
+:_content-type: PROCEDURE
+[id="nw-creating-a-route_{context}"]
+= 创建基于 HTTP 的路由
+
+路由允许您在公共 URL 托管应用程序。根据应用程序的网络安全配置，它可以安全或不受保护。基于 HTTP 的路由是一个不受保护的路由，它使用基本的 HTTP 路由协议，并在未安全的应用程序端口上公开服务。
+
+以下流程描述了如何使用 hello-utccp 应用程序创建基于 HTTP 的简单路由，作为示例。
+
+.先决条件
+
+
+* 已安装 Uccp CLI (`oc`).
+* 以管理员身份登录。
+* 您有一个 web 应用，用于公开端口和侦听端口上流量的 TCP 端点。
+
+.流程
+
+. 运行以下命令，创建一个名为 `hello-utccp` 的项目：
++
+[source,terminal]
+----
+$ oc new-project hello-utccp
+----
+
+. 运行以下命令，在项目中创建 pod：
++
+[source,terminal]
+----
+$ oc create -f https://raw.githubusercontent.com/utccp/origin/master/examples/hello-utccp/hello-pod.json
+----
+
+. 运行以下命令，创建名为 `hello-utccp`` 的服务：
++
+[source,terminal]
+----
+$ oc expose pod/hello-utccp
+----
+
+. 运行以下命令，创建一个没有安全安全的路由到 hello-utccp 应用程序：
++
+[source,terminal]
+----
+$ oc expose svc hello-utccp
+----
++
+如果您检查生成的 `Route` 资源，它应该类似于如下：
++
+.创建的未安全路由的 YAML 定义：
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-openshift
+spec:
+  host: hello-openshift-hello-openshift.<Ingress_Domain> <1>
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: hello-openshift
+----
+<1> `<Ingress_Domain>` 是默认的入口域名。
+
+[注意]
+====
+要显示您的默认入口域，请运行以下命令：
+[source,terminal]
+----
+$ oc get ingresses.config/cluster -o jsonpath={.spec.domain}
+----
+====

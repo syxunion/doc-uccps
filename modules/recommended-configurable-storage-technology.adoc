@@ -1,0 +1,129 @@
+// Module included in the following assemblies:
+//
+// * storage/optimizing-storage.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="推荐的-可配置-storage-tech否logy_{context}"]
+= 推荐的可配置存储技术
+
+下表总结了为给定的 统信容器云管理平台 集群应用程序推荐的可配置存储技术。
+
+[options="header,footer"]
+|===
+|存储类型 |ROX^1^|RWX^2^|Registry|扩展的 registry|Metrics^3^|日志|Apps
+
+| Block
+| Yes^4^
+| 否
+| 可配置
+| 不可配置
+| 推荐的
+| 推荐的
+| 推荐的
+
+| File
+| Yes^4^
+| 是
+| 可配置
+| 可配置
+| 可配置^5^
+| 可配置^6^
+| 推荐的
+
+| 对象
+| 是
+| 是
+| 推荐的
+| 推荐的
+| 不可配置
+| 不可配置
+| 不可配置^7^
+
+8+a|
+^1^ `ReadOnlyMany`
+
+^2^ `ReadWriteMany`
+
+^3^ Prometheus 是用于指标数据的底层技术。
+
+^4^ 这不适用于物理磁盘、虚拟机物理磁盘、VMDK 、NFS 回送、AWS EBS 和 Azure 磁盘。
+
+^5^ 对于指标数据，使用 `ReadWriteMany (RWX)` 访问模式的文件存储是不可靠的。如果使用文件存储，请不要在配置用于指标数据的持久性卷声明（PVC）上配置 RWX 访问模式。
+
+^6^ 用于日志记录，使用任何共享存储都将是一个反模式。每个 elasticsearch 都需要一个卷。
+
+^7^ 对象存储不会通过 统信容器云管理平台 的 PV 或 PVC 使用。应用程序必须与对象存储 REST API 集成。
+
+|===
+
+[注意]
+====
+扩展的容器镜像仓库（registry）是一个 统信容器云管理平台 容器镜像仓库，它有两个或更多个 pod 运行副本。
+====
+
+== 特定应用程序存储建议
+
+[重要]
+====
+测试显示在 UnionTech Enterprise Linux(UOS20)中使用 NFS 服务器作为核心服务的存储后端的问题。这包括 Uccps Container Registry 和 Quay，Prometheus 用于监控存储，以及 Elasticsearch 用于日志存储。因此，不建议使用 UOS20 NFS 作为 PV 后端用于核心服务。
+
+市场上的其他 NFS 实现可能没有这些问题。如需了解更多与此问题相关的信息，请联络相关的 NFS 厂商。
+====
+
+=== Registry
+
+在一个非扩展的/高可用性 (HA) 统信容器云管理平台 registry 集群部署中：
+
+* 存储技术不需要支持 RWX 访问模式。
+* 存储技术必须保证读写一致性。
+* 首选存储技术是对象存储，然后是块存储。
+* 对于应用于生产环境工作负载的 统信容器云管理平台 Registry 集群部署，我们不推荐使用文件存储。
+
+=== 扩展的 registry
+
+在扩展的/HA 统信容器云管理平台 registry 集群部署中：
+
+* 存储技术必须支持 RWX 访问模式。
+* 存储技术必须保证读写一致性。
+* 首选存储技术是对象存储。
+* 支持 Amazon Simple Storage Service(Amazon S3)、Google Cloud Storage(GCS)、Microsoft Azure Blob Storage 和 OpenStack Swift。
+* 对象存储应该兼容 S3 或 Swift。
+* 对于非云平台，如 vSphere 和裸机安装，唯一可配置的技术是文件存储。
+* 块存储是不可配置的。
+
+=== 指标
+
+在 统信容器云管理平台 托管的 metrics 集群部署中：
+
+* 首选存储技术是块存储。
+* 对象存储是不可配置的。
+
+[重要]
+====
+在带有生产环境负载的托管 metrics 集群部署中不推荐使用文件存储。
+====
+
+=== 日志记录
+
+在 统信容器云管理平台 托管的日志集群部署中：
+
+* 首选存储技术是块存储。
+* 对象存储是不可配置的。
+
+=== Applications
+
+应用程序的用例会根据不同应用程序而不同，如下例所示：
+
+* 支持动态 PV 部署的存储技术的挂载时间延迟较低，且不与节点绑定来支持一个健康的集群。
+* 应用程序开发人员需要了解应用程序对存储的要求，以及如何与所需的存储一起工作以确保应用程序扩展或者与存储层交互时不会出现问题。
+
+== 其他特定的应用程序存储建议
+
+[重要]
+====
+不建议在 `Write` 密集型工作负载（如 `etcd` ）中使用 RAID 配置。如果您使用 RAID 配置运行 etcd，您可能会遇到工作负载性能问题的风险。
+====
+
+* UnionTech OpenStack Platform（RHOSP）Cinder: RHOSP Cinder 倾向于在 ROX 访问模式用例中使用。
+* 数据库：数据库（RDBMS 、nosql DBs 等等）倾向于使用专用块存储来获得最好的性能。
+* etcd 数据库必须具有足够的存储和适当的性能容量才能启用大型集群。有关监控和基准测试工具的信息，以建立基本存储和高性能环境，请参阅 _推荐 etcd 实践_。

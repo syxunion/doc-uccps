@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * applications/odc-monitoring-project-and-application-metrics-using-developer-perspective.adoc
+
+:_content-type: PROCEDURE
+[id="odc-monitoring-your-application-metrics_{context}"]
+= 监控应用程序的指标数据
+
+在项目中创建应用程序并进行部署后，您可以使用 *开发者* 视角中的 *拓扑* 视图来查看应用程序的警报和指标。*拓扑* 视图的工作负载节点上会显示应用程序的关键和警告警报。
+
+.流程
+查看工作负载的警报：
+
+. 在 *拓扑* 视图中，点击工作负载查看右侧面板中的工作负载详情。
+. 点 *观察* 选项卡查看应用程序的关键和警告警告 ; 指标数据图,如 CPU、内存和带宽使用情况 ; 以及应用程序的所有事件。
++
+[注意]
+====
+*拓扑* 视图中仅显示 *Firing* 状态的关键和警告警报。处于 *Silenced*、*Pending* 和 *Not Firin*g 状态的警报不会被显示。
+====

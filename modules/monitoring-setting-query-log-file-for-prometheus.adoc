@@ -1,0 +1,132 @@
+// Module included in the following assemblies:
+//
+// * monitoring/configuring-the-monitoring-stack.adoc
+
+[id="setting-query-log-file-for-prometheus_{context}"]
+:_content-type: PROCEDURE
+= 为 Prometheus 启用查询日志文件
+
+[role="_abstract"]
+您可以配置 Prometheus，将引擎运行的所有查询写入到日志文件中。对于默认平台监控和用户定义的工作负载监控，您可以这样做。
+
+[重要]
+====
+因为日志轮转不被支持，所以只在您需要对问题进行故障排除时临时启用此功能。完成故障排除后，通过恢复您对 `ConfigMap` 对象所做的更改来禁用查询日志记录以启用该功能。
+====
+
+.先决条件
+
+* 已安装 Uccps CLI (`oc`).
+* *如果您要为  `openshift-monitoring` 项目中的 Prometheus 启用查询日志文件功能*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+** 您已创建 `cluster-monitoring-config` `ConfigMap` 对象。
+* *如果要在 `openshift-user-workload-monitoring` 项目中为 Prometheus 启用查询日志文件功能*：
+** 您可以使用具有 `cluster-admin` 角色的用户访问集群，也可以使用在 `openshift-user-workload-monitoring` 项目中具有  `user-workload-monitoring-config-edit` 角色的用户访问集群。
+** 您已创建了 `user-workload-monitoring-config` `ConfigMap` 对象。
+
+.流程
+
+** *在  `openshift-monitoring` 项目中为 Prometheus 设置查询日志文件*：
+. 编辑 `openshift-monitoring` 项目中的 `cluster-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+----
++
+. 在 `data/config.yaml` 下为 `prometheusK8s`  添加 `queryLogFile: <path>` ：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    prometheusK8s:
+      queryLogFile: <path> <1>
+----
+<1> 记录查询的文件的完整路径。
++
+. 保存文件以使改变生效。
++
+[警告]
+====
+当您将更改保存到监控配置映射时，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====
++
+. 验证组件的 pod 是否正在运行。以下示例命令列出了 。以下示例命令列出了 `openshift-monitoring` 项目中的 pod 状态：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring get pods
+----
++
+. 读取查询日志：
++
+[source,terminal]
+----
+$ oc -n openshift-monitoring exec prometheus-k8s-0 -- cat <path>
+----
++
+[重要]
+====
+检查日志查询信息后，恢复配置映射中的设置。
+====
+
+** *要在 `openshift-user-workload-monitoring` 项目中为 Prometheus 设置查询日志文件*：
+. 在 `openshift-user-workload-monitoring`  项目中编辑  `user-workload-monitoring-config` `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring edit configmap user-workload-monitoring-config
+----
++
+. 在 `data/config.yaml` 下为 `prometheus` 添加 `queryLogFile: <path>`：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-workload-monitoring-config
+  namespace: openshift-user-workload-monitoring
+data:
+  config.yaml: |
+    prometheus:
+      queryLogFile: <path> <1>
+----
+<1> 记录查询的文件的完整路径。
++
+. 保存文件以使改变生效。
++
+[注意]
+====
+除非集群管理员为用户定义的项目启用了监控，否则应用到 `user-workload-monitoring-config` `ConfigMap` 的配置不会被激活。
+====
++
+[警告]
+====
+当您将更改保存到监控配置映射时，可能会重新部署相关项目中的 Pod 和其他资源。该项目中正在运行的监控进程也可能被重启。
+====
++
+. 验证组件的 pod 是否正在运行。以下示例命令列出了  `openshift-user-workload-monitoring` 项目中 Pod 的状态：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring get pods
+----
++
+. 读取查询日志：
++
+[source,terminal]
+----
+$ oc -n openshift-user-workload-monitoring exec prometheus-user-workload-0 -- cat <path>
+----
++
+[重要]
+====
+检查日志查询信息后，恢复配置映射中的设置。
+====

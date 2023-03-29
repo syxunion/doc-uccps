@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-accessing-private-repos_{context}"]
+= 从部署配置访问私有存储库
+
+您可以在 `部署配置` 中添加 secret，以便它可以从私有存储库访问镜像。此流程演示了 统信容器云管理平台 Web 控制台方法。
+
+.流程
+
+. 创建一个新项目。
+
+. 在 *工作负载* 页面中，创建一个含有用于访问私有镜像存储库的凭证的 secret。
+
+. 创建 `部署配置`。

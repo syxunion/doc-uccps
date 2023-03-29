@@ -1,0 +1,22 @@
+:_content-type: ASSEMBLY
+[id="quotas-setting-per-project"]
+= 项目的资源配额
+include::_attributes/common-attributes.adoc[]
+:context: quotas-setting-per-project
+
+toc::[]
+
+_资源配额_ 由 `ResourceQuota` 对象定义，提供约束来限制各个项目的聚合资源消耗。它可根据类型限制项目中创建的对象数量，以及该项目中资源可以消耗的计算资源和存储的总和。
+
+本指南阐述了资源配额如何工作，集群管理员如何以项目为基础设置和管理资源配额，以及开发人员和集群管理员如何查看配额。
+
+include::modules/quotas-resources-managed.adoc[leveloffset=+1]
+include::modules/quotas-scopes.adoc[leveloffset=+1]
+include::modules/quotas-enforcement.adoc[leveloffset=+1]
+include::modules/quotas-requests-vs-limits.adoc[leveloffset=+1]
+include::modules/quotas-sample-resource-quotas-def.adoc[leveloffset=+1]
+include::modules/quotas-creating-a-quota.adoc[leveloffset=+1]
+include::modules/quotas-creating-object-count-quotas.adoc[leveloffset=+2]
+include::modules/setting-resource-quota-for-extended-resources.adoc[leveloffset=+2]
+include::modules/quotas-viewing-quotas.adoc[leveloffset=+1]
+include::modules/quotas-requiring-explicit-quota.adoc[leveloffset=+1]

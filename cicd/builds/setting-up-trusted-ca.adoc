@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="setting-up-trusted-ca"]
+= 为构建设置其他可信证书颁发机构
+include::_attributes/common-attributes.adoc[]
+:context: setting-up-trusted-ca
+
+toc::[]
+
+在从镜像 registry 中拉取镜像时，参照以下部分设置构建可信任的额外证书颁发机构 (CA) 。
+
+此流程要求集群管理员创建 ConfigMap，并在 ConfigMap 中添加额外的 CA 作为密钥。
+
+* `ConfigMap` 必须在 `openshift-config` 命名空间中创建。
+* `domain` 是 `ConfigMap` 中的键，`value` 是 PEM 编码的证书。
+** 每个 CA 必须与某个域关联。域格式是 `hostname[..port]`。
+* `ConfigMap` 名称必须在 `image.config.openshift.io/cluster` 集群范围配置资源的 `spec.additionalTrustedCA` 字段中设置。
+//* No longer needs single PEM bundle
+
+include::modules/configmap-adding-ca.adoc[leveloffset=+1]

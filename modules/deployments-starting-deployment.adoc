@@ -1,0 +1,23 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-starting-a-deployment_{context}"]
+= 启动部署
+
+您可以启动一个部署推出（rollout）来开始应用程序的部署过程。
+
+.流程
+
+. 要从现有的 `部署配置` 启动新的部署过程，请运行以下命令：
++
+[source,terminal]
+----
+$ oc rollout latest dc/<name>
+----
++
+[注意]
+====
+如果部署过程已在进行中，此命令会显示一条消息，不会部署新的复制控制器。
+====

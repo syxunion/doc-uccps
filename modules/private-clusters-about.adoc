@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/configuring-private-cluster.adoc
+
+:_content-type: CONCEPT
+[id="private-clusters-about_{context}"]
+= 关于私有集群
+
+
+默认情况下，统信容器云管理平台 被置备为使用可公开访问的 DNS 和端点。在部署集群后，您可以将 DNS、Ingress Controller 和 API 服务器设置为私有。
+
+
+[discrete]
+[id="private-clusters-about-dns_{context}"]
+== DNS
+
+如果在安装程序置备的基础架构上安装 统信容器云管理平台，安装程序会在预先存在的公共区中创建记录，并在可能的情况下为集群自己的 `DNS` 解析创建一个私有区。在公共区和私有区中，安装程序或集群为 `*.apps` 和 `Ingress` 对象创建 `DNS` 条目，并为 `API` 服务器创建 `api`。
+
+公共和私有区中的 `*.apps` 记录是相同的，因此当您删除公有区时，私有区为集群无缝地提供所有 DNS 解析。
+
+[discrete]
+[id="private-clusters-about-ingress-controller_{context}"]
+== Ingress Controller
+由于默认 `Ingress` 对象是作为公共对象创建的，所以负载均衡器是面向互联网的，因此在公共子网中。您可以将默认 Ingress Controller 替换为内部控制器。
+
+[discrete]
+[id="private-clusters-about-api-server_{context}"]
+== API server
+
+默认情况下，安装程序为 API 服务器创建适当的网络负载均衡器，供内部和外部流量使用。

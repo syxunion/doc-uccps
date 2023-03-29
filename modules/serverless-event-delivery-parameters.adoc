@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// serverless/develop/serverless-event-delivery.adoc
+
+:_content-type: REFERENCE
+[id="serverless-event-delivery-parameters_{context}"]
+= 可配置事件交付参数
+
+为事件交付配置以下参数：
+
+死信接收器:: 您可以配置 `deadLetterSink` 交付参数，以便在事件无法发送时，它存储在指定的事件 sink 中。取消请求没有存储在死信接收器中的事件会被丢弃。死信接收器是符合 Knative Eventing sink 合同的任何可寻址对象，如 Knative 服务、Kubernetes 服务或一个 URI。
+
+Retries:: 您可以通过使用整数值配置重试 delivery 参数，在事件发送到 dead letter sink 前重试交付的次数。
+
+Back off 延迟:: 您可以设置 `backoffDelay`交付参数，以在失败后尝试事件交付重试前指定延迟。`backoffDelay`  参数的持续时间使用 ISO 8601 格式指定。例如，PT1S 指定 1 秒延迟。
+
+Back off 策略:: `backoffPolicy` 交付参数可以用来指定重试避退策略。该策略可以指定为 `linear` 或 `exponential`。当使用 `linear` back off 策略时，back off 延迟等同于 `backoffDelay * <numberOfRetries>`。当使用 `exponential` backoff 策略时，back off 的延迟等于 `backoffDelay*2^<numberOfRetries>` 。

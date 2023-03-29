@@ -1,0 +1,15 @@
+:_content-type: PROCEDURE
+[id="odc-using-the-devfile-registry_{context}"]
+= 使用 Devfile registry 访问 devfile
+
+您可以使用 *开发者* 视角的 *+添加* 中的 devfile 创建应用程序。+添加 提供与 devfile 社区 registry 的完整集成。devfile 是一个可移植的 YAML 文件，它描述了您的开发环境，而无需从头开始进行配置。使用 *Devfile registry*，您可以使用预先配置的 devfile 创建应用程序。
+
+.流程
+
+. 进入 *开发者 视角* -> *+添加* -> *开发者目录* -> *所有服务*.。此时会显示 *开发者目录* 中所有可用服务的列表。
+
+. 在 *所有服务* 下，选择 *Devfiles* 来浏览支持特定语言或框架的 devfile。另外，您可以使用 keyword 过滤器使用其名称、标签或描述搜索特定 devfile。
+
+. 点击您要用来创建应用程序的 devfile。devfile 标题显示 devfile 的详情，包括 devfile 的名称、描述、供应商和 devfile 文档。
+
+. 点 *创建* 按钮创建一个应用程序，并在 *拓扑* 视图中查看应用程序。

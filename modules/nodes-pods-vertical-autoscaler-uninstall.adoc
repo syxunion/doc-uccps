@@ -1,0 +1,73 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-vertical-autoscaler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-vertical-autoscaler-uninstall_{context}"]
+= 卸载 Vertical Pod Autoscaler Operator
+
+您可以从 统信容器云管理平台 集群中删除 Vertical Pod Autoscaler Operator（VPA）。卸载后，已由现有 VPA CR 修改的 pod 的资源请求不会改变。任何新 pod 都会根据工作负载对象中的定义获得资源，而不是之前由 VPA 提供的的建议。
+
+[注意]
+====
+您可以使用 `oc delete vpa <vpa-name>`  命令删除特定的 VPA。在卸载垂直 pod 自动扩展时，同样的操作适用于资源请求。
+====
+
+删除 VPA Operator 后，建议您删除与 Operator 相关的其他组件，以避免潜在的问题。
+
+.先决条件
+
+* 已安装 Vertical Pod Autoscaler Operator。
+
+.流程
+
+. 在 统信容器云管理平台 web 控制台中，点击  *Operators* -> *安装的 Operators*.
+
+. 切换到 *openshift-vertical-pod-autoscaler* 项目。
+
+. 找到 *VerticalPodAutoscaler*  Operator 点  Options 菜单 {kebab} 点击 *卸载 Operator*.
+
+. 可选： 要删除与 Operator 关联的所有操作对象，请在对话框中选择 *Delete all operand instances for this operator* 复选框。
+
+. 点击 *Uninstall*。
+
+. 可选： 使用 Uccps CLI 删除 VPA 组件：
+
+.. 删除 VPA 命名空间：
++
+[source,terminal]
+----
+$ oc delete namespace openshift-vertical-pod-autoscaler
+----
+
+.. 删除 VPA 自定义资源定义(CRD)对象：
++
+[source,terminal]
+----
+$ oc delete crd verticalpodautoscalercheckpoints.autoscaling.k8s.io
+----
++
+[source,terminal]
+----
+$ oc delete crd verticalpodautoscalercontrollers.autoscaling.openshift.io
+----
++
+[source,terminal]
+----
+$ oc delete crd verticalpodautoscalers.autoscaling.k8s.io
+----
++
+删除 CRD 会删除关联的角色、集群角色和角色绑定。
++
+[注意]
+====
+此操作会从集群中移除，集群中的所有用户创建的 VPA CR。如果重新安装 VPA，您必须再次创建这些对象。
+====
+
+.. 删除 VPA Operator：
++
+[source,terminal]
+----
+$ oc delete operator/vertical-pod-autoscaler.openshift-vertical-pod-autoscaler
+----
+

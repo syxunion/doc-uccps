@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * applications/idling-applications.adoc
+
+:_content-type: PROCEDURE
+[id="idle-unidling-applications_{context}"]
+= Unidling applications
+
+当应用程序服务接收网络流量并扩展为之前的状态时，应用程序服务会再次激活。这包括流向服务的流量和通过路由的流量。
+
+也可以通过扩展资源来手动取消闲置应用程序。
+
+.流程
+
+. 要扩展 DeploymentConfig，请运行:
++
+[source,terminal]
+----
+$ oc scale --replicas=1 dc <dc_name>
+----
+
+[注意]
+====
+目前，只有默认的 HAProxy 路由器支持通过路由器自动取消闲置。
+====

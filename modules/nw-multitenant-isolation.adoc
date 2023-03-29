@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+// * networking/multitenant-isolation.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multitenant-isolation_{context}"]
+= 隔离项目
+
+您可以隔离项目，使其他项目中的 pod 和服务无法访问这个项目中的 pod 和服务。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 您必须作为 `cluster-admin` 角色用户登录集群。
+
+.流程
+
+* 要隔离集群中的项目，请运行以下命令：
++
+[source,terminal]
+----
+$ oc adm pod-network isolate-projects <project1> <project2>
+----
++
+另外，除了指定具体的项目名称，也可以使用 `--selector=<project_selector>` 选项来基于关联标签指定项目。

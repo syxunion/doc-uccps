@@ -1,0 +1,123 @@
+// Module included in the following assemblies:
+//
+// * nodes/containers/nodes-containers-sysctls.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-sysctls-unsafe_{context}"]
+= 启用不安全 sysctl
+
+集群管理员可在非常特殊的情况下允许某些不安全 sysctl，比如高性能或实时应用程序性能优化。
+
+如果要使用不安全 sysctl，集群管理员必须为特定类型的节点单独启用它们。sysctl 必须拥有命名空间。
+
+您可以通过在 forbiddenSysctls 和 allowedUnsafeSysctls 字段中指定 Security Context Constraints 字段中的 sysctl 模式列表来控制 pod 中可以设置哪些 sysctl。forbiddenSysctls 选项用来排除特定 sysctls。
+
+- `allowedUnsafeSysctls` 选项用来控制特定的需求，如高性能或实时应用程序调整。
+
+[警告]
+====
+由于其不安全特性，使用不安全 sysctl 的风险由您自行承担，而且可能会造成严重问题，例如容器行为不当、资源短缺或节点受损。
+====
+
+.流程
+
+. 在运行带有不安全 sysctl 的容器的机器配置池中添加标签：
++
+[source,terminal]
+----
+$ oc edit machineconfigpool worker
+----
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  creationTimestamp: 2019-02-08T14:52:39Z
+  generation: 1
+  labels:
+    custom-kubelet: sysctl <1>
+----
+<1> 添加 key: pair 标签。
+
+. 创建 `KubeletConfig` 自定义资源（CR）：
++
+[source,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: custom-kubelet
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: sysctl <1>
+  kubeletConfig:
+    allowedUnsafeSysctls: <2>
+      - "kernel.msg*"
+      - "net.core.somaxconn"
+----
+<1> 指定机器配置池中的标签。
+<2> 列出您想要允许的不安全 sysctl。
+
+. 创建对象：
++
+[source,terminal]
+----
+$ oc apply -f set-sysctl-worker.yaml
+----
++
+创建了一个新的 `MachineConfig` 对象，命名格式是 `99-worker-XXXXXX-XXXXX-XXXX-XXXXX-kubelet` 。
+
+. 使用 `machineconfigpool` 对象 `status` 字段等待集群重启：
++
+例如：
++
+[source,yaml]
+----
+status:
+  conditions:
+    - lastTransitionTime: '2019-08-11T15:32:00Z'
+      message: >-
+        All nodes are updating to
+        rendered-worker-ccbfb5d2838d65013ab36300b7b3dc13
+      reason: ''
+      status: 'True'
+      type: Updating
+----
++
+集群就绪时会显示类似如下的消息：
++
+[source,yaml]
+----
+   - lastTransitionTime: '2019-08-11T16:00:00Z'
+      message: >-
+        All nodes are updated with
+        rendered-worker-ccbfb5d2838d65013ab36300b7b3dc13
+      reason: ''
+      status: 'True'
+      type: Updated
+----
+
+. 集群就绪后，在新的 `MachineConfig` 对象中检查合并的 `KubeletConfig` 对象：
++
+[source,terminal]
+----
+$ oc get machineconfig 99-worker-XXXXXX-XXXXX-XXXX-XXXXX-kubelet -o json | grep ownerReference -A7
+----
++
+[source,json]
+----
+        "ownerReferences": [
+            {
+                "apiVersion": "machineconfiguration.openshift.io/v1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "KubeletConfig",
+                "name": "custom-kubelet",
+                "uid": "3f64a766-bae8-11e9-abe8-0a1a2a4813f2"
+            }
+        ]
+----
++
+现在，您可以根据需要为 pod 添加不安全 sysctl。

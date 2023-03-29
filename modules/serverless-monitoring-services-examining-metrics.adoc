@@ -1,0 +1,48 @@
+// Module is included in the following assemblies:
+//
+// * /serverless/monitor/serverless-developer-metrics.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-monitoring-services-examining-metrics_{context}"]
+= 检查服务的指标
+
+在将应用配置为导出指标和监控堆栈以提取它们后，您可以在 web 控制台中查看指标数据。
+
+.先决条件
+
+* 已登陆到 {product-title} Web 控制台。
+* 安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+.流程
+
+. 可选：针对应用程序运行请求，您可以在指标中看到：
++
+[source,terminal]
+----
+$ hello_route=$(oc get ksvc helloworld-go -n ns1 -o jsonpath='{.status.url}') && \
+    curl $hello_route
+----
++
+.输出示例
+[source,terminal]
+----
+Hello Go Sample v1!
+----
+
+. 在 Web 控制台中，进入 *观察* -> *指标* 界面。
+
+. 在输入字段中，输入您要观察到的指标的查询，例如：
++
+[source]
+----
+revision_app_request_count{namespace="ns1", job="helloworld-go-sm"}
+----
++
+另一个示例：
++
+[source]
+----
+myapp_processed_ops_total{namespace="ns1", job="helloworld-go-sm"}
+----
+
+. 观察视觉化的指标

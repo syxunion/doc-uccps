@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * storage/dynamic-provisioning.adoc
+// * post_installation_configuration/storage-configuration.adoc
+
+[id="basic-storage-class-definition_{context}"]
+= 基本 StorageClass 对象定义
+
+以下资源显示了用来配置存储类的参数和默认值。这个示例使用 AWS ElasticBlockStore (EBS) 对象定义。
+
+
+.`StorageClass` 定义示例
+[source,yaml]
+----
+kind: StorageClass <1>
+apiVersion: storage.k8s.io/v1 <2>
+metadata:
+  name: <storage-class-name> <3>
+  annotations: <4>
+    storageclass.kubernetes.io/is-default-class: 'true'
+    ...
+provisioner: kubernetes.io/aws-ebs <5>
+parameters: <6>
+  type: gp2
+...
+----
+<1> （必需）API 对象类型。
+<2> （必需）当前的 apiVersion。
+<3> （必需）存储类的名称。
+<4> （可选）存储类的注解。
+<5> （必需）与这个存储类关联的置备程序类型。
+<6> （可选）特定置备程序所需的参数，这将根据插件的不同而有所不同。

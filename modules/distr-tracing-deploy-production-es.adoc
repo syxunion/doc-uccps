@@ -1,0 +1,137 @@
+////
+This module included in the following assemblies:
+- distr_tracing_install/distr-tracing-deploying-jaeger.adoc
+////
+
+:_content-type: PROCEDURE
+[id="distr-tracing-deploy-production_{context}"]
+= Deploying the {DTShortName} production strategy from the web console
+
+`production` 部署策略主要用于生产环境，它需要更具扩展性和高度可用的架构，在此情况下，对 trace 数据进行长期存储非常重要。
+
+.先决条件
+
+* 已安装 统信容器云管理平台搜索引擎。
+* 已安装 统信容器云管理平台分布式追踪 Operator。
+* 您已查看了如何自定义部署的说明。
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台web 控制台。
+
+. 创建一个新项目，如 `tracing-system`.
++
+[注意]
+====
+如果作为 Service Mesh 的一部分安装，则需要在与 `ServiceMeshControlPlane` 资源相同的命名空间中安装分布式追踪资源，如 `istio-system`.
+====
++
+.. 浏览至 *主页* -> *项目*.
+
+.. 点击 *创建项目*。
+
+.. 在 *名称* 字段中输入 `tracing-system`
+
+.. 点击 *创建*。
+
+. 导航到 *Operators* -> *安装的 Operators*.
+
+. 如有必要，从 *项目* 菜单中选择 `tracing-system` 。您可能需要等待一些时间，让 Operator 复制到新项目中。
+
+. 点 *统信容器云管理平台分布式追踪扩展组件*。在 *概述* 选项卡上的 *提供的APIs* 下，Operator 提供了单个链接。
+
+. 在 *Jaeger* 下，点 *创建实例*。
+
+. 在 *创建Jaeger* 页面上，将默认的 `all-in-one` YAML 文本替换为您的生产环境的 YAML 配置，例如：
+
++
+.使用 Elasticsearch 的示例 jaeger-production.yaml 文件
+[source,yaml]
+----
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-production
+  namespace:
+spec:
+  strategy: production
+  ingress:
+    security: oauth-proxy
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      nodeCount: 3
+      redundancyPolicy: SingleRedundancy
+    esIndexCleaner:
+      enabled: true
+      numberOfDays: 7
+      schedule: 55 23 * * *
+    esRollover:
+      schedule: '*/30 * * * *'
+----
++
+
+. 单击 *创建* 以创建分布式追踪平台实例。
+
+. 在 *Jaegers* 页面上，点击分布式追踪平台实例的名称，如  `jaeger-prod-elasticsearch`.
+
+. 在 *Jaeger* 详情页面上，点击 *资源* 选项卡，点击部署。等到所有 Pod 的状态变为“Running”再继续操作。
+
+
+[id="distr-tracing-deploy-production-cli_{context}"]
+== 通过 CLI 部署分布式追踪产品策略
+
+按照以下步骤从命令行创建分布式追踪平台实例。
+
+.先决条件
+
+* 已安装 统信容器云管理平台搜索引擎。
+* 已安装 统信容器云管理平台分布式追踪扩展组件。
+* 您已查看了如何自定义部署的说明。
+* 您可以访问与统信容器云管理平台版本匹配的 Uccp CLI (`oc`)
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 以具有 `cluster-admin` 角色的用户身份登录到统信容器云管理平台CLI
++
+[source,terminal]
+----
+$ oc login --username=<NAMEOFUSER> https://<HOSTNAME>:8443
+----
+
+. 2.创建一个名为 `tracing-system` 的新项目。
++
+[source,terminal]
+----
+$ oc new-project tracing-system
+----
+
+. 创建一个名为 `jaeger-production.yaml` 的自定义资源文件，其中包含上一步中的示例文件文本。
+
+. 运行以下命令来部署分布式追踪平台：
++
+[source,terminal]
+----
+$ oc create -n tracing-system -f jaeger-production.yaml
+----
++
+. 在安装过程中运行以下命令来监控 pod 的进度：
++
+[source,terminal]
+----
+$ oc get pods -n tracing-system -w
+----
++
+安装过程完成后，您应该看到类似以下示例的输出：
++
+[source,terminal]
+----
+NAME                                                              READY   STATUS    RESTARTS   AGE
+elasticsearch-cdm-jaegersystemjaegerproduction-1-6676cf568gwhlw   2/2     Running   0          10m
+elasticsearch-cdm-jaegersystemjaegerproduction-2-bcd4c8bf5l6g6w   2/2     Running   0          10m
+elasticsearch-cdm-jaegersystemjaegerproduction-3-844d6d9694hhst   2/2     Running   0          10m
+jaeger-production-collector-94cd847d-jwjlj                        1/1     Running   3          8m32s
+jaeger-production-query-5cbfbd499d-tv8zf                          3/3     Running   3          8m32s
+----

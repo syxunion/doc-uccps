@@ -1,0 +1,11 @@
+// Text snippet included in the following modules:
+//
+// * modules/odc-importing-codebase-from-git-to-create-application.adoc
+
+:_content-type: SNIPPET
+
+域映射:: 如果要创建 *Serverless* 部署，您可以在创建过程中添加自定义域映射到 Knative 服务。
++
+* 在 *高级选项* 部分中，点 *显示高级路由选项*。
+** 如果要映射到该服务的域映射 CR 已存在，您可以从 *域映射* 下拉菜单中选择它。
+** 如果要创建新域映射 CR，在框中输入域名，然后选择 *创建* 选项。例如，如果您在 example.com 中 键入，则 *创建* 选项为 创建 *"example.com"*。

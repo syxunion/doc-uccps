@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="nodes-nodes-resources-configuring"]
+= 为 统信容器云管理平台 集群中的节点分配资源
+include::_attributes/common-attributes.adoc[]
+:context: nodes-nodes-resources-configuring
+
+toc::[]
+
+为提供更可靠的调度并最大程度减少节点资源过量使用，请保留一部分 CPU 和内存资源供底层节点组件（如 `kubelet` 和 `kube-proxy` ）以及其余系统组件（如 `sshd` 和 `NetworkManager` ）使用。通过指定要保留的资源，您可以为调度程序提供有关节点可用于 pod 使用的剩余 CPU 和内存资源的更多信息。您可以允许 统信容器云管理平台 自动决定节点的最佳 `system-reserved` CPU 和内存资源，也可以手动为节点决定和设置最佳资源。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-nodes-resources-configuring-about.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-resources-configuring-auto.adoc[leveloffset=+1]
+
+include::modules/nodes-nodes-resources-configuring-setting.adoc[leveloffset=+1]

@@ -1,0 +1,39 @@
+:_content-type: ASSEMBLY
+[id="configuring-custom-helm-chart-repositories"]
+= 配置自定义 Helm Chart 仓库
+include::_attributes/common-attributes.adoc[]
+:context: configuring-custom-helm-chart-repositories
+
+toc::[]
+
+[role="_abstract"]
+您可以使用以下方法在 统信容器云管理平台 集群上安装 Helm chart：
+
+* CLI.
+* Web 控制台的 *开发者* 视角。
+
+在 web 控制台的 *开发者* 视角 中，*开发者目录* 显示集群中可用的 Helm chart。默认情况下，它会从 统信Uccp Helm Chart 仓库中列出 Helm chart。
+
+作为集群管理员，您可以添加多个集群范围的 Helm Chart 仓库，与默认的集群范围 Helm 仓库分开，并在 *开发者目录* 中显示这些仓库中的 Helm chart。
+
+作为具有适当基于角色的访问控制(RBAC)权限的普通用户或项目成员，您可以添加多个命名空间范围的 Helm Chart 仓库，除了默认的集群范围的 Helm 仓库，并在 *开发者目录* 中显示这些仓库中的 Helm chart。
+
+include::modules/helm-installing-a-helm-chart-on-an-openshift-cluster.adoc[leveloffset=+1]
+
+include::modules/odc-installing-helm-charts-using-developer-perspective.adoc[leveloffset=+1]
+
+== 在 Web 终端中使用 Helm
+
+您可以通过在 web 控制台的 *开发者* 视角中初始化 web 终端来使用 Helm。
+
+include::modules/helm-creating-a-custom-helm-chart-on-openshift.adoc[leveloffset=+1]
+
+include::modules/helm-adding-helm-chart-repositories.adoc[leveloffset=+1]
+
+include::modules/helm-adding-namespace-scoped-helm-chart-repositories.adoc[leveloffset=+1]
+
+include::modules/helm-creating-credentials-and-certificates-to-add-helm-repositories.adoc[leveloffset=+1]
+
+include::modules/helm-filtering-helm-charts-by-certification-level.adoc[leveloffset=+1]
+
+include::modules/helm-disabling-helm-chart-repositories.adoc[leveloffset=+1]

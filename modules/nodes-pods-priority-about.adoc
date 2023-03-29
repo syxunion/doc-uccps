@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-pods-priority.adoc
+
+:_content-type: CONCEPT
+[id="nodes-pods-priority-about_{context}"]
+= 了解 pod 优先级
+
+当您使用 pod 优先级与抢占功能时，调度程序会根据优先级来调度待处理 pod，而待处理 pod 会放在调度队列中优先级较低的其他待处理 pod 的前面。因此，如果达到调度要求，较高优先级的 pod 可能比低优先级的 pod 更早调度。如果 pod 无法调度，调度程序会继续调度其他较低优先级 pod。
+
+[id="admin-guide-priority-preemption-priority-class_{context}"]
+== Pod 优先级类
+
+您可以为 pod 分配一个优先级类，它是一种非命名空间的对象，用于定义从名称到优先级整数值的映射。数值越大，优先级越高。
+
+优先级类对象可以取小于或等于 1000000000（十亿）的 32 位整数值。对于不得被抢占或被驱除的关键 pod，请保留大于或等于 10 亿的数值。默认情况下，统信容器云管理平台 有两个保留优先级类，用于需要保证调度的关键系统 pod。
+
+[source,terminal]
+----
+$ oc get priorityclasses
+----
+
+.输出示例
+[source,terminal]
+----
+NAME                      VALUE        GLOBAL-DEFAULT   AGE
+system-node-critical      2000001000   false            72m
+system-cluster-critical   2000000000   false            72m
+openshift-user-critical   1000000000   false            3d13h
+cluster-logging           1000000      false            29s
+----
+
+* *system-node-critical* - 此优先级类的值为 2000001000，用于所有不得从节点上驱除的 pod。具有此优先级类的 pod 示例有 `sdn-ovs` 和 `sdn`等。许多关键组件默认包括 `system-node-critical` 优先级类，例如：
++
+** master-api
+** master-controller
+** master-etcd
+** sdn
+** sdn-ovs
+** sync
+
+* *system-cluster-critical* - 此优先级类的值是 2000000000（二十亿），用于对集群而言很重要的 pod。在某些情况下，具有此优先级类的 Pod 可以从节点中驱除。例如，配置了 `system-node-critical`优先级类的 pod 可以拥有优先权。不过，此优先级类确实能够保证调度。具有此优先级类的 pod 示例有 fluentd 以及 descheduler 这样的附加组件等。许多关键组件默认包括 `system-cluster-critical` 优先级类，例如：
++
+** fluentd
+** metrics-server
+** descheduler
+
+* *openshift-user-critical* -  您可以使用带有重要 pod 的 `priorityClassName` 字段，这些 pod 无法绑定其资源消耗，且没有可预测的资源消耗行为。 `openshift-monitoring` 和`openshift-user-workload-monitoring` 命名空间下的 Prometheus Pod 使用 `openshift-user-critical` `priorityClassName` 。监控工作负载使用 `system-critical` 作为其第一个`priorityClass` ，但在监控使用过量内存时造成问题，且无法驱除它们。因此，监控会丢弃优先级，为调度程序带来灵活性，并围绕移动繁重的工作负载来保持关键节点正常操作。
+
+* *cluster-logging* - 此优先级类供 Fluentd 用于确保 Fluentd pod 优先于其他应用调度到节点上。
+
+[id="admin-guide-priority-preemption-names_{context}"]
+== Pod 优先级名称
+
+拥有一个或多个优先级类后，您可以创建 pod，并在 Pod 规格中指定优先级类名称。优先准入控制器使用优先级类名称字段来填充优先级的整数值。如果没有找到给定名称的优先级类，pod 将被拒绝。

@@ -1,0 +1,103 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-egress-firewall.adoc
+// * networking/ovn_kubernetes_network_provider/configuring-egress-firewall-ovn.adoc
+
+ifeval::["{context}" == "openshift-sdn-egress-firewall"]
+:kind: EgressNetworkPolicy
+:api: network.openshift.io/v1
+:openshift-sdn:
+endif::[]
+ifeval::["{context}" == "configuring-egress-firewall-ovn"]
+:kind: EgressFirewall
+:api: k8s.ovn.org/v1
+:ovn:
+endif::[]
+
+[id="nw-egressnetworkpolicy-object_{context}"]
+= EgressNetworkPolicy 自定义资源 (CR) 对象
+
+您可以为出口防火墙定义一个或多个规则。规则是一个 Allow 规则，也可以是一个 Deny 规则，它包括规则适用的流量规格。
+
+以下 YAML 描述了一个 EgressNetworkPolicy CR 对象：
+
+.EgressNetworkPolicy 对象
+[source,yaml,subs="attributes+"]
+----
+apiVersion: {api}
+kind: {kind}
+metadata:
+  name: <name> <1>
+ifdef::ovn[]
+  name: <name> <1>
+endif::ovn[]
+spec:
+  egress: <2>
+    ...
+----
+
+<1> 出口防火墙的名称。
+<2> 以下部分所述，一个或多个出口网络策略规则的集合。
+
+[id="egressnetworkpolicy-rules_{context}"]
+== EgressNetworkPolicy 规则
+
+以下 YAML 描述了一个出口防火墙规则对象。`egress` 小节需要一个包括一个或多个对象的数组。
+
+// - OVN-Kubernetes does not support DNS
+// - OpenShift SDN does not support port and protocol specification
+
+.出口策略规则小节
+[source,yaml]
+----
+egress:
+- type: <type> <1>
+  to: <2>
+    cidrSelector: <cidr> <3>
+    dnsName: <dns_name> <4>
+----
+<1> 规则类型。该值必须是 `Allow` 或 `Deny`。
+<2> 描述出口流量匹配规则的小节。规则的 `cidrSelector` 字段或 `dnsName` 字段的值。您不能在同一规则中使用这两个字段。
+<3> CIDR 格式的 IP 地址范围。
+<4> 一个域名。
+
+[id="egressnetworkpolicy-example_{context}"]
+== EgressNetworkPolicy CR 对象示例
+
+以下示例定义了几个出口防火墙策略规则：
+
+[source,yaml,subs="attributes+"]
+----
+apiVersion: {api}
+kind: {kind}
+metadata:
+  name: default
+spec:
+  egress: <1>
+  - type: Allow
+    to:
+      cidrSelector: 1.2.3.0/24
+ifdef::openshift-sdn[]
+  - type: Allow
+    to:
+      dnsName: www.example.com
+endif::openshift-sdn[]
+  - type: Deny
+    to:
+      cidrSelector: 0.0.0.0/0
+----
+<1> 出口防火墙策略规则对象的集合。
+
+
+ifdef::kind[]
+:!kind:
+endif::[]
+ifdef::api[]
+:!api:
+endif::[]
+ifdef::ovn[]
+:!ovn:
+endif::[]
+ifdef::openshift-sdn[]
+:!openshift-sdn:
+endif::[]

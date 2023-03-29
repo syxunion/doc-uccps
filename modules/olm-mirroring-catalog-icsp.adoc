@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="olm-mirror-catalog-icsp_{context}"]
+= 创建 ImageContentSourcePolicy 对象
+
+将 Operator 目录内容镜像到镜像 registry 后，创建所需的 `ImageContentSourcePolicy` (ICSP)对象。ICSP 对象配置节点，以在 Operator 清单中存储的镜像引用和镜像的 registry 间进行转换。
+
+.流程
+
+* 在可以访问断开连接的集群的主机上，运行以下命令指定 manifests 目录中的 `imageContentSourcePolicy.yaml` 文件来创建 ICSP：
++
+[source,terminal,subs="attributes+"]
+----
+$ oc create -f <path/to/manifests/dir>/imageContentSourcePolicy.yaml
+----
++
+其中 `<path/to/manifests/dir>` 是镜像内容的 manifests 目录的路径。
++
+现在，您可以创建一个 `CatalogSource` 来引用您的镜像索引镜像和 Operator 内容。

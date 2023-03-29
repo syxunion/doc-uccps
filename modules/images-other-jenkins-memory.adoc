@@ -1,0 +1,16 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-memory_{context}"]
+= Jenkins 内存要求
+
+使用所提供的 Jenkins Ephemeral 或 Jenkins Persistent 模板部署时，默认内存限值为 `1 Gi`。
+
+默认情况下，Jenkins 容器中运行的所有其他进程使用的内存总量不超过 `512 MiB`。如果这些进程需要更多内存，容器将停止。因此，我们强烈建议管道尽可能在代理容器中运行外部命令。
+
+如果 `Project` 配额允许，请参阅 Jenkins 文档，了解 Jenkins master 应具有多少内存的建议。这些建议禁止为 Jenkins master 分配更多内存。
+
+建议您为 Jenkins Kubernetes 插件创建的代理容器指定内存请求和限制值。管理员用户可通过 Jenkins 配置基于每个代理镜像设置默认值。内存请求和限值参数也可基于每个容器覆盖。
+
+在实例化 Jenkins Ephemeral 或 Jenkins Persistent 模板时，您可通过覆盖 `MEMORY_LIMIT` 参数来增加 Jenkins 的可用内存量。

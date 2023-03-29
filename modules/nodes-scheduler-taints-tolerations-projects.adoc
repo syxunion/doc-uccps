@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-taints-tolerations.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-taints-tolerations-projects_{context}"]
+= 使用节点选择器和容限创建项目
+
+您可以创建一个使用节点选择器和容限（设为注解）的项目，以控制 pod 放置到特定的节点上。然后，项目中创建的任何后续资源都会调度到与容限匹配的污点节点上。
+
+.先决条件
+
+* 通过使用机器集或直接编辑节点，已将节点选择的标签添加到一个或多个节点上。
+* 通过使用机器集或直接编辑节点，已将污点添加到一个或多个节点上。
+
+.流程
+
+. 创建 Project 资源定义，在 `metadata.annotations` 部分指定节点选择器和容限：
++
+.`project.yaml` 文件示例
+[source,yaml]
+----
+kind: Project
+apiVersion: project.openshift.io/v1
+metadata:
+  name: <project_name> <1>
+  annotations:
+    openshift.io/node-selector: '<label>' <2>
+    scheduler.alpha.kubernetes.io/defaultTolerations: >-
+      [{"operator": "Exists", "effect": "NoSchedule", "key":
+      "<key_name>"} <3>
+      ]
+----
+<1> 项目名称。
+<2> 默认节点选择器标签。
+<3> 容限参数，如 *Taint 和 toleration 组件* 表中所述。本例使用 `NoSchedule` effect （允许节点上现有的 pod 保留）和 `Exists` 1.运算符（不使用值）。
+
+. 使用 `oc apply` 命令来创建项目：
++
+[source,terminal]
+----
+$ oc apply -f project.yaml
+----
+
+现在， `<project_name>` 命名空间中创建的任何后续资源都应调度到指定的节点上。

@@ -1,0 +1,98 @@
+// Module included in the following assemblies:
+//
+// * authentication/understanding-internal-oauth.adoc
+
+:_content-type: PROCEDURE
+[id="oauth-token-inactivity-timeout_{context}"]
+= 为内部 OAuth 服务器配置令牌不活跃超时
+
+您可以将 OAuth 令牌配置为在一组不活跃时间后过期。默认情况下，不会设置令牌不活跃超时。
+
+[注意]
+====
+如果您的 OAuth 客户端中也配置了令牌不活动超时，则该值会覆盖内部 OAuth 服务器配置中设置的超时。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您已经配置了一个身份提供程序（IDP）。
+
+.流程
+
+. 更新 `OAuth` 配置，以设置令牌不活跃超时。
+
+.. 编辑 `OAuth` 对象：
++
+[source,terminal]
+----
+$ oc edit oauth cluster
+----
++
+添加 `spec.tokenConfig.accessTokenInactivityTimeout` 字段并设置超时值：
+
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+...
+spec:
+  tokenConfig:
+    accessTokenInactivityTimeout: 400s <1>
+----
+<1> 设定有适当单位的值，例如 `400s` 代表 400 秒，或 `30m` 代表 30 分钟。允许的超时最小值为 `300s`。
+
+.. 保存文件以使改变生效。
+
+. 检查 OAuth 服务器 pod 是否已重启：
++
+[source,terminal]
+----
+$ oc get clusteroperators authentication
+----
++
+在 `PROGRESSING` 列为 `False` 前不要继续进入下一步，如下所示：
++
+.输出示例
+[source,terminal]
+----
+NAME             VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication   4.10.0    True        False         False      145m
+----
+
+. 检查是否已推出 Kubernetes API 服务器 pod 的新修订版本。这需要几分钟时间。
++
+[source,terminal]
+----
+$ oc get clusteroperators kube-apiserver
+----
++
+在 `PROGRESSING` 列为 `False` 前不要继续进入下一步，如下所示：
++
+.输出示例
+[source,terminal]
+----
+NAME             VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+kube-apiserver   4.10.0     True        False         False      145m
+----
++
+如果 `PROGRESSING` 显示为 `True`，请等待几分钟后再试一次。
+
+.验证
+
+. 使用来自您的 IDP 的身份登录到集群。
+
+. 执行命令并确认它是否成功。
+
+. 等待的时间比配置的超时时间长而无需使用身份。在这个示例中，等待的时间超过 400 秒。
+
+. 尝试从同一身份的会话中执行命令。
++
+这个命令会失败，因为令牌应该因为不活跃的时间超过配置的超时时间而过期。
++
+.输出示例
+[source,terminal]
+----
+error: You must be logged in to the server (Unauthorized)
+----

@@ -1,0 +1,178 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-projected-volumes.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-projected-volumes-about_{context}"]
+= 了解投射卷
+
+投射卷可将这些卷源的任何组合映射到一个目录中，让用户能够：
+
+* 使用来自多个 secret、配置映射的密钥和 downward API 信息自动填充单个卷，以便在一个目录中整合不同来源的信息；
+* 使用来自多个 secret、配置映射的密钥和 downward API 信息填充单个卷，并且明确指定各个项目的路径，以便能够完全掌控卷中的内容。
+
+[重要]
+====
+当在基于 Linux 的 Pod 的安全上下文中设置 RunAsUser 权限时，投射文件具有正确的权限集，包括容器用户所有权。但是，当 Windows pod 中设置了与 Windows 等效的 RunAsUsername 权限时，kubelet 将无法正确设置投射卷中的文件的所有权。
+
+因此，在 Windows pod 的安全上下文中设置的 RunAsUsername 权限不适用于 统信容器云管理平台 中运行的 Windows 项目卷。
+====
+
+以下一般情景演示了如何使用投射卷。
+
+*配置映射, secrets, Downward API.*::
+通过投射卷，使用包含密码的配置数据来部署容器。使用这些资源的应用程序可以在 Kubernetes 上部署 UnionTech OpenStack Platform（RHOSP）。根据服务要用于生产环境还是测试环境，可能需要对配置数据进行不同的编译。如果 pod 标记了生产或测试用途，可以使用 Downward API 选择器 metadata.labels 来生成正确的 RHOSP 配置。
+
+*配置映射 + secrets.*::
+借助投射卷来部署涉及配置数据和密码的容器。例如，您可以执行含有某些敏感加密任务的配置映射，这些任务需要使用保险箱密码文件来解密。
+
+*配置映射 + Downward API.*::
+借助投射卷来生成包含 pod 名称的配置（可通过 metadata.name 选择器使用）。然后，此应用程序可以将 pod 名称与请求一起传递，以在不使用 IP 跟踪的前提下轻松地判断来源。
+
+*Secrets + Downward API.*::
+借助投射卷，将 secret 用作公钥来加密 pod 的命名空间（可通过 metadata.namespace 选择器使用）。这个示例允许 Operator 使用应用程序安全地传送命名空间信息，而不必使用加密传输。
+
+[id="projected-volumes-examples_{context}"]
+== Pod specs 示例
+
+以下是用于创建投射卷的 Pod spec 示例。
+
+.带有 secret、Downward API 和配置映射的 Pod
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-test
+spec:
+  containers:
+  - name: container-test
+    image: busybox
+    volumeMounts: <1>
+    - name: all-in-one
+      mountPath: "/projected-volume"<2>
+      readOnly: true <3>
+  volumes: <4>
+  - name: all-in-one <5>
+    projected:
+      defaultMode: 0400 <6>
+      sources:
+      - secret:
+          name: mysecret <7>
+          items:
+            - key: username
+              path: my-group/my-username <8>
+      - downwardAPI: <9>
+          items:
+            - path: "labels"
+              fieldRef:
+                fieldPath: metadata.labels
+            - path: "cpu_limit"
+              resourceFieldRef:
+                containerName: container-test
+                resource: limits.cpu
+      - configMap: <10>
+          name: myconfigmap
+          items:
+            - key: config
+              path: my-group/my-config
+              mode: 0777 <11>
+----
+
+<1> 为每个需要 secret 的容器添加 volumeMounts 部分。
+<2> 指定一个到还未使用的目录的路径，secret 将出现在这个目录中。
+<3> 将 readOnly 设为 true。
+<4> 添加一个 volumes 块，以列出每个投射卷源。
+<5> 为卷指定任意名称。
+<6> 设置文件的执行权限。
+<7> 添加 secret。输入 secret 对象的名称。必须列出您要使用的每个 secret。
+<8> 指定 mountPath 下 secret 文件的路径。此处，secret 文件位于 *_/projected-volume/my-group/my-username_*.
+<9> 添加 Downward API 源。
+<10> 添加 ConfigMap 源。
+<11> 设置具体的投射模式
+
+[注意]
+====
+如果 pod 中有多个容器，则每个容器都需要一个 volumeMounts 部分，但 volumes 部分只需一个即可。
+====
+
+.具有设定了非默认权限模式的多个 secret 的 Pod
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-test
+spec:
+  containers:
+  - name: container-test
+    image: busybox
+    volumeMounts:
+    - name: all-in-one
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: all-in-one
+    projected:
+      defaultMode: 0755
+      sources:
+      - secret:
+          name: mysecret
+          items:
+            - key: username
+              path: my-group/my-username
+      - secret:
+          name: mysecret2
+          items:
+            - key: password
+              path: my-group/my-password
+              mode: 511
+----
+
+[注意]
+====
+`defaultMode`` 只能在投射级别上指定，而不针对每个卷源指定。但如上方所示，您可以明确设置每一个投射的 mode。
+====
+
+[id="projected-volumes-pathing_{context}"]
+== 路径注意事项
+
+*配置路径相同时发生密钥间冲突*:: 如果您使用同一路径配置多个密钥，则 pod 规格会视其为有效。以下示例中为 mysecret 和 myconfigmap 指定了相同的路径：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-test
+spec:
+  containers:
+  - name: container-test
+    image: busybox
+    volumeMounts:
+    - name: all-in-one
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: all-in-one
+    projected:
+      sources:
+      - secret:
+          name: mysecret
+          items:
+            - key: username
+              path: my-group/data
+      - configMap:
+          name: myconfigmap
+          items:
+            - key: config
+              path: my-group/data
+----
+
+请考虑以下与卷文件路径相关的情况。
+
+*未配置路径的密钥之间发生冲突*:: 只有在创建 pod 时所有路径都已知，才会进行运行时验证，这与上述情景类似。否则发生冲突时，最新指定的资源会覆盖所有之前指定的资源（在 pod 创建后更新的资源也是如此）。
+
+*一个路径为显式而另一个路径为自动投射时发生冲突*:: 如果因为用户指定的路径与自动投射的数据匹配，从而发生冲突，则像前文所述一样，后面的资源将覆盖前面的资源

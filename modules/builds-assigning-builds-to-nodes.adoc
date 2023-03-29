@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * builds/advanced-build-operations.adoc
+
+:_content-type: PROCEDURE
+[id="builds-assigning-builds-to-nodes_{context}"]
+= 将构建分配给特定的节点
+
+通过在构建配置的 `nodeSelector` 字段中指定标签，可以将构建定位到在特定节点上运行。`nodeSelector` 值是一组键值对，在调度构建 pod 时与 Node 标签匹配。
+
+`nodeSelector` 值也可以由集群范围的默认值和覆盖值控制。只有构建配置没有为 `nodeSelector` 定义任何键值对，也没有为 `nodeSelector :{}` 定义显式的空映射值，才会应用默认值。覆盖值将逐个键地替换构建配置中的值。
+
+//See Configuring Global Build Defaults and Overrides for more information.
+
+[注意]
+====
+如果指定的 `NodeSelector` 无法与具有这些标签的节点匹配，则构建仍将无限期地保持在 `Pending` 状态。
+====
+
+.流程
+
+* 通过在 `BuildConfig` 的 `nodeSelector` 字段中指定标签，将构建分配到特定的节点上运行，如下例所示：
++
+[source,yaml]
+----
+apiVersion: "v1"
+kind: "BuildConfig"
+metadata:
+  name: "sample-build"
+spec:
+  nodeSelector:<1>
+    key1: value1
+    key2: value2
+----
+<1> 与此构建配置关联的构建将仅在具有 `key1=value2` 和 `key2=value2` 标签的节点上运行。

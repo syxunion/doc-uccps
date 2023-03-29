@@ -1,0 +1,43 @@
+// Module included in the following assemblies:
+//
+// * /serverless/security/serverless-config-tls.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-enabling-tls-internal-traffic_{context}"]
+= 为内部流量启用 TLS 身份验证
+
+OpenShift Serverless 默认支持 TLS 边缘终止，以便最终用户的 HTTPS 流量加密。但是，OpenShift 路由后面的内部流量使用普通数据转发到应用。通过为内部流量启用 TLS，组件间发送的流量会进行加密，从而使此流量更加安全。
+
+[NOTE]
+====
+如果要使用统信容器云管理平台服务网格集成启用内部 TLS，您必须使用 mTLS 启用 Service Mesh，而不是按照以下流程所述的内部加密。
+====
+
+:FeatureName: Internal TLS encryption support
+include::snippets/technology-preview.adoc[]
+
+.先决条件
+
+* 安装了统信容器云管理平台无服务和 Knative Serving。
+* 已安装 Uccps (`oc`) CLI.
+
+.流程
+
+. 在 spec 中创建一个包含 `internal-encryption: "true"` 字段的 Knative 服务：
++
+[source,yaml]
+----
+...
+spec:
+  config:
+    network:
+      internal-encryption: "true"
+...
+----
+
+. 重启 `knative-serving` 命名空间中的 activator pod 来加载证书：
++
+[source,terminal]
+----
+$ oc delete pod -n knative-serving --selector app=activator
+----

@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: CONCEPT
+[id="nodes-containers-downward-api-container-values_{context}"]
+= 了解如何通过 Downward API 消耗容器值
+
+容器可以使用环境变量或卷插件来消耗 API 值。根据您选择的方法，容器可以消耗：
+
+* Pod 名称
+
+* Pod 项目/命名空间
+
+* Pod 注解
+
+* Pod 标签
+
+注解和标签只能通过卷插件来使用。
+

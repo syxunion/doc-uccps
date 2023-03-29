@@ -1,0 +1,19 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+[id="accessing_the_alerting_ui_{context}"]
+= 在 管理员 和 开发者 视角中访问 Alerting UI
+
+可通过 统信容器云管理平台 Web 控制台中的 *管理员* 视角和 *开发者* 视角访问 Alerting UI。
+
+* 在 *管理员* 视角中选择 *Observe* -> *Alerting* 。在此视角中，Alerting UI 有三个主要页面，即 *Alerts*, *Silences*, 和 *Alerting Rules* 页面。
+
+//Next to the title of each of these pages is a link to the Alertmanager interface.
+
+* 在 *开发者* 视角中，选择 *Observe* -> *<project_name>* -> *Alerts* 。在这个视角中，警报、静默和警报规则都通过 *Alerts* 页面管理。 *Alerts* 页面中显示的结果特定于所选项目。
+
+[NOTE]
+====
+在 Developer 视角中，您可以从有权在 *Project:* 列表中访问的 统信容器云管理平台 核心项目和用户自定义的项目中选择，。但是，如果您没有 cluster-admin 特权，则不会显示与 统信容器云管理平台 核心项目相关的警报、静默和警报规则。
+====

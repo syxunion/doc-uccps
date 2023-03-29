@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-subs.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-list-subs-kn_{context}"]
+= 使用 Knative CLI 列出订阅
+
+您可以使用 `kn subscription list` 命令通过 Knative (kn) CLI 列出集群中的现有订阅。使用 Knative CLI 列出订阅提供了精简且直观的用户界面。
+
+.先决条件
+
+* 已安装 Knative  (`kn`) CLI.
+
+.流程
+
+* 列出集群中的订阅：
++
+[source,terminal]
+----
+$ kn subscription list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME             CHANNEL             SUBSCRIBER           REPLY   DEAD LETTER SINK   READY   REASON
+mysubscription   Channel:mychannel   ksvc:event-display                              True
+----
+// . Optional: List subscriptions in YAML format:
+// +
+// [source,terminal]
+// ----
+// $ kn subscription list -o yaml
+// ----
+// Add this step once I have an example output, optional so non urgent

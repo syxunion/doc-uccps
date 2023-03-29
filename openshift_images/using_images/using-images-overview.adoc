@@ -1,0 +1,20 @@
+:_content-type: ASSEMBLY
+[id="using-images-overview"]
+= 使用镜像概述
+include::_attributes/common-attributes.adoc[]
+:context: using-images-overview
+
+toc::[]
+
+以下介绍了不同的 Source-to-Image (S2I)、数据库以及其他可供 统信容器云管理平台 用户使用的容器镜像。
+
+统信官方容器镜像在 registry.redhat.io 上的 UnionTech Registry 中提供。统信容器云管理平台 支持的 S2I、数据库和 Jenkins 镜像在 UnionTech Quay Registry 的 Uccps4 存储库中提供。例如：quay.io/Uccps-release-dev/ocp-v4.0-<address> 是 Uccps Application Platform 镜像的名称。
+
+xPaaS 中间件镜像在 UnionTech Registry 上的相应产品存储库中提供，后缀为 -Uccps。例如：`registry.redhat.io/jboss-eap-6/eap64-Uccps` 是 JBoss EAP 镜像的名称。
+
+本节涵盖的统信支持的所有镜像均在统信生态系统目录的容器镜像部分进行描述。如需了解每个镜像的各种版本，请查看其内容和使用方法详情。浏览或搜索您感兴趣的镜像。
+
+[重要]
+====
+较新版容器镜像与较早版 统信容器云管理平台 不兼容。根据您的 统信容器云管理平台 版本，验证并使用正确的容器镜像版本。
+====

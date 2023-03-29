@@ -1,0 +1,87 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/nodes-nodes-managing.adoc
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-rtkernel-arguments_{context}"]
+= 在节点中添加实时内核
+
+一些 统信容器云管理平台 工作负载需要高度确定性。虽然 Linux 不是实时操作系统，但 Linux 实时内核包含一个抢占调度程序，它为操作系统提供实时特征。
+
+如果您的 统信容器云管理平台 工作负载需要这些实时特征，您可以将机器切换到 Linux 实时内核。对于 统信容器云管理平台，4.10，您可以使用 MachineConfig 对象进行这个切换。虽然进行这个切换非常简单（只需要把机器配置的 kernelType 设置为 realtime），但进行更改前需要
+
+* 目前，实时内核只支持在 worker 节点上运行，且只支持无线电访问网络（RAN）使用。
+* 使用为 UnionTech Enterprise Linux for Real Time 8 认证系统的裸机安装完全支持以下步骤。
+* 统信容器云管理平台 中的实时支持仅限于特定的订阅。
+* 以下流程也支持与 Google Cloud Platform 搭配使用。
+
+.先决条件
+* 有一个正在运行的 统信容器云管理平台 集群（版本1.2 或更高版本）。
+* 以具有管理特权的用户身份登录集群。
+
+.流程
+
+. 为实时内核创建一个机器配置：创建一个 YAML 文件（例如，`99-worker-realtime.yaml`），其中包含一个 realtime 内核类型的 `MachineConfig` 对象。本例告诉集群在所有 `worker` 节点中使用实时内核：
++
+[source,terminal]
+----
+$ cat << EOF > 99-worker-realtime.yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: "worker"
+  name: 99-worker-realtime
+spec:
+  kernelType: realtime
+EOF
+----
+
+. 将机器配置添加到集群。键入以下内容将机器配置添加到集群中：
++
+[source,terminal]
+----
+$ oc create -f 99-worker-realtime.yaml
+----
+
+. 检查实时内核： 每当受影响节点重新引导后，登录到集群，并运行以下命令来确保您配置的节点组中使用实时内核替换了常规内核：
++
+[source,terminal]
+----
+$ oc get nodes
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                        STATUS  ROLES    AGE   VERSION
+ip-10-0-143-147.us-east-2.compute.internal  Ready   worker   103m  v1.23.0
+ip-10-0-146-92.us-east-2.compute.internal   Ready   worker   101m  v1.23.0
+ip-10-0-169-2.us-east-2.compute.internal    Ready   worker   102m  v1.23.0
+----
++
+[source,terminal]
+----
+$ oc debug node/ip-10-0-143-147.us-east-2.compute.internal
+----
++
+.输出示例
+[source,terminal]
+----
+Starting pod/ip-10-0-143-147us-east-2computeinternal-debug ...
+To use host binaries, run `chroot /host`
+
+sh-4.4# uname -a
+Linux <worker_node> 4.18.0-147.3.1.rt24.96.el8_1.x86_64 #1 SMP PREEMPT RT
+        Wed Nov 27 18:29:55 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+----
++
+内核名称包含 `rt` 和 `"PREMPT RT"` 来表示这是一个实时内核。
+
+. 要返回常规内核，请删除 `MachineConfig` 对象：
++
+[source,terminal]
+----
+$ oc delete -f 99-worker-realtime.yaml
+----

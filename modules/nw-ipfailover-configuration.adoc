@@ -1,0 +1,181 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring-ipfailover.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ipfailover-configuration_{context}"]
+= 配置 IP 故障转移
+
+作为集群管理员，您可以在整个集群中或在其中的一部分节点（由标签选项器定义）中配置 IP 故障转移。您还可以在集群中配置多个 IP 故障转移部署配置，每个配置都独立于其他配置。
+
+IP 故障转移部署配置确保故障转移 pod 在符合限制或使用的标签的每个节点上运行。
+
+此 pod 运行 Keepalived，它可以监控端点，并在第一个节点无法访问服务或端点时使用 Virtual Router Redundancy Protocol（VRRP）从一个节点切换到另一个节点的虚拟 IP（VIP）。
+
+对于生产环境，设置一个选择器（`selector`），用于选择至少两个节点，并设置与所选节点数量相等的副本。
+
+.先决条件
+
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+* 已创建一个 pull secret。
+
+.流程
+
+//. Create an {product-title} pull secret
+//+
+. 创建 IP 故障转移服务帐户：
++
+[source,terminal]
+----
+$ oc create sa ipfailover
+----
++
+. 为 hostNetwork 更新安全性上下文约束（SCC）：
++
+[source,terminal]
+----
+$ oc adm policy add-scc-to-user privileged -z ipfailover
+$ oc adm policy add-scc-to-user hostnetwork -z ipfailover
+----
++
+. 创建部署 YAML 文件来配置 IP 故障转移：
++
+.IP 故障转移配置的部署 YAML 示例
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipfailover-keepalived <1>
+  labels:
+    ipfailover: hello-openshift
+spec:
+  strategy:
+    type: Recreate
+  replicas: 2
+  selector:
+    matchLabels:
+      ipfailover: hello-openshift
+  template:
+    metadata:
+      labels:
+        ipfailover: hello-openshift
+    spec:
+      serviceAccountName: ipfailover
+      privileged: true
+      hostNetwork: true
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: openshift-ipfailover
+        image: quay.io/openshift/origin-keepalived-ipfailover
+        ports:
+        - containerPort: 63000
+          hostPort: 63000
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
+        - name: host-slash
+          mountPath: /host
+          readOnly: true
+          mountPropagation: HostToContainer
+        - name: etc-sysconfig
+          mountPath: /etc/sysconfig
+          readOnly: true
+        - name: config-volume
+          mountPath: /etc/keepalive
+        env:
+        - name: OPENSHIFT_HA_CONFIG_NAME
+          value: "ipfailover"
+        - name: OPENSHIFT_HA_VIRTUAL_IPS <2>
+          value: "1.1.1.1-2"
+        - name: OPENSHIFT_HA_VIP_GROUPS <3>
+          value: "10"
+        - name: OPENSHIFT_HA_NETWORK_INTERFACE <4>
+          value: "ens3" #The host interface to assign the VIPs
+        - name: OPENSHIFT_HA_MONITOR_PORT <5>
+          value: "30060"
+        - name: OPENSHIFT_HA_VRRP_ID_OFFSET <6>
+          value: "0"
+        - name: OPENSHIFT_HA_REPLICA_COUNT <7>
+          value: "2" #Must match the number of replicas in the deployment
+        - name: OPENSHIFT_HA_USE_UNICAST
+          value: "false"
+        #- name: OPENSHIFT_HA_UNICAST_PEERS
+          #value: "10.0.148.40,10.0.160.234,10.0.199.110"
+        - name: OPENSHIFT_HA_IPTABLES_CHAIN <8>
+          value: "INPUT"
+        #- name: OPENSHIFT_HA_NOTIFY_SCRIPT <9>
+        #  value: /etc/keepalive/mynotifyscript.sh
+        - name: OPENSHIFT_HA_CHECK_SCRIPT <10>
+          value: "/etc/keepalive/mycheckscript.sh"
+        - name: OPENSHIFT_HA_PREEMPTION <11>
+          value: "preempt_delay 300"
+        - name: OPENSHIFT_HA_CHECK_INTERVAL <12>
+          value: "2"
+        livenessProbe:
+          initialDelaySeconds: 10
+          exec:
+            command:
+            - pgrep
+            - keepalived
+      volumes:
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: host-slash
+        hostPath:
+          path: /
+      - name: etc-sysconfig
+        hostPath:
+          path: /etc/sysconfig
+      # config-volume contains the check script
+      # created with `oc create configmap keepalived-checkscript --from-file=mycheckscript.sh`
+      - configMap:
+          defaultMode: 0755
+          name: keepalived-checkscript
+        name: config-volume
+      imagePullSecrets:
+        - name: openshift-pull-secret <13>
+----
+<1> IP 故障转移部署的名称。
+<2> 要复制的 IP 地址范围列表。必须提供.例如，`1.2.3.4-6,1.2.3.9`。
+<3> 为 VRRP 创建的组数量。如果没有设置，则会为通过 `OPENSHIFT_HA_VIP_GROUPS` 变量指定的每个虚拟 IP 范围创建一个组。
+<4> IP 故障切换用于发送 VRRP 流量的接口名称。默认情况下使用 `eth0`。
+<5> IP 故障转移 pod 会尝试在每个 VIP 上打开到此端口的 TCP 连接。如果建立连接，则服务将被视为正在运行。如果此端口设为 `0`，则测试会始终通过。默认值为 `80`。
+<6> 用于设置虚拟路由器 ID 的偏移值。使用不同的偏移值可以在同一集群中存在多个 IP 故障转移配置。默认偏移值为 `0`，允许的范围是 `0` 到 `255`。
+<7> 要创建的副本数。这必须与 IP 故障转移部署配置中的 spec.replicas 值匹配。默认值为 `2`。
+<8> iptables 链的名称，用于自动添加允许 VRRP 流量的 `iptables` 规则。如果没有设置值，则不会添加 iptables 规则。如果链不存在，则不会创建链，Keepalived 在单播模式下运行。默认为 `INPUT`。
+<9> 当状态发生变化时运行的脚本的 pod 文件系统的完整路径名称。
+<10> 定期运行的脚本的 pod 文件系统中的完整路径名称，以验证应用是否正在运行。
+<11> 处理新的具有更高优先级主机的策略。默认值为 `preempt_delay` `300`，这会导致，在有一个较低优先级的 master 提供 VIP 时，Keepalived 实例在 `5` 分钟后会接管 VIP。
+<12> 检查脚本运行的期间（以秒为单位）。默认值为 `2`。
+<13> 在创建部署之前创建 pull secret，否则您将在创建部署时收到错误。
+////
++
+.Example service YAML for IP failover configuration
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipfailover-keepalived-service
+spec:
+  ports:
+    - port: 1985
+      targetPort: 1985
+      name: todo
+    - port: 112
+      targetPort: 112
+      name: vrrp
+  selector:
+    ipfailover: hello-openshift
+  externalIPs:
+  - 1.1.1.1
+  - 1.1.1.2
+----
+////

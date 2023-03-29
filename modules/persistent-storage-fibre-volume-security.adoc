@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * storage/persistent_storage/persistent-storage-fibre.adoc
+
+[id="fibre-volume-security_{context}"]
+= Fibre Channel 卷安全
+用户使用持久性卷声明来请求存储。这个声明只在用户的命名空间中有效，且只能被同一命名空间中的 pod 使用。任何尝试访问命名空间中的持久性卷都会导致 pod 失败。
+
+每个 Fibre Channel LUN 必须可以被集群中的所有节点访问。

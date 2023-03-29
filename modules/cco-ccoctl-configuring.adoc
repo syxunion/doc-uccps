@@ -1,0 +1,84 @@
+// Module included in the following assemblies:
+//
+// * authentication/managing_cloud_provider_credentials/cco-mode-sts.adoc
+// * authentication/managing_cloud_provider_credentials/cco-mode-gcp-workload-identity.adoc
+// * installing/installing_ibm_cloud_public/configuring-iam-ibm-cloud.adoc
+// * installing/installing_alibaba/manually-creating-alibaba-ram.adoc
+
+:_content-type: PROCEDURE
+[id="cco-ccoctl-configuring_{context}"]
+= 配置 Cloud Credential Operator 工具
+
+当 Cloud Credential Operator（CCO）使用 STS 以手动模式运行时，要从集群外创建和管理云凭证，提取并准备 CCO 实用程序（ccoctl）二进制文件。
+
+[注意]
+====
+ccoctl 是一个必须在 Linux 环境中运行的 Linux 二进制文件。
+====
+
+
+.流程
+
+. 获取统信容器云管理平台发行镜像：
++
+[source,terminal]
+----
+$ RELEASE_IMAGE=$(./utccp-install version | awk '/release image/ {print $3}')
+----
+
+. 从统信容器云管理平台发行镜像获取 CCO 容器镜像：
++
+[source,terminal]
+----
+$ CCO_IMAGE=$(oc adm release info --image-for='cloud-credential-operator' $RELEASE_IMAGE)
+----
++
+[注意]
+====
+确保 `$RELEASE_IMAGE` 的架构与将使用 ccoctl 工具的环境架构相匹配。
+====
+
+. 将 CCO 容器镜像中的 `ccoctl` 二进制文件提取到统信容器云管理平台发行镜像中：
++
+[source,terminal]
+----
+$ oc image extract $CCO_IMAGE --file="/usr/bin/ccoctl" -a ~/.pull-secret
+----
+
+. 更改权限以使 `ccoctl` 可执行：
++
+[source,terminal]
+----
+$ chmod 775 ccoctl
+----
+
+.验证
+
+* 要验证 `ccoctl` 是否可以使用，请显示帮助文件：
++
+[source,terminal]
+----
+$ ccoctl --help
+----
++
+.`ccoctl --help` 的输出：:
++
+[source,terminal]
+----
+Uccp credentials provisioning tool
+
+Usage:
+  ccoctl [command]
+
+Available Commands:
+  alibabacloud Manage credentials objects for alibaba cloud
+  aws          Manage credentials objects for AWS cloud
+  gcp          Manage credentials objects for Google cloud
+  help         Help about any command
+  ibmcloud     Manage credentials objects for IBM Cloud
+
+Flags:
+  -h, --help   help for ccoctl
+
+Use "ccoctl [command] --help" for more information about a command.
+----

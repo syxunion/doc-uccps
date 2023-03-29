@@ -1,0 +1,105 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: CONCEPT
+[id="machine-config-drift-detection_{context}"]
+= 了解配置偏移检测
+
+当节点的磁盘上状态与机器配置中配置的内容不同时，可能会出现情况。这称为 _配置偏移(drift)_。例如，集群管理员可能会手动修改一个文件、systemd 单元文件，或者通过机器配置配置的文件权限。这会导致配置偏移。配置偏移可能会导致 Machine Config Pool 中的节点或机器配置更新时出现问题。
+
+Machine Config Operator(MCO)使用 Machine Config Daemon(MCD)定期检查节点是否有配置偏移。如果检测到，MCO 会将节点和机器配置池(MCP)设置为 Degraded，并报告错误。降级的节点在线且可操作，但无法更新。
+
+MCD 在出现任何以下条件时执行配置偏移检测：
+
+* 当节点引导时。
+* 在机器配置中指定的任何文件（Ignition 文件和 systemd 置入单元）后，会在机器配置外修改。
+* 应用新机器配置前。
++
+[注意]
+====
+如果您将新机器配置应用到节点，MCD 会临时关闭配置偏移检测。这个关闭是必需的，因为新机器配置必须与节点上的机器配置不同。应用新机器配置后，MCD 将使用新机器配置重启检测配置偏移。
+====
+
+在执行配置偏移检测时，MCD 会验证文件内容和权限是否与当前应用的机器配置指定完全匹配。通常，MCD 在触发检测后检测到小于第二个配置偏移。
+
+如果 MCD 检测到配置偏移，MCD 执行以下任务：
+
+* 向控制台日志发送错误
+* 发送 Kubernetes 事件
+* 在节点上停止进一步检测
+* 将节点和 MCP 设置为 `degraded`
+
+您可以通过列出 MCP 检查是否有降级的节点：
+
+[source,terminal]
+----
+$ oc get mcp worker
+----
+
+如果您有一个降级的 MCP，`DEGRADEDMACHINECOUNT` 字段将不为零，类似于以下输出：
+
+.输出示例
+[source,terminal]
+----
+NAME     CONFIG                                             UPDATED   UPDATING   DEGRADED   MACHINECOUNT   READYMACHINECOUNT   UPDATEDMACHINECOUNT   DEGRADEDMACHINECOUNT   AGE
+worker   rendered-worker-404caf3180818d8ac1f50c32f14b57c3   False     True       True       2              1                   1                     1                      5h51m
+----
+
+您可以通过检查机器配置池来确定问题是否由配置偏移导致：
+
+[source,terminal]
+----
+$ oc describe mcp worker
+----
+
+.输出示例
+[source,terminal]
+----
+ ...
+    Last Transition Time:  2021-12-20T18:54:00Z
+    Message:               Node ci-ln-j4h8nkb-72292-pxqxz-worker-a-fjks4 is reporting: "content mismatch for file \"/etc/mco-test-file\"" <1>
+    Reason:                1 nodes are reporting degraded status on sync
+    Status:                True
+    Type:                  NodeDegraded <2>
+ ...
+----
+<1> 此消息显示节点的 `/etc/mco-test-file` 文件（由机器配置添加）已在机器配置外有所变化。
+<2> 节点的状态为 `NodeDegraded`。
+
+或者，如果您知道哪个节点已降级，请检查该节点：
+
+[source,terminal]
+----
+$ oc describe node/ci-ln-j4h8nkb-72292-pxqxz-worker-a-fjks4
+----
+
+.输出示例
+[source,terminal]
+----
+ ...
+
+Annotations:        cloud.network.openshift.io/egress-ipconfig: [{"interface":"nic0","ifaddr":{"ipv4":"10.0.128.0/17"},"capacity":{"ip":10}}]
+                    csi.volume.kubernetes.io/nodeid:
+                      {"pd.csi.storage.gke.io":"projects/openshift-gce-devel-ci/zones/us-central1-a/instances/ci-ln-j4h8nkb-72292-pxqxz-worker-a-fjks4"}
+                    machine.openshift.io/machine: openshift-machine-api/ci-ln-j4h8nkb-72292-pxqxz-worker-a-fjks4
+                    machineconfiguration.openshift.io/controlPlaneTopology: HighlyAvailable
+                    machineconfiguration.openshift.io/currentConfig: rendered-worker-67bd55d0b02b0f659aef33680693a9f9
+                    machineconfiguration.openshift.io/desiredConfig: rendered-worker-67bd55d0b02b0f659aef33680693a9f9
+                    machineconfiguration.openshift.io/reason: content mismatch for file "/etc/mco-test-file" <1>
+                    machineconfiguration.openshift.io/state: Degraded <2>
+ ...
+----
+<1> 错误消息表示在节点和列出的机器配置间检测到配置偏移。此处的错误消息表示 `/etc/mco-test-file` 的内容由机器配置添加，在机器配置外有所变化。
+<2> 节点的状态为 `Degraded`。
+
+您可以通过执行以下补救之一来更正配置偏移并将节点返回到 `Ready` 状态：
+
+* 确保节点上文件的内容和文件权限与机器配置中配置的内容匹配。您可以手动重写文件内容或更改文件权限。
+* 在降级节点上生成一个强制文件。强制文件使 MCD 绕过常见的配置偏移检测并消除了当前的机器配置。
++
+[注意]
+====
+在节点上生成强制文件会导致该节点重新引导。
+====
+

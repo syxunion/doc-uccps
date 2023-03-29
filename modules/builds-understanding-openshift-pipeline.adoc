@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//* builds/build-strategies.adoc
+
+:_content-type: CONCEPT
+[id="builds-understanding-openshift-pipeline_{context}"]
+= 了解 统信容器云管理平台 管道
+
+[重要]
+====
+Pipeline 构建策略在 统信容器云管理平台 4 中弃用。基于 Tekton 的 统信容器云管理平台 Pipelines 中带有等效且改进的功能。
+
+统信容器云管理平台 上的 Jenkins 镜像被完全支持，用户可以按照 Jenkins 用户文档在作业中定义 `jenkinsfile`，或者将其存储在 Source Control Management 系统中。
+====
+
+通过管道（pipeline），您可以控制在 统信容器云管理平台 上构建、部署和推进您的应用程序。通过结合使用 Jenkins Pipeline 构建策略、`jenkinsfile` 和 Jenkins 客户端插件提供的 统信容器云管理平台 域特定语言（DSL），您可以为任何场景创建高级构建、测试、部署和推进管道。
+
+*统信容器云管理平台 Jenkins 同步插件*
+
+统信容器云管理平台 Jenkins 同步插件使构建配置和构建对象与 Jenkins 任务和构建保持同步，并提供以下功能：
+
+ * Jenkins 中动态作业并运行创建。
+ * 从镜像流、镜像流标签或配置映射动态创建代理 Pod 模板。
+ * 注入环境变量。
+ * 统信容器云管理平台 Web 控制台中的管道视觉化。
+ * 与 Jenkins Git 插件集成，后者将 统信容器云管理平台 构建的提交信息传递给 Jenkins Git 插件。
+ * 将 secret 同步到 Jenkins 凭证条目。
+
+*统信容器云管理平台 Jenkins 客户端插件*
+
+统信容器云管理平台 Jenkins 客户端插件是一种 Jenkins 插件，旨在提供易读、简洁、全面且流畅的 Jenkins Pipeline 语法，以便与 统信容器云管理平台 API 服务器进行丰富的交互。该插件使用 统信容器云管理平台 命令行工具 `oc`，此工具必须在执行脚本的节点上可用。
+
+Jenkins 客户端插件必须安装到 Jenkins master上，这样才能在您的应用程序的 jenkinsfile 中使用 统信容器云管理平台 DSL。使用 统信容器云管理平台 Jenkins 镜像时，默认安装并启用此插件。
+
+对于项目中的 统信容器云管理平台 管道，必须使用 Jenkins Pipeline 构建策略。此策略默认使用源存储库根目录下的 jenkinsfile，但也提供以下配置选项：
+
+* 构建配置中的内联 `jenkinsfile` 字段。
+* 构建配置中的 `jenkinsfilePath` 字段，该字段引用要使用的 `jenkinsfile` 的位置，该位置相对于源 `contextDir`。
+
+[注意]
+====
+可选的 jenkinsfilePath 字段指定要使用的文件的名称，其路径相对于源 `contextDir`。如果省略了 `contextDir`，则默认为存储库的根目录。如果省略了 `jenkinsfilePath`，则默认为 `jenkinsfile`。
+====

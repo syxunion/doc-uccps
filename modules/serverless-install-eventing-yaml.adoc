@@ -1,0 +1,77 @@
+// Module included in the following assemblies:
+//
+// * /serverless/install/installing-knative-eventing.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-install-eventing-yaml_{context}"]
+= 使用 YAML 安装 Knative Eventing
+
+安装  {ServerlessOperatorName} 后，您可以使用默认设置安装 Knative Eventing，或者在 `KnativeEventing` 自定义资源 (CR) 中配置更高级的设置。您可以使用 YAML 文件和 `oc` CLI 安装 Knative Eventing。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 已安装 {ServerlessOperatorName}.
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建名为 `eventing.yaml` 的文件。
+. 将以下示例 YAML 复制到 `eventing.yaml` 中：
++
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+    name: knative-eventing
+    namespace: knative-eventing
+----
+. 可选。根据您的 Knative Eventing 部署，对 YAML 进行相应的更改。
+. 输入以下内容来应用 `eventing.yaml` 文件：
++
+[source,terminal]
+----
+$ oc apply -f eventing.yaml
+----
+
+.Verification
+
+. 输入以下命令验证安装是否完成，并观察输出结果：
++
+[source,terminal]
+----
+$ oc get knativeeventing.operator.knative.dev/knative-eventing \
+  -n knative-eventing \
+  --template='{{range .status.conditions}}{{printf "%s=%s\n" .type .status}}{{end}}'
+----
++
+.输出示例
+[source,terminal]
+----
+InstallSucceeded=True
+Ready=True
+----
++
+[NOTE]
+====
+创建 Knative Eventing 资源可能需要几秒钟时间。.
+====
+. 如果条件状态为 `Unknown` or `假`，请等待几分钟，然后在确认已创建资源后再重新检查。
+. 使用以下命令检查是否已创建 Knative Eventing 资源：
++
+[source,terminal]
+----
+$ oc get pods -n knative-eventing
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                                   READY   STATUS    RESTARTS   AGE
+broker-controller-58765d9d49-g9zp6     1/1     Running   0          7m21s
+eventing-controller-65fdd66b54-jw7bh   1/1     Running   0          7m31s
+eventing-webhook-57fd74b5bd-kvhlz      1/1     Running   0          7m31s
+imc-controller-5b75d458fc-ptvm2        1/1     Running   0          7m19s
+imc-dispatcher-64f6d5fccb-kkc4c        1/1     Running   0          7m18s
+----

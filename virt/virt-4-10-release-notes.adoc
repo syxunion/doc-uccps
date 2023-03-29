@@ -1,0 +1,295 @@
+:_content-type: ASSEMBLY
+[id="virt-4-10-release-notes"]
+= {VirtProductName} release notes
+include::_attributes/common-attributes.adoc[]
+:context: virt-4-10-release-notes
+
+toc::[]
+
+[id="about-openshift-virtualization"]
+== About Red Hat {VirtProductName}
+
+Red Hat {VirtProductName} enables you to bring traditional virtual machines (VMs) into {product-title} where they run alongside containers, and are managed as native Kubernetes objects.
+
+{VirtProductName} is represented by the image:virt-icon.png[{VirtProductName},40,40] icon.
+
+You can use {VirtProductName} with either the xref:../networking/ovn_kubernetes_network_provider/about-ovn-kubernetes.adoc#about-ovn-kubernetes[OVN-Kubernetes] or the xref:../networking/openshift_sdn/about-openshift-sdn.adoc#about-openshift-sdn[OpenShiftSDN] default Container Network Interface (CNI) network provider.
+
+Learn more about xref:../virt/about-virt.adoc#about-virt[what you can do with {VirtProductName}].
+
+include::modules/virt-supported-cluster-version.adoc[leveloffset=+2]
+
+[id="virt-guest-os"]
+=== Supported guest operating systems
+//CNV-13807 Supported guest operating systems
+To view the supported guest operating systems for {VirtProductName}, refer to link:https://access.redhat.com/articles/973163#ocpvirt[Certified Guest Operating Systems in Red Hat OpenStack Platform, Red Hat Virtualization and OpenShift Virtualization].
+
+[id="virt-4-10-inclusive-language"]
+== Making open source more inclusive
+
+Red Hat is committed to replacing problematic language in our code, documentation, and web properties. We are beginning with these four terms: master, slave, blacklist, and whitelist. Because of the enormity of this endeavor, these changes will be implemented gradually over several upcoming releases. For more details, see link:https://www.redhat.com/en/blog/making-open-source-more-inclusive-eradicating-problematic-language[our CTO Chris Wright's message].
+
+[id="virt-4-10-new"]
+== New and changed features
+
+//CNV-13851 SVVP for 4.10: Ensure platform passes Windows Server Virtualization Validation Program - with RHCOS workers
+* OpenShift Virtualization is certified in Microsoft’s Windows Server Virtualization Validation Program (SVVP) to run Windows Server workloads.
++
+The SVVP Certification applies to:
++
+** Red Hat Enterprise Linux CoreOS workers. In the Microsoft SVVP Catalog, they are named __Red Hat OpenShift Container Platform 4 on RHEL CoreOS 8__.
+** Intel and AMD CPUs.
+
+//CNV-14881 Service Mesh for VMs on the primary network with IPv4 (Done in CNV-8577 for 4.9 then reverted in CNV-14481)
+* {VirtProductName} is now integrated with OpenShift Service Mesh. You can xref:../virt/virtual_machines/vm_networking/virt-connecting-vm-to-service-mesh.adoc#virt-connecting-vm-to-service-mesh[connect virtual machines to a service mesh] to monitor, visualize, and control traffic between pods that run virtual machine workloads on the default pod network with IPv4.
+
+//CNV-12310 - unhide and add link once the feature work is merged
+* {VirtProductName} now provides a unified API for the xref:../virt/virtual_machines/advanced_vm_management/virt-automatic-bootsource-updates.adoc#virt-automatic-bootsource-updates[automatic import and update of pre-defined boot sources].
+
+[id="virt-4-10-quick-starts"]
+=== Quick starts
+
+* Quick start tours are available for several {VirtProductName} features. To view the tours, click the *Help* icon *?* in the menu bar on the header of the {VirtProductName} console and then select *Quick Starts*. You can filter the available tours by entering the `virtual machine` keyword in the *Filter* field.
+
+[id="virt-4-10-installation-new"]
+=== Installation
+
+//CNV-14192 Update launchers using live-migration - default/opt out
+* {VirtProductName} workloads, such as `virt-launcher` pods, now automatically update if they support live migration. You can xref:../virt/upgrading-virt.adoc#configuring-workload-updates_upgrading-virt[configure workload update strategies] or opt out of future automatic updates by editing the `HyperConverged` custom resource.
+
+//CNV-16637 SNO availability
+* You can now use {VirtProductName} with single node clusters, also known as Single Node OpenShift (SNO).
++
+[NOTE]
+====
+Single node clusters are not configured for high-availability operation, which results in significant changes to {VirtProductName} behavior.
+====
+
+//CNV-14910 HyperConverged Operator technical debt
+
+//CNV-16636 Resource requests and priority classes
+* Resource requests and priority classes are now defined for all {VirtProductName} control plane components.
+
+[id="virt-4-10-networking-new"]
+=== Networking
+
+//CNV-11201 Rollout of NodeNetworkConfigurationPolicy
+* You can now xref:../virt/node_network/virt-updating-node-network-config.adoc#virt-creating-interface-on-nodes_virt-updating-node-network-config[configure multiple nmstate-enabled nodes concurrently] by using a single `NodeNetworkConfigurationPolicy` manifest.
+
+//CNV-13679 SR-IOV live-migration without privilege escalation
+* xref:../virt/live_migration/virt-live-migration.adoc#virt-live-migration[Live migration] is now supported by default for virtual machines that are attached to an SR-IOV network interface.
+
+[id="virt-4-10-storage-new"]
+=== Storage
+
+//CNV-16641 Snapshot improvements
+* xref:../virt/virtual_machines/virtual_disks/virt-managing-vm-snapshots.adoc#virt-managing-vm-snapshots[Online snapshots] are supported for virtual machines that have hot-plugged virtual disks. However, hot-plugged disks that are not in the virtual machine specification are not included in the snapshot.
+
+//CNV-16673 New CSI driver for HPP
+* You can use the xref:../virt/virtual_machines/virtual_disks/virt-configuring-local-storage-for-vms.adoc#virt-configuring-local-storage-for-vms[Kubernetes Container Storage Interface (CSI) driver] with the hostpath provisioner (HPP)  to configure local storage for your virtual machines. Using the CSI driver minimizes disruption to your existing {product-title} nodes and clusters when configuring local storage.
+
+[id="virt-4-10-web-new"]
+=== Web console
+
+//CNV-16642 - Dashboard feature.
+* The {VirtProductName} dashboard provides resource consumption data for virtual machines and associated pods. The visualization metrics displayed in the {VirtProductName} dashboard are based on xref:../virt/logging_events_monitoring/virt-prometheus-queries.adoc#virt-prometheus-queries[Prometheus Query Language (PromQL) queries].
+
+// NOTE: Comment out deprecated and removed features (and their IDs) if not used in a release
+[id="virt-4-10-deprecated-removed"]
+== Deprecated and removed features
+
+[id="virt-4-10-deprecated"]
+=== Deprecated features
+
+Deprecated features are included in the current release and supported. However, they will be removed in a future release and are not recommended for new deployments.
+
+* In a future release, support for the legacy HPP custom resource, and the associated storage class, will be deprecated. Beginning in {VirtProductName} {VirtVersion}, the HPP Operator uses the Kubernetes Container Storage Interface (CSI) driver to configure local storage. The Operator continues to support the existing (legacy) format of the HPP custom resource and the associated storage class. If you use the HPP Operator, plan to xref:../virt/virtual_machines/virtual_disks/virt-configuring-local-storage-for-vms.adoc#virt-configuring-local-storage-for-vms[create a storage class for the CSI driver] as part of your migration strategy.
+// NOTE: when uncommenting deprecated features list, change the header level below to ===
+
+[id="virt-4-10-removed"]
+=== Removed features
+
+Removed features are not supported in the current release.
+
+* The VM Import Operator has been removed from {VirtProductName} with this release. It is replaced by the link:https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.2[Migration Toolkit for Virtualization].
+
+* This release removes the template for CentOS Linux 8, which reached link:https://www.centos.org/centos-linux-eol/[End of Life (EOL)] on December 31, 2021. However, {product-title} now includes templates for CentOS Stream 8 and CentOS Stream 9.
++
+[NOTE]
+====
+All CentOS distributions are community-supported.
+====
+
+// NOTE: no notable technical changes in 4.9, commenting out to retain
+//[id="virt-4-10-changes"]
+//== Notable technical changes
+
+[id="virt-4-10-technology-preview"]
+== Technology Preview features
+
+Some features in this release are currently in Technology Preview. These experimental features are not intended for production use. The Red Hat Customer Portal provides the link:https://access.redhat.com/support/offerings/techpreview[Technology Preview Features Support Scope] for these features:
+
+* You can now use the Red Hat Enterprise Linux 9 Beta template to create virtual machines.
+
+* You can now link:https://access.redhat.com/articles/6409731[deploy {VirtProductName} on AWS bare metal nodes].
+
+* xref:../virt/logging_events_monitoring/virt-virtualization-alerts.adoc#virt-virtualization-alerts[{VirtProductName} critical alerts] now have corresponding descriptions of problems that require immediate attention, reasons for why each alert occurs, a troubleshooting process to diagnose the source of the problem, and steps for resolving each alert.
+
+* A cluster administrator can now back up namespaces that contain VMs by using the xref:../virt/backup_restore/virt-backup-restore-overview.adoc#virt-backup-restore-overview[OpenShift API for Data Protection] with the {VirtProductName} plug-in.
+
+* Administrators can now declaratively xref:../virt/virtual_machines/advanced_vm_management/virt-configuring-mediated-devices.adoc#virt-configuring-mediated-devices[create and expose mediated devices] such as virtual graphics processing units (vGPUs) by editing the `HyperConverged` CR. Virtual machine owners can then assign these devices to VMs.
+
+//CNV-13660 Inherit static IP from a NIC attached to the bridge
+* You can xref:../virt/node_network/virt-updating-node-network-config.adoc#capturing-nic-static-ip_virt-updating-node-network-config[transfer the static IP configuration of the NIC attached to the bridge] by applying a single `NodeNetworkConfigurationPolicy` manifest to the cluster.
+
+//CNV-16639
+* You can now link:https://access.redhat.com/articles/6738731[install {VirtProductName} on IBM Cloud Bare Metal Servers]. Bare metal servers offered by other cloud providers are not supported.
+
+[id="virt-4-10-bug-fixes"]
+== Bug fixes
+
+* If you initiate a cloning operation before the clone source becomes available, the cloning operation now completes successfully without using a workaround. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1855182[*BZ#1855182*])
+
+* Editing a virtual machine fails if the VM references a deleted template that was provided by {VirtProductName} before version 4.8. In {VirtProductName} 4.8 and later, deleted {VirtProductName}-provided templates are automatically recreated by the {VirtProductName} Operator. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1929165[*BZ#1929165*])
+
+* You can now successfully use the `Send Keys` and `Disconnect` buttons when using a virtual machine with a VNC console. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1964789[*BZ#1964789*])
+
+* When you create a virtual machine, its unique fully qualified domain name (FQDN) now contains the cluster domain name. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1998300[*BZ#1998300*])
+
+* If you hot-plug a virtual disk and then force delete the `virt-launcher` pod, you no longer lose data. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2007397[*BZ#2007397*])
+
+* {VirtProductName} now issues a HPPSharingPoolPathWithOS alert if you try to install the hostpath provisioner (HPP) on a path that shares the filesystem with other critical components.
++
+To use the HPP to provide storage for virtual machine disks, configure it with dedicated storage that is separate from the node's root filesystem. Otherwise, the node might run out of storage and become non-functional. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2038985[*BZ#2038985*])
+
+* If you provision a virtual machine disk, {VirtProductName} now allocates a persistent volume claim (PVC) that is just large enough to accommodate the requested disk size, rather than issuing a KubePersistentVolumeFillingUp alert for each VM disk PVC. You can monitor disk usage from within the virtual machine itself. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2039489[*BZ#2039489*])
+
+* You can now create a virtual machine snapshot for VMs with hot-plugged disks. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2042908[*BZ#2042908*])
+
+* You can now successfully import a VM image when using a cluster-wide proxy configuration. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2046271[*BZ#2046271*])
+
+[id="virt-4-10-known-issues"]
+== Known issues
+
+* Updating to {VirtProductName} 4.10.5 causes some virtual machines (VMs) to get stuck in a live migration loop. This occurs if the `spec.volumes.containerDisk.path` field in the VM manifest is set to a relative path.
+** As a workaround, delete and recreate the VM manifest, setting the value of the `spec.volumes.containerDisk.path` field to an absolute path. You can then update {VirtProductName}.
+// no bz for this one - see PR #49837
+
+* If a single node contains more than 50 images, pod scheduling might be imbalanced across nodes. This is because the list of images on a node is shortened to 50 by default. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1984442[*BZ#1984442*])
+** As a workaround, you can disable the image limit by xref:../nodes/nodes/nodes-nodes-managing.adoc#nodes-nodes-managing[editing the `KubeletConfig` object] and setting the value of `nodeStatusMaxImages` to `-1`.
+
+* If you deploy the xref:../virt/virtual_machines/virtual_disks/virt-configuring-local-storage-for-vms.adoc#virt-configuring-local-storage-for-vms[hostpath provisioner] on a cluster where any node has a fully qualified domain name (FQDN) that exceeds 42 characters, the provisioner fails to bind PVCs. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2057157[*BZ#2057157*])
++
+--
+.Example error message
+[source,terminal]
+----
+E0222 17:52:54.088950       1 reflector.go:138] k8s.io/client-go/informers/factory.go:134: Failed to watch *v1beta1.CSIStorageCapacity: failed to list *v1beta1.CSIStorageCapacity: unable to parse requirement: values[0][csi.storage.k8s.io/managed-by]: Invalid value: "external-provisioner-<node_FQDN>": must be no more than 63 characters <1>
+----
+<1> Though the error message refers to a maximum of 63 characters, this includes the `external-provisioner-` string that is prefixed to the node's FQDN.
+--
+** As a workaround, disable the `storageCapacity` option in the hostpath provisioner CSI driver by running the following command:
++
+[source,terminal]
+----
+$ oc patch csidriver kubevirt.io.hostpath-provisioner --type merge --patch '{"spec": {"storageCapacity": false}}'
+----
+
+* If your {product-title} cluster uses OVN-Kubernetes as the default Container Network Interface (CNI) provider, you cannot attach a Linux bridge or bonding device to a host's default interface because of a change in the host network topology of OVN-Kubernetes. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1885605[*BZ#1885605*])
+** As a workaround, you can use a secondary network interface connected to your host, or switch to the OpenShift SDN default CNI provider.
+
+* Running virtual machines that cannot be live migrated might block an {product-title} cluster upgrade. This includes virtual machines that use hostpath provisioner storage or SR-IOV network interfaces.
+** As a workaround, you can reconfigure the virtual machines so that they can be powered off during a cluster upgrade. In the `spec` section of the virtual machine configuration file:
++
+. Modify the `evictionStrategy` and `runStrategy` fields.
+.. Remove the `evictionStrategy: LiveMigrate` field. See xref:../virt/live_migration/virt-configuring-vmi-eviction-strategy.adoc#virt-configuring-vmi-eviction-strategy[Configuring virtual machine eviction strategy] for more information on how to configure eviction strategy.
+.. Set the `runStrategy` field to `Always`.
+. Set the default CPU model by running the following command:
++
+[NOTE]
+====
+You must make this change before starting the virtual machines that support live migration.
+====
++
+[source,terminal]
+----
+$ oc annotate --overwrite -n openshift-cnv hyperconverged kubevirt-hyperconverged kubevirt.kubevirt.io/jsonpatch='[
+  {
+      "op": "add",
+      "path": "/spec/configuration/cpuModel",
+      "value": "<cpu_model>" <1>
+  }
+]'
+----
+<1> Replace `<cpu_model>` with the actual CPU model value. You can determine this value by running `oc describe node <node>` for all nodes and looking at the `cpu-model-<name>` labels. Select the CPU model that is present on all of your nodes.
+
+* If you use Red Hat Ceph Storage or Red Hat OpenShift Data Foundation Storage, cloning more than 100 VMs at once might fail. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1989527[*BZ#1989527*])
+** As a workaround, you can perform a host-assisted copy by setting `spec.cloneStrategy: copy` in the storage profile manifest. For example:
++
+[source,yaml]
+----
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: StorageProfile
+metadata:
+  name: <provisioner_class>
+#   ...
+spec:
+  claimPropertySets:
+  - accessModes:
+    - ReadWriteOnce
+    volumeMode: Filesystem
+  cloneStrategy: copy <1>
+status:
+  provisioner: <provisioner>
+  storageClass: <provisioner_class>
+----
+<1> The default cloning method set as `copy`.
+
+* In some instances, multiple virtual machines can mount the same PVC in read-write mode, which might result in data corruption. (link:https://bugzilla.redhat.com/show_bug.cgi?id=1992753[*BZ#1992753*])
+** As a workaround, avoid using a single PVC in read-write mode with multiple VMs.
+
+* The Pod Disruption Budget (PDB) prevents pod disruptions for migratable virtual machine images. If the PDB detects pod disruption, then `openshift-monitoring` sends a `PodDisruptionBudgetAtLimit` alert every 60 minutes for virtual machine images that use the `LiveMigrate` eviction strategy. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2026733[*BZ#2026733*])
+** As a workaround, xref:../monitoring/managing-alerts.adoc#silencing-alerts_managing-alerts[Silencing alerts].
+
+* On a large cluster, the {VirtProductName} MAC pool manager might take too much time to boot and {VirtProductName} might not become ready. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2035344[*BZ#2035344*])
+** As a workaround, if you do not require MAC pooling functionality, then disable this sub-component by running the following command:
++
+[source,terminal]
+----
+$ oc annotate --overwrite -n openshift-cnv hco kubevirt-hyperconverged 'networkaddonsconfigs.kubevirt.io/jsonpatch=[
+  {
+    "op": "replace"
+    "path": "/spec/kubeMacPool"
+    "value": null
+  }
+ ]'
+----
+
+* {VirtProductName} links a service account token in use by a pod to that specific pod. {VirtProductName} implements a service account volume by creating a disk image that contains a token. If you migrate a VM, then the service account volume becomes invalid. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2037611[*BZ#2037611*])
+** As a workaround, use user accounts rather than service accounts because user account tokens are not bound to a specific pod.
+
+* If a VM crashes or hangs during shutdown, new shutdown requests do not stop the VM. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2040766[*BZ#2040766*])
+
+* If you configure the `HyperConverged` custom resource (CR) to enable mediated devices before drivers are installed, enablement of mediated devices does not occur. This issue can be triggered by updates. For example, if `virt-handler` is updated before `daemonset`, which installs NVIDIA drivers, then nodes cannot provide virtual machine GPUs. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2046298[*BZ#2046298*])
+** As a workaround:
+. Remove `mediatedDevicesConfiguration` and `permittedHostDevices` from the `HyperConverged` CR.
+. Update both `mediatedDevicesConfiguration` and `permittedHostDevices` stanzas with the configuration you want to use.
+
+* YAML examples in the VM wizard are hardcoded and do not always contain the latest upstream changes. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2055492[*BZ#2055492*])
+
+* If you clone more than 100 VMs using the `csi-clone` cloning strategy, then the Ceph CSI might not purge the clones. Manually deleting the clones can also fail. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2055595[*BZ#2055595*])
+** As a workaround, you can restart the `ceph-mgr` to purge the VM clones.
+
+* A non-privileged user cannot use the Add Network Interface button on the `VM Network Interfaces` tab. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2056420[*BZ#2056420*])
+** As a workaround, non-privileged users can add additional network interfaces while creating the VM by using the VM wizard.
+
+* A non-privileged user cannot add disks to a VM due to RBAC rules. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2056421[*BZ#2056421*])
+** As a workaround, manually add the RBAC rule to allow specific users to add disks.
+
+* The web console does not display virtual machine templates that are deployed to a custom namespace. Only templates deployed to the default namespace display in the web console. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2054650[*BZ#2054650*])
+** As a workaround, avoid deploying templates to a custom namespace.
+
+* On a Single Node OpenShift (SNO) cluster, updating the cluster fails if a VMI has the `spec.evictionStrategy` field set to `LiveMigrate`. For live migration to succeed, the cluster must have more than one worker node. (link:https://bugzilla.redhat.com/show_bug.cgi?id=2073880[*BZ#2073880*])
+** There are two workaround options:
+*** Remove the `spec.evictionStrategy` field from the VM declaration.
+*** Manually stop the VM before you update {product-title}.

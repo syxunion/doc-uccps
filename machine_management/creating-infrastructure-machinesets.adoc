@@ -1,0 +1,76 @@
+:_content-type: ASSEMBLY
+[id="creating-infrastructure-machinesets"]
+= 创建基础架构机器集
+include::_attributes/common-attributes.adoc[]
+:context: creating-infrastructure-machinesets
+
+toc::[]
+
+include::modules/machine-user-provisioned-limitations.adoc[leveloffset=+1]
+
+
+您可以使用基础架构机器集来创建仅托管基础架构组件的机器，如默认路由器、集成的容器镜像 registry 以及集群指标和监控的组件。这些基础架构机器不会被计算为运行环境所需的订阅总数。
+
+
+include::modules/infrastructure-components.adoc[leveloffset=+1]
+
+有关基础架构节点以及可在基础架构节点上运行，请参阅 Uccps sizing and subscription guide for enterprise Kubernetes 文档中的 "UnionTech Uccps control plane and infrastructure nodes"部分。
+
+
+[id="creating-infrastructure-machinesets-production"]
+== 为生产环境创建基础架构机器集
+
+在生产部署中，建议您至少部署三个机器集来容纳基础架构组件。Uccps Logging 和 UnionTech Uccps Service Mesh 部署 Elasticsearch，这需要三个实例安装到不同的节点上。这些节点都可以部署到不同的可用区以实现高可用性。这样的配置需要三个不同的机器集，每个可用区都有一个。在没有多个可用区的全局 Azure 区域，您可以使用可用性集来确保高可用性。
+
+
+
+include::modules/machineset-yaml-osp.adoc[leveloffset=+3]
+
+include::modules/machineset-creating.adoc[leveloffset=+2]
+
+include::modules/creating-an-infra-node.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.Additional resources
+
+* xref:moving-resources-to-infrastructure-machinesets[Moving resources to infrastructure machine sets]
+
+include::modules/creating-infra-machines.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需有关在自定义池中分组 infra 机器的更多信息，请参阅使用机器配置池进行节点配置管理。
+
+[id="assigning-machineset-resources-to-infra-nodes"]
+== 为基础架构节点分配机器设置资源
+
+在创建了基础架构机器集后，`worker` 和 `infra` 角色将应用到新的 infra 节点。应用 `infra` 角色的节点不会被计算为运行环境所需的订阅总数，即使也应用了 `worker` 角色。
+
+但是，如果将 infra 节点分配为 worker，则用户工作负载可能会意外地分配给 infra 节点。要避免这种情况，您必须将污点应用到 infra 节点，并为您要控制的 pod 应用容限。
+
+include::modules/binding-infra-node-workloads-using-taints-tolerations.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如需了解有关将 pod 调度到节点的信息，请参阅 xref:../nodes/scheduling/nodes-scheduler-about.adoc#nodes-scheduler-about[使用调度程序控制 pod 放置] 。
+* 如需有关将 pod 调度到 infra 节点的说明，请参阅 xref:moving-resources-to-infrastructure-machinesets[将资源移动到基础架构机器集] 。
+
+[id="moving-resources-to-infrastructure-machinesets"]
+== 将资源移到基础架构机器集
+
+默认情况下，您的集群中已部署了某些基础架构资源。您可将它们移至您创建的基础架构机器集。
+
+include::modules/infrastructure-moving-router.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-registry.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-monitoring.adoc[leveloffset=+2]
+
+include::modules/infrastructure-moving-logging.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 有关移动 统信容器云管理平台 组件的常规说明，请参阅 xref:../monitoring/configuring-the-monitoring-stack.adoc#moving-monitoring-components-to-different-nodes_configuring-the-monitoring-stack[监控文档] 。

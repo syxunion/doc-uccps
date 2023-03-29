@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+[id="enabling-monitoring-for-user-defined-projects"]
+= 为用户定义的项目启用监控
+include::_attributes/common-attributes.adoc[]
+:context: enabling-monitoring-for-user-defined-projects
+
+toc::[]
+
+在 统信容器云管理平台 1.2 中，除了默认的平台监控外，您还可以为用户定义的项目启用监控。您可以监控 统信容器云管理平台 中的自己的项目，而无需额外的监控解决方案。使用这个功能可以集中监控核心平台组件和用户定义的项目。
+
+include::snippets/monitoring-custom-prometheus-note.adoc[]
+
+// Enabling monitoring for user-defined projects
+include::modules/monitoring-enabling-monitoring-for-user-defined-projects.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+.其他资源
+
+* xref:../monitoring/configuring-the-monitoring-stack.adoc#creating-cluster-monitoring-configmap_configuring-the-monitoring-stack[创建集群监控配置映射]
+* xref:../monitoring/configuring-the-monitoring-stack.adoc#configuring-the-monitoring-stack[配置监控堆栈]
+* xref:../monitoring/enabling-monitoring-for-user-defined-projects.html#granting-users-permission-to-configure-monitoring-for-user-defined-projects_enabling-monitoring-for-user-defined-projects[授予用户权限来为用户定义的项目配置监控]
+
+// Granting users permission to monitor user-defined projects
+include::modules/monitoring-granting-users-permission-to-monitor-user-defined-projects.adoc[leveloffset=+1]
+include::modules/monitoring-granting-user-permissions-using-the-web-console.adoc[leveloffset=+2]
+include::modules/monitoring-granting-user-permissions-using-the-cli.adoc[leveloffset=+2]
+
+// Granting users permission to configure monitoring for user-defined projects
+include::modules/monitoring-granting-users-permission-to-configure-monitoring-for-user-defined-projects.adoc[leveloffset=+1]
+
+// Accessing metrics from outside the cluster for custom applications
+include::modules/accessing-metrics-outside-cluster.adoc[leveloffset=+1]
+
+// Excluding a user-defined project from monitoring
+include::modules/monitoring-excluding-a-user-defined-project-from-monitoring.adoc[leveloffset=+1]
+
+// Disabling monitoring for user-defined projects
+include::modules/monitoring-disabling-monitoring-for-user-defined-projects.adoc[leveloffset=+1]

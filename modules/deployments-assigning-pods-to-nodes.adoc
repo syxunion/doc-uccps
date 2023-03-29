@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * applications/deployments/managing-deployment-processes.adoc
+
+:_content-type: PROCEDURE
+[id="deployments-assigning-pods-to-nodes_{context}"]
+= 将 Pod 分配给特定的节点
+
+您可以结合使用节点选择器和带标签的节点来控制 pod 的放置。
+
+集群管理员可为项目设置默认的节点选择器，以便将 pod 放置限制到特定的节点。作为开发人员，您可以设置 `Pod` 配置的节点选择器来进一步限制节点。
+
+.流程
+
+. 要在创建 `Pod` 时添加节点选择器，请编辑 Pod 配置并添加 `nodeSelector` 值。这可添加到单个 `Pod` 配置中，也可以添加到 Pod 模板中：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+spec:
+  nodeSelector:
+    disktype: ssd
+...
+----
++
+具有节点选择器时创建的 Pod 会分配给带有指定标签的节点。这里指定的标签将与集群管理员添加的标签结合使用。
++
+例如，如果项目中包含由集群管理员添加的 `type=user-node` 和 `region=eas`t 标签，并且您将上述 `disktype: ssd` 标签添加到某一 pod，那么该 pod 仅会调度到具有所有这三个标签的节点上。
++
+[注意]
+====
+标签只能设置为一个值；因此，如果在具有管理员设置的默认值 `region=east` 的 `Pod` 配置中设置节点选择器 `region=west`，这会导致 pod 永不会被调度。
+====

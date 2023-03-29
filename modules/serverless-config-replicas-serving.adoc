@@ -1,0 +1,42 @@
+// Module included in the following assemblies:
+//
+// * /serverless/admin_guide/serverless-ha.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-config-replicas-serving_{context}"]
+= 为 Knative Serving 配置高可用性副本
+
+默认情况下，Knative Serving  `activator`, `autoscaler`, `autoscaler-hpa`, `controller`, `webhook`, `kourier-control`,  和 `kourier-gateway` 组件支持高可用性（HA）功能，它们默认被配置为有两个副本。您可以通过修改 `KnativeServing` 自定义资源 (CR) 中的 `spec.high-availability.replicas` 值来更改这些组件的副本数。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+
+* 在集群中安装了  Uccps Serverless Operator 和 Knative Serving。
+
+.流程
+
+. 在 {product-title} 控制台的 *管理员* 视角中，进入 *OperatorHub* -> *安装的 Operators*.
+
+. 选择 `knative-serving` 命名空间
++
+. 点 统信容器云管理平台无服务扩展组件 的 *提供的 APIs* 列表中的 *Knative Serving* 来进入  *Knative Serving* 选项卡。
+
+. 点 *knative-serving*，然后使用 *knative-serving* 页面中的 *YAML* 选项卡。
++
+image::serving-YAML-HA.png[Knative Serving YAML]
+
+. 修改 `KnativeServing` CR 中的副本数量：
++
+.Example YAML
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  high-availability:
+    replicas: 3
+----

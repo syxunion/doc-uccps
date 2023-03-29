@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * scalability_and_performance/using-node-tuning-operator.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="custom-tuning-default-profiles-set_{context}"]
+= 在集群中设置默认配置集
+
+以下是在集群中设置的默认配置集。
+
+[source,yaml]
+----
+apiVersion: tuned.openshift.io/v1
+kind: Tuned
+metadata:
+  name: default
+  namespace: openshift-cluster-node-tuning-operator
+spec:
+  recommend:
+  - profile: "openshift-control-plane"
+    priority: 30
+    match:
+    - label: "node-role.kubernetes.io/master"
+    - label: "node-role.kubernetes.io/infra"
+
+  - profile: "openshift-node"
+    priority: 40
+----
+
+从 统信容器云管理平台 4.9 开始，所有 Uccps TuneD 配置集都随 TuneD 软件包一起提供。您可以使用  `oc exec`  命令查看这些配置集的内容：
+
+[source,terminal]
+----
+$ oc exec $tuned_pod -n openshift-cluster-node-tuning-operator -- find /usr/lib/tuned/openshift{,-control-plane,-node} -name tuned.conf -exec grep -H ^ {} \;
+----

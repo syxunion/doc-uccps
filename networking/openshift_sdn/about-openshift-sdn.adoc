@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="about-openshift-sdn"]
+= 关于 OpenShift SDN 默认 CNI 网络供应商
+include::_attributes/common-attributes.adoc[]
+:context: about-openshift-sdn
+
+toc::[]
+
+统信容器云管理平台 使用软件定义网络 (SDN) 方法来提供一个统一的集群网络，它允许 统信容器云管理平台 集群中的不同 pod 相互间进行通信。此 pod 网络是由 OpenShift SDN 建立和维护的，它使用 Open vSwitch (OVS) 配置覆盖网络。
+
+include::modules/nw-openshift-sdn-modes.adoc[leveloffset=+1]
+
+include::modules/nw-ovn-kubernetes-matrix.adoc[leveloffset=+1]

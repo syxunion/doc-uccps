@@ -1,0 +1,11 @@
+////
+This module included in the following assemblies:
+service_mesh/v2x/ossm-reference-jaeger.adoc
+////
+:_content-type: CONCEPT
+[id="distr-tracing-config-security-ossm_{context}"]
+= Configuring distributed tracing security for service mesh
+
+分布式追踪平台使用 OAuth 进行默认身份验证。但是， {SMProductName} 使用名为 `htpasswd` 的 secret 来实现依赖服务（如 Grafana、Kiali 和分布式追踪平台）之间的通信。当您在 `ServiceMeshControlPlane`  中配置分布式追踪平台时，Service Mesh 会自动配置安全设置以使用 `htpasswd`.
+
+如果要在 Jaeger 自定义资源中指定分布式追踪平台配置，您必须手动配置 htpasswd 设置并确保 htpasswd secret 挂载到 Jaeger 实例中，以便 Kiali 能够与它通信。

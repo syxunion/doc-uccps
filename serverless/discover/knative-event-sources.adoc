@@ -1,0 +1,21 @@
+:_content-type: ASSEMBLY
+[id="knative-event-sources"]
+= 事件源
+include::_attributes/common-attributes.adoc[]
+:context: knative-event-sources
+
+toc::[]
+
+A Knative _事件源_ 以是生成或导入云事件的任何 Kubernetes 对象，并将这些事件转发到另一个端点，称为 xref:../../serverless/develop/serverless-event-sinks.adoc#serverless-event-sinks[_接收器_]。事件源对于开发对事件做出反应的分布式系统至关重要。
+
+您可以使用  {product-title} web 控制台、 Knative (kn) CLI 或应用 YAML 文件的  *开发者* 视角创建和管理 Knative 事件源。
+
+目前， {ServerlessProductName} 支持以下事件源类型：
+
+xref:../../serverless/develop/serverless-apiserversource.adoc#serverless-apiserversource[API server source]:: 将 Kubernetes API 服务器事件引入 Knative。每次创建、更新或删除 Kubernetes 资源时，API 服务器源会发送一个新事件。
+
+xref:../../serverless/develop/serverless-pingsource.adoc#serverless-pingsource[Ping source]:: 根据指定的 cron 计划生成带有固定有效负载的事件。
+
+xref:../../serverless/develop/serverless-kafka-developer.adoc#serverless-kafka-developer-source[Kafka event source]:: 将 Kafka 集群连接到接收器作为事件源。
+
+您还可以 xref:../../serverless/develop/serverless-custom-event-sources.adoc#serverless-custom-event-sources[自定义事件源]。

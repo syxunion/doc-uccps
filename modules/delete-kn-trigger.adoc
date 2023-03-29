@@ -1,0 +1,41 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="delete-kn-trigger_{context}"]
+= 使用 Knative CLI 删除触发器
+
+使用 Knative (kn) CLI 删除触发器提供精简而直观的用户界面。您可以使用 `kn trigger delete` 命令删除触发器。
+
+.先决条件
+
+* {ServerlessOperatorName}  和 Knative Eventing 已安装在  {product-title} 集群中。
+* 已安装 Knative  (`kn`) CLI.
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载
+
+.流程
+
+* 删除触发器：
++
+[source,terminal]
+----
+$ kn trigger delete <trigger_name>
+----
+
+.验证
+
+. 列出现有触发器：
++
+[source,terminal]
+----
+$ kn trigger list
+----
+
+. 验证触发器不再存在：
++
+.输出示例
+[source,terminal]
+----
+No triggers found.
+----

@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-profiles.adoc
+
+:_content-type: CONCEPT
+[id="nodes-scheduler-profiles-about_{context}"]
+= 关于调度程序配置集
+
+您可以指定一个调度程序配置集来控制 pod 如何调度到节点上。
+
+可用的调度程序配置集如下：
+
+`LowNodeUtilization`:: 此配置集尝试在节点间平均分配 pod，以获得每个节点的资源用量较低。这个配置集提供默认的调度程序行为。
+
+`HighNodeUtilization`:: 此配置集会尝试将尽量多的 pod 放置到尽量少的节点。这样可最小化节点数，并且每个节点的资源使用率很高。
+
+`NoScoring`:: 这是一个低延迟配置集，通过禁用所有分数（score）插件来实现最快的调度周期。这可能会为更快的调度决策提供更好的要求。

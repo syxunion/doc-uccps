@@ -1,0 +1,39 @@
+// Module included in the following assemblies:
+// * openshift_images/image-streams-managing.adoc
+
+:_content-type: PROCEDURE
+[id="images-imagestream-import_{context}"]
+= 配置定期导入镜像流标签
+
+使用外部容器镜像 registry 时，如需定期重新导入镜像（例如为了获取最新安全更新），可使用 --scheduled 标志。
+
+.流程
+
+. 调度导入镜像：
++
+[source,terminal]
+----
+$ oc tag <repository/image> <image-name:tag> --scheduled
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc tag docker.io/python:3.6.0 python:3.6 --scheduled
+----
++
+.输出示例
+[source,terminal]
+----
+Tag python:3.6 set to import docker.io/python:3.6.0 periodically.
+----
++
+该命令可使 统信容器云管理平台 定期更新该特定镜像流标签。此周期是集群范围的设置，默认设为 15 分钟。
+
+. 删除定期检查，重新运行上述命令，但忽略 `--scheduled` 标志。这会将其行为重置为默认值。
++
+[source,terminal]
+----
+$ oc tag <repositiory/image> <image-name:tag>
+----

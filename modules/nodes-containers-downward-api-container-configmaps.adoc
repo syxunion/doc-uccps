@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-containers-downward-api.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-containers-downward-api-container-configmaps_{context}"]
+= 使用 Downward API 消耗配置映射
+
+在创建 `pod` 时，您可以使用 `Downward API` 注入配置映射值，以便镜像和应用程序作者能够为特定环境创建镜像。
+
+.流程
+
+. 创建 `configmap.yaml` 文件：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myconfigmap
+data:
+  mykey: myvalue
+----
+
+. 从 `configmap.yaml` 文件创建 `ConfigMap` 对象：
++
+[source,terminal]
+----
+$ oc create -f configmap.yaml
+----
+
+. 创建 `pod.yaml` 文件来引用上述 `ConfigMap` 对象：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-env-test-pod
+spec:
+  containers:
+    - name: env-test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: MY_CONFIGMAP_VALUE
+          valueFrom:
+            configMapKeyRef:
+              name: myconfigmap
+              key: mykey
+  restartPolicy: Always
+----
+
+. 从 `pod.yaml` 文件创建 pod：
++
+[source,terminal]
+----
+$ oc create -f pod.yaml
+----
+
+. 检查容器日志中的 `MY_CONFIGMAP_VALUE` 值：
++
+[source,terminal]
+----
+$ oc logs -p dapi-env-test-pod
+----

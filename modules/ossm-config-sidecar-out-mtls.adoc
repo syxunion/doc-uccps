@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-config.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-security-mtls-sidecars-outgoing_{context}"]
+== Configuring sidecars for outgoing connections
+
+创建一个目标规则将 Service Mesh 配置为在向网格中的其他服务发送请求时使用 mTLS。
+
+.Procedure
+
+. 使用以下示例创建 YAML 文件：
++
+.DestinationRule 示例 destination-rule.yaml
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: default
+  namespace: <namespace>
+spec:
+  host: "*.<namespace>.svc.cluster.local"
+  trafficPolicy:
+   tls:
+    mode: ISTIO_MUTUAL
+----
++
+.. 将 `<namespace>` 替换为该服务所在的命名空间。
+
+. 运行以下命令，在服务所在的命名空间中创建资源。它必须与您刚才创建的 `DestinationRule` 资源中的 `namespace` 字段匹配。
++
+[source,terminal]
+----
+$ oc create -n <namespace> -f <destination-rule.yaml>
+----

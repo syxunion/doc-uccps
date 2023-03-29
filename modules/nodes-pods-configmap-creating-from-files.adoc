@@ -1,0 +1,105 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmap-creating-from-files_{context}"]
+= 从文件创建配置映射
+
+您可以从文件创建配置映射。
+
+.流程
+
+以下示例流程概述了如何从文件创建配置映射。
+
+[注意]
+====
+如果从文件创建一个配置映射，您可以在不会破坏非 UTF8 数据的项中包含非 UTF8 的数据。统信容器云管理平台 检测到二进制文件，并将该文件编码为 MIME。在服务器上，MIME 有效负载被解码并存储而不会损坏数据。
+====
+
+您可以多次将 --from-file 选项传递给 CLI。以下示例生成与从目录创建示例相同的结果。
+
+. 通过指定特定文件来创建配置映射：
++
+[source,terminal]
+----
+$ oc create configmap game-config-2 \
+    --from-file=example-files/game.properties \
+    --from-file=example-files/ui.properties
+----
++
+. 验证结果：
++
+[source,terminal]
+----
+$ oc get configmaps game-config-2 -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  game.properties: |-
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2016-02-18T18:52:05Z
+  name: game-config-2
+  namespace: default
+  resourceVersion: "516"
+  selflink: /api/v1/namespaces/default/configmaps/game-config-2
+  uid: b4952dc3-d670-11e5-8cd0-68f728db1985
+----
+
+您可以为从文件中导入的内容在配置映射中指定要设置的键。这可以通过向 --from-file 选项传递 key=value 表达式来设置。例如：
+
+. 通过指定键值对来创建配置映射：
++
+[source,terminal]
+----
+$ oc create configmap game-config-3 \
+    --from-file=game-special-key=example-files/game.properties
+----
+
+. 验证结果：
++
+[source,terminal]
+----
+$ oc get configmaps game-config-3 -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  game-special-key: |- <1>
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2016-02-18T18:54:22Z
+  name: game-config-3
+  namespace: default
+  resourceVersion: "530"
+  selflink: /api/v1/namespaces/default/configmaps/game-config-3
+  uid: 05f8da22-d671-11e5-8cd0-68f728db1985
+----
+<1> 这是您在前面的步骤中设置的密钥。

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * backup_and_restore/replacing-unhealthy-etcd-member.adoc
+
+:_content-type: PROCEDURE
+[id="restore-identify-unhealthy-etcd-member_{context}"]
+= 找出一个不健康的 etcd 成员
+
+您可以识别集群是否有不健康的 etcd 成员。
+
+.先决条件
+
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.Procedure
+
+. 使用以下命令检查 `EtcdMembersAvailable` 状态条件的状态：
++
+[source,terminal]
+----
+$ oc get etcd -o=jsonpath='{range .items[0].status.conditions[?(@.type=="EtcdMembersAvailable")]}{.message}{"\n"}'
+----
+
+. 查看输出：
++
+[source,terminal]
+----
+2 of 3 members are available, ip-10-0-131-183.ec2.internal is unhealthy
+----
++
+这个示例输出显示 `ip-10-0-131-183.ec2.internal` etcd 成员不健康。

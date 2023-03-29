@@ -1,0 +1,69 @@
+:_content-type: ASSEMBLY
+[id="odc-creating-applications-using-developer-perspective"]
+= 使用开发者视角创建应用程序
+include::_attributes/common-attributes.adoc[]
+:context: odc-creating-applications-using-developer-perspective
+
+toc::[]
+
+Web 控制台中的 *开发者* 视角为您提供了下列选项，以便您从 *+添加* 视图中创建应用程序和相关服务，并将它们部署到 统信容器云管理平台：
+
+* *入门资源*：使用这些资源帮助您开始使用开发人员控制台。您可以使用选项菜单 {kebab} 来隐藏标头。
+** *使用示例创建应用程序*：使用现有代码示例开始在 统信容器云管理平台 上创建应用程序。
+** *使用引导式练习文档构建*：遵循指导文档构建应用并熟悉关键概念和术语。
+** *探索开发人员新功能*：探索 开发者 视角中的新功能和资源。
+
+* *开发者目录*：浏览 开发者目录 以选择所需的应用、服务或源到镜像构建器，然后将它添加到项目中。
+** *所有服务*：浏览目录以在 统信容器云管理平台 中发现服务。
+** *数据库*：选择所需的数据库服务并将其添加到应用程序中。
+** *Operator* 支持的：选择和部署所需的 Operator 管理服务。
+** *Helm Chart*：选择所需的 Helm Chart 来简化应用程序和服务部署。
+** *devfile*：从 *Devfile registry* 中选择一个 devfile 来声明性地定义开发环境。
+** *事件源*：选择一个事件源，从特定系统中注册对一类事件的兴趣。
++
+
+* *Git 存储库*：使用 *从Git导入*、*从Devfile导入* 或 从Dockerfile导入* 选项分别从您的 Git 存储库中导入一个存在的 codebase、Devfile 或 Dockerfile，以在 统信容器云管理平台 上构建和部署一个应用程序。
+
+* *容器镜像*：使用镜像流或 registry 中的现有镜像，将其部署到 统信容器云管理平台 中。
+
+* *管道*：使用 Tekton 管道为 统信容器云管理平台 上的软件交付过程创建 CI/CD 管道。
+
+* *无服务器*：探索 *Serverless* 选项，在 统信容器云管理平台 中创建、构建和部署无状态和无服务器应用程序。
+** *频道*：创建一个 Knative 频道以创建一个事件转发，使用内存的持久性层以及可靠的实现。
+
+* *样本*：探索可用的示例应用程序，以快速创建、构建和部署应用程序。
+
+* *来自本地机器*：通过 *来自本地机器* 标题导入或上传在您的本地机器中的文件用于更方便地构建并部署应用程序。
+** *导入 YAML*：上传 *YAML* 文件，以创建并定义用于构建和部署应用程序的资源。
+** *上传 JAR 文件*：上传 JAR 文件以构建和部署 Java 应用。
+
+[注意]
+====
+特定的选项，如 *管道*、*事件源* 和 *添加虚拟机* 只在 Uccp Pipelines Operator、Uccp Serverless Operator 和 Uccp Virtualization Operator 被安装时才会显示。
+====
+
+[id="prerequisites_odc-creating-applications-using-developer-perspective"]
+== 先决条件
+
+要使用  *开发者* 视角创建应用程序，请确认以下几项：
+
+* 已登陆到 web 控制台。
+* 处于 开发者 视角。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 统信容器云管理平台 中创建应用程序和其他工作负载。
+
+除以上所要求外，要创建无服务器应用程序，请确保：
+
+* 已安装 Uccp Serverless Operator。
+* 您已在 knative-serving 命名空间中创建了 KnativeServing 资源。
+
+
+include::modules/odc-creating-sample-applications.adoc[leveloffset=+1]
+
+include::modules/odc-importing-codebase-from-git-to-create-application.adoc[leveloffset=+1]
+
+include::modules/odc-deploying-java-applications.adoc[leveloffset=+1]
+
+include::modules/odc-using-the-devfile-registry.adoc[leveloffset=+1]
+
+include::modules/odc-using-the-developer-catalog-to-add-services-or-components.adoc[leveloffset=+1]
+

@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * installing/disconnected_install/installing-mirroring-installation-images.adoc
+// * openshift_images/samples-operator-alt-registry.adoc
+// * scalability_and_performance/ztp-deploying-disconnected.adoc
+
+ifeval::["{context}" == "installing-mirroring-disconnected"]
+:oc-mirror:
+endif::[]
+
+:_content-type: CONCEPT
+[id="installation-about-mirror-registry_{context}"]
+= 关于镜像 registry
+
+ifndef::oc-mirror[]
+您可以镜像 统信容器云管理平台 安装所需的镜像，以及容器镜像 registry 的后续产品更新，如 UnionTech Quay、JFrog Artifactory、Sonatype Nexus Repository 或 Harbor。如果您无法访问大型容器 registry，可以使用 mirror registry for UnionTech Uccps，它是包括在 统信容器云管理平台 订阅中的一个小型容器 registry。
+endif::[]
+ifdef::oc-mirror[]
+您可以使用支持 Docker v2-2 的任何容器 registry，如 UnionTech Quay, mirror registry for UnionTech Uccps, Artifactory, Sonatype Nexus Repository, 或 Harbor。无论您所选 registry 是什么，都会将互联网上统信托管站点的内容镜像到隔离的镜像 registry 相同。镜像内容后，您要将每个集群配置为从镜像 registry 中检索此内容。
+endif::[]
+
+[重要]
+====
+统信容器云管理平台 集群的内部 registry 不能用作目标 registry，因为它不支持没有标签的推送（在镜像过程中需要这个功能）。
+====
+
+如果选择的容器 registry 不是 mirror registry for UnionTech Uccps，则需要集群中置备的每台机器都可以访问它。如果 registry 无法访问，安装、更新或常规操作（如工作负载重新定位）可能会失败。因此，您必须以高度可用的方式运行镜像 registry，镜像 registry 至少必须与 统信容器云管理平台 集群的生产环境可用性相匹配。
+
+使用 统信容器云管理平台 镜像填充镜像 registry 时，可以遵循以下两种情况。如果您的主机可以同时访问互联网和您的镜像 registry，而不能访问您的集群节点，您可以直接从该机器中镜像该内容。这个过程被称为 连接的镜像(mirror)。如果没有这样的主机，则必须将该镜像文件镜像到文件系统中，然后将该主机或者可移动介质放入受限环境中。这个过程被称为 断开连接的镜像。
+
+对于已镜像的 registry，若要查看拉取镜像的来源，您必须查看 `Trying 以访问` CRI-O 日志中的日志条目。查看镜像拉取源的其他方法（如在节点上使用 `crictl images` 命令）显示非镜像镜像名称，即使镜像是从镜像位置拉取的。
+
+[注意]
+====
+统信不支持使用 统信容器云管理平台 测试第三方 registry。
+====
+
+ifeval::["{context}" == "installing-mirroring-disconnected"]
+:!oc-mirror:
+endif::[]

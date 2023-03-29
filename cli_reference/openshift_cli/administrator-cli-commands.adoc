@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="cli-administrator-commands"]
+= OpenShift CLI administrator command reference
+include::_attributes/common-attributes.adoc[]
+:context: cli-administrator-commands
+
+toc::[]
+
+本参考提供了 Uccps CLI（oc）管理员命令的描述和示例命令。您必须具有 cluster-admin 或同等权限才能使用这些命令。
+
+如需开发人员命令，请参阅 Uccps CLI 开发人员命令参考。
+
+运行 `oc adm -h` 以列出所有管理员命令或运行 `oc <command> --help` 获取特定命令的更多详情。
+
+// The following file is auto-generated from the openshift/oc repository
+// OpenShift CLI (oc) administrator commands
+include::modules/oc-adm-by-example-content.adoc[leveloffset=+1]
+
+[role="_additional-resources"]
+[id="additional-resources_cli-administrator-commands"]
+== 其他资源
+
+* xref:../../cli_reference/openshift_cli/developer-cli-commands.adoc#cli-developer-commands[Uccps CLI 开发人员命令参考]

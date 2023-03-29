@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * networking/ingress/configuring_ingress_operator.adoc
+
+
+[id="nw-installation-ingress-config-asset_{context}"]
+= Ingress 配置资产
+
+安装程序在 `config.openshift.io` API 组中生成带有 `Ingress` 资源的资产，`cluster-ingress-02-config.yml`。
+
+.`Ingress` 资源的 YAML 定义
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+spec:
+  domain: apps.openshiftdemos.com
+----
+
+安装程序将这个资产保存在 `manifests/` 目录下的 `cluster-ingress-02-config.yml` 文件中。此 Ingress 资源定义 Ingress 的集群范围配置。此 Ingress 配置的用法如下所示：
+
+* Ingress Operator 使用集群 Ingress 配置中的域，作为默认 Ingress Controller 的域。
+
+* OpenShift API Server Operator 使用集群 Ingress 配置中的域。在为未指定显式主机的 Route 资源生成默认主机时，还会使用此域。

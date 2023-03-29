@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * virt/logging_events_monitoring/virt-openshift-cluster-monitoring.adoc
+// * logging/cluster-logging.adoc
+// * serverless/monitor/cluster-logging-serverless.adoc
+
+// This module uses conditionalized paragraphs so that the module
+// can be re-used in associated products.
+
+:_content-type: CONCEPT
+[id="cluster-logging-about_{context}"]
+= 关于为 统信容器云管理平台 部署日志记录子系统
+
+统信容器云管理平台 集群管理员可以使用 统信容器云管理平台 控制台或 CLI 部署 logging 子系统，以安装统信容器云管理平台弹性搜索和 Uccps Logging Operator。安装 Operator 后，您可以创建一个ClusterLogging 自定义资源 (CR) 来调度 logging 子系统 pod 和支持 logging 子系统所需的其他资源。Operator 负责部署、升级和维护日志记录子系统。
+
+ClusterLogging CR 定义包括日志记录堆栈的所有组件在内的完整日志记录子系统环境，以收集、存储和视觉化日志。Uccps Logging Operator 会监视 logging 子系统 CR，并相应地调整日志记录部署。
+
+管理员和应用程序开发人员可以查看他们具有查看访问权限的项目的日志。

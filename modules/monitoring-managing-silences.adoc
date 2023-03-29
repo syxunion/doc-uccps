@@ -1,0 +1,12 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+[id="managing-silences_{context}"]
+= 管理静默
+
+您可以创建一个静默，在警报触发时停止接收有关警报的通知。在您解决根本问题的同时，在收到第一次通知后将警报置于静默状态可能很有用。
+
+在创建静默时，您必须指定它是立即激活，还是稍后激活。您还必须设置静默在多长一段时间后到期。
+
+您可以查看、编辑现有的静默并使其到期。

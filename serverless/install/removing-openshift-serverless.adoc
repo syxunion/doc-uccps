@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+include::_attributes/common-attributes.adoc[]
+[id="removing-openshift-serverless"]
+= 删除 {ServerlessProductName}
+:context: removing-openshift-serverless
+
+toc::[]
+
+如果需要从集群中删除 {ServerlessProductName} ，您可以手动删除 {ServerlessOperatorName} 和其他 {ServerlessProductName} 组件。在删除 {ServerlessOperatorName} 之前，您必须删除 Knative Serving 和 Knative Eventing。
+
+// Uninstalling Knative Serving
+include::modules/serverless-uninstalling-knative-serving.adoc[leveloffset=+1]
+// Uninstalling Knative Eventing
+include::modules/serverless-uninstalling-knative-eventing.adoc[leveloffset=+1]
+
+[id="removing-openshift-serverless-removing-the-operator"]
+== 删除 {ServerlessOperatorName}
+
+删除 Knative Serving 和 Knative Eventing 后，您可以删除 {ServerlessOperatorName}。您可以使用 {product-title} web 控制台或  `oc` CLI 完成此操作。
+
+include::modules/olm-deleting-operators-from-a-cluster-using-web-console.adoc[leveloffset=+2]
+include::modules/olm-deleting-operators-from-a-cluster-using-cli.adoc[leveloffset=+2]
+include::modules/olm-refresh-subs.adoc[leveloffset=+2]
+
+// deleting serverless CRDs
+include::modules/serverless-deleting-crds.adoc[leveloffset=+1]

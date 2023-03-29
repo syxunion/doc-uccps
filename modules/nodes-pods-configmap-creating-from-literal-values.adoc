@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+//* authentication/configmaps.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-pods-configmap-creating-from-literal-values_{context}"]
+= 从字面值创建配置映射
+
+您可以为配置映射提供字面值。
+
+.流程
+
+`--from-literal` 1.选项使用 key=value 语法，允许直接在命令行中提供字面值。
+
+. 通过指定字面值来创建配置映射：
++
+[source,terminal]
+----
+$ oc create configmap special-config \
+    --from-literal=special.how=very \
+    --from-literal=special.type=charm
+----
+
+. 验证结果：
++
+[source,terminal]
+----
+$ oc get configmaps special-config -o yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+data:
+  special.how: very
+  special.type: charm
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2016-02-18T19:14:38Z
+  name: special-config
+  namespace: default
+  resourceVersion: "651"
+  selflink: /api/v1/namespaces/default/configmaps/special-config
+  uid: dadce046-d673-11e5-8cd0-68f728db1985
+----

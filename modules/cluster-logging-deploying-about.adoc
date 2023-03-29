@@ -1,0 +1,183 @@
+// Module included in the following assemblies:
+//
+// * logging/cluster-logging-deploying-about.adoc
+// * serverless/monitor/cluster-logging-serverless.adoc
+
+:_content-type: CONCEPT
+[id="cluster-logging-deploying-about_{context}"]
+= 关于为 统信容器云管理平台 部署和配置日志记录子系统
+
+Logging 子系统设计为与默认配置一起使用，该配置针对中小型 {product-title} 集群进行了调优。
+
+以下安装说明包括一个示例 `ClusterLogging` 自定义资源 (CR) ，您可以使用它来创建日志记录子系统实例并配置日志记录子系统环境。
+
+如果要使用默认日志记录子系统安装，可直接使用示例 CR。
+
+如果要自定义部署，请根据需要对示例 CR 进行更改。下面介绍了在安装 OpenShift Logging 实例或安装后修改时可以进行的配置。请参阅“配置”部分来了解有关使用各个组件的更多信息，包括可以在 `ClusterLogging` 自定义资源之外进行的修改。
+
+[id="cluster-logging-deploy-about-config_{context}"]
+== 配置和调优日志记录子系统
+
+您可以通过修改 `openshift-logging` 项目中部署的 `ClusterLogging` 自定义资源来配置日志记录子系统。
+
+您可以在安装时或安装后修改以下任何组件：
+
+Memory 和 CPU::
+您可以使用有效的内存和 CPU 值修改 `resources` 块，以此调整各个组件的 CPU 和内存限值：
+
+[source,yaml]
+----
+spec:
+  logStore:
+    elasticsearch:
+      resources:
+        limits:
+          cpu:
+          memory: 16Gi
+        requests:
+          cpu: 500m
+          memory: 16Gi
+      type: "elasticsearch"
+  collection:
+    logs:
+      fluentd:
+        resources:
+          limits:
+            cpu:
+            memory:
+          requests:
+            cpu:
+            memory:
+        type: "fluentd"
+  visualization:
+    kibana:
+      resources:
+        limits:
+          cpu:
+          memory:
+        requests:
+          cpu:
+          memory:
+      type: kibana
+----
+
+Elasticsearch 存储::
+存储 `storageClass` `name` 和 `size` 参数，为 Elasticsearch 集群配置持久性存储类和大小。Uccps Logging Operator 基于这些参数，为 Elasticsearch 集群中的每个数据节点创建一个持久性卷声明（PVC）。
+
+[source,yaml]
+----
+  spec:
+    logStore:
+      type: "elasticsearch"
+      elasticsearch:
+        nodeCount: 3
+        storage:
+          storageClassName: "gp2"
+          size: "200G"
+----
+
+本例中指定，集群中的每个数据节点将绑定到请求 200G 的 gp2 存储的 PVC。每个主分片将由单个副本支持。
+
+[注意]
+====
+省略 storage 块会导致部署中仅包含临时存储。
+
+[source,yaml]
+----
+  spec:
+    logStore:
+      type: "elasticsearch"
+      elasticsearch:
+        nodeCount: 3
+        storage: {}
+----
+====
+
+Elasticsearch 复制策略::
+您可以通过设置策略来定义如何在集群中的数据节点之间复制 Elasticsearch 分片：
+
+* `FullRedundancy`。各个索引的分片完整复制到每个数据节点上。
+* `MultipleRedundancy`。各个索引的分片分布到一半数据节点上。
+* `SingleRedundancy`。各个分片具有单个副本。只要存在至少两个数据节点，日志就能始终可用且可恢复。
+* `ZeroRedundancy`。所有分片均无副本。如果节点关闭或发生故障， 则可能无法获得日志数据。
+
+////
+Log collectors::
+You can select which log collector is deployed as a daemon set to each node in the {product-title} cluster, either:
+
+* Fluentd - The default log collector based on Fluentd.
+* Rsyslog - Alternate log collector supported as **Tech Preview** only.
+
+----
+  spec:
+    collection:
+      logs:
+        fluentd:
+          resources:
+            limits:
+              cpu:
+              memory:
+            requests:
+              cpu:
+              memory:
+        type: "fluentd"
+----
+////
+
+[id="cluster-logging-deploy-about-sample_{context}"]
+== 修改后的 ClusterLogging 自定义资源示例
+
+以下是使用前面描述的选项修改的 `ClusterLogging` 自定义资源的示例。
+
+.修改后的 `ClusterLogging` 自定义资源示例
+[source,yaml]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance"
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"
+  logStore:
+    type: "elasticsearch"
+    retentionPolicy:
+      application:
+        maxAge: 1d
+      infra:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+    elasticsearch:
+      nodeCount: 3
+      resources:
+        limits:
+          memory: 32Gi
+        requests:
+          cpu: 3
+          memory: 32Gi
+        storage:
+          storageClassName: "gp2"
+          size: "200G"
+      redundancyPolicy: "SingleRedundancy"
+  visualization:
+    type: "kibana"
+    kibana:
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
+      replicas: 1
+  collection:
+    logs:
+      type: "fluentd"
+      fluentd:
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 1Gi
+----

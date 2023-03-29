@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-pod-affinity.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-pod-affinity-configuring_{context}"]
+= 配置 pod 关联性规则
+
+以下步骤演示了一个简单的双 pod 配置，它创建一个带有某标签的 pod，以及一个使用关联性来允许随着该 pod 一起调度的 pod。
+
+.流程
+
+. 创建在 Pod spec 中带有特定标签的 pod:
++
+[source,terminal]
+----
+$ cat team4.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-s1
+  labels:
+    security: S1
+spec:
+  containers:
+  - name: security-s1
+    image: docker.io/ocpqe/hello-pod
+----
+
+. 在创建其他 pod 时，按如下所示编辑 Pod 规格：
++
+.. 使用 `podAffinity` 小节配置 `requiredDuringSchedulingIgnoredDuringExecution` 参数或  `preferredDuringSchedulingIgnoredDuringExecution` 参数：
++
+.. 指定必须满足的键和值。如果您希望新 pod 与另一个 pod 一起调度，请使用与第一个 pod 上标签相同的 key 和 value 参数。
++
+[source,yaml]
+----
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+----
++
+.. 指定一个 operator。运算符可以是 `In`, `NotIn`, `Exists`, 或 `DoesNotExist`. 例如，使用运算符 In 来要求节点上存在该标签。
++
+.. 指定 topologyKey，这是一个预填充的 Kubernetes 标签，供系统用于表示这样的拓扑域。
+
+. 创建 pod。
++
+[source,terminal]
+----
+$ oc create -f <pod-spec>.yaml
+----

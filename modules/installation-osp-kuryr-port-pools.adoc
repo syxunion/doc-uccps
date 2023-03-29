@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_openstack/installing-openstack-installer-kuryr.adoc
+// * installing/installing_openstack/installing-openstack-user-kuryr.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+[id="installation-osp-kuryr-port-pools_{context}"]
+= Kuryr 端口池
+
+Kuryr 端口池在待机时维护多个端口，用于创建 pod。
+
+将端口保留在待机上可最大程度缩短 pod 创建时间。如果没有端口池，Kuryr 必须明确请求在创建或删除 pod 时创建或删除端口。
+
+Kuryr 使用的 Neutron 端口是在绑定到命名空间的子网中创建的。这些 pod 端口也作为子端口添加到 统信容器云管理平台 集群节点的主端口。
+
+因为 Kuryr 将每个命名空间保留在单独的子网中，所以为每个命名空间 worker 对维护一个单独的端口池。
+
+在安装集群前，您可以在 `cluster-network-03-config.yml` 清单文件中设置以下参数来配置端口池行为：
+
+* `enablePortPoolsPrepopulation` 参数控制池准备工作，它会强制 Kuryr 在命名空间中创建第一个 pod 使用专用网络时将 Neutron 端口添加到池中。默认值为 `false`。
+* `poolMinPorts` 参数是池中保留的最少可用端口的数量。默认值为 `1`。
+* `poolMaxPorts` 参数是池中保留的最大可用端口数。值 `0` 可 禁用此上限。这是默认设置。
++
+如果您的 `OpenStack` 端口配额较低，或者 pod 网络上的 IP 地址有限，请考虑设置此选项以确保删除不需要的端口。
+* `poolBatchPorts` 参数定义一次可以创建的 Neutron 端口的最大数量。默认值为 `3`。

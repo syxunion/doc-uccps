@@ -1,0 +1,20 @@
+// Module filename: nw-using-cookies-keep-route-statefulness.adoc
+// Use module with the following module:
+// nw-annotating-a-route-with-a-cookie-name.adoc
+//
+// Module included in the following assemblies:
+//
+// * networking/configuring-routing.adoc
+[id="nw-using-cookies-keep-route-statefulness_{context}"]
+= 使用 Cookie 来保持路由有状态性
+
+统信容器云管理平台 提供粘性会话，通过确保所有流量都到达同一端点来实现有状态应用程序流量。但是，如果端点 pod 以重启、扩展或更改配置的方式被终止，这种有状态性可能会消失。
+
+统信容器云管理平台 可以使用 Cookie 来配置会话持久性。Ingress Controller 选择一个端点来处理任何用户请求，并为会话创建一个 Cookie。Cookie 在响应请求时返回，用户则通过会话中的下一请求发回 Cookie。Cookie 告知 Ingress Controller 哪个端点正在处理会话，确保客户端请求使用这个 Cookie 使请求路由到同一个 pod。
+
+[注意]
+====
+无法在 passthrough 路由上设置 Cookie，因为无法看到 HTTP 流量。相反，根据源 IP 地址计算数字，该地址决定了后端。
+
+如果后端更改，可以将流量定向到错误的服务器，使其更不计。如果您使用负载均衡器来隐藏源 IP，则会为所有连接和流量都发送到同一 pod 设置相同的数字。
+====

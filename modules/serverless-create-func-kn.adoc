@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-getting-started.adoc
+// * serverless/reference/kn-func-ref.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-func-kn_{context}"]
+= 创建功能
+
+在构建和部署功能前，您必须使用 Knative  (`kn`) CLI 创建功能。您可以在命令行中指定路径、运行时、模板和镜像 registry，也可以使用  `-c` 标志在终端中启动交互式体验。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving 。
+* 已安装 Knative (`kn`) CLI.
+
+.流程
+
+* 创建功能项目：
++
+[source,terminal]
+----
+$ kn func create -r <repository> -l <runtime> -t <template> <path>
+----
+** 可接受的运行时值包括 `quarkus`, `node`, `typescript`, `go`, `python`, `springboot`, 和 `rust`.
+** 可接受的模板值包括 `http` 和 `cloudevents`.
++
+.示例命令
+[source,terminal]
+----
+$ kn func create -l typescript -t cloudevents examplefunc
+----
++
+.输出示例
+[source,terminal]
+----
+Created typescript function in /home/user/demo/examplefunc
+----
++
+** 或者，您可以指定包含自定义模板的存储库。
++
+.示例命令
+[source,terminal]
+----
+$ kn func create -r https://github.com/boson-project/templates/ -l node -t hello-world examplefunc
+----
++
+.输出示例
+[source,terminal]
+----
+Created node function in /home/user/demo/examplefunc
+----

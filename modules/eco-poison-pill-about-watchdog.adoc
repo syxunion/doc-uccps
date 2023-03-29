@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes/eco-poison-pill-operator.adoc
+
+:_content-type: CONCEPT
+[id="about-watchdog-devices_{context}"]
+= 关于 watchdog 设备
+
+watchdog 设备可以是以下任意一种：
+
+* 独立电源的硬件设备
+* 与它们控制的主机共享电源的硬件设备
+* 软件或 `softdog` 中实施的虚拟设备
+
+硬件 `watchdog` 和 `softdog` 设备分别具有电子计时器和软件计时器。这些 watchdog 设备用于确保在检测到错误条件时机器进入安全状态。集群需要重复重置 watchdog 定时器以证明它处于健康状态。此计时器可能会因为出现错误条件而造成问题，如死锁、CPU 不足以及网络或磁盘访问的丢失。如果计时器过期，watchdog 设备会假设发生了错误，设备会触发强制重置节点。
+
+硬件 watchdog 设备比  `softdog` 设备更可靠。
+
+[id="understanding-pp-watchdog_{context}"]
+== 了解使用 watchdog 设备的 Poison Pill Operator 行为
+
+Poison Pill Operator 根据存在的 watchdog 设备决定补救策略。
+
+如果配置了硬件 watchdog 设备并可用，Operator 会使用它进行补救。如果没有配置硬件 watchdog 设备，Operator 会启用并使用 softdog 设备进行补救。
+
+如果既不支持 watchdog 设备，无论是系统或配置，Operator 都会使用软件重启来修复节点。

@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-pod-topology-spread-constraints
+
+:_content-type: PROCEDURE
+[id="nodes-scheduler-pod-topology-spread-constraints-configuring_{context}"]
+= 配置 pod 拓扑分布限制
+
+以下步骤演示了如何配置 pod 拓扑扩展约束，以根据区分配与指定标签匹配的 pod。
+
+您可以指定多个 pod 拓扑分散约束，但您必须确保它们不会相互冲突。必须满足所有 pod 拓扑分布约束才能放置 pod。
+
+.先决条件
+
+* 集群管理员已将所需的标签添加到节点。
+
+.流程
+
+. 创建 `Pod` spec 并指定 pod 拓扑分散约束：
++
+.`pod-spec.yaml` 文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1 <1>
+    topologyKey: topology.kubernetes.io/zone <2>
+    whenUnsatisfiable: DoNotSchedule <3>
+    labelSelector: <4>
+      matchLabels:
+        foo: bar <5>
+  containers:
+  - image: "docker.io/ocpqe/hello-pod"
+    name: hello-pod
+----
+<1> 两个拓扑域间的 pod 数量的最大差别。默认为 1，您不能指定 0 值。
+<2> 节点标签的密钥。具有此键和相同值的节点被视为在同一拓扑中。
+<3> 如果不满足分布式约束，如何处理 pod。默认为 `DoNotSchedule` ，它会告诉调度程序不要调度 pod。设置为 `ScheduleAnyway` ，它仍然会调度 pod，但调度程序会优先考虑 skew 的根据情况以使集群不要出现不平衡的情况。
+<4> 匹配此标签选择器的 Pod 在分发时被计算并识别为组，以满足约束要求。确保指定标签选择器，否则就无法匹配 pod。
+<5> 如果您希望以后正确计数此 Pod 规格，请确保此 Pod spec 也会设置其标签选择器来匹配这个标签选择器。
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f pod-spec.yaml
+----

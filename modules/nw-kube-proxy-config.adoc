@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/configuring-kube-proxy.adoc
+
+[id="nw-kube-proxy-config_{context}"]
+= kube-proxy 配置参数
+
+您可以修改以下 `kubeProxyConfig` 参数。
+
+[重要]
+====
+由于 统信容器云管理平台 1.1 及更高版本中引进了性能上的改进，现在不再需要调整 `iptablesSyncPeriod` 参数。
+====
+
+.参数
+[cols="30%,30%,30%,10%",options="header"]
+|====
+|参数|描述|值|默认值
+
+|`iptablesSyncPeriod`
+|`iptables` 规则的刷新周期。
+|一个时间间隔，如 `30s` 或 `2m`。有效的后缀包括 `s`、`m`和 `h`，具体参见 Go 时间包文档。
+|`30s`
+
+|`proxyArguments.iptables-min-sync-period`
+|刷新 `iptables` 规则前的最短时长。此参数确保刷新的频率不会过于频繁。默认情况下，当发生影响 `iptables` 规则的更改时就会立即进行刷新。
+|一个时间间隔，如 `30s` 或 `2m`。有效的后缀包括 `s`、`m`和 `h`，具体参见 Go 时间包。
+|`0s`
+
+|====

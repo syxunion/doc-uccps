@@ -1,0 +1,71 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-pipeline-providing-jenkinsfile_{context}"]
+= 为管道构建提供 Jenkins 文件
+
+[重要]
+====
+Pipeline 构建策略在 统信容器云管理平台 4 中弃用。基于 Tekton 的 统信容器云管理平台 Pipelines 中带有等效且改进的功能。
+
+统信容器云管理平台 上的 Jenkins 镜像被完全支持，用户可以按照 Jenkins 用户文档在作业中定义 jenkinsfile，或者将其存储在 Source Control Management 系统中。
+====
+
+`jenkinsfile` 使用标准的 Groovy 语言语法，允许对应用程序的配置、构建和部署进行精细控制。
+
+您可以通过以下一种方式提供 `jenkinsfile`：
+
+* 位于源代码存储库中的文件。
+* 使用 `jenkinsfile` 字段嵌入为构建配置的一部分。
+
+使用第一个选项时，`jenkinsfile` 必须包含在以下位置之一的应用程序源代码存储库中：
+
+* 存储库根目录下名为 `jenkinsfile` 的文件。
+* 存储库的源 `contextDir` 的根目录下名为 `jenkinsfile` 的文件。
+* 通过 `BuildConfig` 的 `JenkinsPipelineStrategy` 部分的 `jenkinsfilePath` 字段指定的文件名；若提供，则路径相对于源 `contextDir`，否则默认为存储库的根目录。
+
+`jenkinsfile` 在 Jenkins 代理 Pod 上运行，如果您打算使用 统信容器云管理平台 DSL，它必须具有 统信容器云管理平台 客户端二进制文件。
+
+.流程
+
+要提供 Jenkins 文件，您可以：
+
+* 在构建配置中嵌入 Jenkins 文件。
+* 在构建配置中包含对包含 Jenkins 文件的 Git 存储库的引用。
+
+.嵌入式定义
+[source,yaml]
+----
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "sample-pipeline"
+spec:
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfile: |-
+        node('agent') {
+          stage 'build'
+          openshiftBuild(buildConfig: 'ruby-sample-build', showBuildLogs: 'true')
+          stage 'deploy'
+          openshiftDeploy(deploymentConfig: 'frontend')
+        }
+----
+
+.引用 Git 存储库
+[source,yaml]
+----
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "sample-pipeline"
+spec:
+  source:
+    git:
+      uri: "https://github.com/openshift/ruby-hello-world"
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: some/repo/dir/filename <1>
+----
+<1> 可选的 `jenkinsfilePath` 字段指定要使用的文件的名称，其路径相对于源 `contextDir`。如果省略了 `contextDir`，则默认为存储库的根目录。如果省略了 `jenkinsfilePath`，则默认为 `jenkinsfile`。

@@ -1,0 +1,51 @@
+:_content-type: ASSEMBLY
+[id="overview-traffic"]
+= 集群入口流量配置概述
+include::_attributes/common-attributes.adoc[]
+:context: overview-traffic
+
+toc::[]
+
+统信容器云管理平台 提供了以下从集群外部与集群中运行的服务进行通信的方法。
+
+建议采用以下方法，它们按顺序或首选程度排列：
+
+* 如果您有 HTTP/HTTPS，请使用 Ingress Controller。
+* 如果您有 HTTPS 之外的 TLS 加密协议，比如对于使用 SNI 标头的 TLS，请使用 Ingress Controller。
+* 否则，请使用负载均衡器、外部 IP 或 `NodePort`。
+
+[[external-access-options-table]]
+[options="header"]
+|===
+
+|方法 |用途
+
+|xref:../../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-ingress-controller.adoc#configuring-ingress-cluster-traffic-ingress-controller[使用 Ingress Controller]
+|允许访问 HTTP/HTTPS 流量和 HTTPS 以外的 TLS 加密协议（例如，使用 SNI 标头的 TLS）。
+
+|xref:../../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-load-balancer.adoc#configuring-ingress-cluster-traffic-load-balancer[使用负载均衡器服务自动分配外部 IP]
+|允许流量通过从池分配的 IP 地址传到非标准端口。大多数云平台都提供了一种使用负载平衡器 IP 地址启动服务的方法。
+
+|xref:../../networking/metallb/about-metallb.adoc#about-metallb[关于 MetalLB 和 MetalLB Operator]
+|允许从机器网络中的一个池到特定 IP 地址的流量。对于裸机安装或类似于裸机的平台，MetalLB 提供了使用负载平衡器 IP 地址启动服务的途径。
+
+|xref:../../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-service-external-ip.adoc#configuring-ingress-cluster-traffic-service-external-ip[手动将外部 IP 分配给服务]
+|允许流量通过特定的 IP 地址传到非标准端口。
+
+|xref:../../networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.adoc#configuring-ingress-cluster-traffic-nodeport[配置 `NodePort`]
+|在集群中的所有节点上公开某一服务。
+|===
+
+[id="overview-traffic-comparision_{context}"]
+== 比较：对外部 IP 地址的容错访问
+
+对于提供对外部 IP 地址访问权限的通信方法，另一个考虑因素是对 IP 地址的容错访问。以下功能提供对外部 IP 地址的容错访问：
+
+IP 故障奇切换::
+IP 故障切换管理一组节点的虚拟 IP 地址池。它通过 Keepalived 和虚拟路由器冗余协议 (VRRP) 实施。IP 故障转移仅仅是第 2 层机制，它依赖于多播。对于某些网络，多播可能有缺点。
+
+MetalLB::
+MetalLB 具有 2 层模式，但它不使用多播。第 2 层模式有一个缺点，它会通过一个节点传输外部 IP 地址的所有流量。
+
+手动分配外部 IP 地址::
+您可以使用 IP 地址块配置集群，用于为服务分配外部 IP 地址。默认情况下禁用此功能。此功能非常灵活，但给集群或网络管理员带来了最大的负担。集群已准备好接收目标为外部 IP 的流量，但每个客户必须决定如何将流量路由到节点。

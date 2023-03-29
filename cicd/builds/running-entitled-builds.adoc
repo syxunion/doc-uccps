@@ -1,0 +1,35 @@
+:_content-type: ASSEMBLY
+[id="running-entitled-builds"]
+= 在构建中使用红帽订阅
+include::_attributes/common-attributes.adoc[]
+:context: running-entitled-builds
+
+toc::[]
+
+[role="_abstract"]
+按照以下小节中的内容在 统信容器云管理平台 上运行授权构建。
+
+include::modules/builds-create-imagestreamtag.adoc[leveloffset=+1]
+
+include::modules/builds-source-secrets-entitlements.adoc[leveloffset=+1]
+
+== 使用 Subscription Manager 运行构建
+
+include::modules/builds-strategy-docker-entitled-subman.adoc[leveloffset=+2]
+
+== 使用 统信 Satellite 订阅运行构建
+
+include::modules/builds-source-input-satellite-config.adoc[leveloffset=+2]
+
+include::modules/builds-strategy-docker-entitled-satellite.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+
+* 如何使用 统信 Satellite 订阅和使用哪个证书进行构建
+
+// Beginning of "Running entitled builds with SharedSecret objects" section
+
+include::modules/builds-running-entitled-builds-with-sharedsecret-objects.adoc[leveloffset=+1]
+
+// End of "Running entitled builds with SharedSecret objects" section

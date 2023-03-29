@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-pipeline-environment-variables_{context}"]
+= 使用环境变量进行 Pipeline 构建
+
+[重要]
+====
+Pipeline 构建策略在 统信容器云管理平台 4 中弃用。基于 Tekton 的 统信容器云管理平台 Pipelines 中带有等效且改进的功能。
+
+统信容器云管理平台 上的 Jenkins 镜像被完全支持，用户可以按照 Jenkins 用户文档在作业中定义 jenkinsfile，或者将其存储在 Source Control Management 系统中。
+====
+
+要将环境变量提供给 Pipeline 构建过程使用，您可以在构建配置的 `jenkinsPipelineStrategy` 定义中添加环境变量。
+
+定义后，环境变量将设置为与构建配置关联的任何 Jenkins 任务的参数。
+
+.流程
+
+* 要定义在构建期间使用的环境变量，编辑 YAML 文件：
++
+[source,yaml]
+----
+jenkinsPipelineStrategy:
+...
+  env:
+    - name: "FOO"
+      value: "BAR"
+----
+
+您还可以使用 `oc set env` 命令管理构建配置中定义的环境变量。
+
+
+
+//[NOTE]
+//====
+// This module needs specific instructions and examples.
+// This is similar between Docker, S2I, and Custom.
+//====

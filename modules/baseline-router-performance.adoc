@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+// * scalability_and_performance/routing-optimization.adoc
+// * post_installation_configuration/network-configuration.adoc
+
+[id="baseline-router-performance_{context}"]
+= Ingress Controller（router）性能的基线
+
+统信容器云管理平台 Ingress Controller，或称为路由器，是所有用于 统信容器云管理平台 服务的外部流量的入站点。
+
+当根据每秒处理的 HTTP 请求来评估单个 HAProxy 路由器性能时，其性能取决于多个因素。特别是：
+
+* HTTP keep-alive/close 模式
+
+* 路由类型
+
+* 对 TLS 会话恢复客户端的支持
+
+* 每个目标路由的并行连接数
+
+* 目标路由数
+
+* 后端服务器页面大小
+
+* 底层基础结构（网络/SDN 解决方案、CPU 等）
+
+具体环境中的性能会有所不同，统信实验室在一个有 4 个 vCPU/16GB RAM 的公共云实例中进行测试。一个 HAProxy 路由器处理由后端终止的 100 个路由服务提供 1kB 静态页面，每秒处理以下传输数。
+
+在 HTTP 的 keep-alive 模式下：
+
+[cols="3",options="header"]
+|===
+|*Encryption* |*LoadBalancerService*|*HostNetwork*
+|none |21515|29622
+|edge |16743|22913
+|passthrough |36786|53295
+|re-encrypt |21583|25198
+|===
+
+在 HTTP 关闭（无 keep-alive）情境中：
+
+[cols="3",options="header"]
+|===
+|*Encryption* |*LoadBalancerService*|*HostNetwork*
+|none |5719|8273
+|edge |2729|4069
+|passthrough |4121|5344
+|re-encrypt |2320|2941
+|===
+
+默认 Ingress Controller 配置使用 `ROUTER_THREADS=4`，并测试了两个不同的端点发布策略 (LoadBalancerService/hostnetwork) 。TLS 会话恢复用于加密路由。使用 HTTP keep-alive 设置，单个 HAProxy 路由器可在页面大小小到 8 kB 时充满 1 Gbit NIC。
+
+当在使用现代处理器的裸机中运行时，性能可以期望达到以上公共云实例测试性能的大约两倍。这个开销是由公有云的虚拟化层造成的，基于私有云虚拟化的环境也会有类似的开销。下表是有关在路由器后面的应用程序数量的指导信息：
+
+[cols="2,4",options="header"]
+|===
+|*应用程序数量* |*应用类型*
+|5-10 |静态文件/web 服务器或者缓存代理
+|100-1000 |生成动态内容的应用程序
+
+|===
+
+取决于所使用的技术，HAProxy 通常可支持 5 到 1000 个程序的路由。Ingress Controller 性能可能会受其后面的应用程序的能力和性能的限制，如使用的语言，静态内容或动态内容。
+
+如果有多个服务于应用程序的 Ingress 或路由器，则应该使用路由器分片（router sharding）以帮助横向扩展路由层。

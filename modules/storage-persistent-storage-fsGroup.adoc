@@ -1,0 +1,33 @@
+// Module included in the following assemblies:
+//
+// * storage/understanding-persistent-storage.adoc
+
+[id="using_fsGroup_{context}"]
+= 使用 fsGroup 减少 pod 超时
+
+如果存储卷包含很多文件（1,000,000 或更多），您可能会遇到 pod 超时问题。
+
+这是因为，在默认情况下，统信容器云管理平台会递归更改每个卷内容的所有权和权限，以便在挂载卷时与 pod 的 securityContext 中指定的 fsGroup 匹配。对于大型卷，检查和更改所有权和权限可能会非常耗时，从而会减慢 pod 启动的速度。您可以使用 `securityContext` 中的 `fsGroupChangePolicy` 字段来控制统信容器云管理平台检查和管理卷的所有权和权限的方式。
+
+`fsGroupChangePolicy` 定义在 pod 中公开卷之前更改卷的所有权和权限的行为。此字段仅适用于支持 `fsGroup-` 控制的所有权和权限。此字段有两个可能的值：
+
+* `OnRootMismatch`: 仅当 root 目录的权限和所有权与卷的预期权限不匹配时才会更改权限和所有权。这有助于缩短更改卷的所有权和权限所需的时间，以减少 pod 超时。
+
+* `Always`: 当卷被挂载时，始终更改卷的权限和所有权。
+
+.`fsGroupChangePolicy` 示例
+[source,yaml]
+----
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 3000
+  fsGroup: 2000
+  fsGroupChangePolicy: "OnRootMismatch" <1>
+  ...
+----
+<1> `OnRootMismatch` 指定跳过递归权限更改，这有助于避免 pod 超时问题。
+
+[注意]
+====
+fsGroupChangePolicyfield 对临时卷类型没有影响，如 secret、configMap 和 emptydir。
+====

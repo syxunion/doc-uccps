@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+
+:_content-type: PROCEDURE
+[id="listing-alerting-rules-for-all-projects-in-a-single-view_{context}"]
+= 在单个视图中列出所有项目的警报规则
+
+作为集群管理员，您可以在单个视图中一起列出 统信容器云管理平台 核心项目和用户定义的项目的警报规则。
+
+.先决条件
+
+* 您可以使用具有e `cluster-admin` 角色的用户访问集群。
+* 已安装 Uccps CLI (`oc`)。
+
+.流程
+
+. 在 *管理员* 视角中，导航到 *Observe* -> *Alerting* -> *Alerting Rules*.
+
+. 2.在 *Filter* 下拉菜单中选择 *Platform* 和 *User* 来源。
++
+[注意]
+====
+默认会选择 *Platform* 来源。
+====

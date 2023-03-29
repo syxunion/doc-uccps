@@ -1,0 +1,20 @@
+// Module included in the following assemblies
+
+// * serverless/cli_tools/kn-func-ref.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-kn-func-delete_{context}"]
+= Deleting a function
+
+您可以使用  `kn func delete` 命令删除功能。当不再需要某个函数时，这很有用，并有助于在集群中保存资源。
+
+.流程
+
+* 删除函数：
++
+[source,terminal]
+----
+$ kn func delete [<function_name> -n <namespace> -p <path>]
+----
+** 如果没有指定要删除的功能的名称或路径，则会搜索当前目录以查找用于决定要删除的功能的 `func.yaml` 文件。
+** 如果没有指定命名空间，则默认为 `namespace`文件中的 `func.yaml` 值。

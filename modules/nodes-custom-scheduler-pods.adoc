@@ -1,0 +1,145 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-custom-scheduler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-custom-scheduler-deploying-pods_{context}"]
+= 使用自定义调度程序部署 pod
+
+在集群中部署自定义调度程序后，您可以将 pod 配置为使用该调度程序，而不是默认调度程序。
+
+[注意]
+====
+每个调度程序具有集群中资源的单独视图。因此，每个调度程序应在自己的一组节点上运行。
+
+如果两个或多个调度程序在同一节点上运行，它们可能会相互干扰，并在同一个节点上调度多个 pod，而不是用于的可用资源。在这种情况下，Pod 可能会因为资源不足而被拒绝。
+====
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 自定义调度程序已在集群中部署。
+
+.流程
+
+. 如果您的集群使用基于角色的访问控制 (RBAC)，将自定义调度程序名称添加到  `system:kube-scheduler` 集群角色。
+
+.. 编辑 `system:kube-scheduler` 集群角色：
++
+[source,terminal]
+----
+$ oc edit clusterrole system:kube-scheduler
+----
+
+.. 将自定义调度程序的名称添加到 `leases` 和 `endpoints`  的 `resourceNames` 列表中：
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  creationTimestamp: "2021-07-07T10:19:14Z"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-scheduler
+  resourceVersion: "125"
+  uid: 53896c70-b332-420a-b2a4-f72c822313f2
+rules:
+...
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+- apiGroups:
+  - coordination.k8s.io
+  resourceNames:
+  - kube-scheduler
+  - custom-scheduler <1>
+  resources:
+  - leases
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resourceNames:
+  - kube-scheduler
+  - custom-scheduler <1>
+  resources:
+  - endpoints
+  verbs:
+  - get
+  - update
+...
+----
+<1> 本例使用 `custom-scheduler` 作为自定义调度程序名称。
+
+. 创建 `Pod` 配置并在 `schedulerName` 参数中指定自定义调度程序的名称：
++
+.`custom-scheduler-example.yaml` 文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: custom-scheduler-example
+  labels:
+    name: custom-scheduler-example
+spec:
+  schedulerName: custom-scheduler <1>
+  containers:
+  - name: pod-with-second-annotation-container
+    image: docker.io/ocpqe/hello-pod
+----
+<1> 要使用的自定义调度程序的名称，本例中为 `custom-scheduler` 。如果没有提供调度程序名称，pod 会自动使用默认调度程序来调度。
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f custom-scheduler-example.yaml
+----
+
+.验证
+
+. 输入以下命令检查 pod 是否已创建：
++
+[source,terminal]
+----
+$ oc get pod custom-scheduler-example
+----
++
+`custom-scheduler-example` 在输出中列出：
++
+[source,terminal]
+----
+NAME                       READY     STATUS    RESTARTS   AGE
+custom-scheduler-example   1/1       Running   0          4m
+----
+
+. 输入以下命令检查自定义调度程序是否已调度 pod：
++
+[source,terminal]
+----
+$ oc describe pod custom-scheduler-example
+----
++
+调度程序 `custom-scheduler` 如以下截断的输出所示：
++
+[source,terminal]
+----
+Events:
+  Type    Reason          Age        From                                               Message
+  ----    ------          ----       ----                                               -------
+  Normal  Scheduled       <unknown>  custom-scheduler                                   Successfully assigned default/custom-scheduler-example to <node_name>
+----

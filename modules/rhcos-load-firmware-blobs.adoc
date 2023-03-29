@@ -1,0 +1,64 @@
+// Module included in the following assemblies:
+//
+// * post_installation_configuration/machine-configuration-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="rhcos-load-firmware-blobs_{context}"]
+= 在机器配置清单中载入自定义固件 Blob
+
+因为 `/usr/lib` 中固件 Blob 的默认位置是只读的，所以您可以通过更新搜索路径来查找自定义固件 Blob。这可让您在 Uswift 不管理 blob 时载入机器配置清单中的本地固件 Blob。
+
+.流程
+
+. 创建 Butane 配置文件 `98-worker-firmware-blob.bu`，它会更新搜索路径，以便其为 root 所有且对本地存储可写。以下示例将本地工作站的自定义 blob 文件放在 `/var/lib/firmware` 下的节点上。
++
+[注意]
+====
+如需有关 Butane 的信息，请参阅"使用 Butane 创建机器配置"。
+====
+.自定义固件 blob 的 Butane 配置文件
++
+[source,yaml]
+----
+variant: openshift
+version: 4.10.0
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 98-worker-firmware-blob
+storage:
+  files:
+  - path: /var/lib/firmware/<package_name> <1>
+    contents:
+      local: <package_name> <2>
+    mode: 0644 <3>
+openshift:
+  kernel_arguments:
+    - 'firmware_class.path=/var/lib/firmware' <4>
+----
++
+<1> 设置将固件软件包复制到的节点上的路径。
+<2> 指定包含从运行 Butane 的系统上本地文件目录中读取的内容的文件。本地文件的路径相对于 `files-dir` 目录，必须在下一步中使用 `--files-dir` 选项指定它。
+<3> 为 Uswift 节点上的文件设置权限。建议把选项设置为 0644 。
+<4> `firmware_class.path` 参数自定义内核搜索路径，在其中查找从本地工作站复制到节点的根文件系统的自定义固件 Blob。这个示例使用 `/var/lib/firmware` 作为自定义路径。
+
+. 运行 Butane 生成 `MachineConfig` 对象文件，该文件使用名为 `98-worker-firmware-blob.yaml` 的本地工作站中的固件 blob 副本。固件 blob 包含要传送到节点的配置。以下示例使用 `--files-dir` 选项指定工作站上本地文件或目录所在的目录：
++
+[source,terminal]
+----
+$ butane 98-worker-firmware-blob.bu -o 98-worker-firmware-blob.yaml --files-dir <directory_including_package_name>
+----
+. 通过两种方式之一将配置应用到节点：
++
+* 如果集群还没有运行，在生成清单文件后，将 `MachineConfig` 对象文件添加到 `<installation_directory>/openshizft` 目录中，然后继续创建集群。
++
+* 如果集群已在运行，请应用该文件：
++
+[source,terminal]
+----
+$ oc apply -f 98-worker-firmware-blob.yaml
+----
++
+已为您创建一个 `MachineConfig` 对象 YAML 文件，以完成机器的配置。
++
+. 如果将来需要更新 `MachineConfig` 对象，请保存 Butane 配置。

@@ -1,0 +1,127 @@
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+:_content-type: PROCEDURE
+[id="nw-enforcing-hsts-per-domain_{context}"]
+= 强制每个域 HTTP 严格传输安全性
+
+要为安全路由强制实施 HTTP Strict Transport Security (HSTS)，在 Ingress spec 中添加 `requiredHSTSPolicies` 记录来捕获 HSTS 策略的配置。
+
+如果您将 `requiredHSTSPolicy` 配置为强制 HSTS，则任何新创建的路由都必须配置有兼容的 HSTS 策略注解。
+
+[注意]
+====
+要使用不合规的 HSTS 路由处理升级的集群，您可以在源更新清单并应用更新。
+====
+
+[注意]
+====
+您无法使用 `oc expose route` 或 `oc create route` 命令在强制 HSTS 的域中添加路由，因为这些命令的 API 不接受注解。
+====
+
+[重要]
+====
+HSTS 无法用于保护或非 TLS 路由，即使全局所有路由都请求 HSTS。
+====
+
+.先决条件
+
+* 您可以使用具有项目的管理员特权的用户登陆到集群。
+* 已安装 `oc` CLI.
+
+.流程
+
+. 编辑 Ingress 配置文件：
++
+[source,terminal]
+----
+$ oc edit ingresses.config.openshift.io/cluster
+----
++
+.HSTS 策略示例
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Ingress
+metadata:
+  name: cluster
+spec:
+  domain: 'hello-openshift-default.apps.username.devcluster.openshift.com'
+  requiredHSTSPolicies: <1>
+  - domainPatterns: <2>
+    - '*hello-openshift-default.apps.username.devcluster.openshift.com'
+    - '*hello-openshift-default2.apps.username.devcluster.openshift.com'
+    namespaceSelector: <3>
+      matchLabels:
+        myPolicy: strict
+    maxAge: <4>
+      smallestMaxAge: 1
+      largestMaxAge: 31536000
+    preloadPolicy: RequirePreload <5>
+    includeSubDomainsPolicy: RequireIncludeSubDomains <6>
+  - domainPatterns: <2>
+    - 'abc.example.com'
+    - '*xyz.example.com'
+    namespaceSelector:
+      matchLabels: {}
+    maxAge: {}
+    preloadPolicy: NoOpinion
+    includeSubDomainsPolicy: RequireNoIncludeSubDomains
+----
+<1> 必需。`requiredHSTSPolicies` 会被按顺序验证，并应用第一个匹配的 `domainPatterns`。
+<2> 必需。您必须至少指定一个 `domainPatterns` 主机名。可以列出任意数量的域。您可以为不同的 `domainPatterns` 包括多个强制选项部分。
+<3> 可选。如果包含 `namespaceSelector`，它必须与路由所在项目的标签匹配，以便在路由上强制执行设定 HSTS 策略。仅与 `namespaceSelector` 而不是 `domainPatterns` 匹配的路由不会被验证。
+<4> 必需。`Max-age` 测量 HSTS 策略生效的时间长度，以秒为单位。此策略设置允许强制实施最小和最大的 `max-age`。
+
+- `largestMaxAge` 值必须在 `0` 到 `2147483647` 之间。它可以不指定，这意味着不强制实施上限。
+- `smallestMaxAge` 值必须在 `0` 到 `2147483647` 之间。输入 `0` 来禁用 HSTS 以进行故障排除，或者如果您不需要禁用 HSTS，输入 1。它可以不知道，这意味着不强制实施较低限制。
+<5> 可选。在 `haproxy.router.openshift.io/hsts_header` 中包含 preload 会使外部服务将此站点包括在 HSTS 预加载列表中。浏览器可以使用这些列表来决定哪些站点可通过 HTTPS 进行通信，然后再与站点交互。如果没有设置 `preload`，浏览器需要至少与站点交互一次，才能获取该标头。可使用以下方法之一设置 `preload` ：
+
+- `RequirePreload`: `RequiredHSTSPolicy` 需要 `preload`。
+- `RequireNoPreload`: `preload` 被 `RequiredHSTSPolicy` 禁止。
+- `NoOpinion`: `preload` 与 `RequiredHSTSPolicy` 没有关系。
+<6> 可选。`includeSubDomainsPolicy` 可使用以下之一设置：
+
+- `RequireIncludeSubDomains`: `includeSubDomains` 需要 `RequiredHSTSPolicy`。
+- `RequireNoIncludeSubDomains`: `includeSubDomains` 被 `RequiredHSTSPolicy` 禁止。
+- `NoOpinion`: `includeSubDomains` 与 `RequiredHSTSPolicy` 没有关系。
++
+. 您可以通过输入 `oc annotate command`，将 HSTS 应用到集群或特定命名空间中的所有路由。
++
+* 要将 HSTS 应用到集群中的所有路由，请输入 `oc annotate command`。例如：
++
+[source,terminal]
+----
+$ oc annotate route --all --all-namespaces --overwrite=true "haproxy.router.openshift.io/hsts_header"="max-age=31536000"
+----
++
+* 要将 HSTS 应用到特定命名空间中的所有路由，请输入 `oc annotate command`。例如：
++
+[source,terminal]
+----
+$ oc annotate route --all -n my-namespace --overwrite=true "haproxy.router.openshift.io/hsts_header"="max-age=31536000"
+----
+
+.验证
+
+您可以查看您配置的 HSTS 策略。例如：
+
+* 要查看所需的 HSTS 策略的 `maxAge` 设置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get clusteroperator/ingress -n openshift-ingress-operator -o jsonpath='{range .spec.requiredHSTSPolicies[*]}{.spec.requiredHSTSPolicies.maxAgePolicy.largestMaxAge}{"\n"}{end}'
+----
++
+* 要查看所有路由上的 HSTS 注解，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get route  --all-namespaces -o go-template='{{range .items}}{{if .metadata.annotations}}{{$a := index .metadata.annotations "haproxy.router.openshift.io/hsts_header"}}{{$n := .metadata.name}}{{with $a}}Name: {{$n}} HSTS: {{$a}}{{"\n"}}{{else}}{{""}}{{end}}{{end}}{{end}}'
+----
++
+.输出示例
+[source,terminal]
+----
+Name: <_routename_> HSTS: max-age=31536000;preload;includeSubDomains
+----

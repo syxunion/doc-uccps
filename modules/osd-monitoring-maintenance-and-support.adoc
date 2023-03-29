@@ -1,0 +1,8 @@
+// Module included in the following assemblies:
+//
+// * monitoring/osd-configuring-the-monitoring-stack.adoc
+
+[id="maintenance-and-support_{context}"]
+= 对监控的维护和支持
+
+若要配置 统信容器云管理平台 Monitoring，支持的方式是使用本文中介绍的选项。*请勿使用其他配置* ，因为不受支持。各个 Prometheus 发行版本的配置范例可能会有所变化，只有掌握了所有可能的配置，才能稳妥应对这样的配置变化。如果使用并非本节所描述的配置，您的更改可能会丢失，因为 cluster-monitoring-operator 会调节差异。根据设计，Operator 默认将一切重置到定义的状态。

@@ -1,0 +1,37 @@
+:_content-type: ASSEMBLY
+[id="advanced-kn-config"]
+= Configuring the Knative CLI
+:context: advanced-kn-config
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+您可以通过创建  `config.yaml` 配置文件来自定义  Knative (`kn`) CLI 设置。您可以使用 `--config` 标志来提供此配置，否则会从默认位置提取配置。默认配置位置符合 XDG Base Directory 规格，对于 UNIX 系统和 Windows 系统有所不同。
+
+对于 UNIX 系统：
+
+* 如果设置了 `XDG_CONFIG_HOME` 环境变量，Knative (kn) CLI 查找的默认配置位置为 `$XDG_CONFIG_HOME/kn`.
+
+* 如果没有设置 `XDG_CONFIG_HOME` 环境变量，Knative (kn) CLI 会在 `$HOME/.config/kn/config.yaml` 的用户主目录中查找配置。
+
+
+.配置文件示例
+[source,yaml]
+----
+plugins:
+  path-lookup: true <1>
+  directory: ~/.config/kn/plugins <2>
+eventing:
+  sink-mappings: <3>
+  - prefix: svc <4>
+    group: core <5>
+    version: v1 <6>
+    resource: services <7>
+----
+<1> 指定 Knative (kn) CLI 是否应该在 PATH 环境变量中查找插件。这是一个布尔值配置选项。默认值为 false。
+<2> 指定 Knative (kn) CLI 查找插件的目录。默认路径取决于操作系统，如前面所述。这可以是用户可见的任何目录。
+<3> `sink-mappings` spec 定义了在 Knative (kn) CLI 命令中使用 --sink 标志时使用的 Kubernetes 可寻址资源。
+<4> 您用来描述接收器（sink）的前缀。svc（用于服务）、channel 和 broker 是 Knative (kn) CLI 中预定义的前缀。
+<5> Kubernetes 资源的 API 组。
+<6> Kubernetes 资源的版本。
+<7> Kubernetes 资源类型的复数名称。例如， `services` 或 `brokers`。

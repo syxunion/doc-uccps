@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/tracking-network-flows.adoc
+
+[id="nw-network-flows-object_{context}"]
+= 用于跟踪网络流的网络对象配置
+
+下表显示了在 Cluster Network Operator（CNO）中配置网络流收集器的字段：
+
+.网络流配置
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|字段|类型|描述
+
+|`metadata.name`
+|`string`
+|CNO 对象的名称。这个名称始终是 `集群`。
+
+|`spec.exportNetworkFlows`
+|`object`
+|一个或多个 `netFlow`、`sFlow` 或 `ipfix`.
+
+|`spec.exportNetworkFlows.netFlow.collectors`
+|`array`
+|最多 10 个收集器的 IP 地址和网络端口对列表。
+
+|`spec.exportNetworkFlows.sFlow.collectors`
+|`array`
+|最多 10 个收集器的 IP 地址和网络端口对列表。
+
+|`spec.exportNetworkFlows.ipfix.collectors`
+|`array`
+|最多 10 个收集器的 IP 地址和网络端口对列表。
+|====
+
+将以下清单应用到 CNO 后，Operator 会在集群中的每个节点上配置 Open vSwitch（OVS），将网络流记录发送到侦听 `192.168.1.99:2056` 的 NetFlow 收集器。
+
+.跟踪网络流的配置示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  exportNetworkFlows:
+    netFlow:
+      collectors:
+        - 192.168.1.99:2056
+----

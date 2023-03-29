@@ -1,0 +1,85 @@
+:_content-type: PROCEDURE
+[id="nw-dual-stack-convert_{context}"]
+= 转换为双栈集群网络
+
+作为集群管理员，您可以将单堆栈集群网络转换为双栈集群网络。
+
+[注意]
+====
+转换为双栈网络后，只有新创建的 pod 会被分配 IPv6 地址。必须重新创建在转换前创建的所有 pod，才能接收 IPv6 地址。
+====
+
+.先决条件
+
+* 已安装 Uccp CLI (`oc`).
+* 使用具有 `cluster-admin` 权限的用户登陆到集群。
+* 集群使用 OVN-Kubernetes 集群网络供应商。
+* 集群节点具有 IPv6 地址。
+
+.流程
+
+. 要为集群和服务网络指定 IPv6 地址块，请创建一个包含以下 YAML 的文件：
++
+--
+[source,yaml]
+----
+- op: add
+  path: /spec/clusterNetwork/-
+  value: <1>
+    cidr: fd01::/48
+    hostPrefix: 64
+- op: add
+  path: /spec/serviceNetwork/-
+  value: fd02::/112 <2>
+----
+<1> 使用 `cidr` 和 `hostPrefix` 字段指定对象。主机前缀必须为 `64` 或更高。IPv6 CIDR 前缀必须足够大，以容纳指定的主机前缀。
+
+<2> 指定一个带有 `112` 前缀的 IPv6 CIDR。Kubernetes 仅使用最低 16 位。对于前缀 `112`，IP 地址从 `112` 分配给 `128` 位。
+--
+
+. 要修补集群网络配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc patch network.config.openshift.io cluster \
+  --type='json' --patch-file <file>.yaml
+----
++
+--
+其中：
+
+`file`:: 指定您在上一步中创建的文件的名称。
+--
++
+.输出示例
+[source,text]
+----
+network.config.openshift.io/cluster patched
+----
+
+.验证
+
+完成以下步骤以验证，集群网络是否可以识别您在上一步中指定的 IPv6 地址块。
+
+. 显示网络配置：
++
+[source,terminal]
+----
+$ oc describe network
+----
++
+.输出示例
+[source,text]
+----
+Status:
+  Cluster Network:
+    Cidr:               10.128.0.0/14
+    Host Prefix:        23
+    Cidr:               fd01::/48
+    Host Prefix:        64
+  Cluster Network MTU:  1400
+  Network Type:         OVNKubernetes
+  Service Network:
+    172.30.0.0/16
+    fd02::/112
+----

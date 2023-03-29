@@ -1,0 +1,26 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-event-sinks.adoc
+// * serverless/develop/serverless-apiserversource.adoc
+// * serverless/develop/serverless-custom-event-sources.adoc
+// * serverless/develop/serverless-kafka-developer.adoc
+// * serverless/reference/kn-flags-reference.adoc
+
+:_content-type: REFERENCE
+[id="specifying-sink-flag-kn_{context}"]
+= Knative CLI sink 标记
+
+当使用 Knative  (`kn`) CLI 创建事件源时，您可以使用 --sink 标志指定事件从该资源发送到的接收器。sink 可以是任何可寻址或可调用的资源，可以从其他资源接收传入的事件。
+
+以下示例创建使用服务 `\http://event-display.svc.cluster.local` 的接收器绑定作为接收器：
+
+.使用 sink 标记的命令示例
+[source,terminal]
+----
+$ kn source binding create bind-heartbeat \
+  --namespace sinkbinding-example \
+  --subject "Job:batch/v1:app=heartbeat-cron" \
+  --sink http://event-display.svc.cluster.local \ <1>
+  --ce-override "sink=bound"
+----
+<1> `\http://event-display.svc.cluster.local` 中的 `svc` 确定接收器是一个 Knative 服务。其他默认的接收器前缀包括  `channel` 和 `broker`。

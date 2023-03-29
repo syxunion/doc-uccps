@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+[id="configuring-oidc-identity-provider"]
+= 配置 OpenID Connect 身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-oidc-identity-provider
+
+toc::[]
+
+配置 `oidc` 身份提供程序，使用授权代码流与 OpenID Connect 身份提供程序集成。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-oidc-supported.adoc[leveloffset=+1]
+
+include::modules/identity-provider-secret.adoc[leveloffset=+1]
+
+include::modules/identity-provider-config-map.adoc[leveloffset=+1]
+
+include::modules/identity-provider-oidc-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]
+
+include::modules/identity-provider-configuring-using-web-console.adoc[leveloffset=+1]

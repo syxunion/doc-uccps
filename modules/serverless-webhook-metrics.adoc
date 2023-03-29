@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-admin-metrics.adoc
+
+:_content-type: REFERENCE
+[id="serverless-webhook-metrics_{context}"]
+= Webhook 指标
+
+Webhook 指标报告有关操作的有用信息。例如，如果大量操作失败，这可能表示用户创建的资源出现问题。
+
+[cols=5*,options="header"]
+|===
+|指标名称
+|描述
+|类型
+|Tags
+|单位
+
+|`request_count`
+|路由到 webhook 的请求数。
+|计数
+|`admission_allowed`, `kind_group`, `kind_kind`, `kind_version`, `request_operation`, `resource_group`, `resource_namespace`, `resource_resource`, `resource_version`
+|整数 (无单位)
+
+|`request_latencies`
+|Webhook 请求的响应时间。
+|Histogram
+|`admission_allowed`, `kind_group`, `kind_kind`, `kind_version`, `request_operation`, `resource_group`, `resource_namespace`, `resource_resource`, `resource_version`
+|Milliseconds
+|===

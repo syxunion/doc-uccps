@@ -1,0 +1,13 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-config.adoc
+
+:_content-type: CONCEPT
+[id="ossm-security-mtls_{context}"]
+= About mutual Transport Layer Security (mTLS)
+
+Mutual Transport Layer Security(mTLS)是一个协议，可让双方相互验证。在一些协议（IKE、SSH）中，它是身份验证的默认模式，在其他协议中（TLS）是可选的。您可以在不更改应用程序或服务代码的情况下使用 mTLS。TLS 完全由服务网格基础架构处理，并在两个 sidecar 代理之间进行处理。
+
+默认情况下，统信容器云管理平台服务网格 中的 mTLS 被启用并设置为 permissive 模式，Service Mesh 中的 sidecar 接受明文流量和使用 mTLS 加密的连接。如果网格中的服务需要与网格外的服务进行通信，则 strict 模式的 mTLS 可能会破坏这些服务之间的通信。在将工作负载迁移到 Service Mesh 时使用 permissive 模式。然后，您可以在网格、命名空间或应用程序间启用严格的 mTLS。
+
+在 Service Mesh control plane 级别启用 mTLS 可保护服务网格中的所有流量，而无需重写应用程序和工作负载。您可以在 `ServiceMeshControlPlane` 源中的 data plane 级别保护网格中的命名空间。要自定义流量加密连接，请使用 `PeerAuthentication` and `DestinationRule` 资源在应用级别上配置命名空间。

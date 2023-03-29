@@ -1,0 +1,38 @@
+////
+This module included in the following assemblies:
+*service_mesh_/v2x/ossm-extensions.adoc
+////
+:_content-type: REFERENCE
+[id="ossm-wasm-ref-smextension_{context}"]
+= ServiceMeshExtension reference
+
+ServiceMeshExtension API 提供了通过 WebAssembly 过滤器扩展 Istio 代理提供的功能的机制。编写 WebAssembly 扩展有两个部分：
+
+. 使用提供 proxy-wasm API 的 SDK 编写扩展，并将其编译到 WebAssembly 模块。
+. 将它打包到容器中。
+
+
+.ServiceMeshExtension 字段参考
+[options="header"]
+[cols="a, a"]
+|===
+| 字段 | 描述
+
+|metadata.namespace
+|ServiceMeshExtension 源的 metadata.namespace 项具有特殊的语义：如果与 Control Plane 命名空间相等，扩展将应用到 Service Mesh 中与 workloadSelector 值匹配的所有工作负载。当部署到任何其他 Mesh 命名空间时，它只适用于同一命名空间中的工作负载。
+
+|spec.workloadSelector
+|spec.workloadSelector 字段的语义与 Istio Gateway 资源 的 spec.selector 字段相同。它将根据其 Pod 标签匹配工作负载。如果没有指定 workloadSelector 值，扩展将应用到命名空间中的所有工作负载。
+
+|spec.config
+|这是一个结构化字段，将被移交给扩展名，其语义取决于您要部署的扩展名。
+
+|spec.image
+|指向包含扩展的镜像的容器镜像 URI。
+
+|spec.phase
+|该阶段根据现有 Istio 功能，如身份验证、授权和指标生成，决定过滤器链中的扩展是否被注入。有效值为： PreAuthN、PostAuthN、PreAuthZ、PostAuthZ、PreStats、PostStats。此字段默认为扩展名的 manifest.yaml 文件中设置的值，但可以被用户覆盖。
+
+|spec.priority
+|如果将具有相同 spec.phase 值的多个扩展应用到同一工作负载实例，则 spec.priority 值会决定执行顺序。优先级更高的扩展将首先执行。这允许相互依赖的扩展。此字段默认为扩展名的 manifest.yaml 文件中设置的值，但可以被用户覆盖。
+|===

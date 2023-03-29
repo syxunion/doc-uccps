@@ -1,0 +1,9 @@
+:_content-type: ASSEMBLY
+[id="configuring-registry-storage-openstack"]
+= 为有栈配置 registry
+include::_attributes/common-attributes.adoc[]
+:context: configuring-registry-storage-openstack
+
+toc::[]
+
+include::modules/installation-registry-osp-creating-custom-pvc.adoc[leveloffset=+1]

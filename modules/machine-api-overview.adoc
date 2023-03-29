@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating_machinesets/creating-machineset-aws.adoc
+// * machine_management/creating_machinesets/creating-machineset-azure.adoc
+// * machine_management/creating_machinesets/creating-machineset-azure-stack-hub.adoc
+// * machine_management/creating_machinesets/creating-machineset-gcp.adoc
+// * machine_management/creating_machinesets/creating-machineset-osp.adoc
+// * machine_management/creating_machinesets/creating-machineset-vsphere.adoc
+// * windows_containers/creating_windows_machinesets/creating-windows-machineset-aws.adoc
+// * windows_containers/creating_windows_machinesets/creating-windows-machineset-azure.adoc
+// * windows_containers/creating_windows_machinesets/creating-windows-machineset-vsphere.adoc
+
+:_content-type: CONCEPT
+[id="machine-api-overview_{context}"]
+= Machine API 概述
+
+Machine API 将基于上游 Cluster API 项目的主要资源与自定义 统信容器云管理平台 资源相结合。
+
+对于 统信容器云管理平台 1.2 集群，Machine API 在集群安装完成后执行所有节点主机置备管理操作。由于此系统的缘故，统信容器云管理平台 1.2 在公有或私有云基础架构之上提供了一种弹性动态置备方法。
+
+两种主要资源分别是：
+
+Machines:: 描述节点主机的基本单元。机器具有 `providerSpec` 规格，用于描述为不同云平台提供的计算节点的类型。例如，Amazon Web Services (AWS) 上的 worker 节点的机器类型可能会定义特定的机器类型和所需的元数据。
+
+机器集:: `MachineSet` 资源是机器组。机器集适用于机器，复制集则适用于 pod。如果需要更多机器或必须缩减规模，则可以更改机器集的 *replicas* 字段来满足您的计算需求。
++
+[警告]
+====
+control plane 机器不能由机器集管理。
+====
+
+以下自定义资源可为集群添加更多功能：
+
+机器自动扩展:: `MachineAutoscaler` 资源自动扩展云中的机器。您可以为指定机器集中的节点设置最小和最大扩展界限，机器自动扩展就会维护此范围内的节点。`ClusterAutoscaler` 对象存在后，`MachineAutoscaler` 对象生效。`ClusterAutoscaler` 和 `MachineAutoscaler` 资源都由 `ClusterAutoscalerOperator` 对象提供。
+
+集群自动扩展:: 此资源基于上游集群自动扩展项目。在 统信容器云管理平台 实现中，它通过扩展机器集 API 来与 Machine API 集成。您可以为核心、节点、内存和 GPU 等资源设置集群范围的扩展限制。您可以设置优先级，使集群对 Pod 进行优先级排序，以便不针对不太重要的 Pod 使新节点上线。您还可以设置扩展策略，以便可以扩展节点，但不会缩减节点。
+
+机器健康检查:: `MachineHealthCheck` 资源可检测机器何时处于不健康状态并将其删除，然后在支持的平台上生成新的机器。
+
+在 统信容器云管理平台 版本 3.11 中，您无法轻松地推出多区架构，因为集群不负责管理机器置备。自 统信容器云管理平台 版本 4.1 起，此过程变得更加容易。每个机器集限定在一个区域，因此安装程序可以代表您将机器集分发到多个可用区。然后，由于您的计算是动态的，因此在面对区域故障时，您始终都有一个区域来应对必须重新平衡机器的情况。在没有多个可用区的全局 Azure 区域，您可以使用可用性集来确保高可用性。自动扩展器在集群生命周期内尽可能提供平衡。

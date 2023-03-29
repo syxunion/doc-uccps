@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="cli-extend-plugins"]
+= 使用插件扩展 Uccps CLI
+include::_attributes/common-attributes.adoc[]
+:context: cli-extend-plugins
+
+toc::[]
+
+您可以针对默认的oc命令编写并安装插件，从而可以使用统信容器云管理平台 CLI执行新的及更复杂的任务。
+
+// Writing CLI plugins
+include::modules/cli-extending-plugins-writing.adoc[leveloffset=+1]
+
+// Installing and using CLI plugins
+include::modules/cli-extending-plugins-installing.adoc[leveloffset=+1]

@@ -1,0 +1,47 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple_networks/remove-additional-network.adoc
+
+:_content-type: PROCEDURE
+[id="nw-multus-delete-network_{context}"]
+= 删除额外网络附加定义
+
+作为集群管理员，您可以从 统信容器云管理平台 集群中删除额外网络。额外网络不会从它所附加的任何 pod 中删除。
+
+.先决条件
+
+* 安装 Uccp CLI (`oc`).
+* 以具有 `cluster-admin` 特权的用户身份登录。
+
+.流程
+
+要从集群中删除额外网络，请完成以下步骤：
+
+. 要从集群中删除额外网络，请完成以下步骤：
++
+[source,terminal]
+----
+$ oc edit networks.operator.openshift.io cluster
+----
+
+. 从您要删除的网络附加定义的 `additionalNetworks` 集合中删除配置，以此修改 CR。
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  additionalNetworks: [] <1>
+----
+<1>  如果要删除 `additionalNetworks` 集合中唯一额外网络附加定义的配置映射，您必须指定一个空集合。
+
+. 保存您的更改，再退出文本编辑器以提交更改。
+
+. 可选：通过运行以下命令确认删除了额外网络 CR：
++
+[source,terminal]
+----
+$ oc get network-attachment-definition --all-namespaces
+----

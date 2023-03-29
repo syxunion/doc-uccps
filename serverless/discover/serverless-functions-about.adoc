@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="serverless-functions-about"]
+= 关于 {FunctionsProductName}
+:context: serverless-functions-about
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+{FunctionsProductName} 帮助开发人员在 {product-title} 上创建和部署无状态、事件驱动的函数，作为 Knative 服务。 `kn func` CLI 作为 Knative `kn`  CLI 的插件提供。您可以使用 `kn func` CLI t在集群中创建、构建和部署容器镜像作为 Knative 服务。
+
+[id="serverless-functions-about-runtimes"]
+== 包括的运行时
+
+{FunctionsProductName} 提供了一组模板，可用于为以下运行时创建基本函数：
+
+// add xref links to docs once added
+* xref:../../serverless/functions/serverless-developing-nodejs-functions.adoc#serverless-developing-nodejs-functions[Node.js]
+* xref:../../serverless/functions/serverless-developing-quarkus-functions.adoc#serverless-developing-quarkus-functions[Quarkus]
+* xref:../../serverless/functions/serverless-developing-typescript-functions.adoc#serverless-developing-typescript-functions[TypeScript]

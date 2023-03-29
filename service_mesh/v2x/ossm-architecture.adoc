@@ -1,0 +1,42 @@
+:_content-type: ASSEMBLY
+[id="ossm-architecture"]
+= Understanding Service Mesh
+include::_attributes/common-attributes.adoc[]
+:context: ossm-architecture
+
+toc::[]
+
+{SMProductName} 提供了一个平台，用于对服务网格（service mesh）中联网的微服务进行行为了解和操作控制。通过使用 {SMProductName}，可以连接、控制并监控 {product-title}
+
+include::modules/ossm-understanding-service-mesh.adoc[leveloffset=+1]
+
+include::modules/ossm-architecture.adoc[leveloffset=+1]
+
+有关如何安装 3scale 适配器的详情，请参考 xref:../../service_mesh/v2x/threescale-adapter.adoc#threescale-adapter[3scale Istio 适配器文档]
+
+== Understanding Kiali
+
+Kiali 通过显示服务网格中的微服务服务以及连接方式，为您提供了一个可视性的服务网格概述。
+
+include::modules/ossm-kiali-overview.adoc[leveloffset=+2]
+
+include::modules/ossm-kiali-architecture.adoc[leveloffset=+2]
+
+include::modules/ossm-kiali-features.adoc[leveloffset=+2]
+
+== Understanding distributed tracing
+
+每次用户在某个应用程序中执行一项操作时，一个请求都会在所在的系统上执行，而这个系统可能需要几十个不同服务的共同参与才可以做出相应的响应。这个请求的路径是一个分布式的事务。 {JaegerShortName} 可让您执行分布式追踪，在组成一个应用的多个微服务间追踪请求的路径。
+
+*Distributed tracing* 是用来将不同工作单元的信息关联起来的技术，通常是在不同进程或主机中执行的，以便理解分布式事务中的整个事件链。分布式追踪可让开发人员在大型服务架构中视觉化调用流程。它对理解序列化、平行和延迟来源会很有价值。
+
+{JaegerShortName} 记录了在微服务的整个堆栈间执行单个请求，并将其显示为 trace。 *trace* 是系统的数据/执行路径。端到端追踪包含一个或多个范围。
+
+*span* 代表具有操作名称、操作的开始时间和持续时间的逻辑工作单元。span 可能会被嵌套并排序以模拟因果关系。
+
+include::modules/distr-tracing-product-overview.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-architecture.adoc[leveloffset=+2]
+
+include::modules/distr-tracing-features.adoc[leveloffset=+2]
+

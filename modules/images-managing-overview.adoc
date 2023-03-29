@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * openshift-images/managing-images.adoc
+
+:_content-type: CONCEPT
+[id="images-managing-overview_{context}"]
+= 镜像概述
+
+镜像流包含由标签识别的任意数量的容器镜像。提供相关镜像的单一虚拟视图，类似于容器镜存储库。
+
+通过监控镜像流，构建和部署可在添加或修改新镜像时收到通知，并通过分别执行构建或部署来作出反应。

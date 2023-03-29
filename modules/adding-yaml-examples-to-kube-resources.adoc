@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * web_console/customizing-the-web-console.adoc
+
+:_content-type: PROCEDURE
+[id="adding-yaml-examples-to-kube-resources_{context}"]
+= 在 Kubernetes 资源中添加 YAML 示例
+
+您可以随时动态地将 YAML 示例添加到任何 Kubernetes 资源中。
+
+.先决条件
+
+* 您必须具有集群管理员特权。
+
+.流程
+
+. 在 *Administration* -> *Custom Resource Definitions* 中点 *ConsoleYAMLSample*.
+
+. 点 *YAML* 并编辑该文件：
++
+[source,yaml]
+----
+apiVersion: console.openshift.io/v1
+kind: ConsoleYAMLSample
+metadata:
+  name: example
+spec:
+  targetResource:
+    apiVersion: batch/v1
+    kind: Job
+  title: Example Job
+  description: An example Job YAML sample
+  yaml: |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: countdown
+    spec:
+      template:
+        metadata:
+          name: countdown
+        spec:
+          containers:
+          - name: counter
+            image: centos:7
+            command:
+            - "bin/bash"
+            - "-c"
+            - "for i in 9 8 7 6 5 4 3 2 1 ; do echo $i ; done"
+          restartPolicy: Never
+----
+使用 `spec.snippet` 表示 YAML 样本不是完整的 YAML 资源定义，而是可在用户光标处的现有 YAML 文档中插入的片段。
+
+. 点击 *Save*。

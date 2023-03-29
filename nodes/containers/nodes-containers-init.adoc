@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+:context: nodes-containers-init
+[id="nodes-containers-init"]
+= 在部署 pod 前使用初始容器来执行任务
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+统信容器云管理平台 提供了一组初始容器（Init Containers），它们是在应用程序容器之前运行的专用容器，可以包含不出现在应用程序镜像中的实用程序或设置脚本。
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-containers-init-about.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-init-creating.adoc[leveloffset=+1]
+
+

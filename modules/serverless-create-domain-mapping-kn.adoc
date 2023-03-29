@@ -1,0 +1,67 @@
+// Module included in the following assemblies:
+//
+// * serverless/security/serverless-custom-domains.adoc
+// * serverless/reference/kn-serving-ref.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-domain-mapping-kn_{context}"]
+= 使用 Knative CLI 创建自定义域映射
+
+您可以通过将您自己的自定义域名映射到 Knative 服务来自定义 Knative 服务域。您可以使用 Knative (kn) CLI 创建映射到可寻址目标 CR 的 `DomainMapping` 自定义资源 (CR) ，如 Knative 服务或 Knative 路由。
+
+.先决条件
+
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 您已创建了 Knative 服务或路由，并控制要映射到该 CR 的自定义域。
++
+[注意]
+====
+您的自定义域必须指向 {product-title} 集群的 DNS。
+====
+* 已安装 Knative (kn) CLI。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+* 将域映射到当前命名空间中的 CR：
++
+[source,terminal]
+----
+$ kn domain create <domain_mapping_name> --ref <target_name>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn domain create example-domain-map --ref example-service
+----
++
+`--ref`  标志为域映射指定一个可寻址的目标 CR。
++
+如果使用 `--ref` 标志时没有提供前缀，则会假定目标为当前命名空间中的 Knative 服务。
+
+* 将域映射到指定命名空间中的 Knative 服务：
++
+[source,terminal]
+----
+$ kn domain create <domain_mapping_name> --ref <ksvc:service_name:service_namespace>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn domain create example-domain-map --ref ksvc:example-service:example-namespace
+----
+
+* 将域映射到 Knative 路由：
++
+[source,terminal]
+----
+$ kn domain create <domain_mapping_name> --ref <kroute:route_name>
+----
++
+.示例命令
+[source,terminal]
+----
+$ kn domain create example-domain-map --ref kroute:example-route
+----

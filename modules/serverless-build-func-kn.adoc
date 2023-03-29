@@ -1,0 +1,77 @@
+// Module included in the following assemblies:
+//
+// * serverless/functions/serverless-functions-getting-started.adoc
+
+:_content-type: REFERENCE
+[id="serverless-build-func-kn_{context}"]
+= 构建函数
+
+在运行功能前，您必须构建 function 项目。如果使用 `kn func run` 命令，则该函数会自动构建。但是，您可以使用 `kn func build` 命令在不运行的情况下构建函数，这对于高级用户或调试场景非常有用。
+
+`kn func build` 命令创建可在您的计算机或 {product-title} 集群中运行的 OCI 容器镜像。此命令使用功能项目名称和镜像 registry 名称为您的功能构建完全限定镜像名称。
+
+[id="serverless-build-func-kn-image-containers_{context}"]
+== 镜像容器类型
+
+默认情况下， `kn func build` 使用 Source-to-Image(S2I)技术创建一个容器镜像。
+
+.使用 Source-to-Image(S2I)的 build 命令示例.
+[source,terminal]
+----
+$ kn func build
+----
+
+[id="serverless-build-func-kn-image-registries_{context}"]
+== 镜像 registry 类型
+
+Uccps Container Registry 默认用作存储功能镜像的镜像 registry。
+
+.使用 Uccps Container Registry 的 build 命令示例
+[source,terminal]
+----
+$ kn func build
+----
+
+.输出示例
+[source,terminal]
+----
+Building function image
+Function image has been built, image: registry.redhat.io/example/example-function:latest
+----
+
+您可以使用 `--registry` 标志覆盖使用 Uccps Container Registry 作为默认镜像 registry：
+
+.build 命令覆盖 OpenShift Container Registry 以使用 quay.io
+[source,terminal]
+----
+$ kn func build --registry quay.io/username
+----
+
+.输出示例
+[source,terminal]
+----
+Building function image
+Function image has been built, image: quay.io/username/example-function:latest
+----
+
+[id="serverless-build-func-kn-push_{context}"]
+== push 标记
+
+您可以将 `--push` 标志添加到 `kn func build` 命令中，以便在成功构建后自动推送功能镜像：
+
+.使用 OpenShift Container Registry 的 build 命令示例
+[source,terminal]
+----
+$ kn func build --push
+----
+
+[id="serverless-build-func-kn-help_{context}"]
+== help 命令
+
+您可以使用 help 命令了解更多有关 `kn func build` 命令选项的信息：
+
+.构建 help 命令
+[source,terminal]
+----
+$ kn func help build
+----

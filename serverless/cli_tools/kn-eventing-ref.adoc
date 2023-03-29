@@ -1,0 +1,21 @@
+:_content-type: ASSEMBLY
+[id="kn-eventing-ref"]
+= Knative Eventing CLI 命令
+include::_attributes/common-attributes.adoc[]
+:context: kn-eventing-ref
+
+toc::[]
+
+您可以使用以下 Knative (`kn`) CLI 命令在集群中完成 Knative Eventing 任务。
+
+[id="kn-eventing-ref-kn-sources"]
+== kn source 命令
+
+您可以使用以下命令列出、创建和管理 Knative 事件源。
+
+include::modules/serverless-list-source-types-kn.adoc[leveloffset=+2]
+include::modules/specifying-sink-flag-kn.adoc[leveloffset=+2]
+include::modules/serverless-kn-containersource.adoc[leveloffset=+2]
+include::modules/apiserversource-kn.adoc[leveloffset=+2]
+include::modules/serverless-pingsource-kn.adoc[leveloffset=+2]
+include::modules/serverless-kafka-source-kn.adoc[leveloffset=+2]

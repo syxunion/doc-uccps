@@ -1,0 +1,46 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: CONCEPT
+[id="ossm-routing-destination-rules_{context}"]
+= Understanding destination rules
+
+目的地规则在评估虚拟服务路由规则后应用，它们应用到流量的真实目的地。虚拟服务将流量路由到目的地。目的地规则配置该目的地的网络流量。
+
+默认情况下， {SMProductName} 使用 round-robin 负载均衡策略，其中实例池中的每个服务实例依次获得请求。 {SMProductName} 还支持以下模型，您可以在目的地规则中指定对特定服务或服务子集的请求。
+
+* Random: 请求会随机转发到池里的实例。
+* Weighted: 根据特定百分比将请求转发到池中的实例。
+* Least requests: 将请求转发到请求数量最少的实例。
+
+.目的地规则示例
+
+以下目的地规则示例为 `my-svc` 目的地服务配置三个不同的子集，具有不同的负载均衡策略：
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: my-destination-rule
+spec:
+  host: my-svc
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: v3
+    labels:
+      version: v3
+----

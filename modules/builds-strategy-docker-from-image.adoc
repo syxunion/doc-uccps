@@ -1,0 +1,21 @@
+// Module included in the following assemblies:
+// * builds/build-strategies.adoc
+
+:_content-type: PROCEDURE
+[id="builds-strategy-docker-from-image_{context}"]
+= 替换 Dockerfile FROM 镜像
+
+您可以将 Dockerfile 中的 `FROM` 指令替换为 `BuildConfig` 对象的 `from`。如果 Dockerfile 使用多阶段构建，最后一个 FROM 指令中的镜像将被替换。
+
+.流程
+
+将 Dockerfile 中的 `FROM` 指令替换为 `BuildConfig` 中的 `from`。
+
+[source,yaml]
+----
+strategy:
+  dockerStrategy:
+    from:
+      kind: "ImageStreamTag"
+      name: "debian:latest"
+----

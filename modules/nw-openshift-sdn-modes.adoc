@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * networking/openshift_sdn/about-openshift-sdn.adoc
+
+[id="nw-openshift-sdn-modes_{context}"]
+= OpenShift SDN网络隔离模式
+
+OpenShift SDN 提供三种 SDN 模式来配置 pod 网络：
+
+* _网络策略模式_ 允许项目管理员使用 `NetworkPolicy` 对象配置自己的隔离策略。Network policy 是 统信容器云管理平台 4.10 的默认模式。
+
+* _多租户_ 模式为 Pod 和服务提供项目级别的隔离。来自不同项目的 Pod 不能与不同项目的 Pod 和服务互相发送或接收数据包。您可以针对项目禁用隔离，允许它将网络流量发送到整个集群中的所有 pod 和服务，并从那些 pod 和服务接收网络流量。
+
+* _子网_ 模式提供一个扁平 pod 网络，每个 pod 都可以与所有其他 pod 和服务通信。网络策略模式提供与子网模式相同的功能。

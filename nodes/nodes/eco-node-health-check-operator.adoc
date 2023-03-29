@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="node-health-check-operator"]
+= 使用 Node Health Check Operator 部署节点健康检查
+include::_attributes/common-attributes.adoc[]
+:context: node-health-check-operator
+
+toc::[]
+
+使用 Node Health Check Operator 来部署 NodeHealthCheck 控制器。控制器识别不健康的节点，并使用 Poison Pill Operator 来修复不健康的节点。
+
+[role="_additional-resources"]
+.其他资源
+
+* xref:../../nodes/nodes/eco-poison-pill-operator.adoc#poison-pill-operator-remediate-nodes[使用 Poison Pill Operator 修复节点]
+
+:FeatureName: Node Health Check Operator
+
+include::snippets/technology-preview.adoc[leveloffset=+1]
+
+include::modules/eco-node-health-check-operator-about.adoc[leveloffset=+1]
+
+include::modules/eco-node-health-check-operator-installation-web-console.adoc[leveloffset=+1]
+
+include::modules/eco-node-health-check-operator-installation-cli.adoc[leveloffset=+1]
+
+
+[id="additional-resources-nhc-operator-installation"]
+== Additional resources
+* xref:../../operators/admin/olm-upgrading-operators.adoc#olm-changing-update-channel_olm-upgrading-operators[更改 Operator 的更新频道]。
+* 受限网络环境中支持 Node Health Check Operator。如需更多信息，请参阅 xref:../../operators/admin/olm-restricted-networks.adoc#olm-restricted-networks[在受限网络中使用 Operator Lifecycle Manager]。

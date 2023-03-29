@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//* builds/creating-build-inputs.adoc
+
+[id="builds-source-code_{context}"]
+= Git 源
+
+指定之后，从提供的位置获取源代码。
+
+如果您提供内联 Dockerfile，它将覆盖 Git 存储库的 contextDir 中的 Dockerfile。
+
+源定义是 `BuildConfig` 的 `spec` 部分的一部分：
+
+[source,yaml]
+----
+source:
+  git: <1>
+    uri: "https://github.com/openshift/ruby-hello-world"
+    ref: "master"
+  contextDir: "app/dir" <2>
+ifndef::openshift-online[]
+  dockerfile: "FROM openshift/ruby-22-centos7\nUSER example" <3>
+endif::[]
+----
+<1> `git` 字段包含源代码的远程 Git 存储库的 URI。此外，也可通过 `ref` 字段来指定要使用的特定代码。有效的 `ref` 可以是 SHA1 标签或分支名称。
+<2> `contextDir` 字段允许您覆盖源代码存储库中构建查找应用程序源代码的默认位置。如果应用程序位于子目录中，您可以使用此字段覆盖默认位置（根文件夹）。
+<3> 如果提供可选的 `dockerfile` 字段，它应该是包含 Dockerfile 的字符串，此文件将覆盖源存储库中可能存在的任何 Dockerfile。
+
+如果 `ref` 字段注明拉取请求，则系统将使用 `git fetch` 操作，然后 checkout `FETCH_HEAD`。
+
+如果未提供 `ref` 值，统信容器云管理平台 将执行浅克隆 (`--depth=1`)。这时，仅下载与默认分支（通常为 `master`）上最近提交相关联的文件。这将使存储库下载速度加快，但不会有完整的提交历史记录。要对指定存储库的默认分支执行完整 git clone，请将 ref 设为默认分支（如 `master`）的名称。
+
+
+[警告]
+====
+如果 Git 克隆操作要经过执行中间人 (MITM) TLS 劫持或重新加密被代理连接的代理，该操作不起作用。
+====

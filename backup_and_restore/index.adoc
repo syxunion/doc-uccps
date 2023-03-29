@@ -1,0 +1,73 @@
+:_content-type: ASSEMBLY
+[id="backup-restore-overview"]
+= 备份和存储
+include::_attributes/common-attributes.adoc[]
+:context: backup-restore-overview
+:backup-restore-overview:
+:velero-domain: velero.io
+
+toc::[]
+
+[id="control-plane-backup-restore-operations-overview"]
+== Control plane 备份和恢复操作
+
+作为集群管理员，您可能需要在一段时间内停止统信容器云管理平台集群，并在以后重启集群。重启集群的一些原因是您需要对集群执行维护或希望降低资源成本。在统信容器云管理平台中，您可以对 xref:../backup_and_restore/graceful-cluster-shutdown.adoc#graceful-shutdown-cluster[集群执行安全关闭] ，以便在以后轻松重启集群。
+
+您必须在关闭集群前  xref:../backup_and_restore/control_plane_backup_and_restore/backing-up-etcd.adoc#backup-etcd[备份 etcd 数据] ；etcd 是统信容器云管理平台的键值存储，它会保留所有资源对象的状态。etcd 备份在灾难恢复中扮演着关键角色。在统信容器云管理平台中，您还可以 xref:../backup_and_restore/control_plane_backup_and_restore/replacing-unhealthy-etcd-member.adoc#replacing-unhealthy-etcd-member[替换不健康的 etcd 成员]。
+
+当您希望集群再次运行时，请 xref:../backup_and_restore/graceful-cluster-restart.adoc#graceful-restart-cluster[安全地重启集群]。
+
+[注意]
+====
+集群的证书在安装日期后一年后过期。您可以关闭集群，并在证书仍有效时安全地重启集群。虽然集群自动检索过期的控制平面证书，但您仍 xref:../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-3-expired-certs.adoc#dr-recovering-expired-certs[批准证书签名请求(CSR)]。
+====
+
+您可能会遇到统信容器云管理平台无法按预期工作的一些情况，例如：
+
+* 您有一个在重启后无法正常工作的集群，因为意外状况（如节点故障或网络连接问题）无法正常工作。
+* 您已错误地删除了集群中的某些关键内容。
+* 您丢失了大多数控制平面主机，从而导致 etcd 仲裁丢失。
+
+通过使用保存的 etcd 快照，始终可以通过将 xref:../backup_and_restore/control_plane_backup_and_restore/disaster_recovery/scenario-2-restoring-cluster-state.adoc#dr-restoring-cluster-state[集群恢复到之前的状态] 从灾难中恢复。
+
+[id="application-backup-restore-operations-overview"]
+== 应用程序备份和恢复操作
+
+作为集群管理员，您可以使用 Uccp API 进行数据保护(OADP)来备份和恢复在统信容器云管理平台上运行的应用程序。
+
+// Velero 1.7 is no longer latest version. However, it is the officially supported version, so do not change the version number without confirmation from PM.
+使用 Velero 1.7，按照命名空间的粒度备份并恢复 Kubernetes 资源和内部镜像。OADP 使用快照或 Restic 来备份和恢复持久性卷(PV)。详情请查看 OADP 功能。
+
+[id="oadp-requirements"]
+=== OADP 要求
+
+OADP 有以下要求：
+
+* 您必须以具有 `cluster-admin` 角色的用户身份登录。
+* 您必须具有用于存储备份的对象存储，比如以下存储类型之一：
+
+** 多云对象网关
+** S3 兼容对象存储，如 Noobaa 或 Minio
+
+
+* 要使用快照备份 PV，您必须有具有原生快照 API 的云存储，或者支持 Container Storage Interface(CSI)快照，如以下供应商：
+
+** 支持 CSI 快照的云存储，如 Ceph RBD 或 Ceph FS
+
+[注意]
+====
+如果您不想使用快照备份 PV，可以使用 Restic，这由 OADP Operator 安装。
+====
+
+[id="backing-up-and-restoring-applications"]
+=== 备份和恢复应用程序
+
+您可以通过创建 Backup 自定义资源(CR) 来备份应用程序。您可以配置以下备份选项：
+
+* xref:../backup_and_restore/application_backup_and_restore/backing_up_and_restoring/backing-up-applications.adoc#oadp-creating-backup-hooks_backing-up-applications[Backup hooks]， 在备份操作之前或之后运行命令
+* xref:../backup_and_restore/application_backup_and_restore/backing_up_and_restoring/backing-up-applications.adoc#oadp-scheduling-backups_backing-up-applications[Scheduled backups]
+* xref:../backup_and_restore/application_backup_and_restore/backing_up_and_restoring/backing-up-applications.adoc#oadp-backing-up-applications-restic_backing-up-applications[Restic backups]
+
+您可以通过创建一个 xref:../backup_and_restore/application_backup_and_restore/backing_up_and_restoring/restoring-applications.adoc#oadp-creating-restore-cr_restoring-applications[`Restore`] CR 。您可以配置 xref:../backup_and_restore/application_backup_and_restore/backing_up_and_restoring/restoring-applications.adoc#oadp-creating-restore-hooks_restoring-applications[restore hooks] ，以便在 init 容器或应用程序容器中运行命令。
+
+:backup-restore-overview!:

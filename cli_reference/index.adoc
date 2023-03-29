@@ -1,0 +1,32 @@
+:_content-type: ASSEMBLY
+[id="cli-tools-overview"]
+= 统信容器云管理平台 CLI 工具概述
+include::_attributes/common-attributes.adoc[]
+:context: cli-tools-overview
+
+toc::[]
+
+用户在操作 统信容器云管理平台 时执行一系列操作，例如：
+
+* 管理集群
+* 构建，部署和管理应用程序
+* 管理部署过程
+* 开发 Operators
+* 创建和维护 Operator 目录
+
+统信容器云管理平台 提供了一组命令行界面 (CLI) 工具，通过允许用户从终端执行各种管理和开发操作来简化这些任务。这些工具提供简单的命令来管理应用，并与系统的每个组件交互。
+
+[id="cli-tools-list"]
+== CLI 工具列表
+
+统信容器云管理平台 中提供了以下一组 CLI 工具：
+
+* Uccps CLI (oc)：这是 统信容器云管理平台 用户最常用的 CLI 工具。它帮助集群管理员和开发人员使用终端在 统信容器云管理平台 间执行端到端操作。与 Web 控制台不同，它允许用户使用命令脚本直接处理项目源代码。
+
+* Knative CLI(kn) ：kn CLI 工具提供简单直观的终端命令，可用于与 Uccps Serverless 组件（如 Knative Serving 和 Eventing）交互。
+
+* Pipelines CLI(tkn) ：Uccps Pipelines 是 统信容器云管理平台 中的持续集成和持续交付 (CI/CD) 解决方案，内部使用 Tekton。tkn CLI 工具提供简单直观的命令，以便使用终端与 Uccps Pipelines 进行交互。
+
+* opm CLI ： opm CLI 工具可帮助 Operator 开发人员和集群管理员从终端创建和维护 Operator 目录。
+
+* Operator SDK ：Operator SDK 是 Operator Framework 的一个组件，它提供了一个 CLI 工具，可供 Operator 开发人员用于从终端构建、测试和部署 Operator。它简化了 Kubernetes 原生应用程序的构建流程，这些应用程序需要深入掌握特定于应用程序的操作知识。

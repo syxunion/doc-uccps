@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="understanding-ephemeral-storage"]
+= 了解临时存储
+include::_attributes/common-attributes.adoc[]
+:context: understanding-ephemeral-storage
+
+toc::[]
+
+include::modules/storage-ephemeral-storage-overview.adoc[leveloffset=+1]
+
+include::modules/storage-ephemeral-storage-types.adoc[leveloffset=+1]
+
+include::modules/storage-ephemeral-storage-manage.adoc[leveloffset=+1]
+
+include::modules/storage-ephemeral-storage-monitoring.adoc[leveloffset=+1]

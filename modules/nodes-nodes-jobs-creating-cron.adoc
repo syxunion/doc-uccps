@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-nodes-jobs.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-nodes-jobs-creating-cron_{context}"]
+= 创建 cron job
+
+您可以通过创建作业对象在 统信容器云管理平台 中创建 Cron Job。
+
+.流程
+
+创建 Cron Job：
+
+. 创建一个类似以下示例的 YAML 文件：
++
+[source,yaml]
+----
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pi
+spec:
+  schedule: "*/1 * * * *"  <1>
+  concurrencyPolicy: "Replace" <2>
+  startingDeadlineSeconds: 200 <3>
+  suspend: true            <4>
+  successfulJobsHistoryLimit: 3 <5>
+  failedJobsHistoryLimit: 1     <6>
+  jobTemplate:             <7>
+    spec:
+      template:
+        metadata:
+          labels:          <8>
+            parent: "cronjobpi"
+        spec:
+          containers:
+          - name: pi
+            image: perl
+            command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+          restartPolicy: OnFailure <9>
+----
++
+<1> 以 cron 格式指定的作业调度计划。在本例中，作业将每分钟运行一次。
+<2> 可选的并发策略，指定如何对待 Cron Job 中的并发作业。只能指定以下并发策略之一。若未指定，默认为允许并发执行。
+* `Allow` 允许 Cron Job 并发运行。
+* `Forbid` 禁止并发运行。如果上一运行尚未结束，则跳过下一运行。
+* `Replace` 取消当前运行的作业并替换为新作业。
+<3> 可选期限（秒为单位），如果作业因任何原因而错过预定时间，则在此期限内启动作业。错过的作业执行计为失败的作业。若不指定，则没有期限。
+<4> 可选标志，允许挂起 Cron Job。若设为 true，则会挂起所有后续执行。
+<5> 要保留的成功完成作业数（默认为 3）。
+<6> 要保留的失败完成作业数（默认为 1）。
+<7> 作业模板。类似于作业示例。
+<8> 为此 Cron Job 生成的作业设置一个标签。
+<9> pod 的重启策略。这不适用于作业控制器。
++
+[注意]
+====
+`.spec.successfulJobsHistoryLimit` 和 `.spec.failedJobsHistoryLimit` 字段是可选的，用于指定应保留的已完成作业和已失败作业的数量。默认情况下，分别设置为 3 和 1。如果将限制设定为 0，则对应种类的作业完成后不予保留。
+====
+
+. 创建 cron job：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+[注意]
+====
+您还可以使用 oc create cronjob，在一个命令中创建并启动 Cron Job。以下命令会创建并启动与上一示例中指定的相似的 Cron Job：
+
+[source,terminal]
+----
+$ oc create cronjob pi --image=perl --schedule='*/1 * * * *' -- perl -Mbignum=bpi -wle 'print bpi(2000)'
+----
+
+使用 oc create cronjob 时，--schedule 选项接受采用 cron 格式的调度计划。
+====

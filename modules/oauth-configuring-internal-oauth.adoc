@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * authentication/configuring-internal-oauth.adoc
+
+:_content-type: PROCEDURE
+[id="oauth-configuring-internal-oauth_{context}"]
+= 配置内部 OAuth 服务器的令牌期间
+
+您可以配置内部 OAuth 服务器令牌期间的默认选项。
+
+[重要]
+====
+默认情况下，令牌仅在 24 小时内有效。现有会话会在此时间过后到期。
+====
+
+如果默认时间不足，可以使用以下步骤进行修改。
+
+.流程
+
+. 创建一个包含令牌期间选项的配置文件。以下文件将此周期设为 48 小时，两倍于默认值。
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  tokenConfig:
+    accessTokenMaxAgeSeconds: 172800 <1>
+----
+<1> `accessTokenMaxAgeSeconds：`设置 `accessTokenMaxAgeSeconds`以控制访问令牌的生命周期。默认生命周期为 24 小时或 86400 秒。此属性不可为负数。如果设置为零，则使用默认的生命周期。
+
+. 应用新配置文件：
++
+[注意]
+====
+由于您更新现有的 OAuth 服务器，因此必须使用 oc apply 命令来应用更改。
+====
++
+[source,terminal]
+----
+$ oc apply -f </path/to/file.yaml>
+----
+
+. 确认更改已生效：
++
+[source,terminal]
+----
+$ oc describe oauth.config.openshift.io/cluster
+----
++
+.输出示例
+[source,terminal]
+----
+...
+Spec:
+  Token Config:
+    Access Token Max Age Seconds:  172800
+...
+----

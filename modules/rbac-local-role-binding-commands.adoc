@@ -1,0 +1,40 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+[id="local-role-binding-commands_{context}"]
+= 本地角色绑定命令
+
+在使用以下操作为本地角色绑定管理用户或组的关联角色时，可以使用 -n 标志来指定项目。如果未指定，则使用当前项目。
+
+您可以使用以下命令进行本地 RBAC 管理。
+
+.本地角色绑定操作
+[options="header"]
+|===
+
+|命令 |描述
+
+|`$ oc adm policy who-can _<verb>_ _<resource>_`
+|指出哪些用户可以对某一资源执行某种操作。
+
+|`$ oc adm policy add-role-to-user _<role>_ _<username>_`
+|将指定角色绑定到当前项目中的指定用户。
+
+|`$ oc adm policy remove-role-from-user _<role>_ _<username>_`
+|从当前项目中的指定用户移除指定角色。
+
+|`$ oc adm policy remove-user _<username>_`
+|移除当前项目中的指定用户及其所有角色。
+
+|`$ oc adm policy add-role-to-group _<role>_ _<groupname>_`
+|将给定角色绑定到当前项目中的指定组。
+
+|`$ oc adm policy remove-role-from-group _<role>_ _<groupname>_`
+|从当前项目中的指定组移除给定角色。
+
+|`$ oc adm policy remove-group _<groupname>_`
+|移除当前项目中的指定组及其所有角色。
+
+|===

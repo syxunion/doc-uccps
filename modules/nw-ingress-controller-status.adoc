@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * ingress/configure-ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-controller-status_{context}"]
+= 查看 Ingress Controller 状态
+
+您可以查看特定 Ingress Controller 的状态。
+
+.流程
+
+* 查看 Ingress Controller 的状态：
++
+[source,terminal]
+----
+$ oc describe --namespace=openshift-ingress-operator ingresscontroller/<name>
+----

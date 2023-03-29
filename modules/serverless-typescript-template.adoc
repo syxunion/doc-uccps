@@ -1,0 +1,39 @@
+// Module included in the following assemblies
+//
+// * serverless/functions/serverless-developing-typescript-functions.adoc
+
+:_content-type: REFERENCE
+[id="serverless-typescript-template_{context}"]
+= TypeScript 功能模板结构
+
+使用 Knative (`kn`) CLI 创建 TypeScript 功能时，项目目录类似于典型的 TypeScript 项目。唯一的例外是额外的 `func.yaml`  文件，用于配置函数。
+
+`http` 和 `event` 触发器功能具有相同的模板结构：
+
+.模板结构
+[source,terminal]
+----
+.
+├── func.yaml <1>
+├── package.json <2>
+├── package-lock.json
+├── README.md
+├── src
+│   └── index.ts <3>
+├── test <4>
+│   ├── integration.ts
+│   └── unit.ts
+└── tsconfig.json
+----
+<1> `func.yaml` 配置文件用于决定镜像名称和 registry。
+<2> 您不限于模板 `package.json` 文件中提供的依赖项。您可以添加额外的依赖项，如任何其他 TypeScript 项目中一样。
++
+.添加 npm 依赖项示例
+[source,terminal]
+----
+npm install --save opossum
+----
++
+为部署构建项目时，这些依赖项将包含在创建的运行时容器镜像中。
+<3> 您的项目必须包含 `src/index.js` 文件，该文件导出名为 `handle` 的函数。
+<4> 集成和单元测试脚本作为功能模板的一部分提供。

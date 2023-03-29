@@ -1,0 +1,445 @@
+// Module included in the following assemblies:
+//
+// * installing/installing_aws/installing-aws-network-customizations.adoc
+// * installing/installing_azure/installing-azure-network-customizations.adoc
+// * installing/installing_bare_metal/installing-bare-metal-network-customizations.adoc
+// * installing/installing_gcp/installing-gcp-network-customizations.adoc
+// * installing/installing_ibm_power/installing-ibm-power.adoc
+// * installing/installing_ibm_power/installing-restricted-networks-ibm-power.adoc
+// * installing/installing_ibm_z/installing-ibm-z-kvm.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z-kvm.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations-user-infra.adoc
+// * installing/installing_vmc/installing-vmc-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.adoc
+// * installing/installing_vsphere/installing-vsphere-network-customizations.adoc
+// * networking/cluster-network-operator.adoc
+// * networking/network_policy/logging-network-policy.adoc
+// * post_installation_configuration/network-configuration.adoc
+// * installing/installing_ibm_cloud_public/installing-ibm-cloud-network-customizations.adoc
+// * installing/installing_ibm_z/installing-ibm-z.adoc
+// * installing/installing_ibm_z/installing-ibm-z-kvm.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z.adoc
+// * installing/installing_ibm_z/installing-restricted-networks-ibm-z-kvm.adoc
+// * installing/installing_ibm_power/installing-ibm-power.adoc
+// * installing/installing_ibm_power/installing-restricted-networks-ibm-power.adoc
+// * installing/installing_azure_stack_hub/installing-azure-stack-hub-network-customizations.adoc
+
+// Installation assemblies need different details than the CNO operator does
+ifeval::["{context}" == "cluster-network-operator"]
+:operator:
+endif::[]
+
+ifeval::["{context}" == "post-install-network-configuration"]
+:post-install-network-configuration:
+endif::[]
+ifeval::["{context}" == "installing-ibm-cloud-network-customizations"]
+:ibm-cloud:
+endif::[]
+
+:_content-type: CONCEPT
+[id="nw-operator-cr_{context}"]
+=  Cluster Network Operator 配置
+
+集群网络的配置作为 `Cluster Network Operator(CNO)` 配置的一部分指定，并存储在名为 cluster 的自定义资源(CR)对象中。CR 指定 `operator.openshift.io` API 组中的 Network API 的字段。
+
+CNO 配置在集群安装过程中从 `Network. config.openshift.io API` 组中的 Network API 继承以下字段，且这些字段无法更改：
+
+`clusterNetwork`:: 从中分配 Pod IP 地址的 IP 地址池。
+`serviceNetwork`:: 服务的 IP 地址池.
+`defaultNetwork.type`:: 集群网络供应商，如 Uccps SDN 或 OVN-Kubernetes。
+
+// For the post installation assembly, no further content is provided.
+ifdef::post-install-network-configuration,operator[]
+[注意]
+====
+在集群安装后，您无法修改上一节中列出的字段。
+====
+endif::[]
+ifndef::post-install-network-configuration[]
+您可以通过设置名为' cluster '的CNO对象中的' defaultNetwork '对象的字段来为您的集群指定集群网络提供程序配置。
+
+[id="nw-operator-cr-cno-object_{context}"]
+== Cluster Network Operator 配置对象
+
+下表中描述了 Cluster Network Operator(CNO)的字段：
+
+.Cluster Network Operator 配置对象
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|字段|类型|描述
+
+|`metadata.name`
+|`string`
+|CNO 对象的名称。这个名称始终是 `集群`。
+
+|`spec.clusterNetwork`
+|`array`
+|用于指定从哪些 IP 地址块分配 Pod IP 地址以及集群中每个节点的子网前缀长度的列表。例如：
+
+[source,yaml]
+----
+spec:
+  clusterNetwork:
+  - cidr: 10.128.0.0/19
+    hostPrefix: 23
+  - cidr: 10.128.32.0/19
+    hostPrefix: 23
+----
+
+ifdef::operator[]
+此值是只读的，在集群安装过程中从名为 `cluster`` 的 `Network.config.openshift.io` 对象继承。
+endif::operator[]
+ifndef::operator[]
+在创建清单之前，您只能在 `install-config.yaml` 文件中自定义此字段。 该值仅在清单文件中读取。
+endif::operator[]
+
+|`spec.serviceNetwork`
+|`array`
+|服务的 IP 地址块。OpenShift SDN 和 OVN-Kubernetes Container Network Interface(CNI)网络供应商只支持服务网络的一个 IP 地址块。例如：
+
+[source,yaml]
+----
+spec:
+  serviceNetwork:
+  - 172.30.0.0/14
+----
+
+ifdef::operator[]
+服务的 IP 地址块。OpenShift SDN 和 OVN-Kubernetes Container Network Interface(CNI)网络供应商只支持服务网络的一个 IP 地址块。例如：
+endif::operator[]
+ifndef::operator[]
+在创建清单之前，您只能在 `install-config.yaml` 文件中自定义此字段。 该值仅在清单文件中读取。
+endif::operator[]
+
+|`spec.defaultNetwork`
+|`object`
+|为集群网络配置 Container Network Interface(CNI)集群网络供应商。
+
+|`spec.kubeProxyConfig`
+|`object`
+|
+此对象的字段指定 kube-proxy 配置。如果您使用 OVN-Kubernetes 集群网络供应商，则 kube-proxy 配置无效。
+
+|====
+
+[discrete]
+[id="nw-operator-cr-defaultnetwork_{context}"]
+=== defaultNetwork 对象配置
+
+下表列出了 `defaultNetwork` 对象的值：
+
+.`defaultNetwork` 对象
+[cols=".^3,.^2,.^5a",options="header"]
+|====
+|字段|类型|描述
+
+|`type`
+|`string`
+|`OpenShiftSDN` 或 `OVNKubernetes`。集群网络供应商是在安装过程中选择的。此值在集群安装后无法更改。
+[NOTE]
+====
+ifdef::openshift-origin[]
+`OpenShiftSDN` 或 `OVNKubernetes`。集群网络供应商是在安装过程中选择的。此值在集群安装后无法更改。
+endif::openshift-origin[]
+ifndef::openshift-origin[]
+{product-title} 使用OpenShift SDN容器网络接口（CNI）群集网络提供商默认情况下。
+endif::openshift-origin[]
+====
+
+|`openshiftSDNConfig`
+|`object`
+|此对象仅对 OpenShift SDN 集群网络供应商有效。
+
+|`ovnKubernetesConfig`
+|`object`
+|此对象仅对 OVN-Kubernetes 集群网络供应商有效。
+
+|====
+
+[discrete]
+[id="nw-operator-configuration-parameters-for-openshift-sdn_{context}"]
+==== OpenShift SDN CNI 集群网络供应商的配置
+
+下表描述了 OpenShift SDN Container Network Interface(CNI)集群网络供应商的配置字段。
+
+.`openshiftSDNConfig` object
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|字段|类型|描述
+
+|`mode`
+|`string`
+|
+ifndef::operator[]
+为OpenShift SDN配置网络隔离模式。 默认值是 `newitspolicy`。
+
+值 `sultenant' 和 `subnet' 可与{product-title} 3.x的向后兼容，但不建议使用。 集群安装后不能更改此值。
+endif::operator[]
+ifdef::operator[]
+OpenShift SDN 的网络隔离模式
+endif::operator[]
+
+|`mtu`
+|`integer`
+|
+ifndef::operator[]
+VXLAN覆盖网络的最大传输单元（MTU）。 这是根据主要网络接口的MTU自动检测到的。 通常，您不需要覆盖检测到的MTU。
+
+如果自动检测值不是您所期望的，请确认节点上的主要网络接口上的MTU是正确的。 您不能使用此选项更改节点上主网络接口的MTU值。
+
+如果您的群集需要不同节点的MTU值不同，则必须将此值设置为“ 50”小于群集中最低的MTU值。 例如，如果您的群集中的某些节点具有`9001'的MTU，而有些节点为1500”，则必须将此值设置为`1450'。
+
+集群安装后不能更改此值。
+endif::operator[]
+ifdef::operator[]
+VXLAN 覆盖网络的最大传输单元(MTU)。这个值通常是自动配置的。
+endif::operator[]
+
+|`vxlanPort`
+|`integer`
+|
+ifndef::operator[]
+用于所有VXLAN数据包的端口。 默认值为`4789`。 集群安装后不能更改此值。
+
+如果您在虚拟化环境中运行，现有节点是另一个VXLAN网络的一部分，则可能需要您进行更改。 例如，在VMware NSX-T顶部运行OpenShift SDN覆盖层时，您必须为VXLAN选择一个替代端口，因为两个SDN都使用相同的默认VXLAN端口号。
+
+在Amazon Web Services（AWS）上，您可以在端口`9000`和port`9999'之间为VXLAN选择一个替代端口。
+endif::operator[]
+ifdef::operator[]
+用于所有 VXLAN 数据包的端口。默认值为 4789。
+endif::operator[]
+
+|====
+
+ifdef::operator[]
+[注意]
+====
+您只能在集群安装过程中更改集群网络供应商的配置。
+====
+endif::operator[]
+
+.OpenShift SDN 配置示例
+[source,yaml]
+----
+defaultNetwork:
+  type: OpenShiftSDN
+  openshiftSDNConfig:
+    mode: NetworkPolicy
+    mtu: 1450
+    vxlanPort: 4789
+----
+
+[discrete]
+[id="nw-operator-configuration-parameters-for-ovn-sdn_{context}"]
+==== OVN-Kubernetes CNI 集群网络供应商的配置
+
+下表描述了 OVN-Kubernetes CNI 集群网络供应商的配置字段。
+
+.`ovnKubernetesConfig` 对象
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|描述|类型|描述
+
+|`mtu`
+|`integer`
+|
+ifndef::operator[]
+基因（通用网络虚拟化封装）覆盖网络的最大传输单元（MTU）。 这是根据主要网络接口的MTU自动检测到的。 通常，您不需要覆盖检测到的MTU。
+
+如果自动检测值不是您所期望的，请确认节点上的主要网络接口上的MTU是正确的。 您不能使用此选项更改节点上主网络接口的MTU值。
+
+如果您的群集需要不同节点的MTU值不同，则必须将此值设置为“ 100”小于群集中最低的MTU值。 例如，如果您的群集中的某些节点的MTU为`9001'，而有些节点则具有`1500'的MTU，则必须将此值设置为`1400'。
+endif::operator[]
+ifdef::operator[]
+Geneve（通用网络虚拟化封装）覆盖网络的最大传输单元(MTU)。这个值通常是自动配置的。
+endif::operator[]
+
+|`genevePort`
+|`integer`
+|
+ifndef::operator[]
+用于所有基因数据包的端口。 默认值为`6081`。 集群安装后不能更改此值。
+endif::operator[]
+ifdef::operator[]
+|Geneve 覆盖网络的 UDP 端口。
+endif::operator[]
+
+ifndef::ibm-cloud[]
+|`ipsecConfig`
+|`object`
+|
+ifndef::operator[]
+指定一个空对象以启用 IPSEC 加密。 集群安装后不能更改此值。
+endif::operator[]
+ifdef::operator[]
+|如果存在该字段，则会为集群启用 IPsec。
+endif::operator[]
+endif::ibm-cloud[]
+
+|`policyAuditConfig`
+|`object`
+|指定用于自定义网络策略审计日志的配置对象。如果未设置，则使用默认的审计日志设置。
+
+|`gatewayConfig`
+|`object`
+|可选：指定一个配置对象来自定义如何将出口流量发送到节点网关。
+
+[注意]
+====
+在迁移出口流量时，您可以预期工作负载和服务流量会受到一些干扰，直到集群网络操作员(CNO)成功推出更改。
+====
+|====
+
+ifdef::ibm-cloud[]
+[注意]
+====
+在 IBM 云上安装群集时，不支持 OVN-KUBERNETES 网络提供商的 IPSEC。
+====
+endif::ibm-cloud[]
+
+// tag::policy-audit[]
+.`policyAuditConfig` 对象
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|字段|类型|描述
+
+|`rateLimit`
+|integer
+|每个节点每秒生成一次的消息数量上限。默认值为每秒 `20` 条消息。
+
+|`maxFileSize`
+|integer
+|审计日志的最大大小，以字节为单位。默认值为 `50000000` 或 50 MB。
+
+|`destination`
+|string
+|
+|以下附加审计日志目标之一：
+
+`libc`:: 主机上的 journald 进程的 libc `syslog（）` 函数。
+`udp:<host>:<port>`:: 一个 syslog 服务器。将 `<host>:<port>` 替换为 syslog 服务器的主机 和端口。
+`unix:<file>`:: 由 `<file>` 指定的 Unix 域套接字文件。
+`null`:: 不要将审计日志发送到任何其他目标。
+
+|`syslogFacility`
+|string
+|syslog 工具，如 as `kern`，如 RFC5424 定义。默认值为 `local0`。T
+
+|====
+// end::policy-audit[]
+
+[id="gatewayConfig-object_{context}"]
+.`gatewayConfig` object
+[cols=".^2,.^2,.^6a",options="header"]
+|====
+|字段|类型|描述
+
+|`routingViaHost`
+|`布尔值`
+|将此字段设置为 `true`，将来自 pod 的出口流量发送到主机网络堆栈。对于依赖于在内核路由表中手动配置路由的高级别安装和应用程序，您可能需要将出口流量路由到主机网络堆栈。默认情况下，出口流量在 OVN 中进行处理以退出集群，不受内核路由表中的特殊路由的影响。默认值为 `false`。
+
+此字段与 Open vSwitch 硬件卸载功能有交互。如果将此字段设置为 `true`，则不会获得卸载的性能优势，因为主机网络堆栈会处理出口流量。
+
+|====
+
+ifdef::operator[]
+[注意]
+====
+您只能在集群安装过程中更改集群网络供应商的配置，但 `gatewayConfig` 字段可作为安装后活动在运行时更改。
+====
+endif::operator[]
+
+.启用 IPSec 的 OVN-Kubernetes 配置示例
+[source,yaml]
+----
+defaultNetwork:
+  type: OVNKubernetes
+  ovnKubernetesConfig:
+    mtu: 1400
+    genevePort: 6081
+ifndef::ibm-cloud[]
+    ipsecConfig: {}
+endif::ibm-cloud[]
+----
+
+[discrete]
+[id="nw-operator-cr-kubeproxyconfig_{context}"]
+=== kubeProxyConfig 对象配置
+
+`kubeProxyConfig` 对象的值在下表中定义：
+
+.`kubeProxyConfig` 对象
+[cols=".^3,.^2,.^5a",options="header"]
+|====
+|字段|类型|描述
+
+|`iptablesSyncPeriod`
+|`string`
+|
+`iptables` 规则的刷新周期。默认值为 30s。有效的后缀包括 `s`、`m` 和 `h`，具体参见 Go 时间 包 文档。
+
+[注意]
+====
+由于 统信容器云管理平台 1.1 及更高版本中引进了性能改进，不再需要调整 `iptablesSyncPeriod` 参数。
+====
+
+|`proxyArguments.iptables-min-sync-period`
+|`array`
+|刷新 iptables 规则前的最短持续时间。此字段确保刷新的频率不会过于频繁。有效的后缀包括 `s`、`m` 和 `h`，具体参见 Go time 软件包。默认值为：
+
+[source,yaml]
+----
+kubeProxyConfig:
+  proxyArguments:
+    iptables-min-sync-period:
+    - 0s
+----
+|====
+
+ifdef::operator[]
+[id="nw-operator-example-cr_{context}"]
+== Cluster Network Operator example 对象
+
+以下示例中指定了完整的 CNO 配置：
+
+.Cluster Network Operator 对象示例
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  clusterNetwork: <1>
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  serviceNetwork: <1>
+  - 172.30.0.0/16
+  defaultNetwork: <1>
+    type: OpenShiftSDN
+    openshiftSDNConfig:
+      mode: NetworkPolicy
+      mtu: 1450
+      vxlanPort: 4789
+  kubeProxyConfig:
+    iptablesSyncPeriod: 30s
+    proxyArguments:
+      iptables-min-sync-period:
+      - 0s
+----
+<1> 仅在集群安装过程中配置。
+endif::operator[]
+endif::post-install-network-configuration[]
+
+ifeval::["{context}" == "cluster-network-operator"]
+:!operator:
+endif::[]
+
+ifdef::post-install-network-configuration[]
+:!post-install-network-configuration:
+endif::[]
+ifeval::["{context}" == "installing-ibm-cloud-network-customizations"]
+:!ibm-cloud:
+endif::[]

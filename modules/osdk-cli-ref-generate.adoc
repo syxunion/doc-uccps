@@ -1,0 +1,9 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-generate_{context}"]
+= generate
+
+`operator-sdk generate` 命令调用特定的生成器来生成代码或清单。

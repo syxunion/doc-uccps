@@ -1,0 +1,95 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-scheduler-pod-affinity.adoc
+
+:_content-type: CONCEPT
+[id="nodes-scheduler-pod-affinity-about_{context}"]
+= 了解 pod 关联性
+
+您可以借助 pod 关联性和 pod 反关联性来根据其他 pod 上的键/值标签限制 pod 有资格调度到哪些节点。
+
+*如果新 pod 上的标签选择器与当前 pod 上的标签匹配，pod 关联性可以命令调度程序将新 pod 放置到与其他 pod 相同的节点上。
+* 如果新 pod 上的标签选择器与当前 pod 上的标签匹配，pod 反关联性可以阻止调度程序将新 pod 放置到与具有相同标签的 pod 相同的节点上。
+
+例如，您可以使用关联性规则，在服务内或相对于其他服务中的 pod 来分散或聚拢 pod。如果特定服务的 pod 的性能已知会受到另一服务的 pod 影响，那么您可以利用反关联性规则，防止前一服务的 pod 调度到与后一服务的 pod 相同的节点上。或者，您可以将服务的 pod 分散到节点间、可用性区域或可用性集，以减少相关的故障。
+
+pod 关联性规则有两种，即必要规则和偏好规则。
+
+必须满足必要规则，pod 才能调度到节点上。偏好规则指定在满足规则时调度程序会尝试强制执行规则，但不保证一定能强制执行成功。
+
+[注意]
+====
+根据 pod 优先级和抢占设置，调度程序可能无法在不违反关联性要求的前提下为 pod 找到适合的节点。若是如此，pod 可能不会被调度。
+
+要防止这种情况，请仔细配置优先级相同的 pod 的 pod 关联性。
+====
+
+您可以通过 Pod 规格文件配置 pod 关联性/反关联性。您可以指定必要规则或偏好规则，或同时指定这两种规则。如果您同时指定，节点必须首先满足必要规则，然后尝试满足偏好规则。
+
+以下示例显示了配置了 pod 关联性和反关联性的 Pod 规格。
+
+在本例中，pod 关联性规则指明，只有当节点至少有一个已在运行且具有键 security 和值 S1 的标签的 pod 时，pod 才可以调度到这个节点上。pod 反关联性则表示，如果节点已在运行带有键 security 和值 S2.的标签的 pod，则 pod 将偏向于不调度到该节点上。
+
+.具有 pod 关联性的 Pod 配置文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity: <1>
+      requiredDuringSchedulingIgnoredDuringExecution: <2>
+      - labelSelector:
+          matchExpressions:
+          - key: security <3>
+            operator: In <4>
+            values:
+            - S1 <3>
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+  containers:
+  - name: with-pod-affinity
+    image: docker.io/ocpqe/hello-pod
+----
+
+<1> 用于配置 pod 关联性的小节。
+<2> 定义必要规则。
+<3> 必须匹配键和值（标签）才会应用该规则。
+<4> 运算符表示现有 pod 上的标签和新 pod 规格中 matchExpression 参数的值集合之间的关系。可以是 In、NotIn、Exists 或 DoesNotExist。
+
+.具有 pod 反关联性的 Pod 配置文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-antiaffinity
+spec:
+  affinity:
+    podAntiAffinity: <1>
+      preferredDuringSchedulingIgnoredDuringExecution: <2>
+      - weight: 100  <3>
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security <4>
+              operator: In <5>
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: docker.io/ocpqe/hello-pod
+----
+
+<1> 用于配置 pod 反关联性的小节。
+<2> 定义偏好规则。
+<3> 为偏好规则指定权重。优先选择权重最高的节点。
+<4> 描述用来决定何时应用反关联性规则的 pod 标签。指定标签的键和值。
+<5> 运算符表示现有 pod 上的标签和新 pod 规格中 matchExpression 参数的值集合之间的关系。可以是  `In`, `NotIn`, `Exists`, 或 `DoesNotExist`.
+
+[注意]
+====
+如果节点标签在运行时改变，使得不再满足 pod 上的关联性规则，pod 会继续在该节点上运行。
+====

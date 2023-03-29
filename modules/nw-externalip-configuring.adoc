@@ -1,0 +1,55 @@
+// Module included in the following assemblies:
+//
+// * networking/configuring_ingress_cluster_traffic/configuring-externalip.adoc
+
+:_content-type: PROCEDURE
+[id="nw-externalip-configuring_{context}"]
+= 为集群配置外部 IP 地址块
+
+作为集群管理员，可以配置以下 ExternalIP 设置：
+
+- 统信容器云管理平台 用来自动填充 `Service` 对象的 `spec.clusterIP` 字段的 ExternalIP 地址块。
+- 用于限制可手动分配给 `Service` 对象的 `spec.clusterIP` 数组的 IP 地址的策略对象。
+
+.先决条件
+
+* 安装 Uccp  CLI (`oc`).
+* 使用具有 `cluster-admin` 角色的用户访问集群。
+
+.流程
+
+. 可选： 要显示当前的外部 IP 配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc describe networks.config cluster
+----
+
+. 要编辑配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc edit networks.config cluster
+----
+
+. 修改 ExternalIP 配置，如下例所示：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  ...
+  externalIP: <1>
+  ...
+----
+<1> 指定 `externalIP` 小节的配置。
+
+. 要确认更新的 ExternalIP 配置，请输入以下命令：
++
+[source,terminal]
+----
+$ oc get networks.config cluster -o go-template='{{.spec.externalIP}}{{"\n"}}'
+----

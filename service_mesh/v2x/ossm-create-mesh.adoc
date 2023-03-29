@@ -1,0 +1,30 @@
+:_content-type: ASSEMBLY
+[id="ossm-create-mesh"]
+= Adding services to a service mesh
+include::_attributes/common-attributes.adoc[]
+:context: ossm-create-mesh
+
+toc::[]
+
+安装 Operators 和 `ServiceMeshControlPlane` 资源后，通过创建一个 `ServiceMeshMemberRoll`  资源并指定您的内容所在的命名空间，将应用程序、工作负载或服务添加到网格中。如果您已经有一个要添加到 `ServiceMeshMemberRoll` 资源的应用程序、工作负载或服务，请使用以下步骤。或者，要安装一个名为 Bookinfo 的示例应用程序并将其添加到  `ServiceMeshMemberRoll` 资源中，请参阅安装 xref:../../service_mesh/v2x/ossm-create-mesh.adoc#ossm-tutorial-bookinfo-overview_ossm-create-mesh[Bookinfo 示例应用教程] 的教程，以查看应用程序 如何在 {SMProductName}中工作。
+
+`ServiceMeshMemberRoll` 资源中列出的项目是由 `ServiceMeshControlPlane`资源管理的应用程序和工作流。control plane （包括 {SMProductShortName} Operators, Istiod、Istiod 和 `ServiceMeshControlPlane`）以及 data plane（包括应用程序和 Envoy 代理）必须位于不同的命名空间中。
+
+[NOTE]
+====
+将命名空间添加到 `ServiceMeshMemberRoll` 后，服务网格外的调用者将无法访问该命名空间中的服务或 pod。
+====
+
+include::modules/ossm-member-roll-create.adoc[leveloffset=+1]
+
+include::modules/ossm-member-roll-modify.adoc[leveloffset=+1]
+
+include::modules/ossm-tutorial-bookinfo-overview.adoc[leveloffset=+1]
+
+include::modules/ossm-tutorial-bookinfo-install.adoc[leveloffset=+2]
+
+include::modules/ossm-tutorial-bookinfo-adding-destination-rules.adoc[leveloffset=+2]
+
+include::modules/ossm-tutorial-bookinfo-verify-install.adoc[leveloffset=+2]
+
+include::modules/ossm-tutorial-bookinfo-removing.adoc[leveloffset=+2]

@@ -1,0 +1,11 @@
+:_content-type: ASSEMBLY
+[id="distr-tracing-release-notes"]
+= 分布式追踪发行标记
+include::_attributes/common-attributes.adoc[]
+:context: distributed-tracing-release-notes
+
+toc::[]
+
+include::modules/distr-tracing-product-overview.adoc[leveloffset=+1]
+
+include::modules/distr-tracing-rn-new-features.adoc[leveloffset=+1]

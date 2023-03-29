@@ -1,0 +1,66 @@
+:_content-type: ASSEMBLY
+:context: nodes-scheduler-about
+[id="nodes-scheduler-about"]
+= 使用调度程序控制 pod 放置
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+Pod 调度是一个内部过程，决定新 pod 如何放置到集群内的节点上。
+
+调度程度代码具有明确隔离，会监测创建的新 pod 并确定最适合托管它们的节点。然后，它会利用主 API 为 pod 创建 pod 至节点的绑定。
+
+默认 pod 调度::
+统信容器云管理平台 附带一个满足大多数用户需求的默认调度程序。默认调度程序使用内置和自定义工具来决定最适合 pod 的调度程序。
+
+高级 pod 调度::
+如果您想要更多地控制新 pod 的放置位置，可以利用 统信容器云管理平台 高级调度功能来配置 pod，从而使 pod 能够根据要求或偏好在特定的节点上运行，或者与特定的 pod 一起运行。
++
+您可以使用以下调度功能来控制 pod 放置：
+
+* xref:../../nodes/scheduling/nodes-scheduler-profiles.adoc#nodes-scheduler-profiles[Scheduler 配置集]
+* xref:../../nodes/scheduling/nodes-scheduler-pod-affinity.adoc#nodes-scheduler-pod-affinity[Pod 关联性和反关联性规则]
+* xref:../../nodes/scheduling/nodes-scheduler-node-affinity.adoc#nodes-scheduler-node-affinity-about_nodes-scheduler-node-affinity[节点关联性]
+* xref:../../nodes/scheduling/nodes-scheduler-node-selectors.adoc#nodes-scheduler-node-selectors[节点选择器]
+* xref:../../nodes/scheduling/nodes-scheduler-taints-tolerations.adoc#nodes-scheduler-taints-tolerations[污点和容限]
+* xref:../../nodes/scheduling/nodes-scheduler-overcommit.adoc#nodes-scheduler-overcommit[节点过量使用]
+
+[id="about-default-scheduler"]
+== 关于默认调度程序
+
+默认的 统信容器云管理平台 pod 调度程序负责确定新 pod 放置到集群中的节点上。它从 pod 读取数据，并查找最适合配置的配置集的节点。它完全独立存在，作为独立解决方案。它不会修改 pod；它会为将 pod 绑定到特定节点的 pod 创建绑定。
+
+// Understanding default scheduling
+include::modules/nodes-scheduler-default-about.adoc[leveloffset=+2]
+
+[id="nodes-scheduler-about-use-cases_{context}"]
+== 调度程序用例
+
+在 统信容器云管理平台 中调度的一个重要用例是支持灵活的关联性和反关联性策略。
+
+[id="infrastructure-topological-levels_{context}"]
+=== 基础架构拓扑级别
+
+管理员可以通过在节点上指定标签，为基础架构（节点）定义多个拓扑级别。例如， `region=r1`, `zone=z1`, `rack=s1`.
+
+这些标签名称没有特别的含义，管理员可以自由为其基础架构级别命名，比如城市/楼宇/房间。另外，管理员可以为其基础架构拓扑定义任意数量的级别，通常三个级别比较适当（例如： `regions` -> `zones` -> `racks`)。管理员可以在各个级别上以任何组合指定关联性和反关联性规则。
+
+
+[id="affinity_{context}"]
+=== 关联性
+
+管理员应能够配置调度程序，在任何一个甚至多个拓扑级别上指定关联性。特定级别上的关联性指示所有属于同一服务的 pod 调度到属于同一级别的节点。这会让管理员确保对等 pod 在地理上不会过于分散，以此处理应用程序对延迟的要求。如果同一关联性组中没有节点可用于托管 pod，则不调度该 pod。
+
+如果您需要更好地控制 pod 的调度位置，请参阅使用节点关联性规则控制节点上的 pod 放置，以及使用关联性和反关联性规则相对于其他 pod 放置 pod。
+
+管理员可以利用这些高级调度功能，来指定 pod 可以调度到哪些节点，并且相对于其他 pod 来强制或拒绝调度。
+
+
+[id="anti-affinity_{context}"]
+=== 反关联性
+
+管理员应能够配置调度程序，在任何一个甚至多个拓扑级别上指定反关联性。特定级别上的反关联性（或分散）指示属于同一服务的所有 pod 分散到属于该级别的不同节点上。这样可确保应用程序合理分布，以实现高可用性目的。调度程序尝试在所有适用的节点之间尽可能均匀地平衡服务 pod。
+
+如果您需要更好地控制 pod 的调度位置，请参阅使用节点关联性规则控制节点上的 pod 放置，以及使用关联性和反关联性规则相对于其他 pod 放置 pod。
+
+管理员可以利用这些高级调度功能，来指定 pod 可以调度到哪些节点，并且相对于其他 pod 来强制或拒绝调度。

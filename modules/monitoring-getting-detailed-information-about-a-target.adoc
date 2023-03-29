@@ -1,0 +1,37 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-metrics-targets.adoc
+
+:_content-type: PROCEDURE
+[id="getting-detailed-information-about-a-target_{context}"]
+= 获取目标的详细信息
+
+在  **Target 详情** 页面中，您可以查看指标目标的详细信息。
+
+.先决条件
+
+* 您可以访问集群，作为您要查看指标目标的项目的管理员。
+
+.流程
+
+*要在 Administrator 视角中查看目标的详细信息*:
+
+. 打开 统信容器云管理平台 web 控制台并导航到 *Observe* -> *Targets*.
+
+. 可选：通过选择 *Filter* 列表中的过滤器来根据状态和源过滤目标。
+
+. 可选：使用搜索框旁的 *Text* 或 *Label* 字段按名称或标签搜索目标。
+
+. 可选：点 *Endpoint*, *Status*, *Namespace*, *Last Scrape*, 和 *Scrape Duration* 列标题对目标进行排序。
+
+. 单击目标的 *Endpoint* 列中的 URL，以导航到其 *Target 详情* 页面。本页提供有关目标的信息，包括：
++
+--
+** 为指标提取的端点 URL
+** 目标的当前 *Up* 或 *Down* 状态
+** 到命名空间的链接
+** 到 ServiceMonitor 详情的链接
+** 附加到目标的标签
+** 为指标提取目标的最长时间
+--
+

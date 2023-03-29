@@ -1,0 +1,84 @@
+:_content-type: ASSEMBLY
+[id="post-install-configuration-overview"]
+= 安装后配置概述
+include::_attributes/common-attributes.adoc[]
+:context: post-installation-configuration-overview
+
+toc::[]
+
+安装 统信容器云管理平台 后，集群管理员可配置和自定义以下组件：
+
+* 机器
+* 裸机
+* 集群
+* 节点
+* 网络
+* Storag
+* 用户
+* 警报和通知
+
+[id="post-install-tasks"]
+== 执行安装后配置任务
+
+集群管理员可以执行以下安装后配置任务：
+
+* xref:../post_installation_configuration/machine-configuration-tasks.adoc#post-install-machine-configuration-tasks[配置操作系统功能]:
+Machine Config Operator(MCO)管理 `MachineConfig` 对象。通过使用 MCO，您可以在 统信容器云管理平台 集群中执行以下操作：
+
+** 使用 `MachineConfig` 对象配置节点
+** 配置 MCO 相关的自定义资源
+
+* xref:../post_installation_configuration/bare-metal-configuration.adoc#post-install-bare-metal-configuration[配置裸机节点]: Bare Metal Operator(BMO)实施 Kubernetes API 来管理裸机主机。它维护一个可用裸机主机清单，作为 BareMetalHost 自定义资源定义(CRD)的实例。Bare Metal Operator 可以：
+
+** 检查主机的硬件详情，并将其报告给对应的 BareMetalHost。这包括 CPU、RAM、磁盘、NIC 等相关信息。
+** 检查主机的固件并配置 BIOS 设置。
+** 使用所需镜像调配主机。
+** 在调配之前或之后清理主机的磁盘内容。
+
+* xref:../post_installation_configuration/cluster-tasks.adoc#post-install-cluster-tasks[配置集群功能]:
+作为集群管理员，您可以修改 统信容器云管理平台 集群的主要功能的配置资源。这些功能包括：
+
+** 镜像 registry
+** 网络配置
+** 镜像构建行为
+** 用户身份提供程序
+** etcd 配置
+** 用于处理工作负载的机器集
+** 云供应商凭证管理
+
+* xref:../post_installation_configuration/configuring-private-cluster.adoc#configuring-private-cluster[将集群组件配置为私有]:
+默认情况下，安装程序使用公开的 DNS 和端点置备 统信容器云管理平台。如果您希望集群只能从内部网络内部访问，请将以下组件配置为私有：
+
+** DNS
+** Ingress Controller
+** API server
+
+* xref:../post_installation_configuration/node-tasks.adoc#post-install-node-tasks[执行节点操作]:
+默认情况下，统信容器云管理平台 使用 UnionTech Enterprise Linux Uswift(Uswift)计算机器。作为集群管理员，您可以使用 统信容器云管理平台 集群中的机器执行以下操作：
+
+** 添加和删除计算机器
+** 为节点添加和删除污点和容限
+** 配置每个节点的最大 pod 数量
+** 启用设备管理器
+
+* xref:../post_installation_configuration/network-configuration.adoc#post-install-network-configuration[配置网络]:
+作为集群管理员安装 统信容器云管理平台 后，您可以配置以下内容：
+
+** 入口集群流量
+** 节点端口服务范围
+** 网络策略
+** 启用集群范围代理
+
+* xref:../post_installation_configuration/storage-configuration.adoc#post-install-storage-configuration[配置存储]:
+默认情况下，容器使用临时存储或临时存储进行操作。临时存储具有生命周期限制，因此您必须配置持久性存储来长期存储数据。您可以使用以下方法之一配置存储：
+
+** *动态置备*: 您可以通过定义并创建控制不同级别的存储类（包括存储访问）来按需动态置备存储。
+
+** *静态置备*: 集群管理员可通过支持各种设备配置和挂载选项，使现有存储可供集群使用。
+
+* xref:../post_installation_configuration/preparing-for-users.adoc#post-install-preparing-for-users[配置用户]:
+OAuth 访问令牌允许用户自行验证 API。作为集群管理员，您可以配置 OAuth 以指定身份提供程序，使用基于角色的访问控制来定义并应用权限，并从 OperatorHub 安装 Operator。
++
+
+* xref:../post_installation_configuration/configuring-alert-notifications.adoc#configuring-alert-notifications[管理警报和通知]:
+作为集群管理员，您可以通过 web 控制台的 Alerting UI 查看默认触发警报。您还可以将 统信容器云管理平台 配置为向外部系统发送警报通知，以便了解集群出现的重要问题。

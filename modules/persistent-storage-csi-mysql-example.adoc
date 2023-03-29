@@ -1,0 +1,44 @@
+// Module included in the following assemblies
+//
+// * storage/container_storage_interface/persistent_storage-csi.adoc
+
+:_content-type: PROCEDURE
+[id="csi-example-usage_{context}"]
+= 使用 CSI 驱动程序示例
+
+以下示例在没有对该模板进行任何修改的情况下安装了一个默认的 MySQL 模板。
+
+.先决条件
+
+* CSI 驱动程序已被部署。
+* 为动态置备创建了存储类。
+
+.流程
+
+* 创建 MySQL 模板：
++
+[source,terminal]
+----
+# oc new-app mysql-persistent
+----
++
+.输出示例
+[source,terminal]
+----
+--> Deploying template "openshift/mysql-persistent" to project default
+...
+----
++
+[source,terminal]
+----
+# oc get pvc
+----
++
+.输出示例
+[source,terminal]
+----
+NAME              STATUS    VOLUME                                   CAPACITY
+ACCESS MODES   STORAGECLASS   AGE
+mysql             Bound     kubernetes-dynamic-pv-3271ffcb4e1811e8   1Gi
+RWO            cinder         3s
+----

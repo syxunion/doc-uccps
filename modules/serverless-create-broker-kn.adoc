@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-using-brokers.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-create-broker-kn_{context}"]
+= 使用 Knative CLI 创建代理
+
+代理可与触发器结合使用，用于将事件源发送到事件 sink。通过使用 Knative (kn) CLI 创建代理，通过直接修改 YAML 文件来提供更简化的、直观的用户界面。您可以使用 `kn broker create` 命令创建代理。
+
+.先决条件
+
+* {ServerlessOperatorName} 和 Knative Eventing 已安装在  {product-title} 集群中。
+* 已安装 Knative  (`kn`) CLI.
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便在 {product-title} 中创建应用程序和其他工作负载。
+
+.流程
+
+* 创建代理：
++
+[source,terminal]
+----
+$ kn broker create <broker_name>
+----
+
+.验证
+
+. 使用 kn 命令列出所有现有代理：
++
+[source,terminal]
+----
+$ kn broker list
+----
++
+.输出示例
+[source,terminal]
+----
+NAME      URL                                                                     AGE   CONDITIONS   READY   REASON
+default   http://broker-ingress.knative-eventing.svc.cluster.local/test/default   45s   5 OK / 5     True
+----
+
+. 可选：如果使用 {product-title} web 控制台，在 *开发者* 视角中进入 *拓扑* 视图来查看存在的代理：
++
+image::odc-view-broker.png[View the broker in the web console Topology view]
+// need to add separate docs for broker in ODC - out of scope for this PR

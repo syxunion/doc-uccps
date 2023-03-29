@@ -1,0 +1,154 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+
+:_content-type: PROCEDURE
+[id="ossm-deploying-automatic-gateway-injection_{context}"]
+= Deploying automatic gateway injection
+
+在部署网关时，您必须通过向网关 `部署` 对象添加注入标签或注解来注入网关。以下示例部署了网关。
+
+.先决条件
+
+* 通过在 `ServiceMeshMemberRoll` 中定义或创建 `ServiceMeshMember` 资源，命名空间必须是网格的成员。
+
+.流程
+
+. 为 Istio ingress 网关设置唯一标签。需要此设置以确保网关可以选择工作负载。这个示例使用 `ingressgateway` 作为网关的名称。
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+spec:
+  type: ClusterIP
+  selector:
+    istio: ingressgateway
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  - name: https
+    port: 443
+    targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+      labels:
+        istio: ingressgateway
+        sidecar.istio.io/inject: "true" <1>
+    spec:
+      containers:
+      - name: istio-proxy
+        image: auto <2>
+----
+<1> 通过将 `sidecar.istio.io/inject` 字段设置为 `"true"` 来启用网关注入。
+<2> 将 `image` 字段设置为  `auto` ，以便镜像在每次 pod 启动时自动更新。
+
+. 设置角色，以允许读取 TLS 的凭据。
++
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istio-ingressgateway-sds
+subjects:
+- kind: ServiceAccount
+  name: default
+----
+
+. 从集群外部授予新网关的访问权限，每当将 `spec.security.manageNetworkPolicy` 设置为 `true` 时是必需的。
++
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gatewayingress
+  namespace: istio-ingress
+spec:
+  podSelector:
+    matchLabels:
+      istio: ingressgateway
+  ingress:
+    - {}
+  policyTypes:
+  - Ingress
+----
+
+. 入口流量增加时自动缩放 pod。这个示例将最小副本设置为 `2` ，最大副本设置为 `5`。它还会在利用率达到 80% 时创建另一个副本。
++
+[source,yaml]
+----
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    istio: ingressgateway
+    release: istio
+  name: ingressgatewayhpa
+  namespace: istio-ingress
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-ingressgateway
+----
+
+. 指定节点上必须运行的最小 pod 数量。本例确保当 pod 在新节点上重启时有一个副本正在运行。
++
+[source,yaml]
+----
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    istio: ingressgateway
+    release: istio
+  name: ingressgatewaypdb
+  namespace: istio-ingress
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      istio: ingressgateway
+----

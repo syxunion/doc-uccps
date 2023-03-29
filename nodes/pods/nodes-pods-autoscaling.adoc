@@ -1,0 +1,42 @@
+:_content-type: ASSEMBLY
+:context: nodes-pods-autoscaling
+[id='nodes-pods-autoscaling']
+= 使用 pod 横向自动扩展自动扩展 pod
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+作为开发人员，您可以使用 pod 横向自动扩展 (HPA) 来指定 OpenShift Container Platform 如何根据从属于某复制控制器或部署配置的 pod 收集的指标来自动增加或缩小该复制控制器或部署配置的规模。您可以为任何部署、部署配置、副本集、复制控制器或有状态集创建 HPA。
+
+
+
+[注意]
+====
+除非需要特定功能或由其他对象提供的行为，否则建议使用 `Deployment` 对象或 `ReplicaSet` 对象。
+====
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-pods-autoscaling-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-workflow-hpa.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-requests-and-limits-hpa.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-best-practices-hpa.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-policies.adoc[leveloffset=+2]
+
+include::modules/nodes-pods-autoscaling-creating-web-console.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-creating-cpu.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-creating-memory.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-status-about.adoc[leveloffset=+1]
+
+include::modules/nodes-pods-autoscaling-status-viewing.adoc[leveloffset=+2]
+

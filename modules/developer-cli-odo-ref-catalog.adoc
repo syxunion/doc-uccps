@@ -1,0 +1,205 @@
+:_content-type: REFERENCE
+[id="odo-catalog_{context}"]
+= odo catalog
+
+`odo` 使用不同的 _目录_ 来部署 _组件_ 和 _服务_。
+
+== 组件
+
+`odo` 使用可移植 devfile 格式来描述组件。它可以连接到各种 devfile registry，以便为不同的语言和框架下载 devfile。如需更多信息，请参阅 `odo registry`。
+
+=== 列出组件
+
+要列出不同 registry 中可用的所有 _devfile_，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog list components
+----
+
+.输出示例
+[source,terminal]
+----
+ NAME             DESCRIPTION                          REGISTRY
+ go               Stack with the latest Go version     DefaultDevfileRegistry
+ java-maven       Upstream Maven and OpenJDK 11        DefaultDevfileRegistry
+ nodejs           Stack with Node.js 14                DefaultDevfileRegistry
+ php-laravel      Stack with Laravel 8                 DefaultDevfileRegistry
+ python           Python Stack with Python 3.7         DefaultDevfileRegistry
+ [...]
+----
+
+=== 获取有关组件的信息
+
+要获得有关特定组件的更多信息，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog describe component
+----
+
+例如，运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog describe component nodejs
+----
+
+.输出示例
+[source,terminal]
+----
+* Registry: DefaultDevfileRegistry <1>
+
+Starter Projects: <2>
+---
+name: nodejs-starter
+attributes: {}
+description: ""
+subdir: ""
+projectsource:
+  sourcetype: ""
+  git:
+    gitlikeprojectsource:
+      commonprojectsource: {}
+      checkoutfrom: null
+      remotes:
+        origin: https://github.com/odo-devfiles/nodejs-ex.git
+  zip: null
+  custom: null
+----
+<1> _Registry_  是从中检索 devfile 的 registry。
+<2> _Starter projects_ 是 devfile 的同一语言和框架的示例项目，可帮助您启动一个新项目。
+
+
+如需有关从入门项目创建项目的更多信息，请参阅 `odo create`。
+
+
+== 服务
+
+`odo` 可使用 _Operator_ 帮助部署服务。
+
+odo 仅支持 Operator Lifecycle Manager 帮助部署的 Operator。
+
+////
+See link:/docs/getting-started/cluster-setup/kubernetes#installing-the-operator-lifecycle-manager-olm[Installing the Operator Lifecycle Manager (OLM)] for more information.
+////
+
+=== 列出服务
+
+要列出可用的 Operator 及其关联的服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog list services
+----
+
+.输出示例
+[source,terminal]
+----
+ Services available through Operators
+ NAME                                 CRDs
+ postgresql-operator.v0.1.1           Backup, Database
+ redis-operator.v0.8.0                RedisCluster, Redis
+----
+
+在本例中，集群中安装两个 Operator。`postgresql-operator.v0.1.1` Operator 部署与 PostgreSQL 相关的服务： `Backup` 和 `Database`。`redis-operator.v0.8.0 Operator` 将部署与 Redis 相关的服务：`RedisCluster` 和 `Redis`。
+
+[注意]
+====
+要获取所有可用 Operator 的列表，`odo` 会获取当前处于 _Succeeded_ 阶段的当前命名空间的 ClusterServiceVersion(CSV)资源。对于支持集群范围的访问权限的 Operator，当创建新命名空间时，这些资源会自动添加到其中。但是，在 _Succeeded_ 阶段前可能需要一些时间，`odo` 可能会返回空列表，直到资源就绪为止。
+====
+
+=== 搜索服务
+
+要通过关键字搜索特定服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog search service
+----
+
+例如，要检索 PostgreSQL 服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog search service postgres
+----
+
+.输出示例
+[source,terminal]
+----
+ Services available through Operators
+ NAME                           CRDs
+ postgresql-operator.v0.1.1     Backup, Database
+----
+
+您将看到在其名称中包含 search 关键字的 Operator 列表。
+
+=== 获取有关服务的信息
+
+要获取有关特定服务的更多信息，请运行以下命令：
+
+[source,terminal]
+----
+$ odo catalog describe service
+----
+
+例如：
+
+[source,terminal]
+----
+$ odo catalog describe service postgresql-operator.v0.1.1/Database
+----
+
+.输出示例
+[source,terminal]
+----
+KIND:    Database
+VERSION: v1alpha1
+
+DESCRIPTION:
+     Database is the Schema for the the Database Database API
+
+FIELDS:
+   awsAccessKeyId (string)
+     AWS S3 accessKey/token ID
+
+     Key ID of AWS S3 storage. Default Value: nil Required to create the Secret
+     with the data to allow send the backup files to AWS S3 storage.
+[...]
+----
+
+服务通过 CustomResourceDefinition(CRD)资源表示在集群中。上一命令显示 CRD 的详细信息，如 `kind`、`version`，以及用于定义此自定义资源实例的字段列表。
+
+从 CRD 中包含的 _OpenAPI schema_ 中提取字段列表。此信息在 CRD 中是可选的，如果不存在，它将从代表该服务的 ClusterServiceVersion(CSV)资源中提取。
+
+也可以请求 Operator 支持的服务的描述，而无需提供 CRD 类型信息。要描述没有 CRD 的集群中的 Redis Operator，请运行以下命令：
+
+
+[source,terminal]
+----
+$ odo catalog describe service redis-operator.v0.8.0
+----
+
+.输出示例
+[source,terminal]
+----
+NAME:	redis-operator.v0.8.0
+DESCRIPTION:
+
+	A Golang based redis operator that will make/oversee Redis
+	standalone/cluster mode setup on top of the Kubernetes. It can create a
+	redis cluster setup with best practices on Cloud as well as the Bare metal
+	environment. Also, it provides an in-built monitoring capability using
+
+... (cut short for beverity)
+
+	Logging Operator is licensed under [Apache License, Version
+	2.0](https://github.com/OT-CONTAINER-KIT/redis-operator/blob/master/LICENSE)
+
+
+CRDs:
+	NAME           DESCRIPTION
+	RedisCluster   Redis Cluster
+	Redis          Redis
+----

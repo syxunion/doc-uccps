@@ -1,0 +1,298 @@
+:_content-type: REFERENCE
+[id="odo-service_{context}"]
+= odo service
+
+`odo` 可使用 _Operator_ 帮助部署 _服务_。
+
+可使用 `odo catalog` 命令找到可用的 Operator 和服务列表。
+
+服务在 _组件_ 上下文中创建，因此在部署服务前运行 `odo create` 命令。
+
+服务通过以下两个步骤进行部署：
+
+. 定义服务并将其定义存储在 devfile 中。
+. 使用 `odo push` 命令将定义的服务部署到集群。
+
+== 创建新服务
+
+要创建新服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo service create
+----
+
+例如，要创建一个名为 `my-redis-service` 的 Redis 服务实例，您可以运行以下命令：
+
+.输出示例
+[source,terminal]
+----
+$ odo catalog list services
+Services available through Operators
+NAME                      CRDs
+redis-operator.v0.8.0     RedisCluster, Redis
+
+$ odo service create redis-operator.v0.8.0/Redis my-redis-service
+Successfully added service to the configuration; do 'odo push' to create service on the cluster
+----
+
+此命令在 `kubernetes/` 目录中创建 Kubernetes 清单，其中包含服务的定义，此文件从 `devfile.yaml` 文件引用。
+
+[source,terminal]
+----
+$ cat kubernetes/odo-service-my-redis-service.yaml
+----
+
+.输出示例
+[source,yaml]
+----
+ apiVersion: redis.redis.opstreelabs.in/v1beta1
+ kind: Redis
+ metadata:
+   name: my-redis-service
+ spec:
+   kubernetesConfig:
+     image: quay.io/opstree/redis:v6.2.5
+     imagePullPolicy: IfNotPresent
+     resources:
+       limits:
+         cpu: 101m
+         memory: 128Mi
+       requests:
+         cpu: 101m
+         memory: 128Mi
+     serviceType: ClusterIP
+   redisExporter:
+     enabled: false
+     image: quay.io/opstree/redis-exporter:1.0
+   storage:
+     volumeClaimTemplate:
+       spec:
+         accessModes:
+         - ReadWriteOnce
+         resources:
+           requests:
+             storage: 1Gi
+----
+
+.示例命令
+[source,terminal]
+----
+$ cat devfile.yaml
+----
+
+.输出示例
+[source,yaml]
+----
+[...]
+components:
+- kubernetes:
+    uri: kubernetes/odo-service-my-redis-service.yaml
+  name: my-redis-service
+[...]
+----
+
+
+请注意，所创建的实例的名称是可选的。如果您不提供名称，它将是服务的小写名称。例如，以下命令创建一个名为 redis 的 Redis 服务实例：
+
+[source,terminal]
+----
+$ odo service create redis-operator.v0.8.0/Redis
+----
+
+=== 显示清单
+
+默认情况下，在 `kubernetes/` 目录中创建一个新清单，从 `devfile.yaml` 文件引用。可以使用 `--inlined` 标志在 `devfile.yaml` 文件中内联清单：
+
+[source,terminal]
+----
+$ odo service create redis-operator.v0.8.0/Redis my-redis-service --inlined
+Successfully added service to the configuration; do 'odo push' to create service on the cluster
+----
+
+
+.示例命令
+[source,terminal]
+----
+$ cat devfile.yaml
+----
+
+.输出示例
+[source,yaml]
+----
+[...]
+components:
+- kubernetes:
+    inlined: |
+      apiVersion: redis.redis.opstreelabs.in/v1beta1
+      kind: Redis
+      metadata:
+        name: my-redis-service
+      spec:
+        kubernetesConfig:
+          image: quay.io/opstree/redis:v6.2.5
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 101m
+              memory: 128Mi
+            requests:
+              cpu: 101m
+              memory: 128Mi
+          serviceType: ClusterIP
+        redisExporter:
+          enabled: false
+          image: quay.io/opstree/redis-exporter:1.0
+        storage:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+  name: my-redis-service
+[...]
+----
+
+=== 配置服务
+
+如果没有特定的自定义，将使用默认配置创建该服务。您可以使用命令行参数或文件来指定您自己的配置。
+
+==== 使用命令行参数
+
+使用 `--parameters` （或 `-p`）指定您自己的配置。
+
+以下示例使用三个参数配置 Redis 服务：
+
+[source,terminal]
+----
+$ odo service create redis-operator.v0.8.0/Redis my-redis-service \
+    -p kubernetesConfig.image=quay.io/opstree/redis:v6.2.5 \
+    -p kubernetesConfig.serviceType=ClusterIP \
+    -p redisExporter.image=quay.io/opstree/redis-exporter:1.0
+Successfully added service to the configuration; do 'odo push' to create service on the cluster
+----
+
+.示例命令
+[source,terminal]
+----
+$ cat kubernetes/odo-service-my-redis-service.yaml
+----
+
+.输出示例
+[source,yaml]
+----
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: Redis
+metadata:
+  name: my-redis-service
+spec:
+  kubernetesConfig:
+    image: quay.io/opstree/redis:v6.2.5
+    serviceType: ClusterIP
+  redisExporter:
+    image: quay.io/opstree/redis-exporter:1.0
+----
+
+您可以使用 `odo catalog describe service` 命令获取特定服务的可能参数。
+
+==== 使用文件
+
+使用 YAML 清单来配置您自己的规格。在以下示例中，UnionTech Redis 服务配置了三个参数。
+
+. 创建清单：
++
+[source,terminal]
+----
+$ cat > my-redis.yaml <<EOF
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: Redis
+metadata:
+  name: my-redis-service
+spec:
+  kubernetesConfig:
+    image: quay.io/opstree/redis:v6.2.5
+    serviceType: ClusterIP
+  redisExporter:
+    image: quay.io/opstree/redis-exporter:1.0
+EOF
+----
+
+. 在清单中创建服务：
++
+[source,terminal]
+----
+$ odo service create --from-file my-redis.yaml
+Successfully added service to the configuration; do 'odo push' to create service on the cluster
+----
+
+== 删除服务
+
+要删除服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo service delete
+----
+
+.输出示例
+[source,terminal]
+----
+$ odo service list
+NAME                       MANAGED BY ODO     STATE               AGE
+Redis/my-redis-service     Yes (api)          Deleted locally     5m39s
+----
+
+[source,terminal]
+----
+$ odo service delete Redis/my-redis-service
+? Are you sure you want to delete Redis/my-redis-service Yes
+Service "Redis/my-redis-service" has been successfully deleted; do 'odo push' to delete service from the cluster
+----
+
+使用 `--force` （或 `-f`）标记强制删除该服务而无需确认。
+
+== 列出服务
+
+要列出为组件创建的服务，请运行以下命令：
+
+[source,terminal]
+----
+$ odo service list
+----
+
+.输出示例
+[source,terminal]
+----
+$ odo service list
+NAME                       MANAGED BY ODO     STATE             AGE
+Redis/my-redis-service-1   Yes (api)          Not pushed
+Redis/my-redis-service-2   Yes (api)          Pushed            52s
+Redis/my-redis-service-3   Yes (api)          Deleted locally   1m22s
+----
+
+对于每个服务，`STATE` 表示该服务是否使用 `odo push` 命令推送到集群，或者该服务仍然在集群中运行，但使用 `odo service delete` 命令在本地移除 devfile。
+
+== 获取有关服务的信息
+
+要获取服务的详情，如其类型、版本、名称和配置参数列表，请运行以下命令：
+
+[source,terminal]
+----
+$ odo service describe
+----
+
+.输出示例
+[source,terminal]
+----
+$ odo service describe Redis/my-redis-service
+Version: redis.redis.opstreelabs.in/v1beta1
+Kind: Redis
+Name: my-redis-service
+Parameters:
+NAME                           VALUE
+kubernetesConfig.image         quay.io/opstree/redis:v6.2.5
+kubernetesConfig.serviceType   ClusterIP
+redisExporter.image            quay.io/opstree/redis-exporter:1.0
+----

@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-source-to-image_{context}"]
+= Source-to-image 策略
+
+采用 `Source` 策略时，所有定义的输入 secret 都复制到对应的 `destinationDir` 中。如果 `destinationDir` 留空，则 secret 会放置到构建器镜像的工作目录中。
+
+当 `destinationDir` 是一个相对路径时，使用相同的规则。secret 放置在相对于镜像工作目录的路径中。如果构建器镜像中不存在 `destinationDir` 路径中的最终目录，则会创建该目录。`destinationDir` 中的所有上述目录都必须存在，否则会发生错误。
+
+[注意]
+====
+输入 secret 将以全局可写（具有 `0666` 权限）形式添加，并且在执行 `assemble` 脚本后其大小会被截断为零。也就是说，生成的镜像中会包括这些 secret 文件，但出于安全原因，它们将为空。
+
+`assemble` 脚本完成后不会截断输入配置映射。
+====

@@ -1,0 +1,18 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/understanding-odo.adoc
+
+:_content-type: CONCEPT
+[id="odo-features_{context}"]
+= odo 的主要功能
+
+odo 的设计目的是为 Kubernetes 的开发人员提供一个友好的 Kubernetes 接口，能够：
+
+* 通过创建新清单或使用现有清单，在 Kubernetes 集群上快速部署应用程序
+* 使用命令轻松创建和更新清单，而无需理解和维护 Kubernetes 配置文件
+* 提供对在 Kubernetes 集群上运行的应用程序的安全访问
+* 为 Kubernetes 集群上的应用程序添加和删除额外存储
+* 创建 Operator 支持的服务，并将应用程序链接到它们
+* 在作为 odo 组件部署的多个微服务间创建一个链接
+* 在 IDE 中使用 odo 进行远程调试应用程序
+* 使用 odo 轻松测试 Kubernetes 上部署的应用程序

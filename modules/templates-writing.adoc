@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+[id="templates-writing_{context}"]
+= 编写模板
+
+您可以定义新模板，以便轻松重新创建应用程序的所有对象。该模板将定义由其创建的对象以及一些元数据，以指导创建这些对象。
+
+以下是简单模板对象定义 (YAML) 的示例：
+
+[source,yaml]
+----
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: redis-template
+  annotations:
+    description: "Description"
+    iconClass: "icon-redis"
+    tags: "database,nosql"
+objects:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    name: redis-master
+  spec:
+    containers:
+    - env:
+      - name: REDIS_PASSWORD
+        value: ${REDIS_PASSWORD}
+      image: dockerfile/redis
+      name: master
+      ports:
+      - containerPort: 6379
+        protocol: TCP
+parameters:
+- description: Password used for Redis authentication
+  from: '[A-Z0-9]{8}'
+  generate: expression
+  name: REDIS_PASSWORD
+labels:
+  redis: master
+----

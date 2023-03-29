@@ -1,0 +1,73 @@
+
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-scheduler-pod-topology-spread-constraints
+
+[id="nodes-scheduler-pod-topology-spread-constraints-examples_{context}"]
+= pod 拓扑分布限制示例
+
+以下示例演示了 pod 拓扑分散约束配置。
+
+[id="nodes-scheduler-pod-topology-spread-constraints-example-single_{context}"]
+== 单个 pod 拓扑分布约束示例
+
+// TODO: Add a diagram?
+
+此 Pod spec 示例定义了一个 pod 拓扑分散约束。它与标记为 foo:bar 的 pod 匹配，在区间分布，指定 skew 1，并在不满足这些要求时不调度 pod。
+
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  name: my-pod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - image: "docker.io/ocpqe/hello-pod"
+    name: hello-pod
+----
+
+[id="nodes-scheduler-pod-topology-spread-constraints-example-multiple_{context}"]
+== 多个 pod 拓扑分布约束示例
+
+// TODO: Add a diagram?
+
+此 Pod spec 示例定义了两个 pod 拓扑分布限制。标签为 foo:bar 的 pod 上的匹配，指定为 skew 1，并在不满足这些要求时不调度 pod。
+
+第一个限制基于用户定义的标签 node 发布 pod，第二个约束根据用户定义的标签 rack 分发 pod。调度 pod 必须满足这两个限制。
+
+[source,yaml]
+----
+kind: Pod
+apiVersion: v1
+metadata:
+  name: my-pod-2
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: node
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  - maxSkew: 1
+    topologyKey: rack
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - image: "docker.io/ocpqe/hello-pod"
+    name: hello-pod
+----

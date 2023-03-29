@@ -1,0 +1,36 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/using-templates.adoc
+
+:_content-type: PROCEDURE
+[id="templates-create-from-existing-object_{context}"]
+= 从现有对象创建模板
+
+您可以 YAML 格式从项目中导出现有对象，然后通过添加参数和其他自定义作为模板表单来修改 YAML，而无需从头开始编写整个模板。
+
+.流程
+
+* 以 YAML 格式导出项目中的对象：
++
+[source,terminal]
+----
+$ oc get -o yaml all > <yaml_filename>
+----
++
+您还可替换特定资源类型或多个资源，而非 `all` 资源。运行 `oc get -h` 获取更多示例。
++
+`oc get -o yaml all` 中包括的对象类型是：
++
+** `BuildConfig`
+** `Build`
+** `DeploymentConfig`
+** `ImageStream`
+** `Pod`
+** `ReplicationController`
+** `Route`
+** `Service`
+
+[注意]
+====
+不建议使用 `all`` 别名，因为内容在不同的集群和版本中可能有所不同。相反，明确指定所有需要的资源。
+====

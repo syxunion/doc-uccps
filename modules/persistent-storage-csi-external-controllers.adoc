@@ -1,0 +1,24 @@
+// Module included in the following assemblies:
+//
+// * storage/container_storage_interface/persistent_storage-csi.adoc
+
+[id="external-csi-contollers_{context}"]
+= 外部 CSI 控制器
+
+外部 CSI 控制器是一个部署，它部署带有以下三个容器的一个或多个 pod：
+
+* 一个外部 CSI attacher 容器，它会将统信容器云管理平台的 `attach` 和 `detach` 调用转换为相关的 CSI 驱动程序的 ControllerPublish 和 ControllerUnpublish 调用。
+* 一个外部 CSI 置备程序容器，它可将统信容器云管理平台的 `provision` 和 `delete` 调用转换为相应的 CSI 驱动程序的 CreateVolume 和 DeleteVolume 调用。
+* 一个 CSI 驱动程序容器
+
+attach、 detach、 provision和 delete 操作通常需要 CSI 驱动程序在存储后端使用凭证。在 infrastructure 节点上运行 CSI controller pod，因此即使在一个计算节点上发生严重的安全破坏时，凭据也不会暴露给用户进程。
+
+[注意]
+====
+`attach`, `detach`, `provision`, 和 `delete` 操作通常需要 CSI 驱动程序在存储后端使用凭证。在 infrastructure 节点上运行 CSI controller pod，因此即使在一个计算节点上发生严重的安全破坏时，凭据也不会暴露给用户进程。
+====
+
+[NOTE]
+====
+当不支持第三方的 `attach` 或 `detach` 操作时，还需要为 CSI 驱动程序运行外部的附加器。外部附加器不会向 CSI 驱动程序发出任何 `ControllerPublish` 或 `ControllerUnpublish` 操作。然而，它仍必须运行方可实现所需的统信容器云管理平台 attachment API。
+====

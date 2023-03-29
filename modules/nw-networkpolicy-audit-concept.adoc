@@ -1,0 +1,47 @@
+[id="nw-networkpolicy-audit-concept_{context}"]
+= 网络策略审计日志记录
+
+OVN-Kubernetes 集群网络供应商使用 Open Virtual Network（OVN）ACL 管理网络策略。审计日志记录会公开允许和拒绝 ACL 事件。
+
+您可以为网络策略审计日志（如 syslog 服务器或 UNIX 域套接字）配置目的地。无论任何其他配置如何，审计日志始终保存到集群中的每个 OVN-Kubernetes pod 上的 `/var/log/ovn/acl-audit-log`。
+
+网络策略审计日志记录通过 `k8s.ovn.org/acl-logging` 键注解命名空间来启用每个命名空间，如下例所示：
+
+.命名空间注解示例
+[source,yaml]
+----
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: example1
+  annotations:
+    k8s.ovn.org/acl-logging: |-
+      {
+        "deny": "info",
+        "allow": "info"
+      }
+----
+
+日志记录格式与 RFC5424 中定义的 syslog 兼容。syslog 工具可配置，默认为 local0。日志条目示例可能类似如下：
+
+.ACL 拒绝日志条目示例
+[source,text]
+----
+2021-06-13T19:33:11.590Z|00005|acl_log(ovn_pinctrl0)|INFO|name="verify-audit-logging_deny-all", verdict=drop, severity=alert: icmp,vlan_tci=0x0000,dl_src=0a:58:0a:80:02:39,dl_dst=0a:58:0a:80:02:37,nw_src=10.128.2.57,nw_dst=10.128.2.55,nw_tos=0,nw_ecn=0,nw_ttl=64,icmp_type=8,icmp_code=0
+----
+
+下表描述了命名空间注解值：
+
+.网络策略审计日志记录命名空间注解
+[cols=".^4,.^6a",options="header"]
+|====
+|注解|Value
+
+|`k8s.ovn.org/acl-logging`
+|
+您必须至少指定 allow、deny 或同时指定两者才能为命名空间启用网络策略审计日志记录。
+
+`deny`:: 可选：指定 `alert`, `warning`, `notice`, `info`, 或 `debug`.
+`allow`:: 可选：指定 `alert`, `warning`, `notice`, `info`, 或 `debug`.
+
+|====

@@ -1,0 +1,49 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/ossm-observability.adoc
+* service_mesh/v2x/ossm-troubleshooting-istio.adoc
+////
+
+:_content-type: PROCEDURE
+[id="ossm-accessing-kiali-console_{context}"]
+= Accessing the Kiali console
+
+您可以在 Kiali 控制台中查看应用程序的拓扑、健康和指标。如果您的服务遇到问题，Kiali 控制台可让您通过服务查看数据流。您可以查看不同级别中的与网格组件相关的信息，包括抽象应用程序、服务以及负载。Kiali 还会实时提供命名空间的互动图形视图。
+
+要访问 Kiali 控制台，您必须安装并配置了 {SMProductName} 。
+
+安装过程创建了访问 Kiali 控制台的路由。
+
+如果您知道 Kiali 控制台的 URL，您可以直接访问它。如果您不知道 URL，请使用以下指示：
+
+.管理员的步骤
+
+. 使用管理员角色登录 {product-title} Web 控制台。
+
+. 点 *主页* -> *项目*。
+
+. 如有必要，在  *Projects* 页面上，使用过滤器来查找项目的名称。
+
+. 点项目的名称，例如 `bookinfo`。
+
+. 在 *Project details* 页面中，点 *Launcher* 部分的 *Kiali* 链接。
+
+. 使用与访问  {product-title} 控制台相同的用户名和密码登录到 Kiali 控制台。
++
+第一次登录到 Kiali 控制台时，您会看到  *Overview* 页面，它会显示服务网格中您有权查看的所有命名空间。
++
+如果您验证了控制台安装，且命名空间还没有添加到网格中，则可能无法显示 `istio-system` 以外的任何数据。
+
+.开发人员的步骤
+
+. 使用开发人员角色登录 {product-title} Web 控制台。
+
+. 单击  *项目*.
+
+. 如有必要，在  *Project Details* 页面上，使用过滤器来查找项目的名称。
+
+. 点项目的名称，例如  `bookinfo`.
+
+. 在 *Project* 页面中，点 *Launcher* 部分的 *Kiali* 链接。
+
+. 单击 *Log In With Uccps*.

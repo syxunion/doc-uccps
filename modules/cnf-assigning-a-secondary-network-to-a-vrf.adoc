@@ -1,0 +1,143 @@
+// Module included in the following assemblies:
+//
+// networking/multiple_networks/assigning-a-secondary-network-to-a-vrf.adoc
+
+
+:_content-type: PROCEDURE
+[id="cnf-assigning-a-secondary-network-to-a-vrf_{context}"]
+= 为 VRF 分配从属网络
+
+作为集群管理员，您可以使用 CNI VRF 插件为 VRF 域配置额外网络。此插件创建的虚拟网络与您指定的物理接口关联。
+
+[注意]
+====
+使用 VRF 的应用程序需要绑定到特定设备。通常的用法是在套接字中使用 `SO_BINDTODEVICE` 选项。`SO_BINDTODEVICE` 将套接字绑定到在传递接口名称中指定的设备，例如 `eth1`。要使用 `SO_BINDTODEVICE`，应用程序必须具有 `CAP_NET_RAW` 功能。
+
+统信容器云管理平台 pod 不支持通过 `ip vrf exec` 命令使用 VRF。要使用 VRF，将应用程序直接绑定到 VRF 接口。
+====
+
+[id="cnf-creating-an-additional-network-attachment-with-the-cni-vrf-plug-in_{context}"]
+== 使用 CNI VRF 插件创建额外网络附加
+
+使用 CNI VRF 插件创建额外网络附加
+
+[注意]
+====
+使用 CNI VRF 插件创建额外网络附加
+====
+
+要使用 CNI VRF 插件创建额外网络附加，请执行以下步骤。
+
+.先决条件
+
+* 安装 统信容器云管理平台 CLI (oc).
+* 以具有 `cluster-admin` 权限的用户身份登录 OpenShift 集群。
+
+.流程
+
+. 为额外网络附加创建 `Network` 自定义资源 (CR)，并为额外网络插入 `rawCNIConfig` 配置，如下例所示。将 YAML 保存为文件 `additional-network-attachment.yaml`。
++
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+  spec:
+  additionalNetworks:
+  - name: test-network-1
+    namespace: additional-network-1
+    type: Raw
+    rawCNIConfig: '{
+      "cniVersion": "0.3.1",
+      "name": "macvlan-vrf",
+      "plugins": [  <1>
+      {
+        "type": "macvlan",  <2>
+        "master": "eth1",
+        "ipam": {
+            "type": "static",
+            "addresses": [
+            {
+                "address": "191.168.1.23/24"
+            }
+            ]
+        }
+      },
+      {
+        "type": "vrf",
+        "vrfname": "example-vrf-name",  <3>
+        "table": 1001   <4>
+      }]
+    }'
+----
+<1> `plugins` 插件必须是一个列表。列表中的第一个项必须是支持 VRF 网络的从属网络。列表中的第二个项目是 VRF 插件配置。
+<2> `type` 必须设为 `vrf`。
+<3> `vrfname` 是接口分配的 VRF 的名称。如果 pod 中不存在，则创建它。
+<4> 可选。`table` 是路由表 ID。默认情况下使用 `tableid` 参数。如果没有指定，CNI 会为 VRF 分配免费路由表 ID。
++
+[注意]
+====
+只有在资源类型为 `netdevice` 时，VRF 才能正常工作。
+====
+
+. 创建 `Network` 资源：
++
+[source,terminal]
+----
+$ oc create -f additional-network-attachment.yaml
+----
+
+. 通过运行以下命令确认 CNO 创建了 `NetworkAttachmentDefinition` CR。将 `<namespace>` 替换为您在配置网络附加时指定的命名空间，如 `additional-network-1`。
++
+[source,terminal]
+----
+$ oc get network-attachment-definitions -n <namespace>
+----
++
+.输出示例
+[source,terminal]
+----
+NAME                       AGE
+additional-network-1       14m
+----
++
+[注意]
+====
+CNO 创建 CR 之前可能会有延迟。
+====
+
+.验证额外的 VRF 网络附加是否成功
+
+要验证 VRF CNI 是否已正确配置并附加额外网络附加，请执行以下操作：
+
+. 创建使用 VRF CNI 的网络。
+. 将网络分配给 pod。
+. 验证 Pod 网络附加是否已连接到 VRF 额外网络。远程 shell 到 pod 并运行以下命令：
++
+[source,terminal]
+----
+$ ip vrf show
+----
++
+.输出示例
++
+[source,terminal]
+----
+Name              Table
+-----------------------
+red                 10
+----
+. 验证 Pod 网络附加是否已连接到 VRF 额外网络。远程 shell 到 pod 并运行以下命令：
++
+[source,terminal]
+----
+$ ip link
+----
++
+.输出示例
++
+[source,terminal]
+----
+5: net1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master red state UP mode
+----

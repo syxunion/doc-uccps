@@ -1,0 +1,20 @@
+// Module included in the following assemblies:
+//
+// * monitoring/managing-alerts.adoc
+// * post_installation_configuration/configuring-alert-notifications.adoc
+
+[id="sending-notifications-to-external-systems_{context}"]
+= 将通知发送到外部系统
+
+在 统信容器云管理平台 1.2 中，可在 Alerting UI 中查看触发警报。默认不会将警报配置为发送到任何通知系统。您可以将 统信容器云管理平台 配置为将警报发送到以下类型的接收器：
+
+* PagerDuty
+* Webhook
+* 电子邮件
+* Slack
+
+通过将警报路由到接收器，您可在出现故障时及时向适当的团队发送通知。例如，关键警报需要立即关注，通常会传给个人或关键响应团队。相反，提供非关键警告通知的警报可能会被路由到一个问题单系统进行非即时的审阅。
+
+.使用 watchdog 警报检查警报是否工作正常
+
+统信容器云管理平台 监控功能包含持续触发的 watchdog 警报。Alertmanager 重复向已配置的通知提供程序发送 watchdog 警报通知。此提供程序通常会配置为在其停止收到 watchdog 警报时通知管理员。这种机制可帮助您快速识别 Alertmanager 和通知提供程序之间的任何通信问题。

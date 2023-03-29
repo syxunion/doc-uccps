@@ -1,0 +1,25 @@
+:_content-type: ASSEMBLY
+[id="ossm-reference"]
+= Service Mesh control plane configuration reference
+include::_attributes/common-attributes.adoc[]
+:context: ossm-reference
+
+toc::[]
+
+您可以通过修改默认的 `ServiceMeshControlPlane` (SMCP) 资源或创建完全自定义 SMCP 资源来自定义 {SMProductName} 本参考部分记录了可用于 SMCP 资源的配置选项。
+
+include::modules/ossm-cr-example.adoc[leveloffset=+1]
+
+== spec parameters
+
+include::modules/ossm-cr-general.adoc[leveloffset=+2]
+
+include::modules/ossm-cr-profiles.adoc[leveloffset=+2]
+
+include::modules/ossm-cr-tracing.adoc[leveloffset=+2]
+
+include::modules/ossm-cr-version.adoc[leveloffset=+2]
+
+include::modules/ossm-cr-threescale.adoc[leveloffset=+2]
+
+include::modules/ossm-cr-status.adoc[leveloffset=+1]

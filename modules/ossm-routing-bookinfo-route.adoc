@@ -1,0 +1,35 @@
+// Module included in the following assemblies:
+//
+// * service_mesh/v1x/ossm-traffic-manage.adoc
+// * service_mesh/v2x/ossm-traffic-manage.adoc
+:_content-type: PROCEDURE
+[id="ossm-routing-bookinfo-route_{context}"]
+= Route based on user identity
+
+更改路由配置，以便特定用户的所有流量都路由到特定的服务版本。在这种情况下，所有来自名为 `jason` 的用户的流量都会被路由到服务的 `reviews:v2`中。
+
+{SMProductShortName} 对用户身份没有任何特殊的内置了解。这个示例是启用的，因为 `productpage` 服务为到 reviews 服务的所有传出 HTTP 请求都添加了一个自定义的 `end-user`标头。
+
+.流程
+
+. 运行以下命令在 Bookinfo 示例应用程序中启用基于用户的路由。
++
+[source,bash,subs="attributes"]
+----
+$ oc apply -f https://raw.githubusercontent.com/Maistra/istio/maistra-{MaistraVersion}/samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+----
+
+. 运行以下命令，以确认创建了该规则。此命令返回 YAML 格式的所有 `kind: VirtualService` 。
++
+[source,terminal]
+----
+$ oc get virtualservice reviews -o yaml
+----
+
+. 在 Bookinfo 应用程序的  `/productpage` 中，以用户 `jason` 身份在无需密码的情况下进行登录。
++
+. 刷新浏览器。星级分级会出现在每条评论旁。
+
+. 以其他用户身份登录（选择任意名称）。刷新浏览器。现在就不会出现星级评分。现在，除 Jason 外，所有用户的流量都会被路由到 `reviews:v1` 。
+
+您已成功配置了 Bookinfo 示例应用程序，以根据用户身份路由流量。

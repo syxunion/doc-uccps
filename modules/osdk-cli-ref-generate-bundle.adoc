@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/osdk/cli-osdk-ref.adoc
+// * operators/operator_sdk/osdk-cli-ref.adoc
+
+[id="osdk-cli-ref-generate-bundle_{context}"]
+= bundle
+
+`generate bundle` 子命令为您的 Operator 项目生成一组捆绑包清单、元数据和 `bundle.Dockerfile` 文件。
+
+[注意]
+====
+通常，您首先运行 `generate kustomize manifests` 子命令来生成由 `generate bundle` 子命令使用的输入 Kustomize 基础。但是，您可以使用初始项目中的 `make bundle` 命令按顺序自动运行这些命令。
+====
+
+.`generate bundle` 标记
+[options="header",cols="1,3"]
+|===
+|标记 |描述
+
+|`--channels` (string)
+|捆绑包所属频道的以逗号分隔的列表。默认值为 `alpha`。
+
+|`--crds-dir` (string)
+|`CustomResoureDefinition` 清单的根目录。
+
+|`--default-channel` (string)
+|捆绑包的默认频道。
+
+|`--deploy-dir` (string)
+|Operator 清单的根目录，如部署和 RBAC。这个目录与传递给 `--input-dir` 标记的目录不同。
+
+|`-h`, `--help`
+|`generate bundle` 的帮助信息
+
+|`--input-dir` (string)
+|从中读取现有捆绑包的目录。这个目录是捆绑包 `manifests` 目录的父目录，它与 `--deploy-dir` 目录不同。
+
+|`--kustomize-dir` (string)
+|包含 Kustomize 基础的目录以及用于捆绑包清单的 `kustomization.yaml` 文件。默认路径为` config/manifests`。
+
+|`--manifests`
+|生成捆绑包清单。
+
+|`--metadata`
+|生成捆绑包元数据和 Dockerfile。
+
+|`--output-dir` (string)
+|将捆绑包写入的目录。
+
+|`--overwrite`
+|如果捆绑包元数据和 Dockerfile 存在，则覆盖它们。默认值为 `true`。
+
+|`--package` (string)
+|捆绑包的软件包名称。
+
+|`-q`, `--quiet`
+|在静默模式下运行。
+
+|`--stdout`
+|将捆绑包清单写入标准输出。
+
+|`--version` (string)
+|生成的捆绑包中的 Operator 语义版本。仅在创建新捆绑包或升级 Operator 时设置。
+
+|===

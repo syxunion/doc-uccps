@@ -1,0 +1,79 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-configure.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-resource-configure-request-limit_{context}"]
+= 从 pod 中查找内存请求和限制
+
+希望从 pod 中动态发现内存请求和限制的应用程序应该使用 Downward API。
+
+.流程
+
+. 配置 pod，以添加  `MEMORY_REQUEST` 和 `MEMORY_LIMIT` 小节：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+  - name: test
+    image: fedora:latest
+    command:
+    - sleep
+    - "3600"
+    env:
+    - name: MEMORY_REQUEST <1>
+      valueFrom:
+        resourceFieldRef:
+          containerName: test
+          resource: requests.memory
+    - name: MEMORY_LIMIT <2>
+      valueFrom:
+        resourceFieldRef:
+          containerName: test
+          resource: limits.memory
+    resources:
+      requests:
+        memory: 384Mi
+      limits:
+        memory: 512Mi
+----
+<1> 添加此小节来发现应用程序内存请求值。
+<2> 添加此小节来发现应用程序内存限制值。
+
+. 创建 pod：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
+
+. 使用远程 shell 访问 pod：
++
+[source,terminal]
+----
+$ oc rsh test
+----
+
+. 检查是否应用了请求的值：
++
+[source,terminal]
+----
+$ env | grep MEMORY | sort
+----
++
+.输出示例
+[source,terminal]
+----
+MEMORY_LIMIT=536870912
+MEMORY_REQUEST=402653184
+----
+
+[注意]
+====
+内存限制值也可由 `/sys/fs/cgroup/memory/memory.limit_in_bytes` 文件从容器内部读取。
+====

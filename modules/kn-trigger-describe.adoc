@@ -1,0 +1,50 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-triggers.adoc
+
+:_content-type: PROCEDURE
+[id="kn-trigger-describe_{context}"]
+=  使用 Knative CLI 描述触发器
+
+使用 Knative (kn) CLI 描述触发器，提供了一个简化且直观的用户界面。您可以通过 `kn trigger describe` 命令使用 Knative CLI 输出集群中现有触发器的信息。
+
+.先决条件
+
+* {ServerlessOperatorName}和 Knative Eventing 已安装在 {product-title} 集群中。
+* 已安装 Knative (`kn`) CLI.
+* 您已创建了触发器。
+
+.流程
+
+* 输入命令：
++
+[source,terminal]
+----
+$ kn trigger describe <trigger_name>
+----
++
+.输出示例
+[source,terminal]
+----
+Name:         ping
+Namespace:    default
+Labels:       eventing.knative.dev/broker=default
+Annotations:  eventing.knative.dev/creator=kube:admin, eventing.knative.dev/lastModifier=kube:admin
+Age:          2m
+Broker:       default
+Filter:
+  type:       dev.knative.event
+
+Sink:
+  Name:       edisplay
+  Namespace:  default
+  Resource:   Service (serving.knative.dev/v1)
+
+Conditions:
+  OK TYPE                  AGE REASON
+  ++ Ready                  2m
+  ++ BrokerReady            2m
+  ++ DependencyReady        2m
+  ++ Subscribed             2m
+  ++ SubscriberResolved     2m
+----

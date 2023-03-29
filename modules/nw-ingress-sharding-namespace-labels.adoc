@@ -1,0 +1,61 @@
+// Module included in the following assemblies:
+//
+// * configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-ingress-controller.adoc
+// * ingress-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-ingress-sharding-namespace-labels_{context}"]
+= 使用命名空间标签配置 Ingress Controller 分片
+
+使用命名空间标签进行 Ingress Controller 分片，意味着 Ingress Controller 提供由命名空间选择器选择的任意命名空间中的所有路由。
+
+在一组 Ingress Controller 之间平衡传入的流量负载时，以及在将流量隔离到特定 Ingress Controller 时，Ingress Controller 分片会很有用处。例如，A 公司的流量使用一个 Ingress Controller，B 公司的流量则使用另外一个 Ingress Controller。
+
+[警告]
+====
+如果您部署 Keepalived Ingress VIP，请不要为 `endpointPublishingStrategy` 参数部署带有值 `HostNetwork` 的非默认 Ingress Controller。这样做可能会导致问题。对于 `endpointPublishingStrategy`，使用 `NodePort` 而不是 `HostNetwork`。
+====
+
+.流程
+
+. 编辑 `router-internal.yaml` 文件：
++
+[source,terminal]
+----
+# cat router-internal.yaml
+----
++
+.输出示例
+[source,yaml]
+----
+apiVersion: v1
+items:
+- apiVersion: operator.openshift.io/v1
+  kind: IngressController
+  metadata:
+    name: sharded
+    namespace: openshift-ingress-operator
+  spec:
+    domain: <apps-sharded.basedomain.example.net>
+    nodePlacement:
+      nodeSelector:
+        matchLabels:
+          node-role.kubernetes.io/worker: ""
+    namespaceSelector:
+      matchLabels:
+        type: sharded
+  status: {}
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+----
+
+. 应用 Ingress Controller `router-internal.yaml` 文件：
++
+[source,terminal]
+----
+# oc apply -f router-internal.yaml
+----
++
+Ingress Controller 选择由命名空间选择器选择的具有 `type: sharded` 标签的任意命名空间中的路由。

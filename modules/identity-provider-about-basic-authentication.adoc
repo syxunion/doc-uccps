@@ -1,0 +1,65 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+
+:_content-type: CONCEPT
+[id="identity-provider-about-basic-authentication_{context}"]
+= 关于基本身份验证
+
+基本身份验证是一种通用后端集成机制，用户可以使用针对远程身份提供程序验证的凭证来登录 统信容器云管理平台。
+
+由于基本身份验证是通用的，因此您可以在高级身份验证配置中使用此身份提供程序。
+
+[重要]
+====
+基本身份验证必须使用 HTTPS 连接到远程服务器，以防止遭受用户 ID 和密码嗅探以及中间人攻击。
+====
+
+配置了基本身份验证后，用户将其用户名和密码发送到 统信容器云管理平台，然后通过提出服务器对服务器请求并将凭证作为基本身份验证标头来传递，针对远程服务器验证这些凭证。这要求用户在登录期间向统信容器云管理平台发送凭证。
+
+[注意]
+====
+这只适用于用户名/密码登录机制，并且统信容器云管理平台必须能够向远程身份验证服务器发出网络请求。
+====
+
+针对受基本身份验证保护并返回 JSON 的远程 URL 验证用户名和密码。
+
+`401` 响应表示身份验证失败。
+
+非 200 状态或出现非空“error”键表示出现错误：
+
+[source,terminal]
+----
+{"error":"Error message"}
+----
+
+200 状态并带有 sub（subject）键则表示成功：
+
+[source,terminal]
+----
+{"sub":"userid"} <1>
+----
+<1> 主体必须是经过身份验证的用户所特有的，而且必须不可修改。
+
+成功响应可以有选择地提供附加数据，例如：
+
+* 使用 `name` 键的显示名称。例如：
++
+[source,terminal]
+----
+{"sub":"userid", "name": "User Name", ...}
+----
++
+* 使用 email 键的电子邮件地址。例如：
++
+[source,terminal]
+----
+{"sub":"userid", "email":"user@example.com", ...}
+----
++
+* 使用 `preferred_username` 键的首选用户名。这可用在唯一不可改主体是数据库密钥或 UID 且存在更易读名称的情形中。为经过身份验证的身份置备统信容器云管理平台用户时，这可用作提示。例如：
++
+[source,terminal]
+----
+{"sub":"014fbff9a07c", "preferred_username":"bob", ...}
+----

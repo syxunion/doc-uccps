@@ -1,0 +1,32 @@
+// Module included in the following assemblies:
+//
+// * scaling_and_performance/using-topology-manager.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+[id="topology_manager_policies_{context}"]
+= 拓扑管理器策略
+
+拓扑管理器通过从 Hint 提供者（如 CPU Manager 和设备管理器）收集拓扑提示来调整所有级别服务质量（QoS）的 Pod 资源，并使用收集的提示来匹配 Pod 资源。
+
+[注意]
+====
+要将 `CPU` 资源与 `Pod` 规格中的其他请求资源匹配，必须使用 static CPU Manager 策略启用 CPU Manager。
+====
+
+拓扑管理器支持四个分配策略，这些策略在 `cpumanager-enabled` 自定义资源（CR）中定义：
+
+`none` 策略::
+
+这是默认策略，不执行任何拓扑对齐调整。
+
+`best-effort` 策略::
+
+对于带有 `best-effort` 拓扑管理策略的 pod 中的每个容器，kubelet 会调用每个 Hint 提供者来发现其资源的可用性。使用这些信息，拓扑管理器会保存那个容器的首选 NUMA 节点关联性设置。如果关联性没有被首选设置，则拓扑管理器会保存这个设置，并把 pod 分配给节点。
+
+`restricted` 策略::
+
+对于带有 `restricted` 拓扑管理策略的 pod 中的每个容器，kubelet 会调用每个 Hint 提供者来发现其资源的可用性。使用这些信息，拓扑管理器会保存那个容器的首选 NUMA 节点关联性设置。如果关联性没有被首选，则拓扑管理器会从节点拒绝这个 pod，从而导致 pod 处于 `Terminated` 状态，且 pod 准入失败。
+
+`single-numa-node` 策略::
+
+对于带有 `single-numa-node` 拓扑管理策略的 pod 中的每个容器，kubelet 会调用每个 Hint 提供者来发现其资源的可用性。使用这个信息，拓扑管理器会决定单个 NUMA 节点关联性是否可能。如果是，pod 将会分配给该节点。如果无法使用单一 NUMA 节点关联性，则拓扑管理器会拒绝来自节点的 pod。这会导致 pod 处于 Terminated 状态，且 pod 准入失败。

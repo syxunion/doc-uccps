@@ -1,0 +1,45 @@
+// Module included in the following assemblies:
+//
+// * authentication/identity_providers/configuring-basic-authentication-identity-provider.adoc
+// * authentication/identity_providers/configuring-github-identity-provider.adoc
+// * authentication/identity_providers/configuring-gitlab-identity-provider.adoc
+// * authentication/identity_providers/configuring-ldap-identity-provider.adoc
+// * authentication/identity_providers/configuring-oidc-identity-provider.adoc
+// * authentication/identity_providers/configuring-request-header-identity-provider.adoc
+
+ifeval::["{context}" == "configuring-github-identity-provider"]
+:github:
+endif::[]
+
+:_content-type: PROCEDURE
+[id="identity-provider-creating-configmap_{context}"]
+= 创建配置映射
+
+身份提供程序使用 `openshift-config` 命名空间中的统信容器云管理平台`ConfigMap` 对象来包含证书颁发机构捆绑包。主要用于包含身份提供程序所需的证书捆绑包。
+
+
+.流程
+
+* 使用以下命令，定义包含证书颁发机构的统信容器云管理平台`ConfigMap`。证书颁发机构必须存储在 `ConfigMap` 对象的 `ca.crt` 键中。
++
+[source,terminal]
+----
+$ oc create configmap ca-config-map --from-file=ca.crt=/path/to/ca -n openshift-config
+----
++
+[提示]
+====
+您还可以应用以下 YAML 来创建配置映射：
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ca-config-map
+  namespace: openshift-config
+data:
+  ca.crt: |
+    <CA_certificate_PEM>
+----
+====

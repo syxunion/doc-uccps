@@ -1,0 +1,58 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-configuring-routes.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-customize-labels-annotations-routes_{context}"]
+= 为 {product-title} 路由自定义标签和注解
+
+{product-title} 路由支持使用自定义标签和注解，您可以通过修改 Knative 服务的 `metadata` 。自定义标签和注解从服务传播到 Knative 路由，然后传播到 Knative ingress，最后传播到 {product-title} 路由。
+
+.先决条件
+
+* 您必须已在  {product-title} 集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 创建包含您要传播到  {product-title} 路由的标签或注解的 Knative 服务：
+** 使用 YAML 创建服务：
++
+.使用 YAML 创建的服务示例
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: <service_name>
+  labels:
+    <label_name>: <label_value>
+  annotations:
+    <annotation_name>: <annotation_value>
+...
+----
+** 要使用 Knative (`kn`) CLI 创建服务，请输入：
++
+.使用 kn 命令创建的服务示例
+[source,terminal]
+----
+$ kn service create <service_name> \
+  --image=<image> \
+  --annotation <annotation_name>=<annotation_value> \
+  --label <label_value>=<label_value>
+----
+
+. 通过检查以下命令的输出来验证 {product-title} 路由是否已使用您添加的注解或标签创建：
++
+.验证命令示例
+[source,terminal]
+----
+$ oc get routes.route.openshift.io \
+     -l serving.knative.openshift.io/ingressName=<service_name> \ <1>
+     -l serving.knative.openshift.io/ingressNamespace=<service_namespace> \ <2>
+     -n knative-serving-ingress -o yaml \
+         | grep -e "<label_name>: \"<label_value>\""  -e "<annotation_name>: <annotation_value>" <3>
+----
+<1> 使用服务的名称。
+<2> 使用创建服务的命名空间。
+<3> 将您的值用于标签和注解名称和值。

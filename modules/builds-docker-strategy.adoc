@@ -1,0 +1,34 @@
+// Module included in the following assemblies:
+//
+// * builds/creating-build-inputs.adoc
+
+[id="builds-docker-strategy_{context}"]
+= Docker 策略
+
+采用 docker 策略时，您可以使用 Dockerfile 中的 ADD 和 COPY 指令，将所有定义的输入 secret 添加到容器镜像中。
+
+如果没有为 secret 指定 `destinationDir`，则文件将复制到 Dockerfile 所在的同一目录中。如果将一个相对路径指定为 `destinationDir`，则 secret 复制到相对于 Dockerfile 位置的该目录中。这样，secret 文件可供 Docker 构建操作使用，作为构建期间使用的上下文目录的一部分。
+
+.引用 secret 和配置映射数据的 Dockerfile 示例
+----
+FROM centos/ruby-22-centos7
+
+USER root
+COPY ./secret-dir /secrets
+COPY ./config /
+
+# Create a shell script that will output secrets and ConfigMaps when the image is run
+RUN echo '#!/bin/sh' > /input_report.sh
+RUN echo '(test -f /secrets/secret1 && echo -n "secret1=" && cat /secrets/secret1)' >> /input_report.sh
+RUN echo '(test -f /config && echo -n "relative-configMap=" && cat /config)' >> /input_report.sh
+RUN chmod 755 /input_report.sh
+
+CMD ["/bin/sh", "-c", "/input_report.sh"]
+----
+
+[重要]
+====
+用户应该从最终的应用程序镜像中移除输入 secret，以便从该镜像运行的容器中不会存在这些 secret。但是，secret 仍然存在于它们添加到的层中的镜像本身内。这一移除是 Dockerfile 本身的一部分。
+
+为防止输入 secret 和配置映射的内容出现在构建输出容器镜像中并完全避免此移除过程，请在 Docker 构建策略中使用构建卷。
+====

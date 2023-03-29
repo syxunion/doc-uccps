@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/opm/cli-opm-ref.adoc
+
+[id="opm-cli-ref-validate_{context}"]
+= validate
+
+验证给定目录中声明性配置 JSON 文件。
+
+.命令语法
+[source,terminal]
+----
+$ opm validate <directory> [<flags>]
+----

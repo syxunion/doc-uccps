@@ -1,0 +1,171 @@
+// Module included in the following assemblies:
+//
+// * nodes/scheduling/nodes-custom-scheduler.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-custom-scheduler-deploying_{context}"]
+= 部署自定义调度程序
+
+要在集群中包含自定义调度程序，请在部署中包含自定义调度程序的镜像。
+
+.先决条件
+
+* 您可以使用具有 `cluster-admin` 角色的用户访问集群。
+* 您有一个调度程序二进制文件。
++
+[注意]
+====
+有关如何创建调度程序二进制文件的信息超出了本文档的讨论范围。例如，请参阅 Kubernetes 文档中的配置多个调度程序。请注意，统信不支持自定义调度程序的实际功能。
+====
+* 您已创建了包含调度程序二进制文件的镜像，并将其推送到 registry。
+
+.流程
+
+. 创建一个包含自定义调度程序部署资源的文件：
++
+.`scheduler-config-map.yaml` 文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scheduler-config
+  namespace: kube-system <1>
+data:
+  scheduler-config.yaml: | <2>
+    apiVersion: kubescheduler.config.k8s.io/v1beta2
+    kind: KubeSchedulerConfiguration
+    profiles:
+      - schedulerName: custom-scheduler <3>
+    leaderElection:
+      leaderElect: false
+----
+<1> 此流程使用 `kube-system` 命名空间，但您可以使用自己选择的命名空间。
+<2> 当此流程稍后定义 Deployment 资源时，您可以使用 `--config` 参数将此文件传递给调度程序命令。
+<3> 为自定义调度程序定义调度程序配置集。在 Pod 配置中定义  `schedulerName` 时使用此调度程序名称。
+
+. 创建配置映射：
++
+[source,terminal]
+----
+$ oc create -f scheduler-config-map.yaml
+----
+
+. 创建一个包含自定义调度程序部署资源的文件：
++
+.`custom-scheduler.yaml` 文件示例
+[source,yaml]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: custom-scheduler
+  namespace: kube-system <1>
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: custom-scheduler-as-kube-scheduler
+subjects:
+- kind: ServiceAccount
+  name: custom-scheduler
+  namespace: kube-system <1>
+roleRef:
+  kind: ClusterRole
+  name: system:kube-scheduler
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: custom-scheduler-as-volume-scheduler
+subjects:
+- kind: ServiceAccount
+  name: custom-scheduler
+  namespace: kube-system <1>
+roleRef:
+  kind: ClusterRole
+  name: system:volume-scheduler
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: scheduler
+    tier: control-plane
+  name: custom-scheduler
+  namespace: kube-system <1>
+spec:
+  selector:
+    matchLabels:
+      component: scheduler
+      tier: control-plane
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: scheduler
+        tier: control-plane
+        version: second
+    spec:
+      serviceAccountName: custom-scheduler
+      containers:
+      - command:
+        - /usr/local/bin/kube-scheduler
+        - --config=/etc/config/scheduler-config.yaml <2>
+        image: "<namespace>/<image_name>:<tag>" <3>
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10259
+            scheme: HTTPS
+          initialDelaySeconds: 15
+        name: kube-second-scheduler
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 10259
+            scheme: HTTPS
+        resources:
+          requests:
+            cpu: '0.1'
+        securityContext:
+          privileged: false
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+      hostNetwork: false
+      hostPID: false
+      volumes:
+        - name: config-volume
+          configMap:
+            name: scheduler-config
+----
+<1> 此流程使用 `kube-system` 命名空间，但您可以使用自己选择的命名空间。
+<2> 自定义调度程序的命令可能需要不同的参数。
+<3> 指定您为自定义调度程序创建的容器镜像。
+
+. 在集群中创建部署资源：
++
+[source,terminal]
+----
+$ oc create -f custom-scheduler.yaml
+----
+
+.验证
+
+* 验证调度程序 pod 是否正在运行：
++
+[source,terminal]
+----
+$ oc get pods -n kube-system
+----
++
+自定义调度程序 pod 列为 `Running`:
++
+[source,terminal]
+----
+NAME                                                       READY   STATUS    RESTARTS   AGE
+custom-scheduler-6cd7c4b8bc-854zb                          1/1     Running   0          2m
+----

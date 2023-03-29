@@ -1,0 +1,125 @@
+// Module included in the following assemblies:
+//
+// * machine_management/creating_machinesets/creating-machineset-osp.adoc
+
+[id="machineset-yaml-osp-sr-iov-port-security_{context}"]
+=  禁用端口安全性的 SR-IOV 部署的 YAML 示例
+
+要在禁用端口安全的网络上创建单根 I/O 虚拟化（SR-IOV）端口，请定义一个机器集，将端口作为 `spec.template.spec.providerSpec.value.ports` 列表中的项来包含。与标准 SR-IOV 机器集的区别在于，自动安全组以及使用网络和子网接口创建的端口允许的地址对配置。
+
+您为机器子网定义的端口需要：
+
+* API 和入口虚拟 IP 端口允许的地址对
+* 计算安全组
+* 附加到机器网络和子网
+
+[注意]
+====
+本例中仅描述特定于禁用端口安全性的 SR-IOV 部署的参数。要查看更常规的示例，请参阅 RHOSP 上使用 SR-IOV 的机器设置自定义资源的 Sample YAML。
+====
+
+.使用 SR-IOV 网络并禁用端口安全性的机器集示例
+[source,yaml]
+----
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  labels:
+    machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+    machine.openshift.io/cluster-api-machine-role: <node_role>
+    machine.openshift.io/cluster-api-machine-type: <node_role>
+  name: <infrastructure_id>-<node_role>
+  namespace: openshift-machine-api
+spec:
+  replicas: <number_of_replicas>
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+      machine.openshift.io/cluster-api-machineset: <infrastructure_id>-<node_role>
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: <infrastructure_id>
+        machine.openshift.io/cluster-api-machine-role: <node_role>
+        machine.openshift.io/cluster-api-machine-type: <node_role>
+        machine.openshift.io/cluster-api-machineset: <infrastructure_id>-<node_role>
+    spec:
+      metadata: {}
+      providerSpec:
+        value:
+          apiVersion: openstackproviderconfig.openshift.io/v1alpha1
+          cloudName: openstack
+          cloudsSecret:
+            name: openstack-cloud-credentials
+            namespace: openshift-machine-api
+          flavor: <nova_flavor>
+          image: <glance_image_name_or_location>
+          kind: OpenstackProviderSpec
+          ports:
+            - allowedAddressPairs: <1> 
+              - ipAddress: <API_VIP_port_IP>
+              - ipAddress: <ingress_VIP_port_IP>
+              fixedIPs:
+                - subnetID: <machines_subnet_UUID> <2>
+              nameSuffix: nodes
+              networkID: <machines_network_UUID> <2>
+              securityGroups:
+                  - <compute_security_group_UUID> <3>
+            - networkID: <SRIOV_network_UUID>
+              nameSuffix: sriov
+              fixedIPs:
+                - subnetID: <SRIOV_subnet_UUID>
+              tags:
+                - sriov
+              vnicType: direct
+              portSecurity: False
+          primarySubnet: <machines_subnet_UUID>
+          serverMetadata:
+            Name: <infrastructure_ID>-<node_role>
+            openshiftClusterID: <infrastructure_id>
+          tags:
+          - openshiftClusterID=<infrastructure_id>
+          trunk: false
+          userDataSecret:
+            name: worker-user-data
+          configDrive: True
+----
+<1> 为 API 和入口端口指定允许的地址对。
+<2> 指定机器网络和子网。
+<3> 指定计算机器安全组。
+
+[注意]
+====
+对于由网络和子网列表中的条目创建的端口，启用中继（Trunking）。从这些列表中创建的端口名称遵循 `<machine_name>-<nameSuffix>` 模式。端口定义中需要 `nameSuffix` 字段。
+
+您可以为每个端口启用中继。
+
+另外，您还可以在端口中添加标签作为其标签（tags）列表的一部分。
+====
+
+如果您的集群使用 Kuryr，且 RHOSP SR-IOV 网络禁用端口安全，计算机器的主要端口必须具有：
+
+* `spec.template.spec.providerSpec.value.networks.portSecurityEnabled` 参数的值设置为 `false`。
+
+* 对于每个子网，`spec.template.spec.providerSpec.value.networks.subnets.portSecurityEnabled` 参数的值设置为 `false`。
+
+* `spec.template.spec.providerSpec.value.securityGroups` 的值设为空：[]。
+
+.Kuryr 上使用 SR-IOV 且禁用端口安全性的集群集的示例部分
+[source,yaml]
+----
+...
+          networks:
+            - subnets:
+              - uuid: <machines_subnet_UUID>
+                portSecurityEnabled: false
+              portSecurityEnabled: false
+          securityGroups: []
+...
+----
+
+在这种情况下，您可以在创建虚拟机后将计算安全组应用到主虚拟机接口。例如，从命令行：
+[source,terminal]
+----
+$ openstack port set --enable-port-security --security-group <infrastructure_id>-<node_role> <main_port_ID>
+----

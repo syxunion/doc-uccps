@@ -1,0 +1,19 @@
+:_content-type: ASSEMBLY
+[id="configuring-gitlab-identity-provider"]
+= 配置 GitLab 身份提供程序
+include::_attributes/common-attributes.adoc[]
+:context: configuring-gitlab-identity-provider
+
+toc::[]
+
+配置 `gitlab` 身份提供程序，使用 GitLab.com 或任何其他 GitLab 实例作为身份提供程序。如果使用 GitLab 版本 7.7.0 到 11.0，您可以使用 OAuth 集成进行连接。如果使用 GitLab 版本 11.1 或更高版本，您可以使用 OpenID Connect (OIDC) 进行连接，而不使用 OAuth。
+
+include::modules/identity-provider-overview.adoc[leveloffset=+1]
+
+include::modules/identity-provider-secret.adoc[leveloffset=+1]
+
+include::modules/identity-provider-config-map.adoc[leveloffset=+1]
+
+include::modules/identity-provider-gitlab-CR.adoc[leveloffset=+1]
+
+include::modules/identity-provider-add.adoc[leveloffset=+1]

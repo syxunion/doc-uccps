@@ -1,0 +1,13 @@
+:_content-type: ASSEMBLY
+[id="viewing-network-policy"]
+= 查看网络策略
+include::_attributes/common-attributes.adoc[]
+:context: viewing-network-policy
+
+toc::[]
+
+以具有 admin 角色的用户，您可以查看命名空间的网络策略。
+
+include::modules/nw-networkpolicy-view.adoc[leveloffset=+1]
+
+include::modules/nw-networkpolicy-object.adoc[leveloffset=+1]

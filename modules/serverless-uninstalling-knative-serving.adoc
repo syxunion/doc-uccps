@@ -1,0 +1,30 @@
+// Module included in the following assemblies:
+//
+// * serverless/install/removing-openshift-serverless.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-uninstalling-knative-serving_{context}"]
+= 卸载 Knative Serving
+
+在删除  {ServerlessOperatorName}之前，您必须删除 Knative Serving。要卸载 Knative Serving，您必须删除 `KnativeServing` 自定义资源 (CR) 并删除 `knative-serving` 命名空间。
+
+.先决条件
+
+* 您可以访问具有集群管理员权限的 {product-title} 帐户。
+* 安装 Uccps CLI (`oc`).
+
+.流程
+
+. 删除  `KnativeServing` CR:
++
+[source,terminal]
+----
+$ oc delete knativeservings.operator.knative.dev knative-serving -n knative-serving
+----
+
+. 在该命令运行完成且已从 `knative-serving` 命名空间中移除所有 Pod 后，删除命名空间：
++
+[source,terminal]
+----
+$ oc delete namespace knative-serving
+----

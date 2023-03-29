@@ -1,0 +1,17 @@
+// Module included in the following assemblies:
+//
+// * dns/dns-operator.adoc
+
+:_content-type: PROCEDURE
+[id="nw-dns-operator-logs_{context}"]
+= DNS Operator 日志
+
+您可以使用 `oc logs` 命令来查看 DNS Operator 日志。
+
+.流程
+
+查看 DNS Operator 的日志：
+[source,terminal]
+----
+$ oc logs -n openshift-dns-operator deployment/dns-operator -c dns-operator
+----

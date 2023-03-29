@@ -1,0 +1,103 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+[id="images-other-jenkins-env-var_{context}"]
+= Jenkins 环境变量
+
+Jenkins 服务器可通过以下环境变量进行配置：
+
+[options="header"]
+|===
+| 变量 | 定义 | 值和设置示例
+
+|`OPENSHIFT_ENABLE_OAUTH`
+|决定在登录 Jenkins 时，OpenShift Container Platform Login 插件可否管理身份验证。要启用，请设为 `true`。
+|默认： `false`
+
+|`JENKINS_PASSWORD`
+|使用标准 Jenkins 身份验证时 admin 用户的密码。`OPENSHIFT_ENABLE_OAUTH` 设置为 `true` 时不适用。
+|默认： `password`
+
+|`JAVA_MAX_HEAP_PARAM`,
+`CONTAINER_HEAP_PERCENT`,
+`JENKINS_MAX_HEAP_UPPER_BOUND_MB`
+|这些值控制 Jenkins JVM 的最大堆大小。如果设置了 `JAVA_MAX_heap_PARAM`，则优先使用其值。否则，最大堆大小将动态计算为容器内存限值的 `CONTAINER_HEAP_PERCENT`，可选上限为 `JENKINS_MAX_HEAP_UPPER_BOUND_MB MiB`。
+
+默认情况下，Jenkins JVM 的最大堆大小设置为容器内存限值的 50%，且无上限。
+|`JAVA_MAX_HEAP_PARAM` 示例设置: `-Xmx512m`
+
+`CONTAINER_HEAP_PERCENT` 默认： `0.5`, or 50%
+
+`JENKINS_MAX_HEAP_UPPER_BOUND_MB` 示例设置: `512 MiB`
+
+|`JAVA_INITIAL_HEAP_PARAM`,
+`CONTAINER_INITIAL_PERCENT`
+|这些值控制 Jenkins JVM 的初始堆大小。如果设置了`JAVA_INITIAL_heap_PARAM`，则优先使用其值。否则，初始堆大小将动态计算为动态计算的最大堆大小的 `CONTAINER_INITIAL_PERCENT`。
+
+默认情况下，JVM 设置初始堆大小。
+|`JAVA_INITIAL_HEAP_PARAM` 示例设置: `-Xms32m`
+
+`CONTAINER_INITIAL_PERCENT` 示例设置: `0.1`, 或 10%
+
+|`CONTAINER_CORE_LIMIT`
+|如果设置，请将用于调整内部 JVM 线程数的内核数指定为整数。
+|示例设置: `2`
+
+|`JAVA_TOOL_OPTIONS`
+|指定应用于该容器中运行的所有 JVM 的选项。不建议覆盖该值。
+|默认： `-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true`
+
+|`JAVA_GC_OPTS`
+|指定 Jenkins JVM 垃圾回收参数。不建议覆盖该值。
+|默认： `-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90`
+
+|`JENKINS_JAVA_OVERRIDES`
+|指定适用于 Jenkins JVM 的附加选项。这些选项附加到所有其他选项中，包括上面的 Java 选项，必要时可用于覆盖其中任何一个选项。用空格分开各个附加选项；如有任意选项包含空格字符，请使用反斜杠转义。
+|示例设置s: `-Dfoo -Dbar`; `-Dfoo=first\ value -Dbar=second\ value`.
+
+|`JENKINS_OPTS`
+|为 Jenkins 指定参数。
+|
+
+|`INSTALL_PLUGINS`
+|指定在容器首次运行或 `OVERRIDE_PV_PLUGINS_WITH_IMAGE_PLUGINS` 设置为 `true` 时需要安装的 Jenkins 附加插件。插件被指定为用逗号分隔的“名称:版本”对列表。
+|示例设置: `git:3.7.0,subversion:2.10.2`.
+
+|`OPENSHIFT_PERMISSIONS_POLL_INTERVAL`
+|指定 OpenShift Container Platform Login 插件轮询 OpenShift Container Platform 的时间间隔（以毫秒为单位），以获取与 Jenkins 中定义的每个用户关联的权限。
+|默认： `300000` - 5 minutes
+
+|`OVERRIDE_PV_CONFIG_WITH_IMAGE_CONFIG`
+|当使用 Jenkins 配置目录的 OpenShift Container Platform 持久性卷（PV）运行此镜像时，从镜像到 PV 的配置传输仅在镜像首次启动时执行，因为在创建持久性卷声明（PVC）时会分配 PV。如果您在初始启动后创建自定义镜像来扩展此镜像并更新自定义镜像中的配置，则不会复制该配置，除非将该环境变量设置为 `true`。
+|默认： `false`
+
+|`OVERRIDE_PV_PLUGINS_WITH_IMAGE_PLUGINS`
+|当使用 Jenkins 配置目录的 OpenShift Container Platform PV 运行此镜像时，从镜像到 PV 的插件传输仅在镜像首次启动时执行，因为在创建 PVC 时会分配 PV。如果您在初始启动后创建自定义镜像来扩展此镜像并更新自定义镜像中的插件，则不会复制该插件，除非将该环境变量设置为 `true`。
+|默认： `false`
+
+|`ENABLE_FATAL_ERROR_LOG_FILE`
+|当使用 Jenkins 配置目录的 OpenShift Container Platform PVC 运行此镜像时，该环境变量允许在严重错误发生时，严重错误日志文件保留。严重错误文件保存在：`/var/lib/jenkins/logs`。
+|默认： `false`
+
+|`NODEJS_SLAVE_IMAGE`
+|设置此值将覆盖用于 Node.js 代理 Pod 默认配置的镜像。项目中有一个名为`jenkins-agent-nodejs` 的相关镜像流标签。该变量必须在 Jenkins 首次启动前进行设置，以便其生效。
+|Jenkins 服务器中的默认 Node.js 代理镜像：`image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-nodejs:latest`
+
+|`MAVEN_SLAVE_IMAGE`
+|设置此值将覆盖用于默认 Maven 代理 Pod 配置的镜像。项目中有一个名为 `jenkins-agent-maven` 的相关镜像流标签。该变量必须在 Jenkins 首次启动前进行设置，以便其生效。
+|Jenkins 服务器中的默认 Maven 代理镜像：`image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-maven:latest`
+
+|`AGENT_BASE_IMAGE`
+|设置此值将覆盖使用此镜像提供的 Kubernetes 插件 pod 模板中的 `jnlp` 容器的镜像。否则，使用 `openshift` 命名空间中的 `jenkins-agent-base:latest` 镜像流标签中的镜像。
+|默认：`image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest`
+
+|`JAVA_BUILDER_IMAGE`
+|设置此值将覆盖使用此镜像提供的 `java-builder` 示例 Kubernetes 插件 Pod 模板中用于 `java-builder` 容器的镜像。否则，会使用 `openshift` 命名空间中的 `java:latest` 镜像流标签的镜像。
+|默认：`image-registry.openshift-image-registry.svc:5000/openshift/java:latest`
+
+|`NODEJS_BUILDER_IMAGE`
+|设置此值将覆盖使用此镜像提供的 `nodejs-builder` 示例 Kubernetes 插件 Pod 模板中用于 `nodejs-builder` 容器的镜像。否则，会使用 `openshift `命名空间中的 `nodejs:latest` 镜像流标签的镜像。
+|默认：`image-registry.openshift-image-registry.svc:5000/openshift/nodejs:latest`
+
+|===

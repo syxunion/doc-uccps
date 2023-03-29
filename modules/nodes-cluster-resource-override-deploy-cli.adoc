@@ -1,0 +1,214 @@
+// Module included in the following assemblies:
+//
+// * nodes/clusters/nodes-cluster-overcommit.adoc
+// * post_installation_configuration/node-tasks.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-resource-override-deploy-cli_{context}"]
+= 使用 CLI 安装 Cluster Resource Override Operator
+
+您可以使用 统信容器云管理平台 CLI 来安装 Cluster Resource Override Operator，以帮助控制集群中的过量使用。
+
+.先决条件
+
+* 如果容器上未设置限值，Cluster Resourceoverride Operator 将没有作用。您必须使用一个 `LimitRange` 对象为项目指定默认限值，或在 Pod spec 中配置要应用的覆盖的限制。
+
+.流程
+
+使用 CLI 安装 Cluster Resource Override Operator：
+
+. 为 Cluster Resource Override Operator 创建命名空间：
+
+.. 为 Cluster Resource Override Operator 创建一个 `Namespace` 空间对象 YAML 文件（如 cro-namespace.yaml）:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clusterresourceoverride-operator
+----
+
+.. 创建命名空间：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f cro-namespace.yaml
+----
+
+. 创建一个 Operator 组：
+
+.. 为 Cluster Resource Override Operator 创建一个 `OperatorGroup`  对象 YAML 文件（如 cro-og.yaml）:
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: clusterresourceoverride-operator
+  namespace: clusterresourceoverride-operator
+spec:
+  targetNamespaces:
+    - clusterresourceoverride-operator
+----
+
+.. 创建 Operator 组：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f cro-og.yaml
+----
+
+. 创建一个订阅：
+
+.. 为 Cluster Resourceoverride Operator 创建一个 `Subscription` 对象 YAML 文件（如 cro-sub.yaml):
++
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: clusterresourceoverride
+  namespace: clusterresourceoverride-operator
+spec:
+  channel: "4.10"
+  name: clusterresourceoverride
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+----
+
+.. 创建订阅：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f cro-sub.yaml
+----
+
+. 在 `clusterresourceoverride-operator` 命名空间中创建  `ClusterResourceOverride` 自定义资源（CR）对象：
+
+.. 进入  `clusterresourceoverride-operator` 命名空间。
++
+[source,terminal]
+----
+$ oc project clusterresourceoverride-operator
+----
+
+.. 为 Cluster Resourceoverride Operator 创建 `ClusterResourceOverride` 对象 YAML 文件（如 cro-cr.yaml):
++
+[source,yaml]
+----
+apiVersion: operator.autoscaling.openshift.io/v1
+kind: ClusterResourceOverride
+metadata:
+    name: cluster <1>
+spec:
+  podResourceOverride:
+    spec:
+      memoryRequestToLimitPercent: 50 <2>
+      cpuRequestToLimitPercent: 25 <3>
+      limitCPUToMemoryPercent: 200 <4>
+----
+<1> 名称必须是 `cluster`。
+<2> 可选。指定在 1-100 之间覆盖容器内存限值的百分比（如果使用的话）。默认值为 50.
+<3> 可选。指定在 1-100 之间覆盖容器 CPU 限值的百分比（如果使用的话）。默认值为 25。
+<4> 可选。如果使用，请指定覆盖容器内存限值的百分比。以 100% 扩展 1Gi RAM， 等于 1 个 CPU 内核。这会在覆盖 CPU 请求前进行处理（如果已配置）。默认值为 200。
+
+.. 创建  `ClusterResourceOverride`  对象：
++
+[source,terminal]
+----
+$ oc create -f <file-name>.yaml
+----
++
+例如：
++
+[source,terminal]
+----
+$ oc create -f cro-cr.yaml
+----
+
+. 通过检查集群自定义资源的状态来验证准入 Webhook 的当前状态。
++
+[source,terminal]
+----
+$ oc get clusterresourceoverride cluster -n clusterresourceoverride-operator -o yaml
+----
++
+当 webhook 被调用时， `mutatingWebhookConfigurationRef` 项会出现。
++
+.输出示例
+[source,yaml]
+----
+apiVersion: operator.autoscaling.openshift.io/v1
+kind: ClusterResourceOverride
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"operator.autoscaling.openshift.io/v1","kind":"ClusterResourceOverride","metadata":{"annotations":{},"name":"cluster"},"spec":{"podResourceOverride":{"spec":{"cpuRequestToLimitPercent":25,"limitCPUToMemoryPercent":200,"memoryRequestToLimitPercent":50}}}}
+  creationTimestamp: "2019-12-18T22:35:02Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "127622"
+  selfLink: /apis/operator.autoscaling.openshift.io/v1/clusterresourceoverrides/cluster
+  uid: 978fc959-1717-4bd1-97d0-ae00ee111e8d
+spec:
+  podResourceOverride:
+    spec:
+      cpuRequestToLimitPercent: 25
+      limitCPUToMemoryPercent: 200
+      memoryRequestToLimitPercent: 50
+status:
+
+....
+
+    mutatingWebhookConfigurationRef: <1>
+      apiVersion: admissionregistration.k8s.io/v1beta1
+      kind: MutatingWebhookConfiguration
+      name: clusterresourceoverrides.admission.autoscaling.openshift.io
+      resourceVersion: "127621"
+      uid: 98b3b8ae-d5ce-462b-8ab5-a729ea8f38f3
+
+....
+----
+<1> 引用 `ClusterResourceOverride`  准入Webhook。
+
+////
+. When the webhook is called, you can add a label to any Namespaces where you want overrides enabled:
++
+----
+$ oc edit namespace <name>
+----
++
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+
+....
+
+  labels:
+    clusterresourceoverrides.admission.autoscaling.openshift.io: enabled <1>
+----
+<1> Add the `clusterresourceoverrides.admission.autoscaling.openshift.io: enabled` label to the Namespace.
+////

@@ -1,0 +1,15 @@
+:_content-type: ASSEMBLY
+[id="configuring-web-console"]
+= 在 统信容器云管理平台 中配置Web控制台
+include::_attributes/common-attributes.adoc[]
+:context: configuring-web-console
+
+toc::[]
+
+您可以修改统信容器云管理平台 Web控制台以设置注销重定向URL，或禁用控制台。
+
+== 先决条件
+
+* 部署一个统信容器云管理平台集群。
+
+include::modules/web-console-configuration.adoc[leveloffset=+1]

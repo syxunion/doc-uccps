@@ -1,0 +1,83 @@
+// Module included in the following assemblies:
+//
+// * networking/load-balancing-openstack.adoc
+
+:_content-type: PROCEDURE
+[id="installation-osp-api-scaling_{context}"]
+= 使用 Octavia 扩展集群
+
+如果要使用多个 API 负载均衡器，或者集群没有使用 Kuryr，请创建一个 Octavia 负载均衡器，然后配置集群使用它。
+
+.先决条件
+
+* Octavia 包括在您的 Uniontech UStack Platform（有栈）部署中。
+
+.流程
+
+. 在命令行中创建一个使用 Amphora 驱动程序的 Octavia 负载均衡器：
++
+[source,terminal]
+----
+$ openstack loadbalancer create --name API_OCP_CLUSTER --vip-subnet-id <id_of_worker_vms_subnet>
+----
++
+可以使用自己选择的名称而不是 `API_OCP_CLUSTER`。
+
+. 负载均衡器成为活跃后，创建监听程序：
++
+[source,terminal]
+----
+$ openstack loadbalancer listener create --name API_OCP_CLUSTER_6443 --protocol HTTPS--protocol-port 6443 API_OCP_CLUSTER
+----
++
+[注意]
+====
+要查看负载均衡器的状态，请输入 `openstack loadbalancer list`。
+====
+
+. 创建一个使用轮循算法的池，并启用了会话持久性：
++
+[source,terminal]
+----
+$ openstack loadbalancer pool create --name API_OCP_CLUSTER_pool_6443 --lb-algorithm ROUND_ROBIN --session-persistence type=<source_IP_address> --listener API_OCP_CLUSTER_6443 --protocol HTTPS
+----
+
+. 为确保 control plane 机器可用，创建一个健康监控器：
++
+[source,terminal]
+----
+$ openstack loadbalancer healthmonitor create --delay 5 --max-retries 4 --timeout 10 --type TCP API_OCP_CLUSTER_pool_6443
+----
+
+. 将 control plane 机器作为负载均衡器池的成员添加：
++
+[source,terminal]
+----
+$ for SERVER in $(MASTER-0-IP MASTER-1-IP MASTER-2-IP)
+do
+  openstack loadbalancer member create --address $SERVER  --protocol-port 6443 API_OCP_CLUSTER_pool_6443
+done
+----
+
+. 可选： 要重复使用集群 API 浮动 IP 地址，取消设置它：
++
+[source,terminal]
+----
+$ openstack floating ip unset $API_FIP
+----
+
+. 为创建的负载均衡器 VIP 添加未设置的 API_FIP 或一个新地址：
++
+[source,terminal]
+----
+$ openstack floating ip set  --port $(openstack loadbalancer show -c <vip_port_id> -f value API_OCP_CLUSTER) $API_FIP
+----
+
+您的集群现在使用 Octavia 进行负载平衡。
+
+[注意]
+====
+如果 Kuryr 使用 Octavia Amphora 驱动程序，则所有流量都通过单个 Amphora 虚拟机（VM）路由。
+
+您可以重复这个过程来创建其他负载均衡器，这样可降低瓶颈。
+====

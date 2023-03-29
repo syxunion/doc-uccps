@@ -1,0 +1,54 @@
+// Module included in the following assemblies:
+//
+// * disaster_recovery/scenario-3-expired-certs.adoc
+
+:_content-type: PROCEDURE
+[id="dr-scenario-3-recovering-expired-certs_{context}"]
+= 从控制平面证书已过期的情况下恢复
+
+集群可以从过期的控制平面证书中自动恢复。
+
+但是，您需要手动批准待处理的 `node-bootstrapper` 证书签名请求（CSR）来恢复 kubelet 证书。对于用户置备的安装，您可能需要批准待处理的 kubelet 服务 CSR。
+
+使用以下步骤批准待处理的 CSR：
+
+.流程
+
+. 获取当前 CSR 列表。
++
+[source,terminal]
+----
+$ oc get csr
+----
++
+.输出示例
+----
+NAME        AGE    SIGNERNAME                                    REQUESTOR                                                                   CONDITION
+csr-2s94x   8m3s   kubernetes.io/kubelet-serving                 system:node:<node_name>                                                     Pending 
+csr-4bd6t   8m3s   kubernetes.io/kubelet-serving                 system:node:<node_name>                                                     Pending 
+csr-4hl85   13m    kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending 
+csr-zhhhp   3m8s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+...
+----
+
+. 查看一个 CSR 的详细信息以验证其是否有效：
++
+[source,terminal]
+----
+$ oc describe csr <csr_name> <1>
+----
+<1> `<csr_name>` 是当前 CSR 列表中 CSR 的名称。
+
+. 批准每个有效的 `node-bootstrapper` CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----
+
+. 对于用户置备的安装，请批准每个有效的 kubelet 服务 CSR：
++
+[source,terminal]
+----
+$ oc adm certificate approve <csr_name>
+----

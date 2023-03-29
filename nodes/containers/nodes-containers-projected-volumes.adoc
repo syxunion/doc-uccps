@@ -1,0 +1,38 @@
+:_content-type: ASSEMBLY
+:context: nodes-containers-projected-volumes
+[id="nodes-containers-projected-volumes"]
+= 使用投射卷来映射卷
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+
+
+
+
+
+投射卷会将几个现有的卷源映射到同一个目录中。
+
+可以投射以下类型的卷源：
+
+* Secrets
+
+* Config Maps
+
+* Downward API
+
+[注意]
+====	
+所有源都必须位于与 pod 相同的命名空间中。
+====
+
+// The following include statements pull in the module files that comprise
+// the assembly. Include any combination of concept, procedure, or reference
+// modules required to cover the user story. You can also include other
+// assemblies.
+
+include::modules/nodes-containers-projected-volumes-about.adoc[leveloffset=+1]
+
+include::modules/nodes-containers-projected-volumes-creating.adoc[leveloffset=+1]
+
+

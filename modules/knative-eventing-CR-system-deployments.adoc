@@ -1,0 +1,60 @@
+// Module included in the following assemblies:
+//
+// * serverless/admin_guide/serverless-configuration.adoc
+
+:_content-type: REFERENCE
+[id="knative-eventing-CR-system-deployments_{context}"]
+=  覆盖 Knative Eventing 系统部署配置
+
+您可以通过修改 `KnativeEventing` 自定义资源 (CR) 中的 `deployments` 来覆盖某些特定部署的默认配置。目前，对于 `eventing-controller`, `eventing-webhook`, 和 `imc-controller` 字段以及探测 `readiness` 和 `liveness` 字段支持覆盖默认配置设置。
+
+[重要]
+====
+`replicas` spec 无法覆盖使用 Horizontal Pod Autoscaler (HPA) 的部署副本数，且不适用于 `eventing-webhook` 部署。
+====
+
+在以下示例中，`KnativeEventing` CR 覆盖 `eventing-controller` 部署，以便：
+
+* `readiness` 超时 `eventing-controller` 设置为 10 秒。
+* 部署指定了 CPU 和内存资源限制。
+* 部署有 3 个副本。
+* 添加 `example-label: label`  标签。
+* 添加 `example-annotation: annotation` 注解。
+* `nodeSelector` 字段被设置为选择带有 `disktype: hdd` 标签的节点。
+
+.KnativeEventing CR 示例
+[source,yaml]
+----
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  deployments:
+  - name: eventing-controller
+    readinessProbes: <1>
+      - container: controller
+        timeoutSeconds: 10
+    resources:
+    - container: eventing-controller
+      requests:
+        cpu: 300m
+        memory: 100Mi
+      limits:
+        cpu: 1000m
+        memory: 250Mi
+    replicas: 3
+    labels:
+      example-label: label
+    annotations:
+      example-annotation: annotation
+    nodeSelector:
+      disktype: hdd
+----
+<1> 您可以使用 `readiness` 和 `liveness`  覆盖，覆盖部署容器中探测的所有字段，如 Kubernetes API 中指定的，但与探测处理程序相关的字段除外： `exec`, `grpc`, `httpGet`, 和`tcpSocket`.
+
+[注意]
+====
+KnativeEventing CR 标签和注解设置覆盖部署本身和生成的 Pod 的部署标签和注解。
+====

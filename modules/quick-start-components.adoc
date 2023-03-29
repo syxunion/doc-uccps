@@ -1,0 +1,25 @@
+// Module included in the following assemblies:
+//
+// * web_console/creating-quick-start-tutorials.adoc
+
+[id="quick-start-components_{context}"]
+= 快速启动组件
+
+快速开始由以下部分组成：
+
+* *Card*: 提供快速启动基本信息的 catalog 标题，其中包括标题、描述、时间提交和完成状态
+* *Introduction*: 概述快速开始的目标和任务
+* *Task headings*: 快速启动中每个任务的超链接标题
+* *Check your work module*: 一个模块用户使用一个模块来确认他们成功完成了任务，然后到快速启动的下一个任务为止
+* *Hints*: 帮助用户识别产品特定部分的动画
+* *Buttons*
+** *Next and back buttons*: 用来浏览快速开始任务里的步骤和模块的按钮
+** *Final screen buttons*: 关闭快速启动，返回到快速启动中的先前任务，并查看所有快速启动
+
+快速启动的主要内容包括以下部分：
+
+* *Card copy*
+* *简介*
+* *Task steps*
+* *Modals and in-app messaging*
+* *Check your work module*

@@ -1,0 +1,96 @@
+// Module included in the following assemblies:
+//
+// * openshift_images/image-configuration.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="images-configuration-shortname_{context}"]
+= 添加允许镜像短名称的 registry
+
+您可以通过编辑 `image.config.openshift.io/cluster` 自定义资源（CR）来添加 registry 来搜索镜像短名称。统信容器云管理平台 会将对此 CR 的更改应用到集群中的所有节点。
+
+镜像简短名称允许您搜索镜像，而无需在 pull spec 中包含完全限定域名。例如： 您可以使用 rhel7/etcd 而不是 `registry.access.redhat.com/rhe7/etcd`。
+`
+在无法使用完整路径的情况下，您可以使用简短名称。例如，如果您的集群引用了 DNS 频繁变化的多个内部 registry，则需要更新 pull spec 中的完全限定域名并进行每次更改。在这种情况下，使用镜像简短名称可能很有用。
+
+在拉取或推送镜像时，容器运行时会搜索 `image.config.openshift.io/cluster` CR 的 `registrySources` 参数中列出的 registry。如果您在 `containerRuntimeSearchRegistries` 参数下创建了 registry 列表，则容器运行时会搜索这些 registry。
+
+[警告]
+====
+强烈建议您使用公共 registry 的镜像短名称。您应该只使用内部或私有 registry 的镜像短名称。
+
+如果您在 containerRuntimeSearchRegistries 参数下列出公共 registry，您的凭证会暴露在列表中的所有 registry 中，从而会使网络和 registry 受到攻击。您应该始终将完全限定的镜像名称与公共 registry 搭配使用。
+====
+
+Machine Config Operator（MCO）会监控 `image.config.openshift.io/cluster` 资源以了解对 registry 的任何更改。当 MCO 检测到更改时，它会排空节点，应用更改，并对节点进行 uncordon 处理。节点返回 Ready 状态后，如果添加了 `containerRuntimeSearchRegistries` 参数，MCO 会在每个带有列出 registry 的节点的 `/etc/containers/registries.conf.d` 目录中创建一个文件。该文件覆盖 `/host/etc/containers/registries.conf` 文件中的非全限定搜索 registry 的默认列表。没有办法回退到非全限定搜索 registry 的默认列表。
+
+`containerRuntimeSearchRegistries` 参数只适用于 Podman 和 CRI-O 容器引擎。列表中的 registry 只能用于 pod 规格，不能用于构建和镜像流。
+
+.流程
+
+. 编辑 `image.config.openshift.io/cluster` 自定义资源：
++
+[source,terminal]
+----
+$ oc edit image.config.openshift.io/cluster
+----
++
+以下是 `image.config.openshift.io/cluster` CR 示例：
++
+[source,yaml]
+----
+apiVersion: config.openshift.io/v1
+kind: Image
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+  creationTimestamp: "2019-05-17T13:44:26Z"
+  generation: 1
+  name: cluster
+  resourceVersion: "8302"
+  selfLink: /apis/config.openshift.io/v1/images/cluster
+  uid: e34555da-78a9-11e9-b92b-06d6c7da38dc
+spec:
+  allowedRegistriesForImport:
+    - domainName: quay.io
+      insecure: false
+  additionalTrustedCA:
+    name: myconfigmap
+  registrySources:
+    containerRuntimeSearchRegistries: <1>
+    - reg1.io
+    - reg2.io
+    - reg3.io
+    allowedRegistries: <2>
+    - example.com
+    - quay.io
+    - registry.redhat.io
+    - reg1.io
+    - reg2.io
+    - reg3.io
+    - image-registry.openshift-image-registry.svc:5000
+...
+status:
+  internalRegistryHostname: image-registry.openshift-image-registry.svc:5000
+----
+<1> 指定用于镜像简短名称的 registry。您应该只使用带有内部或私有 registry 的镜像短名称，以减少可能的安全问题。
+<2> 确保在 `containerRuntimeSearchRegistries` 下列出的任何 registry 都包含在 `allowedRegistries` 列表中。
++
+[NOTE]
+====
+当定义 `allowedRegistries` 参数时，除非明确列出，否则所有 registry（包括 `registry.redhat.io` 和 `quay.io registry` 和默认的内部镜像 registry）都会被阻断。如果使用此参数，为了避免 pod 失败，请将所有 registry（包括 `registry.redhat.io` 和 `quay.io registry`）和 `internalRegistryHostname` 添加到 `allowedRegistries` 列表中，因为环境中有效负载镜像需要它们。对于断开连接的集群，还应添加镜像的 registry。
+====
+
+. 要检查是否已添加 registry，当节点返回到 `Ready` 状态时，请在节点上使用以下命令：
++
+[source,terminal]
+----
+$ cat /host/etc/containers/registries.conf.d/01-image-searchRegistries.conf
+----
++
+.输出示例
+[source,terminal]
+----
+unqualified-search-registries = ['reg1.io', 'reg2.io', 'reg3.io']
+----
+

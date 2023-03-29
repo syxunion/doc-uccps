@@ -1,0 +1,84 @@
+// Module included in the following assemblies:
+//
+// * serverless/develop/serverless-applications.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-services-network-policies_{context}"]
+= 在具有限制性网络策略的集群中启用与 Knative 应用程序通信
+
+如果您使用多个用户可访问的集群，您的集群可能会使用网络策略来控制哪些 pod、服务和命名空间可以通过网络相互通信。如果您的集群使用限制性网络策略，Knative 系统 Pod 可能无法访问 Knative 应用程序。例如，如果您的命名空间具有以下网络策略（拒绝所有请求），Knative 系统 pod 无法访问您的 Knative 应用程序：
+
+.拒绝对命名空间的所有请求的 NetworkPolicy 对象示例
+[source,yaml]
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: deny-by-default
+  namespace: example-namespace
+spec:
+  podSelector:
+  ingress: []
+----
+
+要允许从 Knative 系统 pod 访问应用程序，您必须为每个 Knative 系统命名空间添加标签，然后在应用程序命名空间中创建一个 `NetworkPolicy` 对象，以便为具有此标签的其他命名空间访问命名空间。
+
+.先决条件
+
+* 安装 Uccps CLI (`oc`).
+* 在集群中安装了 {ServerlessOperatorName} 和 Knative Serving。
+
+.流程
+
+. 将  `knative.openshift.io/system-namespace=true` 标签添加到需要访问应用程序的每个 Knative 系统命名空间：
+
+.. 标记 `knative-serving` 命名空间：
++
+[source, terminal]
+----
+$ oc label namespace knative-serving knative.openshift.io/system-namespace=true
+----
+
+.. 标记 `knative-serving-ingress` 命名空间：
++
+[source, terminal]
+----
+$ oc label namespace knative-serving-ingress knative.openshift.io/system-namespace=true
+----
+
+.. 标记 `knative-eventing` 命名空间：
++
+[source, terminal]
+----
+$ oc label namespace knative-eventing knative.openshift.io/system-namespace=true
+----
+
+.. 标记 `knative-kafka` 命名空间：
++
+[source, terminal]
+----
+$ oc label namespace knative-kafka knative.openshift.io/system-namespace=true
+----
+
+. 在应用程序命名空间中创建一个 `NetworkPolicy` 对象，允许从带有 `knative.openshift.io/system-namespace` 标签的命名空间访问：
++
+.`NetworkPolicy` 对象示例
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: <network_policy_name> <1>
+  namespace: <namespace> <2>
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          knative.openshift.io/system-namespace: "true"
+  podSelector: {}
+  policyTypes:
+  - Ingress
+----
+<1> 为您的网络策略提供名称。
+<2> 应用程序所在的命名空间。

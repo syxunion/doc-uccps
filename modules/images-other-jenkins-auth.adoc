@@ -1,0 +1,22 @@
+// Module included in the following assemblies:
+//
+// * images/using_images/images-other-jenkins.adoc
+
+:_content-type: PROCEDURE
+[id="images-other-jenkins-auth_{context}"]
+= Jenkins 身份验证
+
+如果镜像未使用模板直接运行，则默认使用 Jenkins 身份验证。
+
+Jenkins 首次启动时，配置与管理员用户和密码一同创建。默认用户凭证为 `admin` 和 `password`。在使用标准 Jenkins 身份验证时，且仅这种情况下，通过设置 `JENKINS_PASSWORD` 环境变量来配置默认密码。
+
+.流程
+
+* 创建使用标准 Jenkins 身份验证的 Jenkins 应用程序：
++
+[source,terminal]
+----
+$ oc new-app -e \
+    JENKINS_PASSWORD=<password> \
+    openshift4/ose-jenkins
+----

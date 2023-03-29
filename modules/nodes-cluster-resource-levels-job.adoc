@@ -1,0 +1,169 @@
+// Module included in the following assemblies:
+//
+// * nodes/nodes-cluster-resource-levels.adoc
+
+:_content-type: PROCEDURE
+[id="nodes-cluster-resource-levels-job_{context}"]
+= 以 pod 中作业的方式运行集群容量工具
+
+若以 pod 中作业的方式运行集群容量工具，其优点是可以在无需用户干预的前提下多次运行。以作业方式运行集群容量工具涉及使用 `ConfigMap` 对象。
+
+.先决条件
+
+下载并安装 集群容量工具。
+
+.流程
+
+运行集群容量工具：
+
+. 创建集群角色：
++
+[source,terminal]
+----
+$ cat << EOF| oc create -f -
+----
++
+.输出示例
+[source,terminal]
+----
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-capacity-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes", "persistentvolumeclaims", "persistentvolumes", "services", "replicationcontrollers"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["apps"]
+  resources: ["replicasets", "statefulsets"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["policy"]
+  resources: ["poddisruptionbudgets"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "watch", "list"]
+EOF
+----
+
+. 创建服务帐户：
++
+[source,terminal]
+----
+$ oc create sa cluster-capacity-sa
+----
+
+. 将角色添加到服务帐户：
++
+[source,terminal]
+----
+$ oc adm policy add-cluster-role-to-user cluster-capacity-role \
+    system:serviceaccount:default:cluster-capacity-sa
+----
+
+. 定义并创建 `Pod` 规格：
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: small-pod
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  containers:
+  - name: php-redis
+    image: gcr.io/google-samples/gb-frontend:v4
+    imagePullPolicy: Always
+    resources:
+      limits:
+        cpu: 150m
+        memory: 100Mi
+      requests:
+        cpu: 150m
+        memory: 100Mi
+----
+
+. 集群容量分析使用名为 `cluster-capacity-configmap` 的 `ConfigMap` 对象挂载到卷中，从而将输入 pod 规格文件 pod.yaml 挂载到卷 `test-volume` 的路径 `/test-pod` 上。
++
+如果还没有创建 `ConfigMap` 对象，请在创建作业前创建：
++
+----
+$ oc create configmap cluster-capacity-configmap \
+    --from-file=pod.yaml=pod.yaml
+----
+
+. 使用以下作业规格文件示例创建作业：
++
+[source,yaml]
+----
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cluster-capacity-job
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cluster-capacity-pod
+    spec:
+        containers:
+        - name: cluster-capacity
+          image: openshift/origin-cluster-capacity
+          imagePullPolicy: "Always"
+          volumeMounts:
+          - mountPath: /test-pod
+            name: test-volume
+          env:
+          - name: CC_INCLUSTER <1>
+            value: "true"
+          command:
+          - "/bin/sh"
+          - "-ec"
+          - |
+            /bin/cluster-capacity --podspec=/test-pod/pod.yaml --verbose
+        restartPolicy: "Never"
+        serviceAccountName: cluster-capacity-sa
+        volumes:
+        - name: test-volume
+          configMap:
+            name: cluster-capacity-configmap
+----
+<1> 必要的环境变量，使集群容量工具知道它将作为一个 pod 在集群中运行。
+ +
+`ConfigMap` 对象的 `pod.yaml` 键与 Pod spec 文件名称相同，但这不是必须的。如果这样做，输入 pod 规格文件可作为 `/test-pod/pod.yaml` 在 pod 中被访问。
+
+. 以 pod 中作业的方式运行集群容量镜像：
++
+[source,terminal]
+----
+$ oc create -f cluster-capacity-job.yaml
+----
+
+. 检查作业日志，以查找在集群中可调度的 pod 数量：
++
+[source,terminal]
+----
+$ oc logs jobs/cluster-capacity-job
+----
++
+.输出示例
+[source,terminal]
+----
+small-pod pod requirements:
+        - CPU: 150m
+        - Memory: 100Mi
+
+The cluster can schedule 52 instance(s) of the pod small-pod.
+
+Termination reason: Unschedulable: No nodes are available that match all of the
+following predicates:: Insufficient cpu (2).
+
+Pod distribution among nodes:
+small-pod
+        - 192.168.124.214: 26 instance(s)
+        - 192.168.124.120: 26 instance(s)
+----

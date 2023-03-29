@@ -1,0 +1,66 @@
+// Module included in the following assemblies:
+//
+// * /serverless/develop/serverless-pingsource.adoc
+
+:_content-type: PROCEDURE
+[id="serverless-pingsource-odc_{context}"]
+= 使用 Web 控制台创建 ping 源
+
+在集群中安装 Knative Eventing 后，您可以使用 web 控制台创建 ping 源。使用 {product-title} 控制台提供了一个简化且直观的用户界面来创建事件源。
+
+.先决条件
+
+* 已登陆到 {product-title} 控制台。
+* 在集群中安装了 {ServerlessOperatorName}、Knative Serving 和 Knative Eventing。
+* 您已创建了一个项目，或者具有适当的角色和权限访问项目，以便 {product-title}  中创建应用程序和其他工作负载。
+
+.流程
+
+. 要验证 ping 源是否可以工作，请创建一个简单的 Knative 服务，在服务日志中转储传入的信息。
+
+.. 在 *开发者* 视角中，导航到 *+添加* -> *YAML*.
+.. 复制 YAML 示例：
++
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display
+spec:
+  template:
+    spec:
+      containers:
+        - image: quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+----
+.. 点 *创建*.
+
+. 在与上一步中创建的服务相同的命名空间中创建一个 ping 源，或您要将事件发送到的任何其他接收器。
+
+.. 在 *开发者* 视角中，导航到  *+添加* -> *事件源* 。此时会显示 *事件源* 页面。
+.. 可选：如果您的事件源有多个供应商，请从  *提供的* 列表中选择所需的供应商，以过滤供应商的可用事件源。
+.. 选择  *Ping 源* ，然后点击 *创建事件源* 。此时会显示 *创建事件源* 页面。
++
+[注意]
+====
+您可以使用 *Form view* 或 *YAML view* 配置 *PingSource* 设置，并可以在两者间切换。在不同视图间切换时数据会被保留。
+====
+.. 为 *Schedule* 输入一个值。在本例中，值为 `*/2 * * * *`，它会创建一个 PingSource，每两分钟发送一条消息。
+.. 可选：您可以为 *Data* 输入一个值，它是消息的有效负载。
+.. 选择一个 *Sink* 。这可以是 *资源* 或一个 URI。在这个示例中，上一步中创建的 `event-display` 服务被用作 *资源* sink。
+.. 点 *创建*.
+
+.验证
+
+您可以通过查看 *拓扑* 页面来验证 ping 源是否已创建并连接到接收器。
+
+. 在 *开发者* 视角中，导航到  *拓扑*.
+. 查看 ping 源和接收器。
++
+image::verify-pingsource-ODC.png[View the ping source and service in the Topology view]
+
+.删除 ping 源
+// move to separate procedure, out of scope for this PR
+
+. 导航到  *拓扑* 视图。
+. 右键单击 API 服务器源，再选择 *删除 Ping 源*.

@@ -1,0 +1,31 @@
+// Module included in the following assemblies:
+//
+// * cli_reference/developer_cli_odo/configuring-the-odo-cli.adoc
+
+:_content-type: REFERENCE
+[id="developer-cli-odo-set-config_{context}"]
+= 设置值
+
+您可以使用以下命令为首选键设置值：
+
+[source,terminal]
+----
+$ odo preference set <key> <value>
+----
+
+[注意]
+====
+首选项键不区分大小写。
+====
+
+.示例命令
+[source,terminal]
+----
+$ odo preference set updatenotification false
+----
+
+.输出示例
+[source,terminal]
+----
+Global preference was successfully updated
+----

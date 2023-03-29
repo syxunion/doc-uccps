@@ -1,0 +1,15 @@
+////
+Module included in the following assemblies:
+* service_mesh/v2x/servicemesh-release-notes.adoc
+////
+
+:_content-type: CONCEPT
+[id="ossm-core-features_{context}"]
+= Core features
+
+{SMProductName} 在服务网络间提供了实现关键功能的统一方式：
+
+* *流量管理* - 控制服务间的流量和 API 调用，提高调用的可靠性，并使网络在条件不好的情况保持稳定。
+* *服务标识和安全性* - 在网格中提供可验证身份的服务，并提供保护服务流量的能力，以便可以通过信任度不同的网络进行传输。
+* *策略强制* - 对服务间的交互应用机构策略，确保实施访问策略，并在用户间分配资源。通过配置网格就可以对策略进行更改，而不需要修改应用程序代码。
+* *遥测* - 了解服务间的依赖关系以及服务间的网络数据流，从而可以快速发现问题。

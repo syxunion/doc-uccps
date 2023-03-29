@@ -1,0 +1,26 @@
+:_content-type: ASSEMBLY
+:context: nodes-cluster-enabling
+[id="nodes-cluster-enabling"]
+= 使用 FeatureGate 启用 统信容器云管理平台 功能
+include::_attributes/common-attributes.adoc[]
+
+toc::[]
+
+作为管理员，您可以使用功能门启用不是默认功能集合中的功能。
+
+include::modules/nodes-cluster-enabling-features-about.adoc[leveloffset=+1]
+
+.其他资源
+
+* 有关 `TechPreviewNoUpgrade` 功能门激活的功能的更多信息，请参阅以下主题：
+** xref:../../storage/container_storage_interface/persistent-storage-csi-azure-file.adoc#persistent-storage-csi-azure-file[Azure File CSI Driver Operator]
+** xref:../../storage/container_storage_interface/persistent-storage-csi-migration.adoc#persistent-storage-csi-migration[CSI 自动迁移]
+** xref:../../operators/operator-reference.adoc#cluster-cloud-controller-manager-operator_cluster-operators-ref[Cluster Cloud Controller Manager Operator]
+** xref:../../cicd/builds/build-strategies.adoc#builds-using-build-volumes_build-strategies-s2i[Source-to-image (S2I) 构建卷] 和 xref:../../cicd/builds/build-strategies.adoc#builds-using-build-volumes_build-strategies-docker[Docker 构建卷]
+** xref:../../nodes/nodes/nodes-nodes-managing.adoc#nodes-nodes-swap-memory_nodes-nodes-managing[节点上的交换内存]
+
+include::modules/nodes-cluster-enabling-features-console.adoc[leveloffset=+1]
+
+include::modules/nodes-cluster-enabling-features-cli.adoc[leveloffset=+1]
+
+// modules/nodes-cluster-disabling-features-list.adoc[leveloffset=+1]

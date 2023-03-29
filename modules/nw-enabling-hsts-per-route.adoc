@@ -1,0 +1,38 @@
+// Module included in the following assemblies:
+// * networking/configuring-routing.adoc
+
+:_content-type: PROCEDURE
+[id="nw-enabling-hsts-per-route_{context}"]
+= 根据每个路由启用 HTTP 严格传输安全性
+
+HTTP 严格传输安全 (HSTS) 实施在 HAProxy 模板中，并应用到具有 `haproxy.router.openshift.io/hsts_header` 注解的边缘和重新加密路由。
+
+.先决条件
+
+* 您可以使用具有项目的管理员特权的用户登陆到集群。
+* 已安装 `oc` CLI.
+
+.流程
+
+* 要在路由上启用 HSTS，请将 `haproxy.router.openshift.io/hsts_header` 值添加到边缘终止 (edge-terminated) 或重新加密 (re-encrypt) 路由：
+
++
+.配置了注解的路由示例
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload <1> <2> <3>
+...
+spec:
+  host: def.abc.com
+  tls:
+    termination: "reencrypt"
+    ...
+  wildcardPolicy: "Subdomain"
+----
+<1> `max-age` 必需。Max-age 测量 HSTS 策略生效的时间长度，以秒为单位。如果设置为 0，它将对策略进行求反。
+<2> 可选。包含时，`includeSubDomains` 告知客户端主机的所有子域都必须与主机具有相同的 HSTS 策略。
+<3> 可选。当 max-age 大于 0 时，您可以在 `haproxy.router.openshift.io/hsts_header` 中添加 preload，以允许外部服务将这个站点包括在 HSTS 预加载列表中。例如，Google 等站点可以构造设有 preload 的站点的列表。浏览器可以使用这些列表来确定哪些站点可以通过 HTTPS 通信，即使它们与站点交互之前也是如此。如果没有设置 preload，浏览器必须已经通过 HTTPS 与站点交互（至少一次）才能获取标头。

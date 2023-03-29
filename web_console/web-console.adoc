@@ -1,0 +1,23 @@
+:_content-type: ASSEMBLY
+
+[id="web-console"]
+= 访问 Web 控制台
+include::_attributes/common-attributes.adoc[]
+:context: web-console
+
+toc::[]
+
+统信容器云管理平台 Web控制台是可从Web浏览器访问的用户界面。开发人员可以使用Web控制台来直观地浏览并管理项目的内容。
+
+== 先决条件
+
+* 必须启用JavaScript才能使用Web控制台。为获得最佳体验，请使用支持WebSockets的Web浏览器。
+* 在为集群创建支持基础结构之前，请参阅统信容器云管理平台 4.x Tested Integrations页。
+
+include::modules/web-console-overview.adoc[leveloffset=+1]
+include::modules/multi-cluster-about.adoc[leveloffset=+1]
+include::modules/enabling-multi-cluster-console.adoc[leveloffset=+2]
+
+[role="_additional-resources"]
+.其他资源
+* xref:../nodes/clusters/nodes-cluster-enabling-features.adoc[使用 Web 控制台启用功能集]

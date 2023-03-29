@@ -1,0 +1,140 @@
+// Module included in the following assemblies:
+//
+// * authentication/using-rbac.adoc
+// * post_installation_configuration/preparing-for-users.adoc
+
+:_content-type: PROCEDURE
+[id="adding-roles_{context}"]
+= 向用户添加角色
+
+可以使用 `oc adm` 管理员 CLI 管理角色和绑定。
+
+将角色绑定或添加到用户或组可让用户或组具有该角色授予的访问权限。您可以使用 oc adm policy 命令向用户和组添加和移除角色。
+
+您可以将任何默认集群角色绑定到项目中的本地用户或组。
+
+.流程
+
+. 向指定项目中的用户添加角色：
++
+[source,terminal]
+----
+$ oc adm policy add-role-to-user <role> <user> -n <project>
+----
++
+例如，您可以运行以下命令，将 `admin` 角色添加到 `joe` 项目中的 `alice` 用户：
++
+[source,terminal]
+----
+$ oc adm policy add-role-to-user admin alice -n joe
+----
++
+[提示]
+====
+您还可以应用以下 YAML 向用户添加角色：
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admin-0
+  namespace: joe
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: alice
+----
+====
+
+. 查看本地角色绑定，并在输出中验证添加情况：
++
+[source,terminal]
+----
+$ oc describe rolebinding.rbac -n <project>
+----
++
+例如，查看 `joe` 项目的本地角色绑定：
++
+[source,terminal]
+----
+$ oc describe rolebinding.rbac -n joe
+----
++
+.输出示例
+[source,terminal]
+----
+
+Name:         admin
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  ClusterRole
+  Name:  admin
+Subjects:
+  Kind  Name        Namespace
+  ----  ----        ---------
+  User  kube:admin
+
+
+Name:         admin-0
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  ClusterRole
+  Name:  admin
+Subjects:
+  Kind  Name   Namespace
+  ----  ----   ---------
+  User  alice <1>
+
+
+Name:         system:deployers
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows deploymentconfigs in this namespace to rollout pods in
+                this namespace.  It is auto-managed by a controller; remove
+                subjects to disa...
+Role:
+  Kind:  ClusterRole
+  Name:  system:deployer
+Subjects:
+  Kind            Name      Namespace
+  ----            ----      ---------
+  ServiceAccount  deployer  joe
+
+
+Name:         system:image-builders
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows builds in this namespace to push images to this
+                namespace.  It is auto-managed by a controller; remove subjects
+                to disable.
+Role:
+  Kind:  ClusterRole
+  Name:  system:image-builder
+Subjects:
+  Kind            Name     Namespace
+  ----            ----     ---------
+  ServiceAccount  builder  joe
+
+
+Name:         system:image-pullers
+Labels:       <none>
+Annotations:  openshift.io/description:
+                Allows all pods in this namespace to pull images from this
+                namespace.  It is auto-managed by a controller; remove subjects
+                to disable.
+Role:
+  Kind:  ClusterRole
+  Name:  system:image-puller
+Subjects:
+  Kind   Name                                Namespace
+  ----   ----                                ---------
+  Group  system:serviceaccounts:joe
+----
+<1> `alice` 用户已添加到 `admins`  `RoleBinding`。

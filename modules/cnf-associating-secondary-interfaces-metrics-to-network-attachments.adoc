@@ -1,0 +1,73 @@
+// CNF-43 Associate Secondary Interfaces Metrics to Network Attachments
+// Module included in the following assemblies:
+//
+// *networking/associating-secondary-interfaces-metrics-to-network-attachments.adoc
+
+[id="cnf-associating-secondary-interfaces-metrics-to-network-attachments_{context}"]
+= 扩展用于监控的二级网络指标
+
+二级设备或接口用于不同目的。为了对采用相同分类的二级设备的指标数据进行汇总，需要有一个方法来对它们进行分类。
+
+公开的指标会包括接口，但不会指定接口的起始位置。这在没有其他接口时是可行的。但如果添加了二级接口，则很难使用这个指标，因为仅使用接口名称作为标识符很难识别不同的接口。
+
+在添加二级接口时，它们的名称取决于添加它们的顺序，不同的二级接口可能属于不同的网络，并可用于不同的目的。
+
+通过使用 `pod_network_name_info`，可以使用标识接口类型的额外信息来扩展当前的指标。这样，就可以聚合指标，并为特定接口类型添加特定的警告。
+
+网络类型使用相关的 `NetworkAttachementDefinition` 名称生成，该名称也用于区分不同类别的次网络。例如，属于不同网络或使用不同的 CNI 的不同接口使用不同的网络附加定义名称。
+
+[id="cnf-associating-secondary-interfaces-metrics-to-network-attachments-network-metrics-daemon_{context}"]
+== 网络指标守护进程
+
+网络指标守护进程是收集并发布与网络相关的指标的守护进程组件。
+
+kubelet 已经发布了您可以观察到的网络相关指标。这些指标是：
+
+* `container_network_receive_bytes_total`
+* `container_network_receive_errors_total`
+* `container_network_receive_packets_total`
+* `container_network_receive_packets_dropped_total`
+* `container_network_transmit_bytes_total`
+* `container_network_transmit_errors_total`
+* `container_network_transmit_packets_total`
+* `container_network_transmit_packets_dropped_total`
+
+这些指标中的标签包括：
+
+* Pod 名称
+* Pod 命名空间
+* 接口名称（比如 eth0）
+
+这些指标在为 pod 添加新接口之前（例如通过 Multus ）可以正常工作。在添加了新接口后，无法清楚地知道接口名称代表什么。
+
+interface 标签指向接口名称，但它不知道接口的作用是什么。在有多个不同接口的情况下，无法了解您监控的指标代表什么网络。
+
+现在引入了新的 `pod_network_name_info` 可以帮助解决这个问题。
+
+[id="cnf-associating-secondary-interfaces-metrics-with-network-name_{context}"]
+== 带有网络名称的指标
+
+此 daemonset 发布一个 `pod_network_name_info` 指标，固定值为 0:
+
+[source,bash]
+----
+pod_network_name_info{interface="net0",namespace="namespacename",network_name="nadnamespace/firstNAD",pod="podname"} 0
+----
+
+使用 Multus 所添加的注解生成网络名称标签。它是网络附加定义所属命名空间的连接，加上网络附加定义的名称。
+
+新的指标本身不会提供很多值，但与网络相关的 container_network_* 指标一起使用，可以为二集网络的监控提供更好的支持。
+
+使用类似以下的 `promql` 查询时，可以获取包含这个值的新指标，以及从 k8s.v1.cni.cncf.io/networks-status 注解中检索的网络名称：
+
+[source,bash]
+----
+(container_network_receive_bytes_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_receive_errors_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_receive_packets_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_receive_packets_dropped_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_transmit_bytes_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_transmit_errors_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_transmit_packets_total) + on(namespace,pod,interface) group_left(network_name) ( pod_network_name_info )
+(container_network_transmit_packets_dropped_total) + on(namespace,pod,interface) group_left(network_name)
+----

@@ -1,0 +1,44 @@
+// Module included in the following assemblies:
+//
+// * builds/triggering-builds-build-hooks.adoc
+
+:_content-type: PROCEDURE
+[id="builds-setting-triggers-manually_{context}"]
+= 手动设置触发器
+
+您可以使用 `oc set triggers` 在构建配置中添加和移除触发器。
+
+.流程
+
+* 要在构建配置上设置 GitHub Webhook 触发器，请使用：
++
+[source,terminal]
+----
+$ oc set triggers bc <name> --from-github
+----
+
+* 要设置镜像更改触发器，请使用：
++
+[source,terminal]
+----
+$ oc set triggers bc <name> --from-image='<image>'
+----
+
+* 要移除触发器，请添加 `--remove`：
++
+[source,terminal]
+----
+$ oc set triggers bc <name> --from-bitbucket --remove
+----
+
+[注意]
+====
+如果 Webhook 触发器已存在，再次添加它会重新生成 Webhook secret。
+====
+
+如需更多信息，请查阅帮助文档
+
+[source,terminal]
+----
+$ oc set triggers --help
+----
