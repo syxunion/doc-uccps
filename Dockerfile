@@ -1,7 +1,7 @@
 FROM docker.io/library/ruby:2.6.7 as builder
 
-RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/ && \
-     gem install ascii_binder
+RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/ 
+RUN gem install ascii_binder
 ADD . /root/uccps-docs/
 WORKDIR /root/uccps-docs
 USER 0
