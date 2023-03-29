@@ -34,24 +34,24 @@ Topics:
 - Name: Overview
   Distros: openshift-enterprise
   File: index
-- Name: Configuring a private cluster
+- Name: 配置 private cluster
   Distros: openshift-enterprise,openshift-origin
   File: configuring-private-cluster
 - Name: Machine 配置任务
   File: machine-configuration-tasks
 - Name: Cluster 任务
   File: cluster-tasks
-- Name: Node tasks
+- Name: Node 任务
   File: node-tasks
 - Name: Network 配置
   File: network-configuration
 - Name: Storage 配置
   File: storage-configuration
-- Name: Preparing for users
+- Name: 为 user 做好准备
   File: preparing-for-users
-- Name: Configuring alert notifications
+- Name: 配置 Alert Notifications
   File: configuring-alert-notifications
-- Name: Converting a connected cluster to a disconnected cluster
+- Name: 将已连接的 Cluster 转换为未连接的 Cluster
   File: connected-to-disconnected
 ---
 Name: Web 控制台
@@ -155,7 +155,7 @@ Dir: authentication
 Topics:
 - Name: Overview
   File: index
-- Name: Understanding authentication
+- Name: 了解 Authentication
   File: understanding-authentication
   Distros: openshift-enterprise,openshift-origin,openshift-online
 - Name: 配置内部 OAuth 服务器
@@ -179,10 +179,10 @@ Topics:
     Distros: openshift-enterprise,openshift-origin
   - Name: 配置 LDAP 身份提供程序
     File: configuring-ldap-identity-provider
-  - Name: Configuring a basic authentication identity provider
+  - Name: 配置基本的 authentication 标识提供程序
     File: configuring-basic-authentication-identity-provider
     Distros: openshift-enterprise,openshift-origin
-  - Name: Configuring a request header identity provider
+  - Name: 配置 Request Header 标识提供程序
     File: configuring-request-header-identity-provider
     Distros: openshift-enterprise,openshift-origin
   - Name: 配置 GitHub 或 GitHub Enterprise 身份提供程序
@@ -251,11 +251,11 @@ Topics:
 - Name: 配置 Ingress Controller 端点发布策略
   File: nw-ingress-controller-endpoint-publishing-strategies
   Distros: openshift-enterprise,openshift-origin
-- Name: Verifyingconnectivity endpoint
+- Name: 验证 Connectivity-endpoint
   File: verifying-connectivity-endpoint
 - Name: 更改集群网络的 MTU
   File: changing-cluster-network-mtu
-- Name: test 配置节点端口服务范围
+- Name: 配置 Node 端口服务范围
   File: configuring-node-port-service-range
 - Name: 配置 IP 故障转义
   File: configuring-ipfailover
@@ -287,19 +287,19 @@ Topics:
   Topics:
   - Name: 了解 Multiple-Networks
     File: understanding-multiple-networks
-  - Name: 配置额外的 network
+  - Name: 配置额外的 Network
     File: configuring-additional-network
-  - Name: About virtual routing and forwarding
+  - Name: 关于 Virtual Routing 和 Forwarding
     File: about-virtual-routing-and-forwarding
-  - Name: Configuring multi-network policy
+  - Name: 配置 Multi-Network 策略
     File: configuring-multi-network-policy
   - Name: 将 pod 附加到额外网络
     File: attaching-pod
   - Name: 从额外网络中删除 pod
     File: removing-pod
-  - Name: 编辑额外的 network
+  - Name: 编辑额外的 Network
     File: edit-additional-network
-  - Name: 删除额外的 network
+  - Name: 删除额外的 Network
     File: remove-additional-network
   - Name: 为 VRF 分配从属网络
     File: assigning-a-secondary-network-to-a-vrf
@@ -386,7 +386,7 @@ Topics:
   Topics:
   - Name: Route 配置
     File: route-configuration
-  - Name: Secured Route
+  - Name: 安全 Route
     File: secured-routes
 - Name: 配置集群入口流量
   Dir: configuring_ingress_cluster_traffic
@@ -405,14 +405,14 @@ Topics:
   - Name: 使用网络负载平衡器在 AWS 上配置集群入口流量
     File: configuring-ingress-cluster-traffic-aws-network-load-balancer
     Distros: openshift-enterprise,openshift-origin
-  - Name: 为服务外部 IP 配置 ingress 集群流量
+  - Name: 为服务外部 IP 配置 Ingress 集群流量
     File: configuring-ingress-cluster-traffic-service-external-ip
     Distros: openshift-enterprise,openshift-origin
   - Name: 使用 NodePort 配置集群入口流量
     File: configuring-ingress-cluster-traffic-nodeport
     Distros: openshift-enterprise,openshift-origin
   # Kubernetes NMState (TECHNOLOGY PREVIEW)
-- Name: Enable cluster wide proxy
+- Name: 启用 Cluster-Wide proxy
   File: enable-cluster-wide-proxy
   Distros: openshift-enterprise,openshift-origin
 - Name: 配置自定义 PKI
@@ -426,13 +426,13 @@ Topics:
 Name: 存储
 Dir: storage
 Topics:
-- Name: storage 概述
+- Name: Storage 概述
   File: index
   Distros: openshift-enterprise,openshift-origin,openshift-online
 - Name: 了解 Ephemeral Storage
   File: understanding-ephemeral-storage
   Distros: openshift-enterprise,openshift-origin,openshift-online
-- Name: 了解 persistent storage
+- Name: 了解 Persistent Storage
   File: understanding-persistent-storage
   Distros: openshift-enterprise,openshift-origin,openshift-online
 - Name: 配置持久性存储
@@ -445,11 +445,11 @@ Topics:
     File: persistent-storage-fibre
   - Name: 使用 FlexVolume 的持久性存储
     File: persistent-storage-flexvolume
-  - Name: 使用 hostPath 的持久性存储
+  - Name: 使用 HostPath 的持久性存储
     File: persistent-storage-hostpath
   - Name: 使用 iSCSI 的持久性存储
     File: persistent-storage-iscsi
-  - Name: 使用 local storage 的持久性存储
+  - Name: 使用 Local Storage 的持久性存储
     File: persistent-storage-local
   - Name: NFS 的持久性存储
     File: persistent-storage-nfs
@@ -478,7 +478,7 @@ Topics:
     File: persistent-storage-csi-manila
   - Name: VMware vSphere CSI Driver Operator
     File: persistent-storage-csi-vsphere
-- Name: 扩展 persistent volumes
+- Name: 扩展 Persistent Volumes
   File: expanding-persistent-volumes
   Distros: openshift-enterprise,openshift-origin
 - Name: Dynamic provisioning
@@ -493,7 +493,7 @@ Topics:
 - Name: 统信容器云管理平台中的 Image Registry Operator
   File: configuring-registry-operator
   Distros: openshift-origin
-- Name: 设置和配置 registry
+- Name: 设置和配置 Registry
   Dir: configuring_registry_storage
   Distros: openshift-enterprise,openshift-origin
   Topics:
@@ -520,13 +520,13 @@ Topics:
   Topics:
   - Name: 了解 Image 构建
     File: understanding-image-builds
-  - Name: 了解 buildconfigs
+  - Name: 了解 Buildconfigs
     File: understanding-buildconfigs
-  - Name: Creating build inputs
+  - Name: 创建 Build inputs
     File: creating-build-inputs
-  - Name: Managing build output
+  - Name: 管理 Build output
     File: managing-build-output
-  - Name: Use build strategies
+  - Name: 使用 Build strategies
     File: build-strategies
   - Name: 使用 Buildah 自定义镜像构建
     File: custom-builds-buildah
@@ -534,22 +534,22 @@ Topics:
   - Name: Performing and configuring basic builds
     File: basic-build-operations
     Distros: openshift-enterprise,openshift-origin,openshift-online
-  - Name: Triggering and modifying builds
+  - Name: 触发和修改 Builds
     File: triggering-builds-build-hooks
     Distros: openshift-enterprise,openshift-origin,openshift-online
-  - Name: Performing advanced builds
+  - Name: 执行 Advanced Builds
     File: advanced-build-operations
     Distros: openshift-enterprise,openshift-origin
   - Name: 在构建中使用 Red Hat 订阅
     File: running-entitled-builds
     Distros: openshift-enterprise,openshift-origin
-  - Name: Securing builds by strategy
+  - Name: 通过策略保护 Builds
     File: securing-builds-by-strategy
     Distros: openshift-enterprise,openshift-origin
-  - Name: Build configuration resources
+  - Name: Build 配置资源
     File: build-configuration
     Distros: openshift-enterprise,openshift-origin
-  - Name: Troubleshooting builds
+  - Name: Troubleshooting Builds
     File: troubleshooting-builds
     Distros: openshift-enterprise,openshift-origin
   - Name: Setting up additional trusted certificate authorities for builds
@@ -644,40 +644,40 @@ Topics:
 - Name: 使用带有备用 registry 的 Cluster Samples Operator
   File: samples-operator-alt-registry
   Distros: openshift-enterprise,openshift-origin
-- Name: Create Image
+- Name: 创建 Image
   File: create-images
-- Name: Manage Image
+- Name: 管理 Image
   Dir: managing_images
   Topics:
   - Name: Overview
     File: managing-images-overview
   - Name: Tagging 镜像
     File: tagging-images
-  - Name: Image pull policy
+  - Name: Image 拉取策略
     File: image-pull-policy
   - Name: 使用镜像拉取 secret
     File: using-image-pull-secrets
-- Name: 管理 imagestreams
+- Name: 管理 Imagestreams
   File: image-streams-manage
   Distros: openshift-enterprise,openshift-origin
 - Name: Kubernetes 资源使用镜像流
   File: using-imagestreams-with-kube-resources
   Distros: openshift-enterprise,openshift-origin
-- Name: imagestream 改变时触发更新
+- Name: Imagestream 改变时触发更新
   File: triggering-updates-on-imagestream-changes
   Distros: openshift-enterprise,openshift-origin
-- Name: Image configuration resources
+- Name: Image 配置资源
   File: image-configuration
   Distros: openshift-enterprise,openshift-origin
-- Name: 使用模板 Using Templates
+- Name: 使用 Templates
   File: using-templates
 - Name: 使用 Ruby on Rails
   File: templates-using-ruby-on-rails
-- Name: 使用 images
+- Name: 使用 Images
   Dir: using_images
   Distros: openshift-enterprise,openshift-origin
   Topics:
-  - Name: 使用镜像概述 Using image overview
+  - Name: 使用 Image overview
     File: using-images-overview
   - Name: Jenkins 镜像配置
     File: images-other-jenkins
@@ -694,15 +694,15 @@ Topics:
 - Name: 项目
   Dir: projects
   Topics:
-  - Name: Working with projects
+  - Name: 使用 Project
     File: working-with-projects
-  - Name: Creating a project as another user
+  - Name: 以另一个用户创建 Project
     File: creating-project-other-user
     Distros: openshift-enterprise,openshift-origin
-  - Name: Configuring project creation
+  - Name: 配置 Project 创建
     File: configuring-project-creation
     Distros: openshift-enterprise,openshift-origin
-- Name: Create applications
+- Name: 创建 Apps
   Dir: creating_applications
   Topics:
   - Name: 使用开发者视角创建应用程序
@@ -711,9 +711,9 @@ Topics:
     File: creating-apps-from-installed-operators
   - Name: 使用 CLI 创建应用程序
     File: creating-applications-using-cli
-- Name: Viewing application composition using the Topology view
+- Name: 使用拓扑视图查看 App 组合
   File: odc-viewing-application-composition-using-topology-view
-- Name: Use Helm charts
+- Name: 使用 Helm charts
   Dir: working_with_helm_charts
   Topics:
   - Name: 了解 Helm
@@ -755,10 +755,10 @@ Topics:
 - Name: Pruning objects to reclaim resources
   File: pruning-objects
   Distros: openshift-origin,openshift-enterprise
-- Name: Idling applications
+- Name: Idling Apps
   File: idling-applications
   Distros: openshift-origin,openshift-enterprise
-- Name: 删除 App
+- Name: 删除 Apps
   File: odc-deleting-applications
   Distros: openshift-origin,openshift-enterprise
 ---
@@ -773,15 +773,15 @@ Topics:
   Topics:
   - Name: OpenStack 上创建机器集
     File: creating-machineset-osp
-- Name: machine set 手动扩展 
+- Name: Machine Set 手动扩展 
   File: manually-scaling-machineset
-- Name: machine set 修改
+- Name: Machine Set 修改
   File: modifying-machineset
-- Name: Del Machine
+- Name: 删除 Machine
   File: deleting-machine
 - Name: Cluster 应用自动扩展
   File: applying-autoscaling
-- Name: Creating infrastructure machine sets
+- Name: 创建基础架构 Machine Sets
   File: creating-infrastructure-machinesets
 - Name: RHEL 计算机器 添加到集群中
   File: adding-rhel-compute
@@ -789,20 +789,20 @@ Topics:
 - Name: 在集群中添加更多 RHEL 计算机器
   File: more-rhel-compute
   Distros: openshift-enterprise
-- Name: User-provisioned infrastructure
+- Name: User-provisioned 基础架构
   Dir: user_infra
   Topics:
   - Name: 使用用户置备的基础架构在集群中添加计算机器
     File: adding-compute-user-infra-general
   - Name: 在裸机中添加计算机器
     File: adding-bare-metal-compute-user-infra
-- Name: Deploying machine health checks
+- Name: 部署 Machine 健康检查
   File: deploying-machine-health-checks
 ---
 Name: Nodes
 Dir: nodes
 Topics:
-- Name: Node Overviews
+- Name: Node 概述
   File: index
 - Name: 使用 pods
   Dir: pods
@@ -825,54 +825,54 @@ Topics:
   - Name: 使用设备管理器使设备对节点可用
     File: nodes-pods-plugins
     Distros: openshift-enterprise,openshift-origin
-  - Name: pod 调度决策中纳入 pod 优先级
+  - Name: Pod 调度决策中纳入 pod 优先级
     File: nodes-pods-priority
     Distros: openshift-enterprise,openshift-origin
-  - Name: 使用节点选择器将 pod 放置到特定节点
+  - Name: 使用节点选择器将 Pod 放置到特定节点
     File: nodes-pods-node-selectors
     Distros: openshift-enterprise,openshift-origin
-- Name: 控制节点上的 pod 放置（调度）
+- Name: 控制节点上的 Pod 放置（调度）
   Dir: scheduling
   Distros: openshift-enterprise,openshift-origin
   Topics:
-  - Name: 使用调度程序控制 pod 放置
+  - Name: 使用调度程序控制 Pod 放置
     File: nodes-scheduler-about
-  - Name: 使用调度程序配置集调度 pod
+  - Name: 使用调度程序配置集调度 Pod
     File: nodes-scheduler-profiles
-  - Name: 使用关联性和反关联性规则相对于其他 pod 放置 pod
+  - Name: 使用关联性和反关联性规则相对于其他 Pod 放置 pod
     File: nodes-scheduler-pod-affinity
-  - Name: 使用节点关联性规则控制节点上的 pod 放置
+  - Name: 使用节点关联性规则控制节点上的 Pod 放置
     File: nodes-scheduler-node-affinity
-  - Name: pod 放置到过量使用的节点
+  - Name: Pod 放置到过量使用的节点
     File: nodes-scheduler-overcommit
-  - Name: 使用节点污点控制 pod 放置
+  - Name: 使用节点污点控制 Pod 放置
     File: nodes-scheduler-taints-tolerations
-  - Name: 使用节点选择器将 pod 放置到特定节点
+  - Name: 使用节点选择器将 Pod 放置到特定节点
     File: nodes-scheduler-node-selectors
   - Name: 使用 pod 拓扑分布限制控制 pod 放置
     File: nodes-scheduler-pod-topology-spread-constraints
   - Name: 运行自定义调度程序
     File: nodes-custom-scheduler
-  - Name: 使用 descheduler 驱除 pod
+  - Name: 使用 Descheduler 驱除 Pod
     File: nodes-descheduler
   - Name: Secondary scheduler
     Dir: secondary_scheduler
     Topics:
     - Name: 二级调度概述
       File: index
-    - Name: 使用二级调度程序调度 pod
+    - Name: 使用二级调度程序调度 Pod
       File: nodes-secondary-scheduler-configuring
     - Name: 卸载 Secondary Scheduler Operator
       File: nodes-secondary-scheduler-uninstalling
 - Name: 使用作业 和 DaemonSets
   Dir: jobs
   Topics:
-  - Name: 使用 daemonset 在节点上自动运行后台任务
+  - Name: 使用 Daemonset 在节点上自动运行后台任务
     File: nodes-pods-daemonsets
     Distros: openshift-enterprise,openshift-origin
   - Name: 使用任务在 Pod 中运行任务
     File: nodes-nodes-jobs
-- Name: Working with node 
+- Name: Use Node 
   Dir: nodes
   Distros: openshift-enterprise,openshift-origin
   Topics:
@@ -963,33 +963,33 @@ Dir: monitoring
 Topics:
 - Name: Monitoring 概述
   File: monitoring-overview
-- Name: monitoring stack 配置
+- Name: Monitoring Stack 配置
   File: configuring-the-monitoring-stack
 - Name: Monitoring 对用户定义的项目可用
   File: enabling-monitoring-for-user-defined-projects
 - Name: Alert 对用户定义的项目可用
   File: enabling-alert-routing-for-user-defined-projects
-- Name: metrics 管理
+- Name: Metrics 管理
   File: managing-metrics
-- Name: metrics targets 管理
+- Name: Metrics Targets 管理
   File: managing-metrics-targets
 - Name: Alerts 管理
   File: managing-alerts
 - Name: Monitor 仪表盘查看
   File: reviewing-monitoring-dashboards
-- Name: monitoring UIs 和 APIs
+- Name: Monitoring UIs 和 APIs
   File: accessing-third-party-monitoring-uis-and-apis
-- Name: monitoring 问题排查
+- Name: Monitoring 问题排查
   File: troubleshooting-monitoring-issues
 ---
 Name: 备份和恢复
 Dir: backup_and_restore
 Topics:
-- Name: backup 和 restore 概述
+- Name: Backup 和 Restore 概述
   File: index
-- Name: gracefully 关闭集群
+- Name: Gracefully 关闭集群
   File: graceful-cluster-shutdown
-- Name: gracefully 重启集群
+- Name: Gracefully 重启集群
   File: graceful-cluster-restart
 - Name: 应用程序备份和恢复
   Dir: application_backup_and_restore
@@ -999,16 +999,16 @@ Topics:
 - Name: Control plane 备份和恢复
   Dir: control_plane_backup_and_restore
   Topics:
-  - Name: etcd 数据恢复
+  - Name: Etcd 数据恢复
     File: backing-up-etcd
   - Name: 替换不健康的 etcd 成员
     File: replacing-unhealthy-etcd-member
-  - Name: 灾难恢复
+  - Name: Disaster Recovery
     Dir: disaster_recovery
     Topics:
-    - Name: About disaster recovery
+    - Name: 关于 Disaster Recovery
       File: about-disaster-recovery
-    - Name: Restoring to a previous cluster state 
+    - Name: 恢复到以前 cluster 状态
       File: scenario-2-restoring-cluster-state
     - Name: control plane 证书已过期的情况下恢复
       File: scenario-3-expired-certs
