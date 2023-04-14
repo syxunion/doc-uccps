@@ -1,6 +1,6 @@
 :_content-type: ASSEMBLY
 [id="ossm-about"]
-= About OpenShift Service Mesh
+= 关于服务网格
 include::_attributes/common-attributes.adoc[]
 :context: ossm-about
 
